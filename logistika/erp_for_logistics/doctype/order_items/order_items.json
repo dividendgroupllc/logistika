@@ -1,0 +1,117 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-07-06 05:44:11.438571",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "product_name",
+  "size",
+  "qty",
+  "volume_cbm",
+  "weight_ton",
+  "factory_name",
+  "china_supplier_phone",
+  "supplier_name",
+  "sec_logistics",
+  "departure_date",
+  "china_truck_no",
+  "ordered_by",
+  "remarks"
+ ],
+ "fields": [
+  {
+   "columns": 3,
+   "fieldname": "product_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Zakaz mahsulot nomi",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "size",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "O'lchovi / Size",
+   "options": "UOM"
+  },
+  {
+   "columns": 1,
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Soni / Qty"
+  },
+  {
+   "columns": 1,
+   "fieldname": "volume_cbm",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "O'lchovi (m\u00b3)"
+  },
+  {
+   "columns": 1,
+   "fieldname": "weight_ton",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "O'lchovi (tonna)"
+  },
+  {
+   "fieldname": "factory_name",
+   "fieldtype": "Data",
+   "label": "Mijozning Uzbekistondagi zavodi nomi"
+  },
+  {
+   "fieldname": "china_supplier_phone",
+   "fieldtype": "Data",
+   "label": "Xitoy supplier telefon raqami"
+  },
+  {
+   "fieldname": "supplier_name",
+   "fieldtype": "Link",
+   "label": "Supplier nomi",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "sec_logistics",
+   "fieldtype": "Section Break",
+   "label": "Logistika"
+  },
+  {
+   "fieldname": "departure_date",
+   "fieldtype": "Date",
+   "label": "Xitoy zavodidan chiqish sanasi"
+  },
+  {
+   "fieldname": "china_truck_no",
+   "fieldtype": "Data",
+   "label": "Xitoy fura nomeri"
+  },
+  {
+   "fieldname": "ordered_by",
+   "fieldtype": "Data",
+   "label": "Kim buyurtma qildi"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Primechaniya / Izoh"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-07-07 04:48:22.470277",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "Order Items",
+ "owner": "bnormurodov@gmail.com",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,96 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:ORD-{YYYY}-{#####}",
+ "creation": "2026-07-06 03:11:25.444616",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "sec_info",
+  "order_date",
+  "client",
+  "client_phone",
+  "cb_info",
+  "total_amount",
+  "sec_items",
+  "items"
+ ],
+ "fields": [
+  {
+   "fieldname": "sec_info",
+   "fieldtype": "Section Break",
+   "label": "Order Info"
+  },
+  {
+   "default": "Today",
+   "fieldname": "order_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Zakaz sanasi"
+  },
+  {
+   "fieldname": "client",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kliyent / Client",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "client.mobile_no",
+   "fieldname": "client_phone",
+   "fieldtype": "Data",
+   "label": "Klient telefon raqami",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_info",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_amount",
+   "fieldtype": "Currency",
+   "label": "Jami kelishilgan summa"
+  },
+  {
+   "fieldname": "sec_items",
+   "fieldtype": "Section Break",
+   "label": "Zakaz mahsulotlari"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Mahsulotlar",
+   "options": "Order Items"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-07 04:48:21.925107",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "Order",
+ "naming_rule": "Expression (old style)",
+ "owner": "bnormurodov@gmail.com",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
