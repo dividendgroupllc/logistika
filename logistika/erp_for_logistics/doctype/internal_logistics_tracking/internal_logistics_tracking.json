@@ -7,7 +7,10 @@
  "engine": "InnoDB",
  "field_order": [
   "sana",
-  "qayerdaligi"
+  "vaqt",
+  "qayerdaligi",
+  "latitude",
+  "longitude"
  ],
  "fields": [
   {
@@ -20,11 +23,30 @@
    "reqd": 1
   },
   {
+   "columns": 2,
+   "fieldname": "vaqt",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "label": "Vaqt (\u65f6\u95f4)"
+  },
+  {
    "columns": 4,
    "fieldname": "qayerdaligi",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Qayerdaligi (\u4f4d\u7f6e)"
+  },
+  {
+   "fieldname": "latitude",
+   "fieldtype": "Float",
+   "label": "Latitude",
+   "precision": "6"
+  },
+  {
+   "fieldname": "longitude",
+   "fieldtype": "Float",
+   "label": "Longitude",
+   "precision": "6"
   }
  ],
  "grid_page_length": 50,

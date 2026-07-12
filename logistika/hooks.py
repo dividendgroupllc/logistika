@@ -148,23 +148,13 @@ app_license = "mit"
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"logistika.tasks.all"
-# 	],
-# 	"daily": [
-# 		"logistika.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"logistika.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"logistika.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"logistika.tasks.monthly"
-# 	],
-# }
+scheduler_events = {
+	"cron": {
+		"0 */5 * * *": [
+			"logistika.erp_for_logistics.gps_tracking.sync_gps_tracking"
+		],
+	},
+}
 
 # Testing
 # -------
