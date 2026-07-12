@@ -1,0 +1,149 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "TD-.YYYY.-.#####",
+ "creation": "2026-07-10 04:54:09.918113",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sec_top",
+  "hujjat_sanasi",
+  "order",
+  "china_truck",
+  "china_arrival",
+  "cb_top",
+  "truck_type",
+  "kub",
+  "tonna",
+  "sec_driver",
+  "haydovchi_ismi",
+  "mashina_raqami",
+  "omborga_kirish_sanasi",
+  "cb_driver",
+  "prava",
+  "teh_passport"
+ ],
+ "fields": [
+  {
+   "fieldname": "sec_top",
+   "fieldtype": "Section Break",
+   "label": "Asosiy (\u57fa\u672c)"
+  },
+  {
+   "default": "Today",
+   "fieldname": "hujjat_sanasi",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Hujjat sanasi (\u65e5\u671f)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Order / Zakaz (\u8ba2\u5355)",
+   "options": "Order",
+   "reqd": 1
+  },
+  {
+   "fieldname": "china_truck",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Xitoy fura raqami (\u8f66\u724c\u53f7)"
+  },
+  {
+   "fieldname": "china_arrival",
+   "fieldtype": "Date",
+   "label": "Omborga yetib kelish sanasi (\u5230\u8d27\u65e5\u671f)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_top",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "truck_type",
+   "fieldtype": "Link",
+   "label": "Truck type / turi (\u7c7b\u578b)",
+   "options": "Truck Type"
+  },
+  {
+   "fetch_from": "truck_type.kub",
+   "fieldname": "kub",
+   "fieldtype": "Float",
+   "label": "Kubi \u2014 m\u00b3 (\u4f53\u79ef)",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "truck_type.tonna",
+   "fieldname": "tonna",
+   "fieldtype": "Float",
+   "label": "Tonnaji \u2014 tonna (\u5428\u4f4d)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sec_driver",
+   "fieldtype": "Section Break",
+   "label": "Haydovchi / mashina (\u53f8\u673a)"
+  },
+  {
+   "fieldname": "haydovchi_ismi",
+   "fieldtype": "Data",
+   "label": "Haydovchi ismi (\u53f8\u673a\u59d3\u540d)"
+  },
+  {
+   "fieldname": "mashina_raqami",
+   "fieldtype": "Data",
+   "label": "Mashina raqami (\u8f66\u724c\u53f7)"
+  },
+  {
+   "fieldname": "omborga_kirish_sanasi",
+   "fieldtype": "Date",
+   "label": "Omborga kirish sanasi (\u5165\u5e93\u65e5\u671f)"
+  },
+  {
+   "fieldname": "cb_driver",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "prava",
+   "fieldtype": "Attach",
+   "label": "Prava / guvohnoma (\u9a7e\u7167)"
+  },
+  {
+   "fieldname": "teh_passport",
+   "fieldtype": "Attach",
+   "label": "Tex passport (\u884c\u9a76\u8bc1)"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-12 08:34:54.488656",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "Truck Dispatch",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

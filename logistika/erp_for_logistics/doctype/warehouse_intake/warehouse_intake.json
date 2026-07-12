@@ -1,0 +1,100 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "WH-.YYYY.-.#####",
+ "creation": "2026-07-10 03:54:30.752443",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "sec_top",
+  "sana",
+  "order",
+  "cb_top",
+  "fura",
+  "holati",
+  "sec_items",
+  "items"
+ ],
+ "fields": [
+  {
+   "fieldname": "sec_top",
+   "fieldtype": "Section Break",
+   "label": "Asosiy (\u57fa\u672c)"
+  },
+  {
+   "default": "Today",
+   "fieldname": "sana",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Sana (\u65e5\u671f)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Order / Zakaz (\u8ba2\u5355)",
+   "options": "Order",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_top",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "fura",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Fura (\u8f66\u724c\u53f7)"
+  },
+  {
+   "default": "Yangi",
+   "fieldname": "holati",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Holati (\u72b6\u6001)",
+   "options": "Yangi\nTo'liq\nNedostatka",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sec_items",
+   "fieldtype": "Section Break",
+   "label": "Pekin list / Fakt qabul (\u88c5\u7bb1\u5355)"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Mahsulotlar",
+   "options": "Warehouse Intake Item"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-12 08:34:54.861976",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "Warehouse Intake",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

@@ -1,0 +1,138 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{brand}-{##}",
+ "creation": "2026-07-09 05:34:52.754711",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "sec_asosiy",
+  "zakaz_sanasi",
+  "kliyent",
+  "brand",
+  "kliyent_zavodi",
+  "kim_buyurtma_qildi",
+  "cb1",
+  "xitoy_zavod_raqami",
+  "xitoy_postavshik",
+  "izoh",
+  "sec_items",
+  "zakaz_mahsulotlari",
+  "sec_status",
+  "status"
+ ],
+ "fields": [
+  {
+   "fieldname": "sec_asosiy",
+   "fieldtype": "Section Break",
+   "label": "Asosiy (\u57fa\u672c)"
+  },
+  {
+   "default": "Today",
+   "fieldname": "zakaz_sanasi",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Zakaz sanasi (\u4e0b\u5355\u65e5\u671f)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kliyent",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kliyent (\u5ba2\u6237)",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "kliyent.brand",
+   "fieldname": "brand",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Brand (\u54c1\u724c)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kliyent_zavodi",
+   "fieldtype": "Data",
+   "label": "Kliyent zavodi / O'zbekiston (\u5ba2\u6237\u5de5\u5382)"
+  },
+  {
+   "fieldname": "kim_buyurtma_qildi",
+   "fieldtype": "Data",
+   "label": "Kim buyurtma qildi (\u4e0b\u5355\u4eba)"
+  },
+  {
+   "fieldname": "cb1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "xitoy_zavod_raqami",
+   "fieldtype": "Data",
+   "label": "Xitoy zavod raqami (\u5de5\u5382\u7f16\u53f7)"
+  },
+  {
+   "fieldname": "xitoy_postavshik",
+   "fieldtype": "Data",
+   "label": "Xitoy postavshik (\u4f9b\u5e94\u5546)"
+  },
+  {
+   "fieldname": "izoh",
+   "fieldtype": "Small Text",
+   "label": "Izoh (\u5907\u6ce8)"
+  },
+  {
+   "fieldname": "sec_items",
+   "fieldtype": "Section Break",
+   "label": "Zakaz mahsulotlari / Furalar (\u8f66\u8f86)"
+  },
+  {
+   "fieldname": "zakaz_mahsulotlari",
+   "fieldtype": "Table",
+   "label": "Zakaz mahsulotlari (\u8ba2\u5355\u4ea7\u54c1)",
+   "options": "Order Item"
+  },
+  {
+   "fieldname": "sec_status",
+   "fieldtype": "Section Break",
+   "label": "Holat (\u72b6\u6001)"
+  },
+  {
+   "default": "Yangi",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status (\u72b6\u6001)",
+   "options": "Yangi",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-12 08:34:54.063633",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "Order",
+ "naming_rule": "Expression (old style)",
+ "owner": "bnormurodov@gmail.com",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

@@ -1,0 +1,148 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "KZL-.YYYY.-.#####",
+ "creation": "2026-07-10 05:26:17.965398",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "sec_top",
+  "sana",
+  "order",
+  "cb_top",
+  "kz_truck",
+  "sec_load",
+  "manba_china_truck",
+  "yuklar",
+  "sec_jami",
+  "jami_kub",
+  "jami_tonna",
+  "sec_secure",
+  "zanjir_soni",
+  "kamar_soni",
+  "cb_secure",
+  "paddon_soni"
+ ],
+ "fields": [
+  {
+   "fieldname": "sec_top",
+   "fieldtype": "Section Break",
+   "label": "Asosiy (\u57fa\u672c)"
+  },
+  {
+   "default": "Today",
+   "fieldname": "sana",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Sana (\u65e5\u671f)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Order / Zakaz (\u8ba2\u5355)",
+   "options": "Order",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_top",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "kz_truck",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "KZ fura raqami (\u54c8\u65b9\u8f66\u53f7)"
+  },
+  {
+   "fieldname": "sec_load",
+   "fieldtype": "Section Break",
+   "label": "Yuklar (\u88c5\u8f66)"
+  },
+  {
+   "fieldname": "manba_china_truck",
+   "fieldtype": "Select",
+   "label": "Manba Xitoy fura (\u6765\u6e90\u8f66) \u2014 tanlab \"Yuklarni tortish\""
+  },
+  {
+   "fieldname": "yuklar",
+   "fieldtype": "Table",
+   "label": "Ortilgan yuklar",
+   "options": "KZ Load Item"
+  },
+  {
+   "fieldname": "sec_jami",
+   "fieldtype": "Section Break",
+   "label": "Jami (\u5408\u8ba1)"
+  },
+  {
+   "fieldname": "jami_kub",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Jami kub \u2014 m\u00b3 (\u4f53\u79ef)",
+   "precision": "3",
+   "read_only": 1
+  },
+  {
+   "fieldname": "jami_tonna",
+   "fieldtype": "Float",
+   "label": "Jami tonna (\u5428\u4f4d)",
+   "precision": "3",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sec_secure",
+   "fieldtype": "Section Break",
+   "label": "Mustahkamlash (\u52a0\u56fa)"
+  },
+  {
+   "fieldname": "zanjir_soni",
+   "fieldtype": "Int",
+   "label": "Zanjir soni (\u94fe\u6761)"
+  },
+  {
+   "fieldname": "kamar_soni",
+   "fieldtype": "Int",
+   "label": "Kamar soni (\u7ed1\u5e26)"
+  },
+  {
+   "fieldname": "cb_secure",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "paddon_soni",
+   "fieldtype": "Int",
+   "label": "Paddon soni (\u6258\u76d8)"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-12 08:34:53.678233",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "KZ Truck Loading",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

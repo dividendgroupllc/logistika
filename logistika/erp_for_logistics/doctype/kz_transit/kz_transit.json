@@ -1,0 +1,198 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "KZT-.YYYY.-.#####",
+ "creation": "2026-07-10 05:30:26.077318",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sec_top",
+  "sana",
+  "order",
+  "cb_top",
+  "kz_truck",
+  "haydovchi_ismi",
+  "sec_sug",
+  "sugurta_summa",
+  "sugurta_hujjat",
+  "cb_sug",
+  "oldindan_tolov",
+  "sec_dek",
+  "deklaratsiyalar",
+  "jami_deklaratsiya",
+  "sec_boshqa",
+  "boshqa_harajatlar",
+  "jami_boshqa",
+  "sec_ovqat",
+  "kunlik_ovqat_puli",
+  "sec_slij",
+  "slijeniya",
+  "sec_yakun",
+  "fakt_yetib_borgan",
+  "kliyent_oldi_hujjat"
+ ],
+ "fields": [
+  {
+   "fieldname": "sec_top",
+   "fieldtype": "Section Break",
+   "label": "Asosiy (\u57fa\u672c)"
+  },
+  {
+   "default": "Today",
+   "fieldname": "sana",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Sana (\u65e5\u671f)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Order / Zakaz (\u8ba2\u5355)",
+   "options": "Order",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_top",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "kz_truck",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "KZ fura raqami (\u54c8\u65b9\u8f66\u53f7)"
+  },
+  {
+   "fieldname": "haydovchi_ismi",
+   "fieldtype": "Data",
+   "label": "Haydovchi (\u53f8\u673a)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sec_sug",
+   "fieldtype": "Section Break",
+   "label": "Sug'urta va to'lov (\u4fdd\u9669/\u4ed8\u6b3e)"
+  },
+  {
+   "fieldname": "sugurta_summa",
+   "fieldtype": "Currency",
+   "label": "Sug'urta harajati (\u4fdd\u9669\u8d39)"
+  },
+  {
+   "fieldname": "sugurta_hujjat",
+   "fieldtype": "Attach",
+   "label": "Sug'urta hujjati (\u4fdd\u9669\u5355)"
+  },
+  {
+   "fieldname": "cb_sug",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "oldindan_tolov",
+   "fieldtype": "Currency",
+   "label": "Haydovchiga oldindan to'lov (\u9884\u4ed8\u6b3e)"
+  },
+  {
+   "fieldname": "sec_dek",
+   "fieldtype": "Section Break",
+   "label": "Eksport deklaratsiya (\u62a5\u5173)"
+  },
+  {
+   "fieldname": "deklaratsiyalar",
+   "fieldtype": "Table",
+   "label": "Deklaratsiyalar",
+   "options": "KZ Declaration Item"
+  },
+  {
+   "fieldname": "jami_deklaratsiya",
+   "fieldtype": "Currency",
+   "label": "Jami deklaratsiya \u2014 CNY (\u5408\u8ba1)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sec_boshqa",
+   "fieldtype": "Section Break",
+   "label": "Boshqa harajatlar (\u5176\u4ed6\u8d39\u7528)"
+  },
+  {
+   "fieldname": "boshqa_harajatlar",
+   "fieldtype": "Table",
+   "label": "Boshqa harajatlar",
+   "options": "KZ Other Expense"
+  },
+  {
+   "fieldname": "jami_boshqa",
+   "fieldtype": "Currency",
+   "label": "Jami boshqa harajat (\u5408\u8ba1)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sec_ovqat",
+   "fieldtype": "Section Break",
+   "label": "Haydovchi kunlik (\u9910\u8d39)"
+  },
+  {
+   "fieldname": "kunlik_ovqat_puli",
+   "fieldtype": "Currency",
+   "label": "Kunlik oziq-ovqat puli (jami) (\u9910\u8d39)"
+  },
+  {
+   "fieldname": "sec_slij",
+   "fieldtype": "Section Break",
+   "label": "Kunlik slijeniya (\u6bcf\u65e5\u8ddf\u8e2a)"
+  },
+  {
+   "fieldname": "slijeniya",
+   "fieldtype": "Table",
+   "label": "Kunlik slijeniya",
+   "options": "KZ Route Point"
+  },
+  {
+   "fieldname": "sec_yakun",
+   "fieldtype": "Section Break",
+   "label": "Yakun (\u5b8c\u6210)"
+  },
+  {
+   "fieldname": "fakt_yetib_borgan",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Fakt yetib borgan sana (\u5230\u8fbe\u65e5\u671f)"
+  },
+  {
+   "fieldname": "kliyent_oldi_hujjat",
+   "fieldtype": "Attach",
+   "label": "Kliyent oldi \u2014 hujjat (\u5ba2\u6237\u7b7e\u6536)"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-12 08:34:53.432971",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "KZ Transit",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

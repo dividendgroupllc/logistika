@@ -1,0 +1,93 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-07-09 07:00:07.634003",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "part_name",
+  "quantity",
+  "total_boxes",
+  "net_weight",
+  "volume_cbm",
+  "uzunlik",
+  "kenglik",
+  "balandlik"
+ ],
+ "fields": [
+  {
+   "columns": 3,
+   "fieldname": "part_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Mahsulot nomi (\u54c1\u540d)",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "quantity",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Soni (\u6570\u91cf)"
+  },
+  {
+   "columns": 1,
+   "fieldname": "total_boxes",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Karobka soni (\u7bb1\u6570)"
+  },
+  {
+   "columns": 1,
+   "fieldname": "net_weight",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Net vazn (\u51c0\u91cd)"
+  },
+  {
+   "columns": 1,
+   "fieldname": "volume_cbm",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Hajm / CBM (\u4f53\u79ef)",
+   "precision": "3"
+  },
+  {
+   "columns": 1,
+   "fieldname": "uzunlik",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Bo'yi (\u957f)"
+  },
+  {
+   "columns": 1,
+   "fieldname": "kenglik",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Eni (\u5bbd)"
+  },
+  {
+   "columns": 1,
+   "fieldname": "balandlik",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Balandligi (\u9ad8)"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-07-12 08:34:52.461636",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "Internal Logistics Item",
+ "owner": "bnormurodov@gmail.com",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

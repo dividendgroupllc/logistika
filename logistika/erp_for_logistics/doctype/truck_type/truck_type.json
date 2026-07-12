@@ -1,0 +1,78 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "prompt",
+ "creation": "2026-07-10 04:40:56.132207",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "davlat",
+  "turi",
+  "cb",
+  "kub",
+  "tonna"
+ ],
+ "fields": [
+  {
+   "fieldname": "davlat",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Davlat / fura mamlakati (\u56fd\u5bb6)",
+   "options": "China\nKZ\nO'zbekiston\nBoshqa",
+   "reqd": 1
+  },
+  {
+   "fieldname": "turi",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Turi (\u7c7b\u578b)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "kub",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Kubi \u2014 m\u00b3 (\u4f53\u79ef)"
+  },
+  {
+   "fieldname": "tonna",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Tonnaji \u2014 tonna (\u5428\u4f4d)"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-12 08:34:54.685077",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "Truck Type",
+ "naming_rule": "Set by user",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

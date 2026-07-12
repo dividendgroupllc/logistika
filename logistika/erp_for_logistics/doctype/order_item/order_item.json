@@ -1,0 +1,117 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-07-09 05:34:51.036351",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "mahsulot_nomi",
+  "xitoy_fura_telefon",
+  "xitoy_mashina_nomeri",
+  "sugurta",
+  "sugurta_hujjat",
+  "xitoy_fura_summasi",
+  "zavoddan_chiqish_sanasi",
+  "kelish_sanasi",
+  "container",
+  "container_raqami",
+  "konteyner_summasi",
+  "status"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "mahsulot_nomi",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Mahsulot nomi (\u54c1\u540d)",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "xitoy_fura_telefon",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Xitoy fura telefon (\u53f8\u673a\u7535\u8bdd)"
+  },
+  {
+   "columns": 2,
+   "fieldname": "xitoy_mashina_nomeri",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Xitoy mashina nomeri (\u8f66\u724c\u53f7)"
+  },
+  {
+   "columns": 2,
+   "fieldname": "sugurta",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Sug'urta (\u4fdd\u9669)"
+  },
+  {
+   "fieldname": "sugurta_hujjat",
+   "fieldtype": "Attach",
+   "label": "Sug'urta hujjati (\u4fdd\u9669\u5355)"
+  },
+  {
+   "columns": 2,
+   "fieldname": "xitoy_fura_summasi",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Fura olib kelish summasi (\u8fd0\u8d39)"
+  },
+  {
+   "fieldname": "zavoddan_chiqish_sanasi",
+   "fieldtype": "Date",
+   "label": "Zavoddan chiqish sanasi (\u51fa\u5382\u65e5\u671f)"
+  },
+  {
+   "fieldname": "kelish_sanasi",
+   "fieldtype": "Date",
+   "label": "Kelish sanasi (\u5230\u8d27\u65e5\u671f)"
+  },
+  {
+   "default": "0",
+   "fieldname": "container",
+   "fieldtype": "Check",
+   "label": "Container (\u96c6\u88c5\u7bb1)"
+  },
+  {
+   "depends_on": "eval:doc.container",
+   "fieldname": "container_raqami",
+   "fieldtype": "Data",
+   "label": "Container raqami (\u96c6\u88c5\u7bb1\u53f7)"
+  },
+  {
+   "depends_on": "eval:doc.container",
+   "fieldname": "konteyner_summasi",
+   "fieldtype": "Currency",
+   "label": "Konteyner summasi (\u96c6\u88c5\u7bb1\u8d39)"
+  },
+  {
+   "columns": 1,
+   "default": "\u0412\u043d\u0443\u0442\u0440\u0438\u043d\u043d\u0438\u0439 \u0444\u0443\u0440\u0430",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status (\u72b6\u6001)",
+   "options": "\u0412\u043d\u0443\u0442\u0440\u0438\u043d\u043d\u0438\u0439 \u0444\u0443\u0440\u0430\n\u041f\u043e\u0434\u0433\u043e\u0442\u043e\u0432\u043a\u0430 \u0444\u0443\u0440\u0430 \u041a\u0417\n\u0422\u0430\u043c\u043e\u0436\u043d\u0438\u044f \u0441\u043a\u043b\u0430\u0434\n\u0422\u043e\u0432\u0430\u0440 \u043f\u043e\u0433\u0440\u0443\u0436\u0435\u043d \u041a\u0417\n\u041f\u0435\u0440\u0435\u0433\u0440\u0443\u0437 \u0434\u0430\u043d\u043d\u044b\u0439\n\u041e\u0436\u0438\u0434\u0430\u043d\u0438\u044f \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430 \u041a\u043b\u0438\u0435\u043d\u0442\n\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f ED CO \u0434\u043b\u044f \u043a\u043b\u0438\u0435\u043d\u0442\u0430\n\u0422\u0440\u0430\u043d\u0437\u0438\u0442\u043d\u0438\u0439 \u043e\u0444\u043e\u0440\u043c\u0435\u043b\u0435\u043d\u0438\u044f\n\u0412 \u043f\u0443\u0442\u0438 \u043a \u0434\u043e\u0441\u0442\u0430\u0432\u043a\u0435\n\u0422\u0430\u043c\u043e\u0436\u0435\u043d\u043d\u044b\u0439 \u043f\u0440\u043e\u0446\u0435\u0441\u0441\n\u041a\u043b\u0438\u0435\u043d\u0442 \u043f\u043e\u043b\u0443\u0447\u0438\u043b"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-07-12 08:34:54.284240",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "Order Item",
+ "owner": "bnormurodov@gmail.com",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

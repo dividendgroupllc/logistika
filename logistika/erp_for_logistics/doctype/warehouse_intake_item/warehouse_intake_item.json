@@ -1,0 +1,87 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-07-10 03:54:29.150981",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "part_name",
+  "quantity",
+  "total_boxes",
+  "fakt_qty",
+  "farq",
+  "net_weight",
+  "volume_cbm"
+ ],
+ "fields": [
+  {
+   "columns": 3,
+   "fieldname": "part_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Mahsulot nomi (\u54c1\u540d)",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "quantity",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Reja soni (\u6570\u91cf)",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "total_boxes",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Karobka (\u7bb1\u6570)",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "fakt_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Fakt soni (\u5b9e\u6536)"
+  },
+  {
+   "columns": 1,
+   "fieldname": "farq",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Farq (\u5dee\u5f02)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "net_weight",
+   "fieldtype": "Float",
+   "label": "Net vazn (\u51c0\u91cd)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "volume_cbm",
+   "fieldtype": "Float",
+   "label": "CBM (\u4f53\u79ef)",
+   "precision": "3",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-07-12 08:34:55.052778",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "Warehouse Intake Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
