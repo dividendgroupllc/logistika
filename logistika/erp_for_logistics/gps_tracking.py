@@ -63,17 +63,56 @@ def _append_tracking_row(internal_logistics_name, position):
 	doc = frappe.get_doc("Internal Logistics", internal_logistics_name)
 	latitude = position.get("latitude")
 	longitude = position.get("longitude")
+	sana = today()
+	vaqt = nowtime()
 	doc.append(
 		"kunlik_kuzatuv",
 		{
-			"sana": today(),
-			"vaqt": nowtime(),
+			"sana": sana,
+			"vaqt": vaqt,
 			"latitude": latitude,
 			"longitude": longitude,
 			"qayerdaligi": f"{latitude}, {longitude}",
 		},
 	)
 	doc.save(ignore_permissions=True)
+
+	try:
+		_notify_customer_contacts(doc, sana, vaqt, latitude, longitude)
+	except Exception:
+		frappe.log_error(title=f"Traccar GPS sync: failed to notify customer for {doc.name}")
+
+
+def _notify_customer_contacts(doc, sana, vaqt, latitude, longitude):
+	from logistika.telegram.messages import SHIPMENT_UPDATE
+	from logistika.telegram.sender import send_location, send_message
+
+	if not doc.order:
+		return
+
+	customer = frappe.db.get_value("Order", doc.order, "kliyent")
+	if not customer:
+		return
+
+	contact_names = frappe.get_all(
+		"Dynamic Link",
+		filters={"parenttype": "Contact", "link_doctype": "Customer", "link_name": customer},
+		pluck="parent",
+	)
+	if not contact_names:
+		return
+
+	chat_ids = frappe.get_all(
+		"Contact",
+		filters={"name": ["in", contact_names], "telegram_chat_id": ["not in", ["", None]]},
+		pluck="telegram_chat_id",
+	)
+
+	message = SHIPMENT_UPDATE.format(order=doc.order, fura=doc.fura or "-", sana=sana, vaqt=vaqt)
+	for chat_id in chat_ids:
+		send_message(chat_id, message)
+		if latitude and longitude:
+			send_location(chat_id, latitude, longitude)
 
 
 def _traccar_get(traccar_url, path, auth):

@@ -1,0 +1,42 @@
+{
+ "actions": [],
+ "creation": "2026-07-12 09:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "bot_token",
+  "is_active"
+ ],
+ "fields": [
+  {
+   "description": "BotFather dan olingan token: 123456:ABC-DEF...",
+   "fieldname": "bot_token",
+   "fieldtype": "Small Text",
+   "label": "Bot Token",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Bot faol"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-07-12 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "Telegram Bot Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

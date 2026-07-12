@@ -5,6 +5,14 @@ app_description = "Erpnext for logistics"
 app_email = "sardorbekqamchibekov76@gmail.com"
 app_license = "mit"
 
+# Fixtures
+fixtures = [
+	{
+		"dt": "Custom Field",
+		"filters": [["name", "in", ["Contact-telegram_chat_id"]]],
+	},
+]
+
 # Apps
 # ------------------
 
