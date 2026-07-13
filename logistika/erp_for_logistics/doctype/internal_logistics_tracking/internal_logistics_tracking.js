@@ -17,6 +17,11 @@ frappe.ui.form.on("Internal Logistics Tracking", {
 	},
 
 	send_row(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		if (!row.tasdiqlangan) {
+			frappe.msgprint(__("Avval \"Obnovit\" orqali joylashuvni tasdiqlang, keyin yuborish mumkin."));
+			return;
+		}
 		run_row_action(frm, cdt, cdn, {
 			method: "logistika.erp_for_logistics.gps_tracking.send_row",
 			freeze_message: __("Yuborilmoqda..."),

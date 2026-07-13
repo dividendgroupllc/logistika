@@ -28,7 +28,7 @@ def refresh_gps_for_document(internal_logistics_name):
 	today_str = today()
 	row = _find_row_by_date(doc, today_str)
 	if not row:
-		row = doc.append("kunlik_kuzatuv", {"sana": today_str, "holat": _status_text(0, 0)})
+		row = doc.append("kunlik_kuzatuv", {"sana": today_str})
 	return _refresh_row_with_fresh_position(doc, row)
 
 
@@ -53,8 +53,8 @@ def send_row(internal_logistics_name, row_name):
 	row = _find_row_by_name(doc, row_name)
 	if not row:
 		frappe.throw("Qator topilmadi")
-	if not row.qayerdaligi:
-		frappe.throw("Bu qatorda hali manzil yo'q — avval \"Obnovit\" tugmasini bosing")
+	if not row.tasdiqlangan or not row.qayerdaligi:
+		frappe.throw("Bu qatorda hali manzil tasdiqlanmagan — avval \"Obnovit\" tugmasini bosing")
 
 	if not doc.order:
 		frappe.throw("Hujjatda Order ko'rsatilmagan")
@@ -95,7 +95,6 @@ def send_row(internal_logistics_name, row_name):
 
 	if sent > 0:
 		row.yuborilgan = 1
-		row.holat = _status_text(row.tasdiqlangan, row.yuborilgan)
 		doc.save(ignore_permissions=True)
 		frappe.db.commit()
 
@@ -143,7 +142,6 @@ def _refresh_row_with_fresh_position(doc, row) -> bool:
 	row.latitude = position.get("latitude")
 	row.longitude = position.get("longitude")
 	row.tasdiqlangan = 1
-	row.holat = _status_text(row.tasdiqlangan, row.yuborilgan)
 
 	doc.gps_offline = 0
 	doc.save(ignore_permissions=True)
@@ -198,13 +196,6 @@ def _find_row_by_name(doc, row_name):
 		if existing_row.name == row_name:
 			return existing_row
 	return None
-
-
-def _status_text(tasdiqlangan, yuborilgan) -> str:
-	parts = ["✅ Saqlangan" if tasdiqlangan else "🔵 Kutilmoqda"]
-	if yuborilgan:
-		parts.append("📤 Yuborildi")
-	return " · ".join(parts)
 
 
 def _format_time(value) -> str:

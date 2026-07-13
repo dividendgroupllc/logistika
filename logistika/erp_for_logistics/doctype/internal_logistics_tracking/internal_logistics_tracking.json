@@ -9,7 +9,6 @@
   "sana",
   "vaqt",
   "qayerdaligi",
-  "holat",
   "obnovit_row",
   "send_row",
   "tasdiqlangan",
@@ -35,7 +34,7 @@
    "label": "Vaqt (\u65f6\u95f4)"
   },
   {
-   "columns": 2,
+   "columns": 3,
    "fieldname": "qayerdaligi",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -43,22 +42,13 @@
   },
   {
    "columns": 2,
-   "default": "\ud83d\udd35 Kutilmoqda",
-   "fieldname": "holat",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Holat",
-   "read_only": 1
-  },
-  {
-   "columns": 1,
    "fieldname": "obnovit_row",
    "fieldtype": "Button",
    "in_list_view": 1,
    "label": "Obnovit"
   },
   {
-   "columns": 1,
+   "columns": 2,
    "fieldname": "send_row",
    "fieldtype": "Button",
    "in_list_view": 1,

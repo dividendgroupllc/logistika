@@ -7,7 +7,6 @@
 	background-color: #2563eb !important;
 	border-color: #2563eb !important;
 	color: #ffffff !important;
-	opacity: 1 !important;
 	font-weight: 600;
 }
 
@@ -18,7 +17,6 @@
 	background-color: #16a34a !important;
 	border-color: #16a34a !important;
 	color: #ffffff !important;
-	opacity: 1 !important;
 	font-weight: 600;
 }
 
@@ -32,15 +30,13 @@
 	background-color: #15803d !important;
 }
 
-.grid-row [data-fieldname="holat"],
-[data-fieldname="holat"] .static-area,
-[data-fieldname="holat"] input {
-	color: #0f172a !important;
+/* Obnovit/Send bosilgandan keyin shu joyga qo'yiladigan holat yorlig'i */
+.gps-row-label {
 	font-weight: 600;
+	color: #0f172a;
+	white-space: nowrap;
 }
 
-:root[data-theme="dark"] .grid-row [data-fieldname="holat"],
-:root[data-theme="dark"] [data-fieldname="holat"] .static-area,
-:root[data-theme="dark"] [data-fieldname="holat"] input {
-	color: #e2e8f0 !important;
+:root[data-theme="dark"] .gps-row-label {
+	color: #e2e8f0;
 }
