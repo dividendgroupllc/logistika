@@ -17,7 +17,7 @@ WELCOME_CUSTOMER = (
 )
 
 SHIPMENT_UPDATE = (
-	"Sizning <b>{brand}</b> mahsulotingiz {address}ga yetib keldi.\n"
+	"Sizning <b>{brand}</b> mahsulotingiz {sana}, soat {vaqt} holatiga ko'ra {address}da.\n"
 	"Xitoy fura: {fura}\n"
 	"Jami kub: {jami_kub} m³, Jami tonna: {jami_tonna} t."
 )
