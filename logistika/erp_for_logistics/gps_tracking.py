@@ -115,7 +115,7 @@ def _refresh_row_with_fresh_position(doc, row) -> bool:
 		as_dict=True,
 	)
 	if not vehicle:
-		return _mark_offline(doc)
+		return _mark_offline(doc, row)
 
 	auth = (traccar_api_user, traccar_api_password)
 	try:
@@ -123,17 +123,17 @@ def _refresh_row_with_fresh_position(doc, row) -> bool:
 		positions = _traccar_get(traccar_url, "/api/positions", auth)
 	except Exception:
 		frappe.log_error(title=f"Traccar GPS: API'ga ulanib bo'lmadi ({doc.name})")
-		return _mark_offline(doc)
+		return _mark_offline(doc, row)
 
 	traccar_device_id_by_identifier = {d["uniqueId"]: d["id"] for d in devices}
 	traccar_device_id = traccar_device_id_by_identifier.get(vehicle.gps_device_id)
 	if traccar_device_id is None:
-		return _mark_offline(doc)
+		return _mark_offline(doc, row)
 
 	position_by_traccar_device_id = {p["deviceId"]: p for p in positions}
 	position = position_by_traccar_device_id.get(traccar_device_id)
 	if not position or not _is_fresh(position):
-		return _mark_offline(doc)
+		return _mark_offline(doc, row)
 
 	address = _reverse_geocode(traccar_url, auth, position["latitude"], position["longitude"])
 
@@ -149,7 +149,10 @@ def _refresh_row_with_fresh_position(doc, row) -> bool:
 	return True
 
 
-def _mark_offline(doc) -> bool:
+def _mark_offline(doc, row) -> bool:
+	"""Urinish vaqtini yozib qo'yadi (haqiqatan urinilganini ko'rsatish uchun),
+	lekin joylashuvni bo'sh qoldiradi — chunki GPS'dan hech narsa olinmadi."""
+	row.vaqt = nowtime()
 	doc.gps_offline = 1
 	doc.save(ignore_permissions=True)
 	frappe.db.commit()
