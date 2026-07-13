@@ -12,6 +12,7 @@
   "fura",
   "fura_phone",
   "holati",
+  "gps_offline",
   "cb_top",
   "zavod_raqami",
   "postavshik",
@@ -56,6 +57,16 @@
    "in_standard_filter": 1,
    "label": "Holati (\u72b6\u6001)",
    "options": "Yo'lda\nYakunlangan"
+  },
+  {
+   "default": "0",
+   "description": "Kunlik GPS yangilanishi muvaffaqiyatsiz bo'lsa (qurilma offline) avtomatik belgilanadi",
+   "fieldname": "gps_offline",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "GPS Offline",
+   "read_only": 1
   },
   {
    "fieldname": "cb_top",

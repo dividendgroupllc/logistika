@@ -8,16 +8,16 @@ PHONE_NOT_FOUND = (
 	"Iltimos, menejeringiz bilan bog'lanib, raqamingizni ro'yxatga qo'shishini so'rang."
 )
 
-ALREADY_LINKED = "Siz allaqachon ro'yxatdan o'tgansiz — yukingiz holati haqida avtomatik xabar olib turasiz."
+ALREADY_LINKED = "Siz allaqachon ro'yxatdan o'tgansiz — yukingiz yo'lda bo'lganda joylashuvi haqida shu yerga xabar keladi."
 
 WELCOME_CUSTOMER = (
 	"Muvaffaqiyatli ro'yxatdan o'tdingiz!\n"
 	"<b>{customer}</b> nomidan yuk jo'natmalaringiz yo'lda bo'lganda, "
-	"joylashuvi haqida shu yerga avtomatik xabar kelib turadi."
+	"joylashuvi haqida shu yerga xabar kelib turadi."
 )
 
 SHIPMENT_UPDATE = (
-	"📦 <b>{order}</b> yuki yo'lda.\n"
-	"🚛 Fura: {fura}\n"
-	"🕒 Yangilangan vaqt: {sana} {vaqt}"
+	"Sizning <b>{brand}</b> mahsulotingiz {address}ga yetib keldi.\n"
+	"Xitoy fura: {fura}\n"
+	"Jami kub: {jami_kub} m³, Jami tonna: {jami_tonna} t."
 )
