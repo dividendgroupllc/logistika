@@ -1,0 +1,40 @@
+/* Kunlik slijeniya jadvalidagi Obnovit/Send tugmalari — ikkala rejimda ham aniq ko'rinishi uchun */
+
+.grid-row [data-fieldname="obnovit_row"] .btn,
+.grid-row [data-fieldname="obnovit_row"] button,
+[data-fieldname="obnovit_row"] .btn,
+[data-fieldname="obnovit_row"] button {
+	background-color: #2563eb !important;
+	border-color: #2563eb !important;
+	color: #ffffff !important;
+	opacity: 1 !important;
+	font-weight: 600;
+}
+
+.grid-row [data-fieldname="send_row"] .btn,
+.grid-row [data-fieldname="send_row"] button,
+[data-fieldname="send_row"] .btn,
+[data-fieldname="send_row"] button {
+	background-color: #16a34a !important;
+	border-color: #16a34a !important;
+	color: #ffffff !important;
+	opacity: 1 !important;
+	font-weight: 600;
+}
+
+.grid-row [data-fieldname="obnovit_row"] .btn:hover,
+[data-fieldname="obnovit_row"] .btn:hover {
+	background-color: #1d4ed8 !important;
+}
+
+.grid-row [data-fieldname="send_row"] .btn:hover,
+[data-fieldname="send_row"] .btn:hover {
+	background-color: #15803d !important;
+}
+
+.grid-row [data-fieldname="holat_matni"],
+[data-fieldname="holat_matni"] .static-area,
+[data-fieldname="holat_matni"] input {
+	color: #16a34a !important;
+	font-weight: 600;
+}

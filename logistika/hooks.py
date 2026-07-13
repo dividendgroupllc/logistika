@@ -33,7 +33,7 @@ fixtures = [
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/logistika/css/logistika.css"
+app_include_css = "/assets/logistika/css/internal_logistics.css"
 # app_include_js = "/assets/logistika/js/logistika.js"
 
 # include js, css files in header of web template
