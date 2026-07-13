@@ -93,6 +93,12 @@ def send_row(internal_logistics_name, row_name):
 		if row.latitude and row.longitude:
 			send_location(chat_id, row.latitude, row.longitude)
 
+	if sent > 0:
+		row.yuborilgan = 1
+		row.yuborilgan_matni = "📤 Yuborildi"
+		doc.save(ignore_permissions=True)
+		frappe.db.commit()
+
 	return sent
 
 
@@ -137,6 +143,7 @@ def _refresh_row_with_fresh_position(doc, row) -> bool:
 	row.latitude = position.get("latitude")
 	row.longitude = position.get("longitude")
 	row.tasdiqlangan = 1
+	row.holat_matni = "✅ Saqlangan"
 
 	doc.gps_offline = 0
 	doc.save(ignore_permissions=True)

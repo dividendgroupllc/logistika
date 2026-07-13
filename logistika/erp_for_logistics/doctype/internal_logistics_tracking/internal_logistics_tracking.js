@@ -32,10 +32,19 @@ frappe.ui.form.on("Internal Logistics Tracking", {
 			freeze: true,
 			freeze_message: __("Yuborilmoqda..."),
 			callback: (r) => {
-				frappe.show_alert({
-					message: __("Mijozga yuborildi ({0} kishi)", [r.message]),
-					indicator: "green",
-				});
+				frm.reload_doc();
+				if (r.message) {
+					frappe.show_alert({
+						message: __("Mijozga yuborildi ({0} kishi)", [r.message]),
+						indicator: "green",
+					});
+				} else {
+					frappe.msgprint(
+						__(
+							"Yuborilmadi — mijozning ro'yxatdan o'tgan Telegram kontakti topilmadi yoki xatolik yuz berdi. Qayta urinib ko'ring."
+						)
+					);
+				}
 			},
 		});
 	},

@@ -12,7 +12,9 @@
   "obnovit_row",
   "holat_matni",
   "send_row",
+  "yuborilgan_matni",
   "tasdiqlangan",
+  "yuborilgan",
   "latitude",
   "longitude"
  ],
@@ -34,7 +36,7 @@
    "label": "Vaqt (\u65f6\u95f4)"
   },
   {
-   "columns": 3,
+   "columns": 2,
    "fieldname": "qayerdaligi",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -50,7 +52,6 @@
   },
   {
    "columns": 2,
-   "default": "\u2705 Saqlangan",
    "depends_on": "eval:doc.tasdiqlangan",
    "fieldname": "holat_matni",
    "fieldtype": "Data",
@@ -60,10 +61,20 @@
   },
   {
    "columns": 1,
+   "depends_on": "eval:!doc.yuborilgan",
    "fieldname": "send_row",
    "fieldtype": "Button",
    "in_list_view": 1,
    "label": "Send"
+  },
+  {
+   "columns": 1,
+   "depends_on": "eval:doc.yuborilgan",
+   "fieldname": "yuborilgan_matni",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Yuborildi",
+   "read_only": 1
   },
   {
    "default": "0",
@@ -71,6 +82,13 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Tasdiqlangan"
+  },
+  {
+   "default": "0",
+   "fieldname": "yuborilgan",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Yuborilgan"
   },
   {
    "fieldname": "latitude",
