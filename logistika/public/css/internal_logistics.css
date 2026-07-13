@@ -32,16 +32,15 @@
 	background-color: #15803d !important;
 }
 
-.grid-row [data-fieldname="holat_matni"],
-[data-fieldname="holat_matni"] .static-area,
-[data-fieldname="holat_matni"] input {
-	color: #16a34a !important;
+.grid-row [data-fieldname="holat"],
+[data-fieldname="holat"] .static-area,
+[data-fieldname="holat"] input {
+	color: #0f172a !important;
 	font-weight: 600;
 }
 
-.grid-row [data-fieldname="yuborilgan_matni"],
-[data-fieldname="yuborilgan_matni"] .static-area,
-[data-fieldname="yuborilgan_matni"] input {
-	color: #2563eb !important;
-	font-weight: 600;
+:root[data-theme="dark"] .grid-row [data-fieldname="holat"],
+:root[data-theme="dark"] [data-fieldname="holat"] .static-area,
+:root[data-theme="dark"] [data-fieldname="holat"] input {
+	color: #e2e8f0 !important;
 }

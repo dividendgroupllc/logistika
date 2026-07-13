@@ -9,10 +9,9 @@
   "sana",
   "vaqt",
   "qayerdaligi",
+  "holat",
   "obnovit_row",
-  "holat_matni",
   "send_row",
-  "yuborilgan_matni",
   "tasdiqlangan",
   "yuborilgan",
   "latitude",
@@ -44,16 +43,8 @@
   },
   {
    "columns": 2,
-   "depends_on": "eval:!doc.tasdiqlangan",
-   "fieldname": "obnovit_row",
-   "fieldtype": "Button",
-   "in_list_view": 1,
-   "label": "Obnovit"
-  },
-  {
-   "columns": 2,
-   "depends_on": "eval:doc.tasdiqlangan",
-   "fieldname": "holat_matni",
+   "default": "\ud83d\udd35 Kutilmoqda",
+   "fieldname": "holat",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Holat",
@@ -61,20 +52,17 @@
   },
   {
    "columns": 1,
-   "depends_on": "eval:!doc.yuborilgan",
+   "fieldname": "obnovit_row",
+   "fieldtype": "Button",
+   "in_list_view": 1,
+   "label": "Obnovit"
+  },
+  {
+   "columns": 1,
    "fieldname": "send_row",
    "fieldtype": "Button",
    "in_list_view": 1,
    "label": "Send"
-  },
-  {
-   "columns": 1,
-   "depends_on": "eval:doc.yuborilgan",
-   "fieldname": "yuborilgan_matni",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Yuborildi",
-   "read_only": 1
   },
   {
    "default": "0",
