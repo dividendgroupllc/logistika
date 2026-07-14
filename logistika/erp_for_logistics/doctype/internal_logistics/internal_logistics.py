@@ -11,6 +11,7 @@ class InternalLogistics(Document):
 		self.check_duplicate_orders()
 		self.compute_order_totals()
 		self.warn_orphaned_pekin_items()
+		self.compute_truck_capacity()
 
 	def check_duplicate_orders(self):
 		"""Bitta order "Buyurtmalar" jadvalida ikki marta kiritilsa, jami kub/tonna
@@ -63,3 +64,37 @@ class InternalLogistics(Document):
 				indicator="orange",
 				alert=True,
 			)
+
+	def compute_truck_capacity(self):
+		"""Fura'ning sig'imini (kub/tonna) Order Item'dagi shu mashina raqamiga mos
+		Truck Type'dan topib, jami yuk asosida qancha joy bo'sh qolganini hisoblaydi."""
+		self.truck_kub_sigimi = 0
+		self.truck_tonna_sigimi = 0
+		self.bosh_kub = 0
+		self.bosh_kub_foiz = 0
+		self.bosh_tonna = 0
+		self.bosh_tonna_foiz = 0
+
+		if not self.fura:
+			return
+
+		truck_type = frappe.db.get_value(
+			"Order Item",
+			{"xitoy_mashina_nomeri": self.fura, "truck_type": ["is", "set"]},
+			"truck_type",
+		)
+		if not truck_type:
+			return
+
+		capacity = frappe.db.get_value("Truck Type", truck_type, ["kub", "tonna"], as_dict=True)
+		if not capacity:
+			return
+
+		self.truck_kub_sigimi = capacity.kub or 0
+		self.truck_tonna_sigimi = capacity.tonna or 0
+		self.bosh_kub = self.truck_kub_sigimi - (self.jami_kub or 0)
+		self.bosh_tonna = self.truck_tonna_sigimi - (self.jami_tonna or 0)
+		if self.truck_kub_sigimi:
+			self.bosh_kub_foiz = self.bosh_kub / self.truck_kub_sigimi * 100
+		if self.truck_tonna_sigimi:
+			self.bosh_tonna_foiz = self.bosh_tonna / self.truck_tonna_sigimi * 100

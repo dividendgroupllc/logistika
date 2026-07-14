@@ -332,6 +332,9 @@ function format_number(value) {
 	return Number(value).toLocaleString(undefined, { maximumFractionDigits: 3 });
 }
 
+// Manzil endi qo'lda kiritiladi (Traccar/GPS avtomatikasi olib tashlandi — Xitoy
+// furalari uchun endi faqat "Send" tugmasi bor). Send faqat "Qayerdaligi" to'ldirilgan
+// qatorlarda yoqiladi.
 function apply_gps_row_states(frm) {
 	const grid_field = frm.fields_dict["kunlik_kuzatuv"];
 	if (!grid_field || !grid_field.grid) {
@@ -348,15 +351,13 @@ function apply_gps_row_states(frm) {
 			return;
 		}
 
-		toggle_cell($row, "obnovit_row", !row_doc.tasdiqlangan, "✅ Saqlangan");
-
 		const $send_cell = $row.find('[data-fieldname="send_row"]');
 		if (row_doc.yuborilgan) {
 			toggle_cell($row, "send_row", false, "📤 Yuborildi");
 		} else {
 			toggle_cell($row, "send_row", true, "");
 			const $btn = $send_cell.find("button");
-			if (row_doc.tasdiqlangan) {
+			if (row_doc.qayerdaligi) {
 				$btn.prop("disabled", false).css({ opacity: 1, cursor: "pointer" });
 			} else {
 				$btn.prop("disabled", true).css({ opacity: 0.35, cursor: "not-allowed" });
@@ -390,27 +391,13 @@ function toggle_cell($row, fieldname, show_button, label_text) {
 // Bu kompakt jadval qatorida ham, kattalashtirilgan "Editing Row" oynasida ham ishlaydi,
 // chunki delegatsiya DOM qayerda ekanidan qat'iy nazar ishlaydi.
 //
-// MUHIM: "KZ Transit" (kz_transit.js) xuddi shu fieldname'larni ("obnovit_row",
-// "send_row") o'zining "KZ Route Point" jadvalida ham ishlatadi. Agar bu yerda
-// yopilish paytida ushlab qolingan `frm` ishlatilsa — foydalanuvchi SPA orqali
-// (to'liq sahifa yangilanishisiz) boshqa doctype'ga o'tganda, ESKI `frm` bilan
-// noto'g'ri hujjatga chaqiruv ketishi mumkin. Shuning uchun click payti har doim
-// joriy `cur_frm`dan foydalanamiz va faqat shu doctype uchun ishlaymiz.
+// MUHIM: "KZ Transit" (kz_transit.js) xuddi shu "send_row" fieldnomini o'zining
+// "KZ Route Point" jadvalida ham ishlatadi. Agar bu yerda yopilish paytida ushlab
+// qolingan `frm` ishlatilsa — foydalanuvchi SPA orqali (to'liq sahifa
+// yangilanishisiz) boshqa doctype'ga o'tganda, ESKI `frm` bilan noto'g'ri hujjatga
+// chaqiruv ketishi mumkin. Shuning uchun click payti har doim joriy `cur_frm`dan
+// foydalanamiz va faqat shu doctype uchun ishlaymiz.
 function bind_gps_row_clicks() {
-	$(document)
-		.off("click.gps_obnovit")
-		.on("click.gps_obnovit", '[data-fieldname="obnovit_row"] button', function (e) {
-			if (!cur_frm || cur_frm.doctype !== "Internal Logistics") {
-				return;
-			}
-			e.preventDefault();
-			e.stopPropagation();
-			const row_name = resolve_row_name(cur_frm, $(this));
-			if (row_name) {
-				do_obnovit(cur_frm, row_name);
-			}
-		});
-
 	$(document)
 		.off("click.gps_send")
 		.on("click.gps_send", '[data-fieldname="send_row"] button', function (e) {
@@ -444,41 +431,14 @@ function get_row(frm, row_name) {
 	return (frm.doc.kunlik_kuzatuv || []).find((r) => r.name === row_name);
 }
 
-function do_obnovit(frm, row_name) {
-	const row = get_row(frm, row_name);
-	if (!row) {
-		frappe.msgprint(__("Qator topilmadi — sahifani yangilang (Ctrl+Shift+R)."));
-		return;
-	}
-	frappe.call({
-		method: "logistika.erp_for_logistics.gps_tracking.refresh_row",
-		args: { internal_logistics_name: frm.doc.name, row_name: row.name },
-		freeze: true,
-		freeze_message: __("GPS tekshirilmoqda..."),
-		callback: (r) => {
-			frm.reload_doc();
-			if (r.message) {
-				frappe.show_alert({ message: __("Manzil yangilandi"), indicator: "green" });
-			} else {
-				frappe.msgprint(
-					__(
-						"Qurilma offline — haydovchiga qo'ng'iroq qilib, GPS'ni yangilashini so'rang, keyin qayta urinib ko'ring."
-					)
-				);
-			}
-		},
-		error: () => frappe.msgprint(__("Xatolik yuz berdi. Qayta urinib ko'ring.")),
-	});
-}
-
 function do_send(frm, row_name) {
 	const row = get_row(frm, row_name);
 	if (!row) {
 		frappe.msgprint(__("Qator topilmadi — sahifani yangilang (Ctrl+Shift+R)."));
 		return;
 	}
-	if (!row.tasdiqlangan) {
-		frappe.msgprint(__("Avval \"Obnovit\" orqali joylashuvni tasdiqlang, keyin yuborish mumkin."));
+	if (!row.qayerdaligi) {
+		frappe.msgprint(__("Avval \"Qayerdaligi\" maydoniga manzilni kiriting, keyin yuborish mumkin."));
 		return;
 	}
 	frappe.call({

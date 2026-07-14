@@ -66,13 +66,15 @@ function toggle_cell($row, fieldname, show_button, label_text) {
 // — shuning uchun click hodisasini to'g'ridan-to'g'ri, delegatsiya orqali (document
 // darajasida) o'zimiz ushlaymiz.
 //
-// MUHIM: "Internal Logistics" (internal_logistics.js) xuddi shu fieldname'larni
-// ("obnovit_row", "send_row") o'zining "Internal Logistics Tracking" jadvalida ham
-// ishlatadi. Shuning uchun bu yerda yopilish paytida ushlab qolingan `frm` emas,
-// click paytidagi joriy `cur_frm`dan foydalanamiz va faqat "KZ Transit" uchun
-// ishlaymiz — aks holda SPA orqali (to'liq sahifa yangilanishisiz) boshqa
-// doctype'ga o'tilganda ikkala handler ham bitta bosishga javob berib, noto'g'ri
-// hujjatga chaqiruv ketishi mumkin edi.
+// MUHIM: "Internal Logistics" (internal_logistics.js) xuddi shu "send_row"
+// fieldnomini o'zining "Internal Logistics Tracking" jadvalida ham ishlatadi
+// (obnovit_row esa endi faqat shu — KZ Route Point — jadvalida bor, Internal
+// Logistics'dan GPS avtomatikasi bilan birga olib tashlandi). Shuning uchun bu
+// yerda yopilish paytida ushlab qolingan `frm` emas, click paytidagi joriy
+// `cur_frm`dan foydalanamiz va faqat "KZ Transit" uchun ishlaymiz — aks holda SPA
+// orqali (to'liq sahifa yangilanishisiz) boshqa doctype'ga o'tilganda ikkala
+// handler ham bitta bosishga javob berib, noto'g'ri hujjatga chaqiruv ketishi
+// mumkin edi.
 function bind_gps_row_clicks() {
 	$(document)
 		.off("click.kzt_obnovit")

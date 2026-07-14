@@ -91,8 +91,7 @@ def send_row(kz_transit_name, row_name):
 	if chat_ids:
 		message = KZ_SHIPMENT_UPDATE.format(
 			brand=order.brand or "",
-			sana=row.sana,
-			vaqt=traccar_client.format_time(row.vaqt),
+			sana_vaqt=traccar_client.format_sana_vaqt(row.sana, row.vaqt),
 			address=row.joylashuv or "",
 			kz_fura=doc.kz_truck or "-",
 		)

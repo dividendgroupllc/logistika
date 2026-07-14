@@ -9,6 +9,8 @@
   "xitoy_fura_telefon",
   "xitoy_mashina_nomeri",
   "truck_type",
+  "truck_kub",
+  "truck_tonna",
   "sugurta",
   "sugurta_hujjat",
   "xitoy_fura_summasi",
@@ -49,6 +51,26 @@
    "in_list_view": 1,
    "label": "Truck Type",
    "options": "Truck Type"
+  },
+  {
+   "columns": 1,
+   "fetch_from": "truck_type.kub",
+   "fieldname": "truck_kub",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Kubi — m³ (体积)",
+   "precision": "3",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fetch_from": "truck_type.tonna",
+   "fieldname": "truck_tonna",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Tonnaji (吨位)",
+   "precision": "3",
+   "read_only": 1
   },
   {
    "columns": 2,

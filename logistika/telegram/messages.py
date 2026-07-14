@@ -17,12 +17,17 @@ WELCOME_CUSTOMER = (
 )
 
 SHIPMENT_UPDATE = (
-	"Sizning <b>{brand}</b> mahsulotingiz {sana}, soat {vaqt} holatiga ko'ra {address}da.\n"
-	"Xitoy fura: {fura}\n"
-	"Jami kub: {jami_kub} m³, Jami tonna: {jami_tonna} t."
+	"📦 Sizning <b>{brand}</b> mahsulotingiz holati yangilandi\n\n"
+	"🗓 Sana: {sana_vaqt}\n"
+	"📍 Manzil: {address}\n"
+	"🚛 Xitoy fura: {fura}\n"
+	"📐 Jami kub: {jami_kub} m³\n"
+	"⚖️ Jami tonna: {jami_tonna} t"
 )
 
 KZ_SHIPMENT_UPDATE = (
-	"Sizning <b>{brand}</b> mahsulotingiz {sana}, soat {vaqt} holatiga ko'ra {address}da.\n"
-	"KZ fura: {kz_fura}"
+	"📦 Sizning <b>{brand}</b> mahsulotingiz holati yangilandi\n\n"
+	"🗓 Sana: {sana_vaqt}\n"
+	"📍 Manzil: {address}\n"
+	"🚛 KZ fura: {kz_fura}"
 )

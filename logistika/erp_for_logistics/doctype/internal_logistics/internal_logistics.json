@@ -7,22 +7,29 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "sec_buyurtmalar",
+  "buyurtmalar",
   "sec_top",
   "order",
   "fura",
   "fura_phone",
   "holati",
-  "gps_offline",
   "tamojniy_ombori",
   "cb_top",
   "zavod_raqami",
   "postavshik",
   "jami_kub",
   "jami_tonna",
-  "sec_buyurtmalar",
-  "buyurtmalar",
   "sec_pekin",
   "pekin_list",
+  "sec_sigim",
+  "truck_kub_sigimi",
+  "truck_tonna_sigimi",
+  "cb_sigim",
+  "bosh_kub",
+  "bosh_kub_foiz",
+  "bosh_tonna",
+  "bosh_tonna_foiz",
   "sec_buyurtmalar_korinishi",
   "buyurtmalar_korinishi",
   "sec_kuzatuv",
@@ -30,27 +37,39 @@
  ],
  "fields": [
   {
+   "fieldname": "sec_buyurtmalar",
+   "fieldtype": "Section Break",
+   "label": "Buyurtmalar (订单列表)"
+  },
+  {
+   "description": "Bitta furada bir nechta buyurtmaning mahsuloti bo'lishi mumkin — har biri uchun alohida qator qo'shing",
+   "fieldname": "buyurtmalar",
+   "fieldtype": "Table",
+   "label": "Buyurtmalar (订单列表)",
+   "options": "Internal Logistics Order"
+  },
+  {
    "fieldname": "sec_top",
    "fieldtype": "Section Break",
-   "label": "Asosiy (\u57fa\u672c)"
+   "label": "Asosiy (基本)"
   },
   {
    "fieldname": "order",
    "fieldtype": "Link",
    "hidden": 1,
-   "label": "Order / Zakaz (\u8ba2\u5355) \u2014 eski, endi \"Buyurtmalar\" jadvaliga ko'chirilgan",
+   "label": "Order / Zakaz (订单) — eski, endi \"Buyurtmalar\" jadvaliga ko'chirilgan",
    "options": "Order"
   },
   {
    "fieldname": "fura",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Fura / mashina nomeri (\u8f66\u724c\u53f7)"
+   "label": "Fura / mashina nomeri (车牌号)"
   },
   {
    "fieldname": "fura_phone",
    "fieldtype": "Data",
-   "label": "Fura telefon (\u53f8\u673a\u7535\u8bdd)",
+   "label": "Fura telefon (司机电话)",
    "read_only": 1
   },
   {
@@ -59,21 +78,11 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Holati (\u72b6\u6001)",
+   "label": "Holati (状态)",
    "options": "Yo'lda\nYakunlangan"
   },
   {
-   "default": "0",
-   "description": "Kunlik GPS yangilanishi muvaffaqiyatsiz bo'lsa (qurilma offline) avtomatik belgilanadi",
-   "fieldname": "gps_offline",
-   "fieldtype": "Check",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "GPS Offline",
-   "read_only": 1
-  },
-  {
-   "description": "Qayerdaligi (GPS manzili)ga qarab, yuk qaysi bojxona omboriga tushishi qo'lda tanlanadi",
+   "description": "Qayerdaligi (yozib qo'yilgan manzil)ga qarab, yuk qaysi bojxona omboriga tushishi qo'lda tanlanadi",
    "fieldname": "tamojniy_ombori",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -88,59 +97,99 @@
    "fieldname": "zavod_raqami",
    "fieldtype": "Data",
    "hidden": 1,
-   "label": "Xitoy zavod raqami (\u5de5\u5382\u7f16\u53f7) \u2014 eski, endi har bir buyurtma o'zinikini ko'rsatadi",
+   "label": "Xitoy zavod raqami (工厂编号) — eski, endi har bir buyurtma o'zinikini ko'rsatadi",
    "read_only": 1
   },
   {
    "fieldname": "postavshik",
    "fieldtype": "Data",
    "hidden": 1,
-   "label": "Xitoy postavshik (\u4f9b\u5e94\u5546) \u2014 eski, endi har bir buyurtma o'zinikini ko'rsatadi",
+   "label": "Xitoy postavshik (供应商) — eski, endi har bir buyurtma o'zinikini ko'rsatadi",
    "read_only": 1
   },
   {
    "description": "Barcha buyurtmalar bo'yicha JAMI (avtomatik hisoblanadi)",
    "fieldname": "jami_kub",
    "fieldtype": "Float",
-   "label": "Jami kub \u2014 m\u00b3 (\u603b\u4f53\u79ef)",
+   "label": "Jami kub — m³ (总体积)",
    "precision": "3",
    "read_only": 1
   },
   {
    "fieldname": "jami_tonna",
    "fieldtype": "Float",
-   "label": "Jami tonna (\u603b\u91cd)",
+   "label": "Jami tonna (总重)",
    "precision": "3",
    "read_only": 1
   },
   {
-   "fieldname": "sec_buyurtmalar",
-   "fieldtype": "Section Break",
-   "label": "Buyurtmalar (\u8ba2\u5355\u5217\u8868)"
-  },
-  {
-   "description": "Bitta furada bir nechta buyurtmaning mahsuloti bo'lishi mumkin \u2014 har biri uchun alohida qator qo'shing",
-   "fieldname": "buyurtmalar",
-   "fieldtype": "Table",
-   "label": "Buyurtmalar (\u8ba2\u5355\u5217\u8868)",
-   "options": "Internal Logistics Order"
-  },
-  {
    "fieldname": "sec_pekin",
    "fieldtype": "Section Break",
-   "label": "Pekin list / mahsulotlar (\u88c5\u7bb1\u5355)"
+   "label": "Pekin list / mahsulotlar (装箱单)"
   },
   {
    "allow_bulk_edit": 1,
    "fieldname": "pekin_list",
    "fieldtype": "Table",
-   "label": "Pekin list (\u88c5\u7bb1\u5355)",
+   "label": "Pekin list (装箱单)",
    "options": "Internal Logistics Item"
+  },
+  {
+   "fieldname": "sec_sigim",
+   "fieldtype": "Section Break",
+   "label": "Truck sig'imi / bo'sh joy (车辆容量)"
+  },
+  {
+   "description": "Fura'ning Order Item'dagi Truck Type'idan olinadi (avtomatik)",
+   "fieldname": "truck_kub_sigimi",
+   "fieldtype": "Float",
+   "label": "Truck sig'imi — kub, m³",
+   "precision": "3",
+   "read_only": 1
+  },
+  {
+   "fieldname": "truck_tonna_sigimi",
+   "fieldtype": "Float",
+   "label": "Truck sig'imi — tonna",
+   "precision": "3",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_sigim",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bosh_kub",
+   "fieldtype": "Float",
+   "label": "Bo'sh joy — kub, m³",
+   "precision": "3",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bosh_kub_foiz",
+   "fieldtype": "Percent",
+   "label": "Bo'sh joy — kub, %",
+   "precision": "1",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bosh_tonna",
+   "fieldtype": "Float",
+   "label": "Bo'sh joy — tonna",
+   "precision": "3",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bosh_tonna_foiz",
+   "fieldtype": "Percent",
+   "label": "Bo'sh joy — tonna, %",
+   "precision": "1",
+   "read_only": 1
   },
   {
    "fieldname": "sec_buyurtmalar_korinishi",
    "fieldtype": "Section Break",
-   "label": "Buyurtmalar bo'yicha ko'rinish (\u6309\u8ba2\u5355\u67e5\u770b)"
+   "label": "Buyurtmalar bo'yicha ko'rinish (按订单查看)"
   },
   {
    "fieldname": "buyurtmalar_korinishi",
@@ -150,19 +199,20 @@
   {
    "fieldname": "sec_kuzatuv",
    "fieldtype": "Section Break",
-   "label": "Kunlik slijeniya (\u6bcf\u65e5\u8ddf\u8e2a)"
+   "label": "Kunlik slijeniya (每日跟踪)"
   },
   {
+   "description": "Manzilni qo'lda kiriting, so'ng \"Send\" orqali mijozga (agar Telegram botiga ro'yxatdan o'tgan bo'lsa) yuboring",
    "fieldname": "kunlik_kuzatuv",
    "fieldtype": "Table",
-   "label": "Kunlik slijeniya (\u6bcf\u65e5\u8ddf\u8e2a)",
+   "label": "Kunlik slijeniya (每日跟踪)",
    "options": "Internal Logistics Tracking"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-12 08:34:51.734436",
+ "modified": "2026-07-14 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Internal Logistics",

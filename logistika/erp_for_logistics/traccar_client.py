@@ -70,6 +70,15 @@ def format_time(value) -> str:
 	return str(value)[:5]
 
 
+def format_sana_vaqt(sana, vaqt) -> str:
+	"""Telegram xabarlarida ko'rsatish uchun sana+vaqtni birlashtiradi. Vaqt qo'lda
+	kiritilmagan (bo'sh) bo'lsa, faqat sanani qaytaradi — "soat" so'zi bo'sh qoldirilmaydi."""
+	vaqt_str = format_time(vaqt)
+	if vaqt_str:
+		return f"{sana}, soat {vaqt_str}"
+	return str(sana)
+
+
 def find_device_position(traccar_url, auth, gps_device_id):
 	"""Berilgan GPS Device ID (Traccar'dagi uniqueId) uchun eng oxirgi position'ni
 	qaytaradi, yoki topilmasa/ulanib bo'lmasa None. Xato holatida frappe.log_error
