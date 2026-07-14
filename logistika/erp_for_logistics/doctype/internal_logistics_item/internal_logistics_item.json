@@ -5,6 +5,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "order",
   "part_name",
   "quantity",
   "total_boxes",
@@ -15,6 +16,15 @@
   "balandlik"
  ],
  "fields": [
+  {
+   "columns": 2,
+   "fieldname": "order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Order / Zakaz (\u8ba2\u5355)",
+   "options": "Order",
+   "reqd": 1
+  },
   {
    "columns": 3,
    "fieldname": "part_name",

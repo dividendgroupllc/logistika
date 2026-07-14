@@ -160,7 +160,8 @@ scheduler_events = {
 	"cron": {
 		# Xitoy vaqti bilan soat 11:00 (UTC+8) = 03:00 UTC = O'zbekiston vaqti bilan 08:00
 		"0 3 * * *": [
-			"logistika.erp_for_logistics.gps_tracking.daily_gps_update"
+			"logistika.erp_for_logistics.gps_tracking.daily_gps_update",
+			"logistika.erp_for_logistics.kz_gps_tracking.daily_gps_update_kz",
 		],
 	},
 }

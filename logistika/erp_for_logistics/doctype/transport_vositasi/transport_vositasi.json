@@ -15,8 +15,10 @@
  ],
  "fields": [
   {
+   "description": "Order'lardagi \"Xitoy mashina nomeri\"dan tanlang — qo'lda yozib xato/mos kelmaslikning oldini olish uchun. Ro'yxatda yo'q yangi raqamni ham yozish mumkin.",
    "fieldname": "mashina_raqami",
-   "fieldtype": "Data",
+   "fieldtype": "Autocomplete",
+   "ignore_validation": 1,
    "in_list_view": 1,
    "label": "Mashina raqami / Fura (车牌号)",
    "reqd": 1,

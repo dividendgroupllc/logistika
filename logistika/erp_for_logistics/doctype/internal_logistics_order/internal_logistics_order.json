@@ -1,0 +1,78 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-07-14 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "order",
+  "zavod_raqami",
+  "postavshik",
+  "jami_kub",
+  "jami_tonna"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Order / Zakaz (订单)",
+   "options": "Order",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fetch_from": "order.xitoy_zavod_raqami",
+   "fieldname": "zavod_raqami",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Xitoy zavod raqami (工厂编号)",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fetch_from": "order.xitoy_postavshik",
+   "fieldname": "postavshik",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Xitoy postavshik (供应商)",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "jami_kub",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Jami kub — m³ (总体积)",
+   "precision": "3",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "jami_tonna",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Jami tonna (总重)",
+   "precision": "3",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-07-14 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "Internal Logistics Order",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

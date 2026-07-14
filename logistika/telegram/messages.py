@@ -21,3 +21,8 @@ SHIPMENT_UPDATE = (
 	"Xitoy fura: {fura}\n"
 	"Jami kub: {jami_kub} m³, Jami tonna: {jami_tonna} t."
 )
+
+KZ_SHIPMENT_UPDATE = (
+	"Sizning <b>{brand}</b> mahsulotingiz {sana}, soat {vaqt} holatiga ko'ra {address}da.\n"
+	"KZ fura: {kz_fura}"
+)

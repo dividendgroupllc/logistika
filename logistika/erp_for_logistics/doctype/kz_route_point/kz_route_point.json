@@ -7,30 +7,84 @@
  "engine": "InnoDB",
  "field_order": [
   "sana",
-  "joylashuv"
+  "vaqt",
+  "joylashuv",
+  "obnovit_row",
+  "send_row",
+  "tasdiqlangan",
+  "yuborilgan",
+  "latitude",
+  "longitude"
  ],
  "fields": [
   {
-   "columns": 3,
+   "columns": 2,
    "default": "Today",
    "fieldname": "sana",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Sana (\u65e5\u671f)"
+   "label": "Sana (日期)"
   },
   {
-   "columns": 6,
+   "columns": 2,
+   "fieldname": "vaqt",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "label": "Vaqt (时间)"
+  },
+  {
+   "columns": 3,
    "fieldname": "joylashuv",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Qayerdaligi (\u4f4d\u7f6e)"
+   "label": "Qayerdaligi (位置)"
+  },
+  {
+   "columns": 2,
+   "fieldname": "obnovit_row",
+   "fieldtype": "Button",
+   "in_list_view": 1,
+   "label": "Obnovit"
+  },
+  {
+   "columns": 2,
+   "fieldname": "send_row",
+   "fieldtype": "Button",
+   "in_list_view": 1,
+   "label": "Send"
+  },
+  {
+   "default": "0",
+   "fieldname": "tasdiqlangan",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Tasdiqlangan"
+  },
+  {
+   "default": "0",
+   "fieldname": "yuborilgan",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Yuborilgan"
+  },
+  {
+   "fieldname": "latitude",
+   "fieldtype": "Float",
+   "label": "Latitude",
+   "precision": "6"
+  },
+  {
+   "fieldname": "longitude",
+   "fieldtype": "Float",
+   "label": "Longitude",
+   "precision": "6"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-07-12 08:34:53.287331",
+ "modified": "2026-07-14 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "KZ Route Point",

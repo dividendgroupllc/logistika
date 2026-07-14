@@ -13,6 +13,8 @@
   "cb_top",
   "kz_truck",
   "haydovchi_ismi",
+  "holati",
+  "gps_offline",
   "sec_sug",
   "sugurta_summa",
   "sugurta_hujjat",
@@ -68,6 +70,26 @@
    "fieldname": "haydovchi_ismi",
    "fieldtype": "Data",
    "label": "Haydovchi (\u53f8\u673a)",
+   "read_only": 1
+  },
+  {
+   "default": "Yo'lda",
+   "description": "Kunlik GPS yangilanishi shu holat \"Yo'lda\" bo'lgan hujjatlar uchungina ishlaydi",
+   "fieldname": "holati",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Holati (\u72b6\u6001)",
+   "options": "Yo'lda\nYakunlangan"
+  },
+  {
+   "default": "0",
+   "description": "Kunlik GPS yangilanishi muvaffaqiyatsiz bo'lsa (qurilma offline) avtomatik belgilanadi",
+   "fieldname": "gps_offline",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "GPS Offline",
    "read_only": 1
   },
   {

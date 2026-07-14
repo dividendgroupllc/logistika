@@ -3,47 +3,49 @@ from frappe.utils import nowtime, today
 
 from logistika.erp_for_logistics import traccar_client
 
-ACTIVE_STATUS = "Yo'lda"
 
-
-def daily_gps_update():
-	"""Kuniga 1 marta (Xitoy vaqti bilan ertalab, hooks.py'dagi cron'ga qarang) har bir
-	ochiq (holati=Yo'lda) Internal Logistics hujjati uchun bugungi qatorni ta'minlaydi
-	va GPS orqali manzilni yangilashga harakat qiladi."""
+def daily_gps_update_kz():
+	"""Kuniga 1 marta — hali yetib bormagan (Fakt yetib borgan sana bo'sh) har bir
+	KZ Transit hujjati uchun bugungi qatorni ta'minlaydi va GPS orqali manzilni
+	yangilashga harakat qiladi."""
 	if not all(traccar_client.get_credentials()):
 		frappe.log_error(
-			title="Kunlik GPS yangilash: Traccar sozlanmagan",
+			title="Kunlik KZ GPS yangilash: Traccar sozlanmagan",
 			message="traccar_url/traccar_api_user/traccar_api_password site_config.json'da yo'q — "
 			"kunlik yangilash butunlay o'tkazib yuborildi.",
 		)
 		return
 
-	names = frappe.get_all("Internal Logistics", filters={"holati": ACTIVE_STATUS}, pluck="name")
+	names = frappe.get_all(
+		"KZ Transit",
+		filters={"fakt_yetib_borgan": ["is", "not set"], "holati": "Yo'lda"},
+		pluck="name",
+	)
 	for name in names:
 		try:
-			refresh_gps_for_document(name)
+			refresh_gps_for_kz_transit(name)
 		except Exception:
-			frappe.log_error(title=f"Kunlik GPS yangilash xato: {name}")
+			frappe.log_error(title=f"Kunlik KZ GPS yangilash xato: {name}")
 
 
 @frappe.whitelist()
-def refresh_gps_for_document(internal_logistics_name):
+def refresh_gps_for_kz_transit(kz_transit_name):
 	"""Kunlik avtomatik ish uchun — bugungi qatorni ta'minlaydi (yo'q bo'lsa yaratadi)
 	va uni joriy GPS bilan yangilashga harakat qiladi."""
-	doc = frappe.get_doc("Internal Logistics", internal_logistics_name)
+	doc = frappe.get_doc("KZ Transit", kz_transit_name)
 	doc.check_permission("write")
 	today_str = today()
 	row = _find_row_by_date(doc, today_str)
 	if not row:
-		row = doc.append("kunlik_kuzatuv", {"sana": today_str})
+		row = doc.append("slijeniya", {"sana": today_str})
 	return _refresh_row_with_fresh_position(doc, row)
 
 
 @frappe.whitelist()
-def refresh_row(internal_logistics_name, row_name):
+def refresh_row(kz_transit_name, row_name):
 	""""Obnovit" tugmasi (har bir qatorda) — o'sha qatorni joriy GPS bilan qayta yozadi.
 	Muvaffaqiyatli bo'lsa qator "Saqlangan" deb belgilanadi va tugma qayta chiqmaydi."""
-	doc = frappe.get_doc("Internal Logistics", internal_logistics_name)
+	doc = frappe.get_doc("KZ Transit", kz_transit_name)
 	doc.check_permission("write")
 	row = _find_row_by_name(doc, row_name)
 	if not row:
@@ -52,82 +54,53 @@ def refresh_row(internal_logistics_name, row_name):
 
 
 @frappe.whitelist()
-def send_row(internal_logistics_name, row_name):
-	""""Send" tugmasi (har bir qatorda) — shu qatordagi sana/vaqt/manzilni HAR BIR
-	buyurtma (Internal Logistics Order) mijoziga, o'z buyurtmasi haqida alohida
-	xabar qilib yuboradi (bitta furada bir nechta buyurtma bo'lishi mumkin)."""
-	from logistika.telegram.messages import SHIPMENT_UPDATE
+def send_row(kz_transit_name, row_name):
+	""""Send" tugmasi (har bir qatorda) — shu qatordagi sana/vaqt/manzilni hujjatga
+	bog'langan Order'ning mijoziga Telegram orqali yuboradi."""
+	from logistika.telegram.messages import KZ_SHIPMENT_UPDATE
 	from logistika.telegram.sender import send_location, send_message
 
-	doc = frappe.get_doc("Internal Logistics", internal_logistics_name)
+	doc = frappe.get_doc("KZ Transit", kz_transit_name)
 	doc.check_permission("write")
 	row = _find_row_by_name(doc, row_name)
 	if not row:
 		frappe.throw("Qator topilmadi")
-	if not row.tasdiqlangan or not row.qayerdaligi:
+	if not row.tasdiqlangan or not row.joylashuv:
 		frappe.throw("Bu qatorda hali manzil tasdiqlanmagan — avval \"Obnovit\" tugmasini bosing")
+	if not doc.order:
+		frappe.throw("Hujjatda Order ko'rsatilmagan")
+	if not frappe.db.exists("Order", doc.order):
+		frappe.throw(f'"{doc.order}" nomli Order topilmadi — havola eskirgan yoki o\'chirilgan bo\'lishi mumkin.')
 
-	if not doc.buyurtmalar:
-		frappe.throw("Hujjatda hech qanday buyurtma (Order) ko'rsatilmagan")
+	order = frappe.db.get_value("Order", doc.order, ["brand", "kliyent"], as_dict=True)
+	if not order.kliyent:
+		frappe.throw("Bu Order'da mijoz (Kliyent) ko'rsatilmagan")
+
+	contact_names = frappe.get_all(
+		"Dynamic Link",
+		filters={"parenttype": "Contact", "link_doctype": "Customer", "link_name": order.kliyent},
+		pluck="parent",
+	)
+	chat_ids = frappe.get_all(
+		"Contact",
+		filters={"name": ["in", contact_names], "telegram_chat_id": ["not in", ["", None]]},
+		pluck="telegram_chat_id",
+	)
 
 	sent = 0
-	broken_orders = []
-	no_contact_orders = []
-	for buyurtma in doc.buyurtmalar:
-		if not buyurtma.order or not frappe.db.exists("Order", buyurtma.order):
-			broken_orders.append(buyurtma.order or "(bo'sh)")
-			continue
-
-		order = frappe.db.get_value("Order", buyurtma.order, ["brand", "kliyent"], as_dict=True)
-		if not order.kliyent:
-			broken_orders.append(buyurtma.order)
-			continue
-
-		contact_names = frappe.get_all(
-			"Dynamic Link",
-			filters={"parenttype": "Contact", "link_doctype": "Customer", "link_name": order.kliyent},
-			pluck="parent",
-		)
-		chat_ids = frappe.get_all(
-			"Contact",
-			filters={"name": ["in", contact_names], "telegram_chat_id": ["not in", ["", None]]},
-			pluck="telegram_chat_id",
-		)
-		if not chat_ids:
-			no_contact_orders.append(buyurtma.order)
-			continue
-
-		message = SHIPMENT_UPDATE.format(
+	if chat_ids:
+		message = KZ_SHIPMENT_UPDATE.format(
 			brand=order.brand or "",
 			sana=row.sana,
 			vaqt=traccar_client.format_time(row.vaqt),
-			address=row.qayerdaligi or "",
-			fura=doc.fura or "-",
-			jami_kub=buyurtma.jami_kub or 0,
-			jami_tonna=buyurtma.jami_tonna or 0,
+			address=row.joylashuv or "",
+			kz_fura=doc.kz_truck or "-",
 		)
-
 		for chat_id in chat_ids:
 			if send_message(chat_id, message):
 				sent += 1
 				if row.latitude and row.longitude:
 					send_location(chat_id, row.latitude, row.longitude)
-
-	if broken_orders:
-		frappe.msgprint(
-			"Diqqat: quyidagi order(lar) topilmadi yoki mijozsiz — ularga xabar yuborilmadi: {0}".format(
-				", ".join(broken_orders)
-			),
-			indicator="orange",
-			alert=True,
-		)
-	if no_contact_orders:
-		frappe.msgprint(
-			"Diqqat: quyidagi order(lar)ning mijozi Telegram botiga ro'yxatdan o'tmagan — ularga xabar "
-			"yuborilmadi: {0}".format(", ".join(no_contact_orders)),
-			indicator="orange",
-			alert=True,
-		)
 
 	if sent > 0:
 		row.yuborilgan = 1
@@ -142,7 +115,7 @@ def _refresh_row_with_fresh_position(doc, row) -> bool:
 
 	vehicle = frappe.db.get_value(
 		"Transport Vositasi",
-		{"mashina_raqami": doc.fura, "faol": 1},
+		{"mashina_raqami": doc.kz_truck, "faol": 1},
 		["gps_device_id"],
 		as_dict=True,
 	)
@@ -157,7 +130,7 @@ def _refresh_row_with_fresh_position(doc, row) -> bool:
 	address = traccar_client.reverse_geocode(traccar_url, auth, position["latitude"], position["longitude"])
 
 	row.vaqt = nowtime()
-	row.qayerdaligi = address
+	row.joylashuv = address
 	row.latitude = position.get("latitude")
 	row.longitude = position.get("longitude")
 	row.tasdiqlangan = 1
@@ -179,16 +152,14 @@ def _mark_offline(doc, row) -> bool:
 
 
 def _find_row_by_date(doc, date_str):
-	for existing_row in doc.kunlik_kuzatuv:
+	for existing_row in doc.slijeniya:
 		if str(existing_row.sana) == date_str:
 			return existing_row
 	return None
 
 
 def _find_row_by_name(doc, row_name):
-	for existing_row in doc.kunlik_kuzatuv:
+	for existing_row in doc.slijeniya:
 		if existing_row.name == row_name:
 			return existing_row
 	return None
-
-

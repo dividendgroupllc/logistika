@@ -8,6 +8,7 @@
   "mahsulot_nomi",
   "xitoy_fura_telefon",
   "xitoy_mashina_nomeri",
+  "truck_type",
   "sugurta",
   "sugurta_hujjat",
   "xitoy_fura_summasi",
@@ -40,6 +41,14 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Xitoy mashina nomeri (\u8f66\u724c\u53f7)"
+  },
+  {
+   "columns": 1,
+   "fieldname": "truck_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Truck Type",
+   "options": "Truck Type"
   },
   {
    "columns": 2,

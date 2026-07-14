@@ -13,13 +13,18 @@
   "fura_phone",
   "holati",
   "gps_offline",
+  "tamojniy_ombori",
   "cb_top",
   "zavod_raqami",
   "postavshik",
   "jami_kub",
   "jami_tonna",
+  "sec_buyurtmalar",
+  "buyurtmalar",
   "sec_pekin",
   "pekin_list",
+  "sec_buyurtmalar_korinishi",
+  "buyurtmalar_korinishi",
   "sec_kuzatuv",
   "kunlik_kuzatuv"
  ],
@@ -32,10 +37,9 @@
   {
    "fieldname": "order",
    "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Order / Zakaz (\u8ba2\u5355)",
-   "options": "Order",
-   "reqd": 1
+   "hidden": 1,
+   "label": "Order / Zakaz (\u8ba2\u5355) \u2014 eski, endi \"Buyurtmalar\" jadvaliga ko'chirilgan",
+   "options": "Order"
   },
   {
    "fieldname": "fura",
@@ -69,24 +73,33 @@
    "read_only": 1
   },
   {
+   "description": "Qayerdaligi (GPS manzili)ga qarab, yuk qaysi bojxona omboriga tushishi qo'lda tanlanadi",
+   "fieldname": "tamojniy_ombori",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Tamojniy ombori",
+   "options": "Tamojniy"
+  },
+  {
    "fieldname": "cb_top",
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "order.xitoy_zavod_raqami",
    "fieldname": "zavod_raqami",
    "fieldtype": "Data",
-   "label": "Xitoy zavod raqami (\u5de5\u5382\u7f16\u53f7)",
+   "hidden": 1,
+   "label": "Xitoy zavod raqami (\u5de5\u5382\u7f16\u53f7) \u2014 eski, endi har bir buyurtma o'zinikini ko'rsatadi",
    "read_only": 1
   },
   {
-   "fetch_from": "order.xitoy_postavshik",
    "fieldname": "postavshik",
    "fieldtype": "Data",
-   "label": "Xitoy postavshik (\u4f9b\u5e94\u5546)",
+   "hidden": 1,
+   "label": "Xitoy postavshik (\u4f9b\u5e94\u5546) \u2014 eski, endi har bir buyurtma o'zinikini ko'rsatadi",
    "read_only": 1
   },
   {
+   "description": "Barcha buyurtmalar bo'yicha JAMI (avtomatik hisoblanadi)",
    "fieldname": "jami_kub",
    "fieldtype": "Float",
    "label": "Jami kub \u2014 m\u00b3 (\u603b\u4f53\u79ef)",
@@ -101,6 +114,18 @@
    "read_only": 1
   },
   {
+   "fieldname": "sec_buyurtmalar",
+   "fieldtype": "Section Break",
+   "label": "Buyurtmalar (\u8ba2\u5355\u5217\u8868)"
+  },
+  {
+   "description": "Bitta furada bir nechta buyurtmaning mahsuloti bo'lishi mumkin \u2014 har biri uchun alohida qator qo'shing",
+   "fieldname": "buyurtmalar",
+   "fieldtype": "Table",
+   "label": "Buyurtmalar (\u8ba2\u5355\u5217\u8868)",
+   "options": "Internal Logistics Order"
+  },
+  {
    "fieldname": "sec_pekin",
    "fieldtype": "Section Break",
    "label": "Pekin list / mahsulotlar (\u88c5\u7bb1\u5355)"
@@ -111,6 +136,16 @@
    "fieldtype": "Table",
    "label": "Pekin list (\u88c5\u7bb1\u5355)",
    "options": "Internal Logistics Item"
+  },
+  {
+   "fieldname": "sec_buyurtmalar_korinishi",
+   "fieldtype": "Section Break",
+   "label": "Buyurtmalar bo'yicha ko'rinish (\u6309\u8ba2\u5355\u67e5\u770b)"
+  },
+  {
+   "fieldname": "buyurtmalar_korinishi",
+   "fieldtype": "HTML",
+   "label": "Buyurtmalar bo'yicha ko'rinish"
   },
   {
    "fieldname": "sec_kuzatuv",
