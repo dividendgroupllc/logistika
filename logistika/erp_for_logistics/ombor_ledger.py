@@ -2,6 +2,24 @@ import frappe
 from frappe.utils import flt, today
 
 
+def _prorate_kub_tonna(actual_qty, planned_qty, volume_cbm, net_weight):
+	"""Reja (planned_qty) uchun berilgan jami kub/og'irlikni, haqiqatda o'tgan
+	(actual_qty) miqdorga mutanosib ravishda taqsimlaydi (masalan, kamomad/nedostatka
+	bo'lsa, faqat kelgan qismining kub/tonnasi hisoblanadi). net_weight kg'da
+	saqlanadi, shuning uchun tonnaga o'tkazish uchun 1000ga bo'linadi.
+
+	frac 1.0 bilan chegaralanadi — reja miqdoridan ko'proq fakt kiritilsa (masalan
+	xato yoki reja noto'g'ri to'ldirilgan bo'lsa), kub/tonna hujjatning o'zida
+	yozilgan haqiqiy hajm/og'irlikdan oshib ketmasligi kerak."""
+	planned_qty = flt(planned_qty)
+	if not planned_qty:
+		return 0.0, 0.0
+	frac = min(flt(actual_qty) / planned_qty, 1.0)
+	kub = flt(volume_cbm) * frac
+	tonna = (flt(net_weight) / 1000) * frac
+	return kub, tonna
+
+
 def sync_warehouse_intake_ledger(doc):
 	"""Warehouse Intake saqlanganda, shu hujjatga tegishli eski "Ombor Harakati" (Kirim)
 	yozuvlarini o'chirib, joriy fakt_qty'lardan yangisini yaratadi — hujjat necha marta
@@ -14,11 +32,14 @@ def sync_warehouse_intake_ledger(doc):
 		qty = flt(row.fakt_qty)
 		if qty <= 0:
 			continue
+		kub, tonna = _prorate_kub_tonna(qty, row.quantity, row.volume_cbm, row.net_weight)
 		_create_ledger_entry(
 			ombor=doc.ombor,
 			part_name=row.part_name,
 			harakat_turi="Kirim",
 			miqdor=qty,
+			kub=kub,
+			tonna=tonna,
 			sana=doc.sana,
 			reference_doctype="Warehouse Intake",
 			reference_name=doc.name,
@@ -39,11 +60,14 @@ def sync_kz_truck_loading_ledger(doc):
 		qty = flt(row.fakt_ortilgan)
 		if qty <= 0:
 			continue
+		kub, tonna = _prorate_kub_tonna(qty, row.quantity, row.volume_cbm, row.net_weight)
 		_create_ledger_entry(
 			ombor=doc.ombor,
 			part_name=row.part_name,
 			harakat_turi="Chiqim",
 			miqdor=qty,
+			kub=kub,
+			tonna=tonna,
 			sana=doc.sana,
 			reference_doctype="KZ Truck Loading",
 			reference_name=doc.name,
@@ -406,6 +430,8 @@ def _create_ledger_entry(
 	fura,
 	order,
 	izoh,
+	kub=0.0,
+	tonna=0.0,
 ):
 	frappe.get_doc(
 		{
@@ -414,6 +440,8 @@ def _create_ledger_entry(
 			"part_name": part_name,
 			"harakat_turi": harakat_turi,
 			"miqdor": miqdor,
+			"kub": kub,
+			"tonna": tonna,
 			"sana": sana,
 			"reference_doctype": reference_doctype,
 			"reference_name": reference_name,

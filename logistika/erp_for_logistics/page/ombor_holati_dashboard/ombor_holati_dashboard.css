@@ -525,22 +525,6 @@
 	font-weight: 500;
 }
 
-.ld-filters {
-	display: flex;
-	gap: 8px;
-	flex-wrap: wrap;
-}
-.ld-select {
-	padding: 7px 10px;
-	border-radius: 8px;
-	border: 1px solid rgba(255, 255, 255, 0.5);
-	background: rgba(255, 255, 255, 0.94);
-	color: #0b0b0b;
-	font-size: 12px;
-	font-weight: 600;
-	min-width: 160px;
-}
-
 .ld-tiles {
 	display: grid;
 	grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -625,7 +609,7 @@
 }
 .ld-table th.ld-th-status {
 	text-align: left;
-	min-width: 220px;
+	min-width: 360px;
 }
 .ld-table th:last-child,
 .ld-table td:last-child {
@@ -642,6 +626,11 @@
 	text-align: right;
 	font-variant-numeric: tabular-nums;
 	letter-spacing: 0.2px;
+}
+.ld-td-products {
+	white-space: normal;
+	max-width: 260px;
+	min-width: 180px;
 }
 .ld-table td.is-link {
 	color: var(--oh-kirim);
@@ -683,13 +672,14 @@
 }
 .ld-stepper {
 	display: flex;
-	flex-direction: column;
-	gap: 4px;
-	min-width: 200px;
+	align-items: center;
+	gap: 8px;
+	min-width: 340px;
 }
 .ld-stepper-track {
 	display: flex;
 	gap: 3px;
+	flex: 0 0 120px;
 }
 .ld-step {
 	flex: 1;
@@ -718,24 +708,17 @@
 	);
 }
 .ld-stepper-label {
-	font-size: 10px;
+	font-size: 11px;
 	font-weight: 600;
 	color: var(--oh-ink-secondary);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 160px;
 }
 .ld-stepper-label--unknown {
 	color: var(--oh-critical);
 	font-style: italic;
-}
-.ld-stepper-meta {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 8px;
-	margin-top: 2px;
-}
-.ld-stepper-days {
-	font-size: 10px;
-	color: var(--oh-ink-muted);
 }
 .ld-stepper-history {
 	font-size: 10px;
@@ -743,6 +726,8 @@
 	color: var(--oh-kirim);
 	cursor: pointer;
 	white-space: nowrap;
+	margin-left: auto;
+	padding-left: 8px;
 }
 .ld-stepper-history:hover {
 	text-decoration: underline;
@@ -758,12 +743,5 @@
 	.ld-topbar {
 		flex-direction: column;
 		align-items: flex-start;
-	}
-	.ld-filters {
-		width: 100%;
-	}
-	.ld-select {
-		flex: 1;
-		min-width: 0;
 	}
 }

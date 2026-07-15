@@ -11,6 +11,8 @@
   "part_name",
   "harakat_turi",
   "miqdor",
+  "kub",
+  "tonna",
   "sana",
   "cb_top",
   "reference_doctype",
@@ -61,6 +63,20 @@
    "in_list_view": 1,
    "label": "Miqdor",
    "reqd": 1
+  },
+  {
+   "fieldname": "kub",
+   "fieldtype": "Float",
+   "label": "Kubi — m³",
+   "precision": "3",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tonna",
+   "fieldtype": "Float",
+   "label": "Tonnaji",
+   "precision": "3",
+   "read_only": 1
   },
   {
    "default": "Today",

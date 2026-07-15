@@ -12,7 +12,6 @@ from logistika.erp_for_logistics.ombor_ledger import (
 )
 from logistika.erp_for_logistics.order_status_log import attach_current_stage_durations
 from logistika.erp_for_logistics.pipeline_status import PIPELINE_STAGES
-from logistika.erp_for_logistics.pipeline_status import get_distinct_orders as _get_pipeline_distinct_orders
 from logistika.erp_for_logistics.pipeline_status import get_pipeline_rows as _get_pipeline_rows
 from logistika.erp_for_logistics.pipeline_status import get_stat_tiles as _get_pipeline_stat_tiles
 from logistika.erp_for_logistics.report.ombor_holati.ombor_holati import get_data as get_report_rows
@@ -21,32 +20,26 @@ TREND_DAYS = 21
 
 
 @frappe.whitelist()
-def get_dashboard_data(ombor=None, order=None, fura=None, pipeline_order=None, pipeline_status=None):
+def get_dashboard_data(ombor=None, fura=None):
 	"""Ombor Holati dashboard uchun yagona whitelisted endpoint — barcha
-	kartochka/jadval/chart ma'lumotlarini, shu jumladan pastdagi "Logistika
+	kartochka/jadval/chart ma'lumotlarini, shu jumladan yuqoridagi "Logistika
 	Dashboard" (furalar bo'yicha pipeline holati) bo'limini ham bitta so'rovda
 	qaytaradi."""
-	report_filters = {"ombor": ombor, "order": order, "fura": fura, "only_in_warehouse": 1}
-	pipeline_rows = _get_pipeline_rows(pipeline_order, pipeline_status)
+	report_filters = {"ombor": ombor, "fura": fura, "only_in_warehouse": 1}
+	pipeline_rows = _get_pipeline_rows()
 	attach_current_stage_durations(pipeline_rows)
 
 	return {
 		"stat_tiles": _get_stat_tiles(),
 		"filters": {
 			"omborlar": _get_active_warehouses(),
-			"orders": _get_orders_in_warehouse(),
-			"selected": {"ombor": ombor or "", "order": order or "", "fura": fura or ""},
+			"selected": {"ombor": ombor or "", "fura": fura or ""},
 		},
 		"pipeline_stages": PIPELINE_STAGES,
 		"rows": get_report_rows(report_filters),
 		"trend": _get_daily_trend(days=TREND_DAYS),
 		"pipeline": {
 			"stat_tiles": _get_pipeline_stat_tiles(pipeline_rows),
-			"filters": {
-				"orders": _get_pipeline_distinct_orders(),
-				"statuses": PIPELINE_STAGES,
-				"selected": {"order": pipeline_order or "", "status": pipeline_status or ""},
-			},
 			"rows": pipeline_rows,
 		},
 	}
@@ -109,21 +102,6 @@ def _get_active_warehouses():
 		w.nomi
 		for w in frappe.get_all("Ombor", filters={"faol": 1}, fields=["nomi"], order_by="nomi asc")
 	]
-
-
-def _get_orders_in_warehouse():
-	rows = frappe.db.sql(
-		"""
-		select `order`
-		from `tabOmbor Harakati`
-		where `order` is not null and `order` != ''
-		group by `order`, part_name
-		having sum(case when harakat_turi = 'Kirim' then miqdor else 0 end)
-			- sum(case when harakat_turi = 'Chiqim' then miqdor else 0 end) > 0
-		""",
-		as_dict=True,
-	)
-	return sorted({row.order for row in rows})
 
 
 def _get_daily_trend(days=21):

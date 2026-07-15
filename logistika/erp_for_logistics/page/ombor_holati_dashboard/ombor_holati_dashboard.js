@@ -16,11 +16,10 @@ logistika.ui.OmborHolatiDashboardPage = class OmborHolatiDashboardPage {
 			single_column: true,
 		});
 
-		this.state = { ombor: "", order: "", fura: "" };
+		this.state = { ombor: "", fura: "" };
 		this.sort = { field: "qoldiq", dir: "desc" };
 		this.quickSearch = "";
 
-		this.pipelineState = { order: "", status: "" };
 		this.pipelineQuickSearch = "";
 
 		this.make_layout();
@@ -43,7 +42,6 @@ logistika.ui.OmborHolatiDashboardPage = class OmborHolatiDashboardPage {
 								<div class="oh-subtitle">${__("Real vaqtda ombor qoldig'i va yetkazib berish holati")}</div>
 							</div>
 						</div>
-						<div class="oh-filters" data-region="filters"></div>
 					</header>
 
 					<div class="oh-tiles" data-region="tiles"></div>
@@ -56,15 +54,6 @@ logistika.ui.OmborHolatiDashboardPage = class OmborHolatiDashboardPage {
 						<div class="oh-trend-chart" data-region="trend"></div>
 					</section>
 
-					<section class="oh-panel oh-table-panel">
-						<div class="oh-panel-head">
-							<div class="oh-panel-title">${__("Buyurtma / Fura / Mahsulot kesimida qoldiq")}</div>
-							<input type="text" class="oh-quick-search" data-region="quick-search"
-								placeholder="${__("Mahsulot bo'yicha qidirish...")}" />
-						</div>
-						<div class="oh-table-wrap" data-region="table"></div>
-					</section>
-
 					<header class="ld-topbar">
 						<div class="ld-brand">
 							<div class="ld-logo">LD</div>
@@ -73,7 +62,6 @@ logistika.ui.OmborHolatiDashboardPage = class OmborHolatiDashboardPage {
 								<div class="ld-subtitle">${__("Har bir furaning Order dan Kliyentgacha bo'lgan joriy holati")}</div>
 							</div>
 						</div>
-						<div class="ld-filters" data-region="pipeline-filters"></div>
 					</header>
 
 					<div class="ld-tiles" data-region="pipeline-tiles"></div>
@@ -86,6 +74,16 @@ logistika.ui.OmborHolatiDashboardPage = class OmborHolatiDashboardPage {
 						</div>
 						<div class="ld-table-wrap" data-region="pipeline-table"></div>
 					</section>
+
+					<section class="oh-panel oh-table-panel">
+						<div class="oh-panel-head">
+							<div class="oh-panel-title">${__("Buyurtma / Fura / Mahsulot kesimida qoldiq")}</div>
+							<div class="oh-filters" data-region="filters"></div>
+							<input type="text" class="oh-quick-search" data-region="quick-search"
+								placeholder="${__("Mahsulot bo'yicha qidirish...")}" />
+						</div>
+						<div class="oh-table-wrap" data-region="table"></div>
+					</section>
 				</div>
 			</div>
 		`);
@@ -96,7 +94,6 @@ logistika.ui.OmborHolatiDashboardPage = class OmborHolatiDashboardPage {
 		this.$trendLegend = this.page.main.find('[data-region="trend-legend"]');
 		this.$table = this.page.main.find('[data-region="table"]');
 
-		this.$pipelineFilters = this.page.main.find('[data-region="pipeline-filters"]');
 		this.$pipelineTiles = this.page.main.find('[data-region="pipeline-tiles"]');
 		this.$pipelineTable = this.page.main.find('[data-region="pipeline-table"]');
 	}
@@ -104,10 +101,7 @@ logistika.ui.OmborHolatiDashboardPage = class OmborHolatiDashboardPage {
 	load_data() {
 		const args = {};
 		if (this.state.ombor) args.ombor = this.state.ombor;
-		if (this.state.order) args.order = this.state.order;
 		if (this.state.fura) args.fura = this.state.fura;
-		if (this.pipelineState.order) args.pipeline_order = this.pipelineState.order;
-		if (this.pipelineState.status) args.pipeline_status = this.pipelineState.status;
 
 		frappe.call({
 			method:
@@ -129,7 +123,6 @@ logistika.ui.OmborHolatiDashboardPage = class OmborHolatiDashboardPage {
 		this.render_tiles();
 		this.render_trend();
 		this.render_table();
-		this.render_pipeline_filters();
 		this.render_pipeline_tiles();
 		this.render_pipeline_table();
 	}
@@ -142,21 +135,11 @@ logistika.ui.OmborHolatiDashboardPage = class OmborHolatiDashboardPage {
 					`<option value="${frappe.utils.escape_html(o)}" ${o === this.state.ombor ? "selected" : ""}>${frappe.utils.escape_html(o)}</option>`
 			)
 			.join("");
-		const orderOptions = (f.orders || [])
-			.map(
-				(o) =>
-					`<option value="${frappe.utils.escape_html(o)}" ${o === this.state.order ? "selected" : ""}>${frappe.utils.escape_html(o)}</option>`
-			)
-			.join("");
 
 		this.$filters.html(`
 			<select class="oh-select" data-filter="ombor">
 				<option value="">${__("Barcha omborlar")}</option>
 				${omborOptions}
-			</select>
-			<select class="oh-select" data-filter="order">
-				<option value="">${__("Barcha buyurtmalar")}</option>
-				${orderOptions}
 			</select>
 			<input type="text" class="oh-input" data-filter="fura"
 				placeholder="${__("Fura raqami...")}" value="${frappe.utils.escape_html(this.state.fura)}" />
@@ -164,10 +147,6 @@ logistika.ui.OmborHolatiDashboardPage = class OmborHolatiDashboardPage {
 
 		this.$filters.find('[data-filter="ombor"]').on("change", (e) => {
 			this.state.ombor = $(e.currentTarget).val();
-			this.load_data();
-		});
-		this.$filters.find('[data-filter="order"]').on("change", (e) => {
-			this.state.order = $(e.currentTarget).val();
 			this.load_data();
 		});
 
@@ -365,42 +344,6 @@ logistika.ui.OmborHolatiDashboardPage = class OmborHolatiDashboardPage {
 		});
 	}
 
-	render_pipeline_filters() {
-		const f = (this.pipelineData && this.pipelineData.filters) || {};
-		const orderOptions = (f.orders || [])
-			.map(
-				(o) =>
-					`<option value="${frappe.utils.escape_html(o)}" ${o === this.pipelineState.order ? "selected" : ""}>${frappe.utils.escape_html(o)}</option>`
-			)
-			.join("");
-		const statusOptions = (f.statuses || [])
-			.map(
-				(s) =>
-					`<option value="${frappe.utils.escape_html(s)}" ${s === this.pipelineState.status ? "selected" : ""}>${frappe.utils.escape_html(s)}</option>`
-			)
-			.join("");
-
-		this.$pipelineFilters.html(`
-			<select class="ld-select" data-pipeline-filter="order">
-				<option value="">${__("Barcha buyurtmalar")}</option>
-				${orderOptions}
-			</select>
-			<select class="ld-select" data-pipeline-filter="status">
-				<option value="">${__("Barcha statuslar")}</option>
-				${statusOptions}
-			</select>
-		`);
-
-		this.$pipelineFilters.find('[data-pipeline-filter="order"]').on("change", (e) => {
-			this.pipelineState.order = $(e.currentTarget).val();
-			this.load_data();
-		});
-		this.$pipelineFilters.find('[data-pipeline-filter="status"]').on("change", (e) => {
-			this.pipelineState.status = $(e.currentTarget).val();
-			this.load_data();
-		});
-	}
-
 	render_pipeline_tiles() {
 		const tiles = (this.pipelineData && this.pipelineData.stat_tiles) || [];
 		this.$pipelineTiles.html(
@@ -434,18 +377,15 @@ logistika.ui.OmborHolatiDashboardPage = class OmborHolatiDashboardPage {
 			segments += `<span class="${cls}" title="${frappe.utils.escape_html(stages[i] || "")}"></span>`;
 		}
 		const label = statusText ? frappe.utils.escape_html(statusText) : __("Noma'lum");
-		const daysLabel =
+		const daysTitle =
 			daysInCurrentStage !== null && daysInCurrentStage !== undefined
 				? __("Joriy bosqichda: {0} kun", [daysInCurrentStage])
 				: "";
 		return `
-			<div class="ld-stepper">
+			<div class="ld-stepper" title="${daysTitle}">
 				<div class="ld-stepper-track">${segments}</div>
 				<div class="ld-stepper-label ${stageIndex === -1 ? "ld-stepper-label--unknown" : ""}">${label}</div>
-				<div class="ld-stepper-meta">
-					${daysLabel ? `<span class="ld-stepper-days">${daysLabel}</span>` : ""}
-					<span class="ld-stepper-history" data-history-order="${frappe.utils.escape_html(order || "")}" data-history-fura="${frappe.utils.escape_html(chinaFura || "")}">${__("Tarix")} →</span>
-				</div>
+				<span class="ld-stepper-history" data-history-order="${frappe.utils.escape_html(order || "")}" data-history-fura="${frappe.utils.escape_html(chinaFura || "")}">${__("Tarix")} →</span>
 			</div>
 		`;
 	}
@@ -517,7 +457,7 @@ logistika.ui.OmborHolatiDashboardPage = class OmborHolatiDashboardPage {
 		if (this.pipelineQuickSearch) {
 			const needle = this.pipelineQuickSearch.toLowerCase();
 			rows = rows.filter((r) =>
-				[r.order, r.china_fura, r.kz_fura, r.mahsulot_nomi]
+				[r.order, r.china_fura, r.kz_fura, r.mahsulotlar]
 					.filter(Boolean)
 					.some((v) => String(v).toLowerCase().includes(needle))
 			);
@@ -537,16 +477,14 @@ logistika.ui.OmborHolatiDashboardPage = class OmborHolatiDashboardPage {
 			<table class="ld-table">
 				<thead>
 					<tr>
-						<th>${__("Buyurtma")}</th>
-						<th>${__("Mahsulot")}</th>
+						<th class="ld-th-status">${__("Status")}</th>
 						<th>${__("Xitoy fura")}</th>
+						<th>${__("Mahsulotlar")}</th>
 						<th>${__("IL kub / tonna")}</th>
 						<th>${__("China truck kub / tonna")}</th>
 						<th>${__("KZ fura")}</th>
 						<th>${__("KZ truck kub / tonna")}</th>
-						<th>${__("Yuklangan sana")}</th>
 						<th>${__("Yetib kelish sanasi")}</th>
-						<th class="ld-th-status">${__("Status")}</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -554,16 +492,14 @@ logistika.ui.OmborHolatiDashboardPage = class OmborHolatiDashboardPage {
 						.map(
 							(row) => `
 						<tr>
-							<td class="is-link" data-doctype="Order" data-name="${frappe.utils.escape_html(row.order || "")}">${frappe.utils.escape_html(row.order || "")}</td>
-							<td>${frappe.utils.escape_html(row.mahsulot_nomi || "—")}</td>
+							<td class="ld-td-status">${this.get_stepper_html(row.stage_index, row.status, row.days_in_current_stage, row.order, row.china_fura)}</td>
 							<td>${frappe.utils.escape_html(row.china_fura || "—")}</td>
+							<td class="ld-td-products">${frappe.utils.escape_html(row.mahsulotlar || "—")}</td>
 							<td class="is-num">${this.formatPipelineNumber(row.il_kub)} / ${this.formatPipelineNumber(row.il_tonna)}</td>
 							<td class="is-num">${this.formatPipelineNumber(row.china_truck_kub)} / ${this.formatPipelineNumber(row.china_truck_tonna)}</td>
 							<td>${frappe.utils.escape_html(row.kz_fura || "—")}</td>
 							<td class="is-num">${this.formatPipelineNumber(row.kz_truck_kub)} / ${this.formatPipelineNumber(row.kz_truck_tonna)}</td>
-							<td>${frappe.utils.escape_html(row.yuklangan_sana || "—")}</td>
 							<td>${frappe.utils.escape_html(row.yetib_kelish_sanasi || "—")}</td>
-							<td class="ld-td-status">${this.get_stepper_html(row.stage_index, row.status, row.days_in_current_stage, row.order, row.china_fura)}</td>
 						</tr>
 					`
 						)
@@ -572,11 +508,6 @@ logistika.ui.OmborHolatiDashboardPage = class OmborHolatiDashboardPage {
 			</table>
 		`);
 
-		this.$pipelineTable.find("td.is-link").on("click", (e) => {
-			const doctype = $(e.currentTarget).data("doctype");
-			const name = $(e.currentTarget).data("name");
-			if (name) frappe.set_route("Form", doctype, name);
-		});
 		this.$pipelineTable.find(".ld-stepper-history").on("click", (e) => {
 			const $el = $(e.currentTarget);
 			const order = $el.data("history-order");
