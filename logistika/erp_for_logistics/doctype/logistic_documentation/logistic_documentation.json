@@ -7,21 +7,36 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "tab_main",
   "sec_top",
   "sana",
   "order",
   "cb_top",
   "kz_truck",
+  "tab_per",
   "sec_per",
   "peregruz_hujjat",
   "peregruz_check",
+  "cb_per",
+  "send_peregruz_hujjat",
+  "peregruz_sent",
+  "tab_cl",
   "sec_cl",
   "pekin_invoice",
   "eksport_deklaratsiya",
+  "cb_cl",
+  "send_eksport_deklaratsiya",
+  "eksport_sent",
+  "tab_tr",
   "sec_tr",
   "tranzit_check"
  ],
  "fields": [
+  {
+   "fieldname": "tab_main",
+   "fieldtype": "Tab Break",
+   "label": "Asosiy (\u57fa\u672c)"
+  },
   {
    "fieldname": "sec_top",
    "fieldtype": "Section Break",
@@ -54,6 +69,11 @@
    "label": "KZ fura raqami (\u54c8\u65b9\u8f66\u53f7)"
   },
   {
+   "fieldname": "tab_per",
+   "fieldtype": "Tab Break",
+   "label": "\u041f\u0435\u0440\u0435\u0433\u0440\u0443\u0437 \u0434\u0430\u043d\u043d\u044b\u0439"
+  },
+  {
    "fieldname": "sec_per",
    "fieldtype": "Section Break",
    "label": "\u041f\u0435\u0440\u0435\u0433\u0440\u0443\u0437 \u0434\u0430\u043d\u043d\u044b\u0439"
@@ -70,6 +90,28 @@
    "label": "\u041f\u0435\u0440\u0435\u0433\u0440\u0443\u0437 \u0434\u0430\u043d\u043d\u044b\u0439 \u2713"
   },
   {
+   "fieldname": "cb_per",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.peregruz_hujjat",
+   "fieldname": "send_peregruz_hujjat",
+   "fieldtype": "Button",
+   "label": "\ud83d\udce4 Kliyentga yuborish (Telegram)"
+  },
+  {
+   "default": "0",
+   "fieldname": "peregruz_sent",
+   "fieldtype": "Check",
+   "label": "Kliyentga yuborilgan \u2713",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tab_cl",
+   "fieldtype": "Tab Break",
+   "label": "Kliyent hujjatlari (\u5ba2\u6237\u6587\u4ef6)"
+  },
+  {
    "fieldname": "sec_cl",
    "fieldtype": "Section Break",
    "label": "Kliyent hujjatlari (\u5ba2\u6237\u6587\u4ef6)"
@@ -83,6 +125,28 @@
    "fieldname": "eksport_deklaratsiya",
    "fieldtype": "Attach",
    "label": "Eksport deklaratsiya (ED/CO)"
+  },
+  {
+   "fieldname": "cb_cl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.eksport_deklaratsiya",
+   "fieldname": "send_eksport_deklaratsiya",
+   "fieldtype": "Button",
+   "label": "\ud83d\udce4 Kliyentga yuborish (Telegram)"
+  },
+  {
+   "default": "0",
+   "fieldname": "eksport_sent",
+   "fieldtype": "Check",
+   "label": "Kliyentga yuborilgan \u2713",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tab_tr",
+   "fieldtype": "Tab Break",
+   "label": "\u0422\u0440\u0430\u043d\u0437\u0438\u0442"
   },
   {
    "fieldname": "sec_tr",

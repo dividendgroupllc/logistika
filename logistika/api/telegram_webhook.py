@@ -23,8 +23,24 @@ import re
 import frappe
 
 from logistika.telegram.keyboards import phone_request_keyboard
-from logistika.telegram.messages import ALREADY_LINKED, ASK_PHONE, PHONE_NOT_FOUND, WELCOME_CUSTOMER
-from logistika.telegram.sender import send_message
+from logistika.telegram.messages import (
+	ALREADY_LINKED,
+	ASK_PHONE,
+	PHONE_NOT_FOUND,
+	UPLOAD_NO_ORDERS,
+	UPLOAD_NOT_LINKED,
+	UPLOAD_ORDER_EXPIRED,
+	UPLOAD_ORDER_PICKED,
+	UPLOAD_PICK_ORDER,
+	UPLOAD_RECEIVED,
+	UPLOAD_SAVE_FAILED,
+	UPLOAD_WAITING_FOR_FILE,
+	WELCOME_CUSTOMER,
+)
+from logistika.telegram.sender import answer_callback_query, download_incoming_file, send_message
+
+_UPLOAD_CACHE_PREFIX = "telegram_upload_pending"
+_UPLOAD_CACHE_TTL = 900  # 15 daqiqa
 
 
 @frappe.whitelist(allow_guest=True)
@@ -41,6 +57,8 @@ def handle():
 
 	if "message" in update:
 		_on_message(update["message"])
+	elif "callback_query" in update:
+		_on_callback_query(update["callback_query"])
 
 	return {"ok": True}
 
@@ -52,15 +70,155 @@ def _on_message(message: dict) -> None:
 		_handle_shared_contact(chat_id, message["from"]["id"], message["contact"])
 		return
 
+	if "document" in message or "photo" in message:
+		_handle_uploaded_file(chat_id, message)
+		return
+
 	text = message.get("text", "").strip()
 	if text.startswith("/start"):
 		_cmd_start(chat_id)
+		return
+	if text.startswith("/upload"):
+		_cmd_upload(chat_id)
 		return
 
 	if _is_linked(chat_id):
 		send_message(chat_id, ALREADY_LINKED)
 	else:
 		send_message(chat_id, ASK_PHONE, reply_markup=phone_request_keyboard())
+
+
+def _on_callback_query(callback_query: dict) -> None:
+	callback_id = callback_query["id"]
+	chat_id = callback_query["message"]["chat"]["id"]
+	data = callback_query.get("data", "")
+
+	if not data.startswith("upload_ld:"):
+		answer_callback_query(callback_id)
+		return
+
+	ld_name = data.split(":", 1)[1]
+	ld = frappe.db.get_value(
+		"Logistic Documentation", ld_name, ["name", "order", "pekin_invoice"], as_dict=True
+	)
+	contact_name = _get_contact_by_chat_id(chat_id)
+	valid = bool(
+		ld and not ld.pekin_invoice and contact_name and _contact_owns_order(contact_name, ld.order)
+	)
+
+	if not valid:
+		answer_callback_query(callback_id)
+		send_message(chat_id, UPLOAD_ORDER_EXPIRED)
+		return
+
+	_set_pending_upload(chat_id, ld_name)
+	answer_callback_query(callback_id)
+	send_message(chat_id, UPLOAD_ORDER_PICKED.format(order=ld.order))
+
+
+def _cmd_upload(chat_id) -> None:
+	contact_name = _get_contact_by_chat_id(chat_id)
+	if not contact_name:
+		send_message(chat_id, UPLOAD_NOT_LINKED)
+		return
+
+	candidates = _get_pending_ld_candidates(contact_name)
+	if not candidates:
+		send_message(chat_id, UPLOAD_NO_ORDERS)
+		return
+
+	buttons = [[{"text": c.order, "callback_data": f"upload_ld:{c.name}"}] for c in candidates]
+	send_message(chat_id, UPLOAD_PICK_ORDER, reply_markup={"inline_keyboard": buttons})
+
+
+def _handle_uploaded_file(chat_id, message: dict) -> None:
+	ld_name = _get_pending_upload(chat_id)
+	if not ld_name:
+		send_message(chat_id, UPLOAD_WAITING_FOR_FILE)
+		return
+
+	if "document" in message:
+		file_id = message["document"]["file_id"]
+		suggested_name = message["document"].get("file_name")
+	else:
+		file_id = message["photo"][-1]["file_id"]  # eng yuqori sifatdagisi
+		suggested_name = None
+
+	ld = frappe.db.get_value(
+		"Logistic Documentation", ld_name, ["name", "order", "pekin_invoice"], as_dict=True
+	)
+	if not ld or ld.pekin_invoice:
+		# hujjat shu orada allaqachon to'ldirilgan (masalan xodim qo'lda yuklagan) yoki o'chirilgan
+		_clear_pending_upload(chat_id)
+		send_message(chat_id, UPLOAD_ORDER_EXPIRED)
+		return
+
+	downloaded = download_incoming_file(file_id)
+	if not downloaded:
+		send_message(chat_id, UPLOAD_SAVE_FAILED)
+		return
+
+	content, telegram_file_name = downloaded
+	file_name = suggested_name or telegram_file_name
+
+	from frappe.utils.file_manager import save_file
+
+	file_doc = save_file(file_name, content, "Logistic Documentation", ld_name, df="pekin_invoice")
+	frappe.db.set_value("Logistic Documentation", ld_name, "pekin_invoice", file_doc.file_url)
+	frappe.db.commit()
+
+	_clear_pending_upload(chat_id)
+	send_message(chat_id, UPLOAD_RECEIVED.format(order=ld.order))
+
+
+def _get_pending_ld_candidates(contact_name):
+	customer_names = _get_linked_customers(contact_name)
+	if not customer_names:
+		return []
+
+	order_names = frappe.get_all("Order", filters={"kliyent": ["in", customer_names]}, pluck="name")
+	if not order_names:
+		return []
+
+	return frappe.get_all(
+		"Logistic Documentation",
+		filters={
+			"order": ["in", order_names],
+			"peregruz_hujjat": ["is", "set"],
+			"pekin_invoice": ["is", "not set"],
+		},
+		fields=["name", "order"],
+		order_by="creation desc",
+		limit_page_length=10,
+	)
+
+
+def _contact_owns_order(contact_name, order_name) -> bool:
+	if not order_name:
+		return False
+	customer_names = _get_linked_customers(contact_name)
+	if not customer_names:
+		return False
+	kliyent = frappe.db.get_value("Order", order_name, "kliyent")
+	return kliyent in customer_names
+
+
+def _get_contact_by_chat_id(chat_id) -> str | None:
+	return frappe.db.get_value("Contact", {"telegram_chat_id": str(chat_id)}, "name")
+
+
+def _set_pending_upload(chat_id, ld_name) -> None:
+	frappe.cache().set_value(
+		f"{_UPLOAD_CACHE_PREFIX}:{chat_id}", ld_name, expires_in_sec=_UPLOAD_CACHE_TTL
+	)
+
+
+def _get_pending_upload(chat_id) -> str | None:
+	return frappe.cache().get_value(f"{_UPLOAD_CACHE_PREFIX}:{chat_id}", expires=True)
+
+
+def _clear_pending_upload(chat_id) -> None:
+	frappe.cache().delete_value(f"{_UPLOAD_CACHE_PREFIX}:{chat_id}")
 
 
 def _cmd_start(chat_id) -> None:

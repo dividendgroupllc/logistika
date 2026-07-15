@@ -31,3 +31,35 @@ KZ_SHIPMENT_UPDATE = (
 	"📍 Manzil: {address}\n"
 	"🚛 KZ fura: {kz_fura}"
 )
+
+UPLOAD_NOT_LINKED = (
+	"Avval ro'yxatdan o'ting — /start buyrug'ini yuboring va telefon raqamingizni ulashing."
+)
+
+UPLOAD_NO_ORDERS = (
+	"Hozircha hujjat kutayotgan buyurtmangiz yo'q. "
+	"Menejeringiz sizga \"Перегруз данный\" hujjatini yuborgach, shu yerda tanlash imkoni paydo bo'ladi."
+)
+
+UPLOAD_PICK_ORDER = "Qaysi buyurtma uchun Pekin invoice yubormoqchisiz?"
+
+UPLOAD_ORDER_EXPIRED = (
+	"Bu buyurtma uchun hujjat topshirish muddati o'tgan yoki allaqachon qabul qilingan. "
+	"Qaytadan /upload buyrug'ini yuboring."
+)
+
+UPLOAD_ORDER_PICKED = (
+	"✅ <b>{order}</b> buyurtmasi tanlandi.\n"
+	"Endi Pekin invoice faylini (PDF yoki rasm) shu yerga yuboring."
+)
+
+UPLOAD_WAITING_FOR_FILE = (
+	"Iltimos, avval /upload buyrug'i orqali buyurtmani tanlang, keyin faylni yuboring."
+)
+
+UPLOAD_RECEIVED = "✅ Hujjat qabul qilindi, rahmat! <b>{order}</b> buyurtmasiga biriktirildi."
+
+UPLOAD_SAVE_FAILED = (
+	"Kechirasiz, faylni saqlashda xatolik yuz berdi. Iltimos, qaytadan urinib ko'ring "
+	"yoki menejeringiz bilan bog'laning."
+)

@@ -57,8 +57,20 @@ def get_pipeline_rows(order=None, status=None):
 			oi.truck_kub as china_truck_kub,
 			oi.truck_tonna as china_truck_tonna,
 			oi.status,
-			ilo.jami_kub as il_kub,
-			ilo.jami_tonna as il_tonna,
+			coalesce(
+				ilo.jami_kub,
+				case
+					when coalesce(ilo_count.buyurtmalar_count, 0) = 0 and il.`order` = oi.parent
+					then il.jami_kub
+				end
+			) as il_kub,
+			coalesce(
+				ilo.jami_tonna,
+				case
+					when coalesce(ilo_count.buyurtmalar_count, 0) = 0 and il.`order` = oi.parent
+					then il.jami_tonna
+				end
+			) as il_tonna,
 			td.mashina_raqami as td_kz_fura,
 			td.kub as kz_truck_kub,
 			td.tonna as kz_truck_tonna,
@@ -70,6 +82,11 @@ def get_pipeline_rows(order=None, status=None):
 		from `tabOrder Item` oi
 		left join `tabInternal Logistics` il on il.fura = oi.xitoy_mashina_nomeri
 		left join `tabInternal Logistics Order` ilo on ilo.parent = il.name and ilo.order = oi.parent
+		left join (
+			select parent, count(*) as buyurtmalar_count
+			from `tabInternal Logistics Order`
+			group by parent
+		) ilo_count on ilo_count.parent = il.name
 		left join `tabTruck Dispatch` td on td.order = oi.parent and td.china_truck = oi.xitoy_mashina_nomeri
 		left join `tabKZ Truck Loading` kzl on kzl.order = oi.parent and kzl.manba_china_truck = oi.xitoy_mashina_nomeri
 		where {where_clause}
