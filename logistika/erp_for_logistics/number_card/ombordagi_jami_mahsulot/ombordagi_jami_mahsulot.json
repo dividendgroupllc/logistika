@@ -1,0 +1,22 @@
+{
+ "creation": "2026-07-14 16:41:10.219703",
+ "currency": "UZS",
+ "docstatus": 0,
+ "doctype": "Number Card",
+ "function": "Count",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "Ombordagi jami mahsulot",
+ "method": "logistika.erp_for_logistics.ombor_ledger.dashboard_total_stock",
+ "modified": "2026-07-14 16:41:10.219703",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "Ombordagi jami mahsulot",
+ "owner": "Administrator",
+ "report_function": "Sum",
+ "show_full_number": 0,
+ "show_percentage_stats": 0,
+ "stats_time_interval": "Daily",
+ "type": "Custom"
+}

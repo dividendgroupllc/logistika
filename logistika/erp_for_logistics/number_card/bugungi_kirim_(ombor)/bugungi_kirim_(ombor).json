@@ -1,0 +1,22 @@
+{
+ "creation": "2026-07-14 16:41:10.316805",
+ "currency": "UZS",
+ "docstatus": 0,
+ "doctype": "Number Card",
+ "function": "Count",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "Bugungi kirim (Ombor)",
+ "method": "logistika.erp_for_logistics.ombor_ledger.dashboard_today_kirim",
+ "modified": "2026-07-14 16:41:10.316805",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "Bugungi kirim (Ombor)",
+ "owner": "Administrator",
+ "report_function": "Sum",
+ "show_full_number": 0,
+ "show_percentage_stats": 0,
+ "stats_time_interval": "Daily",
+ "type": "Custom"
+}

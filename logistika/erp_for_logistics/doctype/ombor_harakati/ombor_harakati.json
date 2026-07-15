@@ -1,0 +1,155 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "OH-.YYYY.-.#####",
+ "creation": "2026-07-14 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "sec_top",
+  "ombor",
+  "part_name",
+  "harakat_turi",
+  "miqdor",
+  "sana",
+  "cb_top",
+  "reference_doctype",
+  "reference_name",
+  "reference_row",
+  "fura",
+  "order",
+  "izoh"
+ ],
+ "fields": [
+  {
+   "fieldname": "sec_top",
+   "fieldtype": "Section Break",
+   "label": "Harakat"
+  },
+  {
+   "fieldname": "ombor",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Ombor",
+   "options": "Ombor",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "part_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Mahsulot nomi",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "harakat_turi",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Harakat turi",
+   "options": "Kirim\nChiqim",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "miqdor",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Miqdor",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "sana",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Sana",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_top",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reference_doctype",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Hujjat turi",
+   "options": "Warehouse Intake\nKZ Truck Loading",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Hujjat",
+   "options": "reference_doctype",
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "reference_row",
+   "fieldtype": "Data",
+   "label": "Qator (idn)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "fura",
+   "fieldtype": "Data",
+   "label": "Fura",
+   "read_only": 1
+  },
+  {
+   "fieldname": "order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Order / Zakaz",
+   "options": "Order",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "izoh",
+   "fieldtype": "Small Text",
+   "label": "Izoh",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-14 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "Ombor Harakati",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "sana",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 0
+}

@@ -13,6 +13,7 @@
   "kz_truck",
   "sec_load",
   "manba_china_truck",
+  "ombor",
   "yuklar",
   "sec_jami",
   "jami_kub",
@@ -64,6 +65,15 @@
    "fieldname": "manba_china_truck",
    "fieldtype": "Select",
    "label": "Manba Xitoy fura (\u6765\u6e90\u8f66) \u2014 tanlab \"Yuklarni tortish\""
+  },
+  {
+   "description": "Qaysi ombordan yuk chiqarilayotgani \u2014 \"Yuklarni tortish\" shu ombor qoldig'idan hisoblaydi",
+   "fieldname": "ombor",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Ombor",
+   "options": "Ombor",
+   "reqd": 1
   },
   {
    "fieldname": "yuklar",

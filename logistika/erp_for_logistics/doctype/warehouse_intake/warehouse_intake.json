@@ -11,6 +11,7 @@
   "order",
   "cb_top",
   "fura",
+  "ombor",
   "holati",
   "sec_items",
   "items"
@@ -32,20 +33,30 @@
   {
    "fieldname": "order",
    "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Order / Zakaz (\u8ba2\u5355)",
-   "options": "Order",
-   "reqd": 1
+   "hidden": 1,
+   "label": "Order / Zakaz (\u8ba2\u5355) \u2014 eski, endi fura orqali avtomatik aniqlanadi",
+   "options": "Order"
   },
   {
    "fieldname": "cb_top",
    "fieldtype": "Column Break"
   },
   {
+   "description": "Order Item'lardagi mavjud fura raqamlaridan tavsiya qiladi, lekin yangi raqam yozishga ham ruxsat beradi",
    "fieldname": "fura",
-   "fieldtype": "Select",
+   "fieldtype": "Autocomplete",
+   "ignore_validation": 1,
    "in_list_view": 1,
-   "label": "Fura (\u8f66\u724c\u53f7)"
+   "label": "Fura (\u8f66\u724c\u53f7)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ombor",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Ombor",
+   "options": "Ombor",
+   "reqd": 1
   },
   {
    "default": "Yangi",

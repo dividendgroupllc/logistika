@@ -6,6 +6,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "order",
   "china_truck",
   "part_name",
   "ombor_fakt",
@@ -15,6 +16,15 @@
   "net_weight"
  ],
  "fields": [
+  {
+   "columns": 2,
+   "fieldname": "order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Order / Zakaz (订单)",
+   "options": "Order",
+   "read_only": 1
+  },
   {
    "columns": 2,
    "fieldname": "china_truck",
@@ -33,6 +43,7 @@
   },
   {
    "columns": 1,
+   "description": "\"Yuklarni tortish\" bosilgan paytdagi Ombor Harakati ledger'idan hisoblangan JONLI qoldiq (avvalgi bir martalik statik nusxadan farqli)",
    "fieldname": "ombor_fakt",
    "fieldtype": "Float",
    "in_list_view": 1,
