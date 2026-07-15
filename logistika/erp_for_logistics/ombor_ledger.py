@@ -162,6 +162,28 @@ def pull_for_kz_loading(china_truck, order=None, kz_truck_loading=None):
 			as_dict=True,
 		)
 		if not matched:
+			# Eski (buyurtma refaktoridan oldingi) Warehouse Intake'larda item qatorlari
+			# umuman "order" bilan belgilanmagan bo'lishi mumkin (Internal Logistics'ning
+			# ham eski pekin_list qatorlari shunday). Bunday holda — agar shu furaga mos
+			# Warehouse Intake topilsa VA uning HECH BIR qatori boshqa (aniq) buyurtmaga
+			# belgilanmagan bo'lsa — xavfsiz zaxira sifatida qabul qilinadi. Aks holda
+			# (haqiqatda boshqa buyurtmaga tegishli bo'lsa) hali ham rad etiladi.
+			matched = frappe.db.sql(
+				"""
+				select wi.name
+				from `tabWarehouse Intake` wi
+				where wi.fura = %(fura)s
+					and not exists (
+						select 1 from `tabWarehouse Intake Item` wii2
+						where wii2.parent = wi.name and wii2.order is not null
+					)
+				order by wi.creation desc
+				limit 1
+				""",
+				{"fura": china_truck},
+				as_dict=True,
+			)
+		if not matched:
 			frappe.throw(
 				f'"{china_truck}" furasi va "{order}" buyurtmasi uchun mos Warehouse Intake '
 				"topilmadi. Fura raqami boshqa buyurtma uchun ishlatilgan bo'lishi mumkin."
@@ -184,7 +206,9 @@ def pull_for_kz_loading(china_truck, order=None, kz_truck_loading=None):
 
 	items = [row for row in intake.items if flt(row.fakt_qty) > 0]
 	if order:
-		items = [row for row in items if row.order == order]
+		# O'z buyurtmamizga tegishli qatorlar + hali order bilan belgilanmagan (eski)
+		# qatorlarni olamiz; boshqa ANIQ buyurtmaga tegishli qatorlar tashlab ketiladi.
+		items = [row for row in items if row.order == order or not row.order]
 
 	part_names = [row.part_name for row in items]
 	balances = get_balances_for_parts(
