@@ -8,6 +8,9 @@ frappe.ui.form.on("Logistic Documentation", {
 	send_eksport_deklaratsiya(frm) {
 		send_to_telegram(frm, "eksport_deklaratsiya");
 	},
+	send_tranzit_hujjat(frm) {
+		send_to_telegram(frm, "tranzit_hujjat");
+	},
 });
 
 function send_to_telegram(frm, fieldname) {

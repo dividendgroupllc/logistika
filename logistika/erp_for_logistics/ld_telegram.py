@@ -1,10 +1,10 @@
 # Copyright (c) 2026, sardorbek qamchibekov and contributors
 # For license information, please see license.txt
 
-# "Logistic Documentation" hujjatidagi "Перегруз данный" va "Eksport deklaratsiya"
-# fayllarini bog'langan Order mijoziga Telegram orqali yuborish (chiquvchi tomon).
-# Kirish tomoni ("Pekin invoice" — mijozdan avtomatik qabul qilish, /upload buyrug'i
-# orqali) logistika.api.telegram_webhook modulida amalga oshirilgan.
+# "Logistic Documentation" hujjatidagi "Перегруз данный", "Eksport deklaratsiya" va
+# "Tranzit hujjati" fayllarini bog'langan Order mijoziga Telegram orqali yuborish
+# (chiquvchi tomon). Kirish tomoni ("Pekin invoice" — mijozdan avtomatik qabul qilish,
+# /upload buyrug'i orqali) logistika.api.telegram_webhook modulida amalga oshirilgan.
 
 import frappe
 
@@ -13,6 +13,11 @@ from logistika.telegram.sender import send_document
 SENDABLE_FIELDS = {
 	"peregruz_hujjat": {"label": "Перегруз данный", "sent_field": "peregruz_sent"},
 	"eksport_deklaratsiya": {"label": "Eksport deklaratsiya (ED/CO)", "sent_field": "eksport_sent"},
+	"tranzit_hujjat": {
+		"label": "Tranzit hujjati",
+		"sent_field": "tranzit_sent",
+		"text_field": "tranzit_matn",
+	},
 }
 
 
@@ -40,9 +45,14 @@ def send_ld_document(ld_name, fieldname):
 		return 0
 
 	config = SENDABLE_FIELDS[fieldname]
+	caption = config["label"]
+	text_field = config.get("text_field")
+	if text_field and doc.get(text_field):
+		caption = f"{caption}\n{doc.get(text_field)}"
+
 	sent = 0
 	for chat_id in chat_ids:
-		if send_document(chat_id, file_url, caption=config["label"]):
+		if send_document(chat_id, file_url, caption=caption):
 			sent += 1
 
 	if sent > 0:

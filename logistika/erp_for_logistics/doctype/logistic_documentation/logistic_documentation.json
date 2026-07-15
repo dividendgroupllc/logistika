@@ -29,7 +29,12 @@
   "eksport_sent",
   "tab_tr",
   "sec_tr",
-  "tranzit_check"
+  "tranzit_check",
+  "tranzit_hujjat",
+  "tranzit_matn",
+  "cb_tr",
+  "send_tranzit_hujjat",
+  "tranzit_sent"
  ],
  "fields": [
   {
@@ -158,6 +163,33 @@
    "fieldname": "tranzit_check",
    "fieldtype": "Check",
    "label": "\u0422\u0440\u0430\u043d\u0437\u0438\u0442\u043d\u0438\u0439 \u043e\u0444\u043e\u0440\u043c\u0435\u043b\u0435\u043d\u0438\u044f \u2713"
+  },
+  {
+   "fieldname": "tranzit_hujjat",
+   "fieldtype": "Attach",
+   "label": "Tranzit hujjati"
+  },
+  {
+   "fieldname": "tranzit_matn",
+   "fieldtype": "Data",
+   "label": "Izoh"
+  },
+  {
+   "fieldname": "cb_tr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.tranzit_hujjat",
+   "fieldname": "send_tranzit_hujjat",
+   "fieldtype": "Button",
+   "label": "\ud83d\udce4 Kliyentga yuborish (Telegram)"
+  },
+  {
+   "default": "0",
+   "fieldname": "tranzit_sent",
+   "fieldtype": "Check",
+   "label": "Kliyentga yuborilgan \u2713",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
