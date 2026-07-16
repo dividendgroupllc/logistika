@@ -132,7 +132,7 @@ def _run_py3dbp(truck_type, boxes):
 				"height_cm": height_cm,
 				"rotation_type": item.rotation_type,
 				"weight_kg": float(item.weight),
-				"color_key": box["order"] or box["part_name"],
+				"color_key": box["part_name"],
 			}
 		)
 
