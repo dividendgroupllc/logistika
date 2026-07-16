@@ -22,7 +22,7 @@ logistika.ui.LoadOptimizerPage = class LoadOptimizerPage {
 			single_column: true,
 		});
 
-		this.internal_logistics = "";
+		this.source = null;
 		this.activeTab = "2d";
 		this.threeState = null;
 
@@ -34,10 +34,17 @@ logistika.ui.LoadOptimizerPage = class LoadOptimizerPage {
 		const options = frappe.route_options || {};
 		frappe.route_options = null;
 
-		if (options.internal_logistics && options.internal_logistics !== this.internal_logistics) {
-			this.internal_logistics = options.internal_logistics;
+		let next = null;
+		if (options.kz_truck_loading) {
+			next = { doctype: "KZ Truck Loading", name: options.kz_truck_loading };
+		} else if (options.peregruz) {
+			next = { doctype: "Peregruz", name: options.peregruz };
+		}
+
+		if (next && (!this.source || this.source.doctype !== next.doctype || this.source.name !== next.name)) {
+			this.source = next;
 			this.load_data();
-		} else if (!this.internal_logistics) {
+		} else if (!this.source) {
 			this.render_empty_state();
 		}
 	}
@@ -54,7 +61,7 @@ logistika.ui.LoadOptimizerPage = class LoadOptimizerPage {
 							<div class="lo-logo">3D</div>
 							<div class="lo-brand-copy">
 								<div class="lo-title">${__("Load Optimizer")}</div>
-								<div class="lo-subtitle" data-region="subtitle">${__("Internal Logistics tanlanmagan")}</div>
+								<div class="lo-subtitle" data-region="subtitle">${__("Hujjat tanlanmagan")}</div>
 							</div>
 						</div>
 						<button class="btn btn-default btn-sm" data-region="recompute">
@@ -130,17 +137,23 @@ logistika.ui.LoadOptimizerPage = class LoadOptimizerPage {
 	}
 
 	render_empty_state() {
-		this.$subtitle.text(__("Internal Logistics tanlanmagan — Internal Logistics hujjatidan \"Yuklash sxemasi (3D)\" tugmasini bosing."));
+		this.$subtitle.text(__("Hujjat tanlanmagan — \"KZ Truck Loading\" yoki \"Peregruz\" hujjatidan \"Yuklash sxemasi (3D)\" tugmasini bosing."));
 	}
 
 	load_data() {
-		if (!this.internal_logistics) {
+		if (!this.source) {
 			this.render_empty_state();
 			return;
 		}
+		const args = {};
+		if (this.source.doctype === "KZ Truck Loading") {
+			args.kz_truck_loading = this.source.name;
+		} else {
+			args.peregruz = this.source.name;
+		}
 		frappe.call({
 			method: "logistika.erp_for_logistics.page.load_optimizer.load_optimizer.get_data",
-			args: { internal_logistics: this.internal_logistics },
+			args,
 			freeze: true,
 			freeze_message: __("Hisoblanmoqda..."),
 			callback: (r) => {
@@ -152,13 +165,16 @@ logistika.ui.LoadOptimizerPage = class LoadOptimizerPage {
 
 	render() {
 		const d = this.data;
+		const src = d.source || {};
 		this.$subtitle.text(
-			__("Fura: {0} — Truck: {1} ({2}×{3}×{4} sm)", [
-				d.internal_logistics ? d.internal_logistics.fura : "",
+			__("{0} — KZ fura: {1} — Truck: {2} ({3}×{4}×{5} sm) — {6}", [
+				src.doctype || "",
+				src.kz_truck || "",
 				d.truck ? d.truck.name : "",
 				d.truck ? d.truck.length_cm : "",
 				d.truck ? d.truck.width_cm : "",
 				d.truck ? d.truck.height_cm : "",
+				__("karobka soni taxminiy, Internal Logistics'dagi o'lchamlar asosida hisoblangan"),
 			])
 		);
 
@@ -200,7 +216,6 @@ logistika.ui.LoadOptimizerPage = class LoadOptimizerPage {
 	render_warnings() {
 		const unfitted = (this.data.unfitted || []).length;
 		const skipped = this.data.skipped || [];
-		const skippedBoxes = skipped.reduce((sum, s) => sum + (s.box_count || 0), 0);
 
 		let html = "";
 		if (unfitted) {
@@ -209,10 +224,10 @@ logistika.ui.LoadOptimizerPage = class LoadOptimizerPage {
 				[unfitted]
 			)}</div>`;
 		}
-		if (skippedBoxes) {
+		if (skipped.length) {
 			html += `<div class="lo-warning is-orange">${__(
-				"{0} ta karobka o'lchami kiritilmagani uchun hisoblashga qo'shilmadi (Internal Logistics'da pekin_list qatorlarini to'ldiring).",
-				[skippedBoxes]
+				"{0} ta mahsulot qatori hisoblashga qo'shilmadi (o'lcham topilmadi yoki miqdor juda kichik) — pastdagi ro'yxatga qarang.",
+				[skipped.length]
 			)}</div>`;
 		}
 		this.$warnings.html(html);
@@ -259,11 +274,15 @@ logistika.ui.LoadOptimizerPage = class LoadOptimizerPage {
 			`;
 		}
 		if (skipped.length) {
+			const reason_label = (reason) =>
+				reason === "quantity_too_small"
+					? __("Miqdor juda kichik (1 karobkaga yetmadi)")
+					: __("Mos o'lcham topilmadi");
 			html += `
-				<div class="lo-list-title">${__("O'lchami yo'qligi sababli o'tkazib yuborilgan")}</div>
+				<div class="lo-list-title">${__("Hisoblashga qo'shilmagan mahsulotlar")}</div>
 				<table class="lo-list-table">
-					<thead><tr><th>${__("Buyurtma")}</th><th>${__("Mahsulot")}</th><th>${__("Karobka soni")}</th></tr></thead>
-					<tbody>${skipped.map((r) => row(r, r.box_count)).join("")}</tbody>
+					<thead><tr><th>${__("Buyurtma")}</th><th>${__("Mahsulot")}</th><th>${__("Sababi")}</th></tr></thead>
+					<tbody>${skipped.map((r) => row(r, frappe.utils.escape_html(reason_label(r.reason)))).join("")}</tbody>
 				</table>
 			`;
 		}

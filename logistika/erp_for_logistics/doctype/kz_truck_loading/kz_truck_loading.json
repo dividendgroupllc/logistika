@@ -22,7 +22,9 @@
   "zanjir_soni",
   "kamar_soni",
   "cb_secure",
-  "paddon_soni"
+  "paddon_soni",
+  "yuklash_sxemasi",
+  "yuklash_sxemasi_sanasi"
  ],
  "fields": [
   {
@@ -124,6 +126,19 @@
    "fieldname": "paddon_soni",
    "fieldtype": "Int",
    "label": "Paddon soni (\u6258\u76d8)"
+  },
+  {
+   "fieldname": "yuklash_sxemasi",
+   "fieldtype": "Long Text",
+   "hidden": 1,
+   "label": "Yuklash sxemasi (JSON keshi)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "yuklash_sxemasi_sanasi",
+   "fieldtype": "Datetime",
+   "label": "Yuklash sxemasi hisoblangan vaqti",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,

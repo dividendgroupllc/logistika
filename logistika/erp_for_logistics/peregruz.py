@@ -175,16 +175,33 @@ def pull_for_peregruz(china_truck, order=None, peregruz=None):
 		china_truck, order, part_names, exclude_peregruz=peregruz
 	)
 
+	# Bitta mahsulot (part_name) pekin_list'da bir necha qatorga bo'lingan bo'lishi mumkin
+	# (masalan turli partiya/pallet) — "routed"/"elsewhere" esa MAHSULOT bo'yicha (barcha
+	# qatorlar yig'indisiga nisbatan) hisoblangan. Shuning uchun avval har bir mahsulot
+	# uchun TO'G'RI qolgan miqdorni (reja yig'indisi − ishlatilgan) hisoblab, so'ng buni
+	# har bir qatorga reja ulushiga mutanosib taqsimlaymiz — aks holda "ishlatilgan"
+	# miqdor HAR bir qatordan ALOHIDA-ALOHIDA ayirilib, umumiy mavjud miqdor haqiqiydan
+	# kamroq (hatto ayrim qatorlarda 0ga qisilib) chiqib ketardi.
+	planned_by_part = {}
+	for row in items:
+		planned_by_part[row.part_name] = planned_by_part.get(row.part_name, 0.0) + flt(row.quantity)
+
+	available_by_part = {}
+	for part_name, planned in planned_by_part.items():
+		available = planned - routed.get(part_name, 0.0) - elsewhere.get(part_name, 0.0)
+		available_by_part[part_name] = max(available, 0.0)
+
 	result = []
 	for row in items:
-		available = flt(row.quantity) - routed.get(row.part_name, 0.0) - elsewhere.get(row.part_name, 0.0)
+		planned = planned_by_part[row.part_name]
+		share = (flt(row.quantity) / planned * available_by_part[row.part_name]) if planned else 0.0
 		result.append(
 			{
 				"china_truck": china_truck,
 				"order": row.order or order,
 				"part_name": row.part_name,
 				"quantity": row.quantity,
-				"mavjud": max(available, 0.0),
+				"mavjud": share,
 				"volume_cbm": row.volume_cbm,
 				"net_weight": row.net_weight,
 			}
@@ -232,12 +249,15 @@ def validate_no_overissue(doc):
 
 
 def advance_status(doc):
-	"""Hujjat saqlangandan keyin — shu hujjatdagi barcha Xitoy furalar uchun Order
-	Item.status'ni "Товар погружен КЗ"ga siljitadi (KZ Truck Loading bilan bir xil
-	maqsad bosqichi — "Перегруз данный" EMAS, unga tegilmaydi)."""
+	"""Hujjat saqlangandan keyin — shu hujjatdagi, HAQIQATDA o'tkazilgan (fakt_transload > 0)
+	qatorlari bor Xitoy furalar uchun Order Item.status'ni "Товар погружен КЗ"ga siljitadi
+	(KZ Truck Loading bilan bir xil maqsad bosqichi — "Перегруз данный" EMAS, unga
+	tegilmaydi). fakt_transload=0 bo'lgan fura status'ni siljitmaydi — aks holda (masalan
+	ombor qoldig'i allaqachon tugagan bo'lsa) hech narsa o'tkazilmagan holda ham pipeline
+	"yuklandi" deb noto'g'ri ko'rsatib qo'yishi mumkin edi."""
 	if not doc.order:
 		return
-	china_trucks = list({row.china_truck for row in doc.yuklar if row.china_truck})
+	china_trucks = list({row.china_truck for row in doc.yuklar if row.china_truck and flt(row.fakt_transload) > 0})
 	if not china_trucks:
 		return
 	advance_order_item_status(doc.order, china_trucks, TARGET_STATUS)

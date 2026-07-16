@@ -17,6 +17,17 @@ frappe.ui.form.on("Peregruz", {
 			() => pull_loads(frm),
 			"Yuklar"
 		);
+		frm.add_custom_button(
+			"📦 Konteyner: shu fura to'liq o'tkazildi",
+			() => fill_container(frm),
+			"Konteyner"
+		);
+		if (!frm.is_new() && frm.doc.order && frm.doc.kz_truck) {
+			frm.add_custom_button(__("Yuklash sxemasi (3D)"), () => {
+				frappe.route_options = { peregruz: frm.doc.name };
+				frappe.set_route("load-optimizer");
+			});
+		}
 	},
 	validate: function (frm) {
 		compute_totals(frm);
@@ -99,6 +110,50 @@ function pull_loads(frm) {
 			});
 		},
 	});
+}
+
+// Yopiq konteyner uchun — mahsulotlarni birma-bir sanab bo'lmasa, joriy tanlangan
+// furaning har bir qatoridagi "O'tkazilgan" (fakt_transload) maydonini shu qatorning
+// hisoblangan "mavjud" qiymati (reja − ombordagi − boshqa Peregruz'da ishlatilgan)
+// bilan bir xil qilib to'ldiradi — ya'ni "qolgan hammasi o'tkazildi" deb hisoblanadi.
+function fill_container(frm) {
+	if (!frm.doc.manba_china_truck) {
+		frappe.msgprint(__("Avval \"Manba Xitoy fura\" tanlang va \"Yuklarni tortish\" bilan tortib oling."));
+		return;
+	}
+	const rows = (frm.doc.yuklar || []).filter((row) => row.china_truck === frm.doc.manba_china_truck);
+	if (!rows.length) {
+		frappe.msgprint(__("Avval \"Yuklarni tortish\" bilan shu fura uchun mahsulotlarni tortib oling."));
+		return;
+	}
+	frappe.confirm(
+		__("\"{0}\" furasining barcha mahsulotlari mavjud (qolgan) miqdor bo'yicha TO'LIQ o'tkazildi deb belgilanadi — sanab chiqilmagan bo'lsa ham (yopiq konteyner uchun). Davom etasizmi?", [frm.doc.manba_china_truck]),
+		() => {
+			const zeroParts = [];
+			rows.forEach((row) => {
+				if (!flt(row.mavjud)) {
+					zeroParts.push(row.part_name);
+				}
+				frappe.model.set_value(row.doctype, row.name, "fakt_transload", flt(row.mavjud));
+			});
+			frm.dirty();
+			if (zeroParts.length) {
+				// Mavjud=0 bo'lgan qator — reja allaqachon ombordan yoki boshqa Peregruz
+				// hujjatida to'liq ishlatilgan bo'lishi mumkin. Bunday qatorlar 0 deb
+				// belgilanadi (haqiqatda hech narsa o'tkazilmagan) — bu status siljishiga
+				// ta'sir qilmaydi (advance_status faqat fakt_transload>0 furalarni oladi),
+				// lekin xodim buni bilishi kerak, aks holda "hammasi to'liq o'tkazildi"
+				// degan noto'g'ri taassurot qoladi.
+				frappe.msgprint(
+					__("Diqqat: {0} uchun mavjud miqdor 0 edi (allaqachon ombordan yoki boshqa Peregruz hujjatida ishlatilgan bo'lishi mumkin) — bu qator(lar) 0 deb belgilandi.", [zeroParts.join(", ")])
+				);
+			}
+			frappe.show_alert({
+				message: __("\"{0}\" furasi to'liq o'tkazildi deb belgilandi", [frm.doc.manba_china_truck]),
+				indicator: "green",
+			});
+		}
+	);
 }
 
 function compute_totals(frm) {

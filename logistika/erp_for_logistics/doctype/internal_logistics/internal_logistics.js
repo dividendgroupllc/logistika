@@ -9,13 +9,6 @@ frappe.ui.form.on("Internal Logistics", {
 		render_orders_summary(frm);
 		setup_order_filter(frm);
 		refresh_order_filter(frm);
-
-		if (!frm.is_new() && frm.doc.fura) {
-			frm.add_custom_button(__("Yuklash sxemasi (3D)"), () => {
-				frappe.route_options = { internal_logistics: frm.doc.name };
-				frappe.set_route("load-optimizer");
-			});
-		}
 	},
 	fura(frm) {
 		refresh_order_filter(frm);

@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:{brand}-{##}",
+ "autoname": "format:{kliyent}-{##}",
  "creation": "2026-07-09 05:34:52.754711",
  "doctype": "DocType",
  "engine": "InnoDB",

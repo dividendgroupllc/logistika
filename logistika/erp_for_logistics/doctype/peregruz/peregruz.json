@@ -16,7 +16,9 @@
   "yuklar",
   "sec_jami",
   "jami_kub",
-  "jami_tonna"
+  "jami_tonna",
+  "yuklash_sxemasi",
+  "yuklash_sxemasi_sanasi"
  ],
  "fields": [
   {
@@ -85,6 +87,19 @@
    "fieldtype": "Float",
    "label": "Jami tonna (吨位)",
    "precision": "3",
+   "read_only": 1
+  },
+  {
+   "fieldname": "yuklash_sxemasi",
+   "fieldtype": "Long Text",
+   "hidden": 1,
+   "label": "Yuklash sxemasi (JSON keshi)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "yuklash_sxemasi_sanasi",
+   "fieldtype": "Datetime",
+   "label": "Yuklash sxemasi hisoblangan vaqti",
    "read_only": 1
   }
  ],
