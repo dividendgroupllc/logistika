@@ -13,6 +13,7 @@
   "truck_tonna",
   "sugurta",
   "sugurta_hujjat",
+  "cb_row_1",
   "xitoy_fura_summasi",
   "zavoddan_chiqish_sanasi",
   "kelish_sanasi",
@@ -83,6 +84,10 @@
    "fieldname": "sugurta_hujjat",
    "fieldtype": "Attach",
    "label": "Sug'urta hujjati (\u4fdd\u9669\u5355)"
+  },
+  {
+   "fieldname": "cb_row_1",
+   "fieldtype": "Column Break"
   },
   {
    "columns": 2,
