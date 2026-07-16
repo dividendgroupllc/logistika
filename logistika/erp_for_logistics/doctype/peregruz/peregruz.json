@@ -1,0 +1,120 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "PRG-.YYYY.-.#####",
+ "creation": "2026-07-16 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "sec_top",
+  "sana",
+  "order",
+  "cb_top",
+  "kz_truck",
+  "sec_load",
+  "manba_china_truck",
+  "yuklar",
+  "sec_jami",
+  "jami_kub",
+  "jami_tonna"
+ ],
+ "fields": [
+  {
+   "fieldname": "sec_top",
+   "fieldtype": "Section Break",
+   "label": "Asosiy (基本)"
+  },
+  {
+   "default": "Today",
+   "fieldname": "sana",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Sana (日期)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Order / Zakaz (订单)",
+   "options": "Order",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_top",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "kz_truck",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "KZ fura raqami (哈方车号)"
+  },
+  {
+   "fieldname": "sec_load",
+   "fieldtype": "Section Break",
+   "label": "O'tkazilgan yuklar (中转货物)"
+  },
+  {
+   "description": "Ombordan o'tmasdan, to'g'ridan shu KZ furaga o'tkazilayotgan Xitoy fura",
+   "fieldname": "manba_china_truck",
+   "fieldtype": "Select",
+   "label": "Manba Xitoy fura (来源车) — tanlab \"Yuklarni tortish\""
+  },
+  {
+   "fieldname": "yuklar",
+   "fieldtype": "Table",
+   "label": "O'tkazilgan yuklar",
+   "options": "Peregruz Item"
+  },
+  {
+   "fieldname": "sec_jami",
+   "fieldtype": "Section Break",
+   "label": "Jami (合计)"
+  },
+  {
+   "fieldname": "jami_kub",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Jami kub — m³ (体积)",
+   "precision": "3",
+   "read_only": 1
+  },
+  {
+   "fieldname": "jami_tonna",
+   "fieldtype": "Float",
+   "label": "Jami tonna (吨位)",
+   "precision": "3",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-16 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "Peregruz",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

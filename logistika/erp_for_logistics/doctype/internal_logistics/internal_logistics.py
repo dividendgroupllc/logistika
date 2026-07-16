@@ -4,6 +4,22 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import flt
+
+from logistika.erp_for_logistics.doctype.internal_logistics_item.internal_logistics_item import dims_to_cm
+
+
+def resolve_truck_type_for_fura(fura):
+	"""Berilgan Xitoy fura raqamiga mos Truck Type'ni Order Item'dan topadi — bitta
+	joyda (Load Optimizer ham shu funksiyani ishlatadi, ikkalasi alohida-alohida
+	so'rov yozib, ikki xil natija chiqarish xavfidan qochish uchun)."""
+	if not fura:
+		return None
+	return frappe.db.get_value(
+		"Order Item",
+		{"xitoy_mashina_nomeri": fura, "truck_type": ["is", "set"]},
+		"truck_type",
+	)
 
 
 class InternalLogistics(Document):
@@ -12,6 +28,7 @@ class InternalLogistics(Document):
 		self.compute_order_totals()
 		self.warn_orphaned_pekin_items()
 		self.compute_truck_capacity()
+		self.compute_pekin_item_derived_fields()
 
 	def check_duplicate_orders(self):
 		"""Bitta order "Buyurtmalar" jadvalida ikki marta kiritilsa, jami kub/tonna
@@ -78,11 +95,7 @@ class InternalLogistics(Document):
 		if not self.fura:
 			return
 
-		truck_type = frappe.db.get_value(
-			"Order Item",
-			{"xitoy_mashina_nomeri": self.fura, "truck_type": ["is", "set"]},
-			"truck_type",
-		)
+		truck_type = resolve_truck_type_for_fura(self.fura)
 		if not truck_type:
 			return
 
@@ -98,3 +111,35 @@ class InternalLogistics(Document):
 			self.bosh_kub_foiz = self.bosh_kub / self.truck_kub_sigimi * 100
 		if self.truck_tonna_sigimi:
 			self.bosh_tonna_foiz = self.bosh_tonna / self.truck_tonna_sigimi * 100
+
+	def compute_pekin_item_derived_fields(self):
+		"""Har bir pekin_list qatori uchun bitta karobka og'irligini hisoblaydi, va
+		kiritilgan o'lchamlar (birlik hisobga olingan holda) asosidagi hajmni "Hajm/CBM"
+		bilan solishtirib, sezilarli (>15%) farq bo'lsa ogohlantiradi (masalan noto'g'ri
+		birlik yoki bitta karobka o'rniga jami partiya o'lchami kiritilgan bo'lishi
+		mumkin) — Load Optimizer shu maydonlarga tayanadi."""
+		mismatched = []
+		for item in self.pekin_list:
+			total_boxes = flt(item.total_boxes)
+			item.bir_dona_ogirlik = (flt(item.net_weight) / total_boxes) if total_boxes else 0
+
+			if not (item.uzunlik and item.kenglik and item.balandlik and total_boxes):
+				continue
+
+			uzunlik_cm, kenglik_cm, balandlik_cm = dims_to_cm(
+				item.uzunlik, item.kenglik, item.balandlik, item.birlik
+			)
+			hajm = uzunlik_cm * kenglik_cm * balandlik_cm * total_boxes / 1_000_000
+			if item.volume_cbm and abs(hajm - flt(item.volume_cbm)) > flt(item.volume_cbm) * 0.15:
+				mismatched.append(item.part_name)
+
+		if mismatched:
+			frappe.msgprint(
+				_(
+					"Diqqat: quyidagi mahsulot(lar)ning kiritilgan o'lchamlaridan hisoblangan hajm, "
+					'"Hajm/CBM" qiymatidan sezilarli farq qiladi — o\'lcham birligi (sm/m) yoki '
+					"o'lchamlarning o'zi to'g'ri kiritilganini tekshiring: {0}"
+				).format(", ".join(mismatched)),
+				indicator="orange",
+				alert=True,
+			)

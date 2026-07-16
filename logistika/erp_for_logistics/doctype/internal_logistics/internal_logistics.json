@@ -33,7 +33,9 @@
   "sec_buyurtmalar_korinishi",
   "buyurtmalar_korinishi",
   "sec_kuzatuv",
-  "kunlik_kuzatuv"
+  "kunlik_kuzatuv",
+  "yuklash_sxemasi",
+  "yuklash_sxemasi_sanasi"
  ],
  "fields": [
   {
@@ -207,6 +209,19 @@
    "fieldtype": "Table",
    "label": "Kunlik slijeniya (每日跟踪)",
    "options": "Internal Logistics Tracking"
+  },
+  {
+   "fieldname": "yuklash_sxemasi",
+   "fieldtype": "Long Text",
+   "hidden": 1,
+   "label": "Yuklash sxemasi (JSON keshi)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "yuklash_sxemasi_sanasi",
+   "fieldtype": "Datetime",
+   "label": "Yuklash sxemasi hisoblangan vaqti",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,

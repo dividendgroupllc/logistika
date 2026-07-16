@@ -1,0 +1,100 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-07-16 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "order",
+  "china_truck",
+  "part_name",
+  "mavjud",
+  "fakt_transload",
+  "volume_cbm",
+  "quantity",
+  "net_weight"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Order / Zakaz (订单)",
+   "options": "Order",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "china_truck",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Manba Xitoy fura (来源车)",
+   "read_only": 1
+  },
+  {
+   "columns": 3,
+   "fieldname": "part_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Mahsulot (品名)",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "description": "Reja − ombordan o'tgan − boshqa Peregruz hujjatida o'tkazilgan qoldiq",
+   "fieldname": "mavjud",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Mavjud (可用数量)",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "fakt_transload",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "O'tkazilgan (装车数量)"
+  },
+  {
+   "columns": 1,
+   "fieldname": "volume_cbm",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "CBM (体积)",
+   "precision": "3",
+   "read_only": 1
+  },
+  {
+   "fieldname": "quantity",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Reja soni",
+   "read_only": 1
+  },
+  {
+   "fieldname": "net_weight",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Net vazn",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-07-16 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "Peregruz Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

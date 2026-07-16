@@ -10,10 +10,12 @@
   "quantity",
   "total_boxes",
   "net_weight",
+  "bir_dona_ogirlik",
   "volume_cbm",
   "uzunlik",
   "kenglik",
-  "balandlik"
+  "balandlik",
+  "birlik"
  ],
  "fields": [
   {
@@ -52,36 +54,55 @@
    "fieldname": "net_weight",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Net vazn (\u51c0\u91cd)"
+   "label": "Net vazn \u2014 jami (\u51c0\u91cd)"
+  },
+  {
+   "columns": 1,
+   "description": "= Net vazn / Karobka soni (avtomatik hisoblanadi)",
+   "fieldname": "bir_dona_ogirlik",
+   "fieldtype": "Float",
+   "label": "Bitta karobka og'irligi",
+   "read_only": 1
   },
   {
    "columns": 1,
    "fieldname": "volume_cbm",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Hajm / CBM (\u4f53\u79ef)",
+   "label": "Hajm / CBM \u2014 jami (\u4f53\u79ef)",
    "precision": "3"
   },
   {
    "columns": 1,
+   "description": "Bitta karobkaning bo'yi (Load Optimizer uchun)",
    "fieldname": "uzunlik",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Bo'yi (\u957f)"
+   "label": "Bitta karobka bo'yi (\u5355\u7bb1\u957f)"
   },
   {
    "columns": 1,
+   "description": "Bitta karobkaning eni (Load Optimizer uchun)",
    "fieldname": "kenglik",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Eni (\u5bbd)"
+   "label": "Bitta karobka eni (\u5355\u7bb1\u5bbd)"
   },
   {
    "columns": 1,
+   "description": "Bitta karobkaning balandligi (Load Optimizer uchun)",
    "fieldname": "balandlik",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Balandligi (\u9ad8)"
+   "label": "Bitta karobka balandligi (\u5355\u7bb1\u9ad8)"
+  },
+  {
+   "columns": 1,
+   "default": "sm",
+   "fieldname": "birlik",
+   "fieldtype": "Select",
+   "label": "O'lcham birligi",
+   "options": "sm\nm"
   }
  ],
  "grid_page_length": 50,

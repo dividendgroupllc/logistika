@@ -100,8 +100,8 @@ def get_pipeline_rows(order=None, status=None):
 			max(td.tonna) as kz_truck_tonna,
 			max(td.haydovchi_ismi) as haydovchi_ismi,
 			max(td.china_arrival) as yetib_kelish_sanasi,
-			max(kzl.kz_truck) as kzl_kz_fura,
-			max(kzl.sana) as yuklangan_sana
+			max(coalesce(kzl.kz_truck, prg.kz_truck)) as kzl_kz_fura,
+			max(coalesce(kzl.sana, prg.sana)) as yuklangan_sana
 		from `tabOrder Item` oi
 		left join `tabInternal Logistics` il on il.fura = oi.xitoy_mashina_nomeri
 		left join `tabInternal Logistics Order` ilo on ilo.parent = il.name and ilo.order = oi.parent
@@ -121,6 +121,16 @@ def get_pipeline_rows(order=None, status=None):
 			and kzl.creation = (
 				select max(kzl2.creation) from `tabKZ Truck Loading` kzl2
 				where kzl2.order = oi.parent and kzl2.manba_china_truck = oi.xitoy_mashina_nomeri
+			)
+		left join `tabPeregruz Item` prgi
+			on prgi.`order` = oi.parent and prgi.china_truck = oi.xitoy_mashina_nomeri
+		left join `tabPeregruz` prg
+			on prg.name = prgi.parent
+			and prg.creation = (
+				select max(prg2.creation)
+				from `tabPeregruz` prg2
+				inner join `tabPeregruz Item` prgi2 on prgi2.parent = prg2.name
+				where prgi2.`order` = oi.parent and prgi2.china_truck = oi.xitoy_mashina_nomeri
 			)
 		where {where_clause}
 		group by oi.parent, oi.xitoy_mashina_nomeri
@@ -213,3 +223,33 @@ def get_stat_tiles(rows):
 			"tone": "critical" if overdue else "neutral",
 		},
 	]
+
+
+def advance_order_item_status(order, china_trucks, new_status):
+	"""Berilgan (order, xitoy furalar) uchun Order Item.status'ni FAQAT OLDINGA siljitadi
+	— bu 5 ta yashirin (bazada, gitda yo'q) Client Script'da alohida-alohida qayta
+	yozilgan `il_set_status(orderName, chinaTrucks, newStatus)` JS naqshining PYTHON'dagi
+	yagona nusxasi. Yangi, to'liq git-tracked hujjatlar (masalan Peregruz) shu funksiyani
+	chaqirishi kerak — DB-only Client Script yozish shart emas, chunki bu faylni to'liq
+	nazorat qilamiz.
+
+	Order.save() chaqirilishi "Order Item Status Log" tarixini ham avtomatik yozadi
+	(order_status_log.py orqali, Order.on_update()'da allaqachon ulangan) — bu yerda
+	qo'shimcha logging kerak emas."""
+	if not order or not china_trucks or new_status not in PIPELINE_STAGES:
+		return
+	new_index = PIPELINE_STAGES.index(new_status)
+	trucks = set(china_trucks)
+
+	order_doc = frappe.get_doc("Order", order)
+	changed = False
+	for row in order_doc.zakaz_mahsulotlari:
+		if row.xitoy_mashina_nomeri not in trucks:
+			continue
+		current_index = PIPELINE_STAGES.index(row.status) if row.status in PIPELINE_STAGES else -1
+		if new_index > current_index:
+			row.status = new_status
+			changed = True
+
+	if changed:
+		order_doc.save()
