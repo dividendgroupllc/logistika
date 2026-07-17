@@ -82,12 +82,12 @@
    "options": "Yo'lda\nYakunlangan"
   },
   {
-   "description": "Qayerdaligi (yozib qo'yilgan manzil)ga qarab, yuk qaysi bojxona omboriga tushishi qo'lda tanlanadi",
+   "description": "Qayerdaligi (yozib qo'yilgan manzil)ga qarab, yuk qaysi omborga tushishi qo'lda tanlanadi",
    "fieldname": "tamojniy_ombori",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Tamojniy ombori",
-   "options": "Tamojniy"
+   "options": "Ombor"
   },
   {
    "fieldname": "cb_top",

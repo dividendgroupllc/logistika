@@ -32,6 +32,16 @@ KZ_SHIPMENT_UPDATE = (
 	"🚛 KZ fura: {kz_fura}"
 )
 
+PEKIN_LIST_GUIDANCE = (
+	"📋 Endi bizga <b>Pekin list</b> kerak — bu Xitoy zavodidan kelgan invoys/qadoqlash "
+	"varag'i, unda mahsulotlar ro'yxati va ularning miqdori/og'irligi ko'rsatilgan bo'ladi. "
+	"Shu hujjatsiz keyingi bosqich (eksport deklaratsiyasi) tayyorlanishi kechikadi.\n\n"
+	"Yuborish uchun:\n"
+	"1️⃣ Shu chatga <b>/upload</b> buyrug'ini yuboring\n"
+	"2️⃣ Ro'yxatdan <b>{order}</b> buyurtmasini tanlang\n"
+	"3️⃣ Pekin list faylini (PDF yoki rasm) yuboring"
+)
+
 UPLOAD_NOT_LINKED = (
 	"Avval ro'yxatdan o'ting — /start buyrug'ini yuboring va telefon raqamingizni ulashing."
 )

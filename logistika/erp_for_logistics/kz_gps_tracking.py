@@ -6,8 +6,14 @@ from logistika.erp_for_logistics import traccar_client
 
 def daily_gps_update_kz():
 	"""Kuniga 1 marta — hali yetib bormagan (Fakt yetib borgan sana bo'sh) har bir
-	KZ Transit hujjati uchun bugungi qatorni ta'minlaydi va GPS orqali manzilni
-	yangilashga harakat qiladi."""
+	KZ Transit hujjati uchun bugungi qatorni ta'minlaydi, GPS orqali manzilni
+	yangilashga harakat qiladi, VA agar bugungi qator hali mijozga yuborilmagan
+	bo'lsa (yuborilgan=0) va manzili bo'lsa — avtomatik ravishda bir marta yuboradi.
+
+	Bir kunda ikki marta yuborilmasligi `row.yuborilgan` bayrog'i bilan
+	kafolatlanadi: cron kuniga bir marta ishga tushadi va bugungi qator uchun
+	yuborilgach shu bayroq darhol 1 bo'lib qoladi, keyingi (agar bo'lsa) chaqiruv
+	buni ko'rib hech narsa qilmaydi."""
 	if not all(traccar_client.get_credentials()):
 		frappe.log_error(
 			title="Kunlik KZ GPS yangilash: Traccar sozlanmagan",
@@ -24,8 +30,17 @@ def daily_gps_update_kz():
 	for name in names:
 		try:
 			refresh_gps_for_kz_transit(name)
+			_auto_send_today_if_needed(name)
 		except Exception:
 			frappe.log_error(title=f"Kunlik KZ GPS yangilash xato: {name}")
+
+
+def _auto_send_today_if_needed(kz_transit_name):
+	doc = frappe.get_doc("KZ Transit", kz_transit_name)
+	row = _find_row_by_date(doc, today())
+	if not row or row.yuborilgan or not row.joylashuv:
+		return
+	_send_row_to_client(doc, row)
 
 
 @frappe.whitelist()
@@ -56,17 +71,28 @@ def refresh_row(kz_transit_name, row_name):
 @frappe.whitelist()
 def send_row(kz_transit_name, row_name):
 	""""Send" tugmasi (har bir qatorda) — shu qatordagi sana/vaqt/manzilni hujjatga
-	bog'langan Order'ning mijoziga Telegram orqali yuboradi."""
-	from logistika.telegram.messages import KZ_SHIPMENT_UPDATE
-	from logistika.telegram.sender import send_location, send_message
-
+	bog'langan Order'ning mijoziga Telegram orqali yuboradi. Manzil GPS orqali
+	tasdiqlangan ("Obnovit" bosilgan) yoki xodim tomonidan qo'lda yozilgan bo'lishi
+	mumkin — ikkalasi ham qabul qilinadi, faqat manzilning o'zi bo'lishi shart."""
 	doc = frappe.get_doc("KZ Transit", kz_transit_name)
 	doc.check_permission("write")
 	row = _find_row_by_name(doc, row_name)
 	if not row:
 		frappe.throw("Qator topilmadi")
-	if not row.tasdiqlangan or not row.joylashuv:
-		frappe.throw("Bu qatorda hali manzil tasdiqlanmagan — avval \"Obnovit\" tugmasini bosing")
+	if not row.joylashuv:
+		frappe.throw(
+			"Bu qatorda manzil yo'q — avval \"Obnovit\" tugmasi bilan GPS orqali oling "
+			"yoki manzilni qo'lda yozib kiriting"
+		)
+	return _send_row_to_client(doc, row)
+
+
+def _send_row_to_client(doc, row):
+	"""`send_row` (qo'lda) va kunlik avtomatik yuborish IKKALASI ham shu funksiyani
+	chaqiradi — Telegram'ga yuborish mantig'i bitta joyda."""
+	from logistika.telegram.messages import KZ_SHIPMENT_UPDATE
+	from logistika.telegram.sender import send_location, send_message
+
 	if not doc.order:
 		frappe.throw("Hujjatda Order ko'rsatilmagan")
 	if not frappe.db.exists("Order", doc.order):

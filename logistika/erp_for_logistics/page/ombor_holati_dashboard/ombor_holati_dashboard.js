@@ -42,6 +42,7 @@ logistika.ui.OmborHolatiDashboardPage = class OmborHolatiDashboardPage {
 								<div class="oh-subtitle">${__("Real vaqtda ombor qoldig'i va yetkazib berish holati")}</div>
 							</div>
 						</div>
+						<button class="oh-refresh-btn" data-region="refresh" title="${__("Qayta yuklash")}">↻ ${__("Yangilash")}</button>
 					</header>
 
 					<div class="oh-tiles" data-region="tiles"></div>
@@ -479,12 +480,11 @@ logistika.ui.OmborHolatiDashboardPage = class OmborHolatiDashboardPage {
 					<tr>
 						<th class="ld-th-status">${__("Status")}</th>
 						<th>${__("Xitoy fura")}</th>
+						<th>${__("Yetib kelish sanasi")}</th>
 						<th>${__("Mahsulotlar")}</th>
-						<th>${__("IL kub / tonna")}</th>
 						<th>${__("China truck kub / tonna")}</th>
 						<th>${__("KZ fura")}</th>
 						<th>${__("KZ truck kub / tonna")}</th>
-						<th>${__("Yetib kelish sanasi")}</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -494,12 +494,11 @@ logistika.ui.OmborHolatiDashboardPage = class OmborHolatiDashboardPage {
 						<tr>
 							<td class="ld-td-status">${this.get_stepper_html(row.stage_index, row.status, row.days_in_current_stage, row.order, row.china_fura)}</td>
 							<td>${frappe.utils.escape_html(row.china_fura || "—")}</td>
+							<td>${frappe.utils.escape_html(row.yetib_kelish_sanasi || "—")}</td>
 							<td class="ld-td-products">${frappe.utils.escape_html(row.mahsulotlar || "—")}</td>
-							<td class="is-num">${this.formatPipelineNumber(row.il_kub)} / ${this.formatPipelineNumber(row.il_tonna)}</td>
 							<td class="is-num">${this.formatPipelineNumber(row.china_truck_kub)} / ${this.formatPipelineNumber(row.china_truck_tonna)}</td>
 							<td>${frappe.utils.escape_html(row.kz_fura || "—")}</td>
 							<td class="is-num">${this.formatPipelineNumber(row.kz_truck_kub)} / ${this.formatPipelineNumber(row.kz_truck_tonna)}</td>
-							<td>${frappe.utils.escape_html(row.yetib_kelish_sanasi || "—")}</td>
 						</tr>
 					`
 						)
@@ -548,5 +547,7 @@ logistika.ui.OmborHolatiDashboardPage = class OmborHolatiDashboardPage {
 				this.render_pipeline_table();
 			}, 200);
 		});
+
+		this.page.main.on("click", '[data-region="refresh"]', () => this.load_data());
 	}
 };

@@ -1,15 +1,14 @@
 // Copyright (c) 2026, sardorbek qamchibekov  and contributors
 // For license information, please see license.txt
 
+// Tranzit hujjati endi Telegram orqali mijozga yuborilmaydi — faqat oddiy
+// biriktirma (attach) sifatida saqlanadi, xolos.
 frappe.ui.form.on("Logistic Documentation", {
 	send_peregruz_hujjat(frm) {
 		send_to_telegram(frm, "peregruz_hujjat");
 	},
 	send_eksport_deklaratsiya(frm) {
 		send_to_telegram(frm, "eksport_deklaratsiya");
-	},
-	send_tranzit_hujjat(frm) {
-		send_to_telegram(frm, "tranzit_hujjat");
 	},
 });
 

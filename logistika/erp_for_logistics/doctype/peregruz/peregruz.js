@@ -7,21 +7,28 @@
 // shunchaki bir xil so'zni ishlatadi, butunlay boshqa-boshqa narsalar.
 
 frappe.ui.form.on("Peregruz", {
+	onload(frm) {
+		frm.set_query("harajat_turi", "yuklash_xarajatlari", () => {
+			return { query: "logistika.erp_for_logistics.ombor_xarajatlari.get_ombor_xarajati_accounts" };
+		});
+	},
 	order: async function (frm) {
 		await load_select_options(frm);
 	},
 	refresh: async function (frm) {
 		await load_select_options(frm);
-		frm.add_custom_button(
-			"📥 Yuklarni tortish",
-			() => pull_loads(frm),
-			"Yuklar"
-		);
-		frm.add_custom_button(
-			"📦 Konteyner: shu fura to'liq o'tkazildi",
-			() => fill_container(frm),
-			"Konteyner"
-		);
+		if (frm.doc.docstatus === 0) {
+			frm.add_custom_button(
+				"📥 Yuklarni tortish",
+				() => pull_loads(frm),
+				"Yuklar"
+			);
+			frm.add_custom_button(
+				"📦 Konteyner: shu fura to'liq o'tkazildi",
+				() => fill_container(frm),
+				"Konteyner"
+			);
+		}
 		if (!frm.is_new() && frm.doc.order && frm.doc.kz_truck) {
 			frm.add_custom_button(__("Yuklash sxemasi (3D)"), () => {
 				frappe.route_options = { peregruz: frm.doc.name };

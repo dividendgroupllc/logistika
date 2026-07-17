@@ -10,8 +10,12 @@ class KZTruckLoading(Document):
 	def validate(self):
 		ombor_ledger.validate_no_overissue(self)
 
-	def on_update(self):
+	def on_submit(self):
 		ombor_ledger.sync_kz_truck_loading_ledger(self)
+		ombor_ledger.advance_kz_truck_loading_status(self)
+
+	def on_cancel(self):
+		ombor_ledger.delete_ledger_for_document(self.doctype, self.name)
 
 	def on_trash(self):
 		ombor_ledger.delete_ledger_for_document(self.doctype, self.name)

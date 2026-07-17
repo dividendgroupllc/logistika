@@ -6,5 +6,8 @@ frappe.ui.form.on("Warehouse Intake", {
 		frm.fields_dict.fura.get_query = () => {
 			return "logistika.erp_for_logistics.api.truck_plate_autocomplete";
 		};
+		frm.set_query("harajat_turi", "yuklash_xarajatlari", () => {
+			return { query: "logistika.erp_for_logistics.ombor_xarajatlari.get_ombor_xarajati_accounts" };
+		});
 	},
 });

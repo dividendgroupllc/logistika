@@ -236,45 +236,61 @@ logistika.ui.OrderDashboardPage = class OrderDashboardPage {
 		return rows;
 	}
 
+	// Har bir pipeline bosqichi (11 tasi) o'zining alohida bo'limi bo'lib turadi —
+	// bo'lim ichida shu bosqichdagi har bir (buyurtma, fura) juftligi chiqadi. Noma'lum
+	// statusdagi qatorlar (stage_index === -1) eng oxirida alohida bo'limda ko'rinadi.
 	render_table() {
 		const rows = this.getVisibleRows();
+		const stages = this.data.pipeline_stages || [];
 
-		if (!rows.length) {
-			this.$table.html(`<div class="od-empty">${__("Ma'lumot topilmadi")}</div>`);
-			return;
+		const byStage = stages.map(() => []);
+		const unknown = [];
+		rows.forEach((row) => {
+			if (row.stage_index >= 0 && row.stage_index < stages.length) {
+				byStage[row.stage_index].push(row);
+			} else {
+				unknown.push(row);
+			}
+		});
+
+		const item = (row) => `
+			<div class="od-stage-item">
+				<div class="od-stage-item-top">
+					<span class="od-stage-item-order is-link" data-doctype="Order" data-name="${frappe.utils.escape_html(row.order || "")}">
+						${frappe.utils.escape_html(row.order || "")}
+					</span>
+					<span class="od-stage-item-history" data-history-order="${frappe.utils.escape_html(row.order || "")}" data-history-fura="${frappe.utils.escape_html(row.china_fura || "")}" title="${__("Tarix")}">⏱</span>
+				</div>
+				<div class="od-stage-item-fura">${frappe.utils.escape_html(row.china_fura || "—")}</div>
+			</div>
+		`;
+
+		const section = (label, items, isUnknown) => `
+			<div class="od-stage-section ${isUnknown ? "od-stage-section--unknown" : ""}">
+				<div class="od-stage-header">
+					<span class="od-stage-name">${frappe.utils.escape_html(label)}</span>
+					<span class="od-stage-count">${items.length}</span>
+				</div>
+				<div class="od-stage-items">
+					${items.length ? items.map(item).join("") : `<div class="od-stage-empty">${__("Hozircha yo'q")}</div>`}
+				</div>
+			</div>
+		`;
+
+		let columns = stages.map((label, i) => section(label, byStage[i], false)).join("");
+		if (unknown.length) {
+			columns += section(__("Noma'lum status"), unknown, true);
 		}
+		const html = columns ? `<div class="od-stage-board">${columns}</div>` : "";
 
-		this.$table.html(`
-			<table class="od-table">
-				<thead>
-					<tr>
-						<th>${__("Buyurtma")}</th>
-						<th>${__("Fura")}</th>
-						<th class="od-th-status">${__("Status")}</th>
-					</tr>
-				</thead>
-				<tbody>
-					${rows
-						.map(
-							(row) => `
-						<tr>
-							<td class="is-link" data-doctype="Order" data-name="${frappe.utils.escape_html(row.order || "")}">${frappe.utils.escape_html(row.order || "")}</td>
-							<td>${frappe.utils.escape_html(row.china_fura || "—")}</td>
-							<td class="od-td-status">${this.get_stepper_html(row.stage_index, row.status, row.days_in_current_stage, row.order, row.china_fura)}</td>
-						</tr>
-					`
-						)
-						.join("")}
-				</tbody>
-			</table>
-		`);
+		this.$table.html(html || `<div class="od-empty">${__("Ma'lumot topilmadi")}</div>`);
 
-		this.$table.find("td.is-link").on("click", (e) => {
+		this.$table.find(".is-link").on("click", (e) => {
 			const doctype = $(e.currentTarget).data("doctype");
 			const name = $(e.currentTarget).data("name");
 			if (name) frappe.set_route("Form", doctype, name);
 		});
-		this.$table.find(".od-stepper-history").on("click", (e) => {
+		this.$table.find(".od-stage-item-history").on("click", (e) => {
 			const $el = $(e.currentTarget);
 			const order = $el.data("history-order");
 			const fura = $el.data("history-fura");

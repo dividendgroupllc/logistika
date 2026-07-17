@@ -145,7 +145,7 @@ def _handle_uploaded_file(chat_id, message: dict) -> None:
 		suggested_name = None
 
 	ld = frappe.db.get_value(
-		"Logistic Documentation", ld_name, ["name", "order", "pekin_invoice"], as_dict=True
+		"Logistic Documentation", ld_name, ["name", "order", "kz_truck", "pekin_invoice"], as_dict=True
 	)
 	if not ld or ld.pekin_invoice:
 		# hujjat shu orada allaqachon to'ldirilgan (masalan xodim qo'lda yuklagan) yoki o'chirilgan
@@ -167,8 +167,18 @@ def _handle_uploaded_file(chat_id, message: dict) -> None:
 	frappe.db.set_value("Logistic Documentation", ld_name, "pekin_invoice", file_doc.file_url)
 	frappe.db.commit()
 
+	_advance_status_for_pekin_invoice(ld)
+
 	_clear_pending_upload(chat_id)
 	send_message(chat_id, UPLOAD_RECEIVED.format(order=ld.order))
+
+
+def _advance_status_for_pekin_invoice(ld) -> None:
+	"""Mijoz Pekin list (pekin_invoice)ni /upload orqali yuborganda, tegishli Xitoy
+	fura(lar) uchun pipeline statusini "Ожидания документа Клиент"ga suradi."""
+	from logistika.erp_for_logistics.ld_telegram import _advance_status
+
+	_advance_status(ld, "Ожидания документа Клиент")
 
 
 def _get_pending_ld_candidates(contact_name):

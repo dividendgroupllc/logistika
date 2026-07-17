@@ -8,15 +8,24 @@
 
 import frappe
 
-from logistika.telegram.sender import send_document
+from logistika.erp_for_logistics.pipeline_status import advance_order_item_status, resolve_china_trucks_for_kz_truck
+from logistika.telegram.messages import PEKIN_LIST_GUIDANCE
+from logistika.telegram.sender import send_document, send_message
 
+# Bitta hujjat/tugma qaysi pipeline bosqichini oldinga suradi (mos nomlangan
+# PIPELINE_STAGES yozuvi) — "Tranzit" endi Telegram orqali yuborilmagani uchun bu
+# yerda yo'q; uning bosqichi (Транзитний оформеления) `tranzit_check` checkbox
+# belgilanganda logistic_documentation.py orqali suriladi.
 SENDABLE_FIELDS = {
-	"peregruz_hujjat": {"label": "Перегруз данный", "sent_field": "peregruz_sent"},
-	"eksport_deklaratsiya": {"label": "Eksport deklaratsiya (ED/CO)", "sent_field": "eksport_sent"},
-	"tranzit_hujjat": {
-		"label": "Tranzit hujjati",
-		"sent_field": "tranzit_sent",
-		"text_field": "tranzit_matn",
+	"peregruz_hujjat": {
+		"label": "Перегруз данный",
+		"sent_field": "peregruz_sent",
+		"target_status": "Перегруз данный",
+	},
+	"eksport_deklaratsiya": {
+		"label": "Eksport deklaratsiya (ED/CO)",
+		"sent_field": "eksport_sent",
+		"target_status": "Документация ED CO для клиента",
 	},
 }
 
@@ -46,9 +55,6 @@ def send_ld_document(ld_name, fieldname):
 
 	config = SENDABLE_FIELDS[fieldname]
 	caption = config["label"]
-	text_field = config.get("text_field")
-	if text_field and doc.get(text_field):
-		caption = f"{caption}\n{doc.get(text_field)}"
 
 	sent = 0
 	for chat_id in chat_ids:
@@ -57,8 +63,27 @@ def send_ld_document(ld_name, fieldname):
 
 	if sent > 0:
 		doc.db_set(config["sent_field"], 1, update_modified=False)
+		_advance_status(doc, config["target_status"])
+
+		if fieldname == "peregruz_hujjat":
+			# Birinchi hujjat (peregruz danniy) yuborilgach, mijozga Pekin list
+			# (Xitoydan kelgan invoys/qadoqlash varag'i)ni /upload orqali yuborish
+			# haqida qo'shimcha yo'riqnoma yuboriladi.
+			for chat_id in chat_ids:
+				send_message(chat_id, PEKIN_LIST_GUIDANCE.format(order=doc.order))
 
 	return sent
+
+
+def _advance_status(doc, target_status):
+	"""Logistic Documentation'da faqat `order` + `kz_truck` bor (qaysi Xitoy fura
+	ekanligi yo'q) — shuning uchun avval shu KZ furaga yuk yuklagan Xitoy fura(lar)ni
+	topib, keyin ular uchun statusni suramiz."""
+	if not doc.kz_truck:
+		return
+	china_trucks = resolve_china_trucks_for_kz_truck(doc.order, doc.kz_truck)
+	if china_trucks:
+		advance_order_item_status(doc.order, china_trucks, target_status)
 
 
 def get_order_chat_ids(order_name):

@@ -1,8 +1,8 @@
-# Copyright (c) 2026, sardorbek qamchibekov  and contributors
+# Copyright (c) 2026, sardorbek qamchibekov and contributors
 # For license information, please see license.txt
 
 from frappe.model.document import Document
 
 
-class Tamojniy(Document):
+class OmborXarajatiItem(Document):
 	pass

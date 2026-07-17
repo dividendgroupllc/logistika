@@ -10,5 +10,5 @@ class Peregruz(Document):
 	def validate(self):
 		peregruz.validate_no_overissue(self)
 
-	def on_update(self):
+	def on_submit(self):
 		peregruz.advance_status(self)

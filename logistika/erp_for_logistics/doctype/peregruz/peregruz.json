@@ -18,7 +18,10 @@
   "jami_kub",
   "jami_tonna",
   "yuklash_sxemasi",
-  "yuklash_sxemasi_sanasi"
+  "yuklash_sxemasi_sanasi",
+  "sec_yuklash_xarajati",
+  "yuklash_xarajatlari",
+  "amended_from"
  ],
  "fields": [
   {
@@ -101,10 +104,31 @@
    "fieldtype": "Datetime",
    "label": "Yuklash sxemasi hisoblangan vaqti",
    "read_only": 1
+  },
+  {
+   "fieldname": "sec_yuklash_xarajati",
+   "fieldtype": "Section Break",
+   "label": "Yuklash xarajatlari (kran/kara/gruzchik)"
+  },
+  {
+   "fieldname": "yuklash_xarajatlari",
+   "fieldtype": "Table",
+   "label": "Yuklash xarajatlari",
+   "options": "Ombor Xarajati Item"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Peregruz",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
+ "is_submittable": 1,
  "links": [],
  "modified": "2026-07-16 00:00:00.000000",
  "modified_by": "Administrator",
@@ -114,6 +138,8 @@
  "owner": "Administrator",
  "permissions": [
   {
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -123,6 +149,7 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],

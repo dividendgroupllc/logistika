@@ -201,8 +201,9 @@
 
 /* ---------- table ---------- */
 .od-table-wrap {
-	overflow: auto;
-	max-height: 620px;
+	overflow-x: auto;
+	overflow-y: hidden;
+	padding-bottom: 4px;
 }
 .od-table {
 	width: 100%;
@@ -269,6 +270,112 @@
 	text-align: center;
 	color: var(--od-ink-muted);
 	font-size: 12px;
+}
+
+/* ---------- kanban board: har bir pipeline bosqichi alohida USTUN (column),
+   yon-yonma gorizontal joylashadi, kerak bo'lsa taxta gorizontal skroll bo'ladi ---------- */
+.od-stage-board {
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+	height: 100%;
+}
+.od-stage-section {
+	flex: 0 0 260px;
+	width: 260px;
+	display: flex;
+	flex-direction: column;
+	max-height: 600px;
+	border: 1px solid var(--od-gridline);
+	border-radius: 10px;
+	overflow: hidden;
+}
+.od-stage-section--unknown {
+	border-color: var(--od-critical);
+}
+.od-stage-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	padding: 9px 14px;
+	background: var(--od-stripe);
+	border-bottom: 1px solid var(--od-gridline);
+	flex: 0 0 auto;
+}
+.od-stage-name {
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--od-ink);
+}
+.od-stage-section--unknown .od-stage-name {
+	color: var(--od-critical);
+}
+.od-stage-count {
+	min-width: 22px;
+	padding: 1px 7px;
+	border-radius: 999px;
+	background: var(--od-kirim);
+	color: #fff;
+	font-size: 11px;
+	font-weight: 700;
+	text-align: center;
+	font-variant-numeric: tabular-nums;
+}
+.od-stage-section--unknown .od-stage-count {
+	background: var(--od-critical);
+}
+.od-stage-items {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: 10px;
+	overflow-y: auto;
+	flex: 1 1 auto;
+}
+.od-stage-empty {
+	color: var(--od-ink-muted);
+	font-size: 11px;
+	font-style: italic;
+	padding: 2px 0;
+}
+.od-stage-item {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	padding: 7px 10px;
+	border-radius: 8px;
+	border: 1px solid var(--od-gridline);
+	background: var(--od-surface);
+	font-size: 12px;
+}
+.od-stage-item-top {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+}
+.od-stage-item-order {
+	font-weight: 700;
+	color: var(--od-kirim);
+	cursor: pointer;
+	text-decoration: underline;
+	text-decoration-color: transparent;
+}
+.od-stage-item-order:hover {
+	text-decoration-color: currentColor;
+}
+.od-stage-item-fura {
+	color: var(--od-ink-secondary);
+	font-weight: 600;
+}
+.od-stage-item-history {
+	cursor: pointer;
+	color: var(--od-ink-muted);
+	font-size: 11px;
+}
+.od-stage-item-history:hover {
+	color: var(--od-kirim);
 }
 
 /* ---------- status stepper (11-stage pipeline progress) ---------- */

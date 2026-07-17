@@ -33,7 +33,10 @@ function apply_gps_row_states(frm) {
 		} else {
 			toggle_cell($row, "send_row", true, "");
 			const $btn = $send_cell.find("button");
-			if (row_doc.tasdiqlangan) {
+			// Manzil GPS orqali tasdiqlangan bo'lsa HAM, yoki xodim qatorga qo'lda
+			// yozgan bo'lsa HAM — ikkalasida ham yuborish mumkin, faqat manzilning
+			// o'zi bo'lishi kerak.
+			if (row_doc.tasdiqlangan || row_doc.joylashuv) {
 				$btn.prop("disabled", false).css({ opacity: 1, cursor: "pointer" });
 			} else {
 				$btn.prop("disabled", true).css({ opacity: 0.35, cursor: "not-allowed" });
@@ -156,8 +159,10 @@ function do_send(frm, row_name) {
 		frappe.msgprint(__("Qator topilmadi — sahifani yangilang (Ctrl+Shift+R)."));
 		return;
 	}
-	if (!row.tasdiqlangan) {
-		frappe.msgprint(__("Avval \"Obnovit\" orqali joylashuvni tasdiqlang, keyin yuborish mumkin."));
+	if (!row.tasdiqlangan && !row.joylashuv) {
+		frappe.msgprint(
+			__("Avval \"Obnovit\" orqali GPS bilan tasdiqlang, yoki manzilni qo'lda yozib kiriting.")
+		);
 		return;
 	}
 	frappe.call({

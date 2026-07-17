@@ -2,17 +2,24 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("KZ Truck Loading", {
+	onload(frm) {
+		frm.set_query("harajat_turi", "yuklash_xarajatlari", () => {
+			return { query: "logistika.erp_for_logistics.ombor_xarajatlari.get_ombor_xarajati_accounts" };
+		});
+	},
 	refresh(frm) {
-		frm.add_custom_button(
-			"📥 Yuklarni tortish (Xitoy fura)",
-			() => pull_loads(frm),
-			"Yuklar"
-		);
-		frm.add_custom_button(
-			"📦 Konteyner: shu fura to'liq yuklandi",
-			() => fill_container(frm),
-			"Konteyner"
-		);
+		if (frm.doc.docstatus === 0) {
+			frm.add_custom_button(
+				"📥 Yuklarni tortish (Xitoy fura)",
+				() => pull_loads(frm),
+				"Yuklar"
+			);
+			frm.add_custom_button(
+				"📦 Konteyner: shu fura to'liq yuklandi",
+				() => fill_container(frm),
+				"Konteyner"
+			);
+		}
 		if (!frm.is_new() && frm.doc.order && frm.doc.kz_truck) {
 			frm.add_custom_button(__("Yuklash sxemasi (3D)"), () => {
 				frappe.route_options = { kz_truck_loading: frm.doc.name };

@@ -32,9 +32,7 @@
   "tranzit_check",
   "tranzit_hujjat",
   "tranzit_matn",
-  "cb_tr",
-  "send_tranzit_hujjat",
-  "tranzit_sent"
+  "tranzit_xarajat"
  ],
  "fields": [
   {
@@ -175,21 +173,9 @@
    "label": "Izoh"
   },
   {
-   "fieldname": "cb_tr",
-   "fieldtype": "Column Break"
-  },
-  {
-   "depends_on": "eval:doc.tranzit_hujjat",
-   "fieldname": "send_tranzit_hujjat",
-   "fieldtype": "Button",
-   "label": "\ud83d\udce4 Kliyentga yuborish (Telegram)"
-  },
-  {
-   "default": "0",
-   "fieldname": "tranzit_sent",
-   "fieldtype": "Check",
-   "label": "Kliyentga yuborilgan \u2713",
-   "read_only": 1
+   "fieldname": "tranzit_xarajat",
+   "fieldtype": "Currency",
+   "label": "Xarajatlar summasi"
   }
  ],
  "grid_page_length": 50,

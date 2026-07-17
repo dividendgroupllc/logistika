@@ -13,6 +13,7 @@
   "truck_tonna",
   "sugurta",
   "sugurta_hujjat",
+  "sugurta_je",
   "cb_row_1",
   "xitoy_fura_summasi",
   "zavoddan_chiqish_sanasi",
@@ -84,6 +85,15 @@
    "fieldname": "sugurta_hujjat",
    "fieldtype": "Attach",
    "label": "Sug'urta hujjati (\u4fdd\u9669\u5355)"
+  },
+  {
+   "fieldname": "sugurta_je",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Sug'urta Journal Entry",
+   "no_copy": 1,
+   "options": "Journal Entry",
+   "read_only": 1
   },
   {
    "fieldname": "cb_row_1",

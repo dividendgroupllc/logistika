@@ -27,6 +27,36 @@ PIPELINE_STAGES = [
 ]
 
 
+def resolve_china_trucks_for_kz_truck(order, kz_truck):
+	"""Berilgan (order, KZ fura) uchun unga yuk yuklagan Xitoy fura(lar)ni topadi —
+	Logistic Documentation'da faqat `order` + `kz_truck` bor, qaysi Xitoy fura(lar)
+	ekanligi yo'q (bitta KZ furaga bir nechta Xitoy furaning yuki jamlanishi mumkin).
+	KZ Truck Loading/Peregruz'ning qator darajasidagi `china_truck`laridan (faqat
+	submit qilingan hujjatlardan) yig'ib olinadi."""
+	if not order or not kz_truck:
+		return []
+
+	from_kzl = frappe.get_all(
+		"KZ Load Item",
+		filters={"parent": ["in", frappe.get_all(
+			"KZ Truck Loading",
+			filters={"order": order, "kz_truck": kz_truck, "docstatus": 1},
+			pluck="name",
+		)], "order": order},
+		pluck="china_truck",
+	)
+	from_prg = frappe.get_all(
+		"Peregruz Item",
+		filters={"parent": ["in", frappe.get_all(
+			"Peregruz",
+			filters={"order": order, "kz_truck": kz_truck, "docstatus": 1},
+			pluck="name",
+		)], "order": order},
+		pluck="china_truck",
+	)
+	return list({t for t in (from_kzl + from_prg) if t})
+
+
 def get_distinct_orders():
 	return frappe.get_all(
 		"Order Item",
@@ -118,19 +148,23 @@ def get_pipeline_rows(order=None, status=None):
 			)
 		left join `tabKZ Truck Loading` kzl
 			on kzl.order = oi.parent and kzl.manba_china_truck = oi.xitoy_mashina_nomeri
+			and kzl.docstatus = 1
 			and kzl.creation = (
 				select max(kzl2.creation) from `tabKZ Truck Loading` kzl2
 				where kzl2.order = oi.parent and kzl2.manba_china_truck = oi.xitoy_mashina_nomeri
+					and kzl2.docstatus = 1
 			)
 		left join `tabPeregruz Item` prgi
 			on prgi.`order` = oi.parent and prgi.china_truck = oi.xitoy_mashina_nomeri
 		left join `tabPeregruz` prg
 			on prg.name = prgi.parent
+			and prg.docstatus = 1
 			and prg.creation = (
 				select max(prg2.creation)
 				from `tabPeregruz` prg2
 				inner join `tabPeregruz Item` prgi2 on prgi2.parent = prg2.name
 				where prgi2.`order` = oi.parent and prgi2.china_truck = oi.xitoy_mashina_nomeri
+					and prg2.docstatus = 1
 			)
 		where {where_clause}
 		group by oi.parent, oi.xitoy_mashina_nomeri

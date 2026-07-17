@@ -1,6 +1,11 @@
 import frappe
 from frappe.utils import flt, today
 
+from logistika.erp_for_logistics.pipeline_status import advance_order_item_status
+
+WAREHOUSE_INTAKE_TARGET_STATUS = "Таможния склад"
+KZ_TRUCK_LOADING_TARGET_STATUS = "Товар погружен КЗ"
+
 
 def _prorate_kub_tonna(actual_qty, planned_qty, volume_cbm, net_weight):
 	"""Reja (planned_qty) uchun berilgan jami kub/og'irlikni, haqiqatda o'tgan
@@ -76,6 +81,41 @@ def sync_kz_truck_loading_ledger(doc):
 			order=row.order,
 			izoh=f"Avtomatik: KZ Truck Loading {doc.name} saqlanganda yaratildi",
 		)
+
+
+def advance_warehouse_intake_status(doc):
+	"""Hujjat submit qilingandan keyin — shu hujjatdagi, HAQIQATDA qabul qilingan
+	(fakt_qty > 0) qatorlari bor buyurtmalar uchun Order Item.status'ni "Таможния
+	склад"ga siljitadi. Bitta Warehouse Intake bitta Xitoy furaning (doc.fura) yuki,
+	lekin turli buyurtmalarga tegishli qatorlarni o'z ichiga olishi mumkin — shuning
+	uchun har bir qatorni o'z order'i bo'yicha guruhlaymiz."""
+	if not doc.fura:
+		return
+	orders = {row.order for row in doc.items if row.order and flt(row.fakt_qty) > 0}
+	for order in orders:
+		advance_order_item_status(order, [doc.fura], WAREHOUSE_INTAKE_TARGET_STATUS)
+
+
+def advance_kz_truck_loading_status(doc):
+	"""Hujjat submit qilingandan keyin — shu hujjatdagi, HAQIQATDA yuklangan
+	(fakt_ortilgan > 0) qatorlari bor (order, Xitoy fura) juftliklari uchun Order
+	Item.status'ni "Товар погружен КЗ"ga siljitadi (Peregruz'ning maqsad bosqichi
+	bilan bir xil). Peregruz'ning advance_status'idan farqli — bu yerda har bir
+	QATOR o'zining order'iga ega bo'lishi mumkin (bitta yuklashda bir nechta
+	buyurtmaning yuki bo'lishi mumkin), shuning uchun yolg'iz doc.order'ga tayanib
+	bo'lmaydi — har bir qatorni o'z order'i (yoki, agar qator darajasida order bo'sh
+	bo'lsa, hujjatning umumiy order'i) bo'yicha guruhlaymiz."""
+	trucks_by_order = {}
+	for row in doc.yuklar:
+		if flt(row.fakt_ortilgan) <= 0 or not row.china_truck:
+			continue
+		order = row.order or doc.order
+		if not order:
+			continue
+		trucks_by_order.setdefault(order, set()).add(row.china_truck)
+
+	for order, trucks in trucks_by_order.items():
+		advance_order_item_status(order, list(trucks), KZ_TRUCK_LOADING_TARGET_STATUS)
 
 
 def delete_ledger_for_document(reference_doctype, reference_name):

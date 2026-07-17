@@ -20,9 +20,6 @@
   "sugurta_hujjat",
   "cb_sug",
   "oldindan_tolov",
-  "sec_dek",
-  "deklaratsiyalar",
-  "jami_deklaratsiya",
   "sec_boshqa",
   "boshqa_harajatlar",
   "jami_boshqa",
@@ -115,23 +112,6 @@
    "fieldname": "oldindan_tolov",
    "fieldtype": "Currency",
    "label": "Haydovchiga oldindan to'lov (\u9884\u4ed8\u6b3e)"
-  },
-  {
-   "fieldname": "sec_dek",
-   "fieldtype": "Section Break",
-   "label": "Eksport deklaratsiya (\u62a5\u5173)"
-  },
-  {
-   "fieldname": "deklaratsiyalar",
-   "fieldtype": "Table",
-   "label": "Deklaratsiyalar",
-   "options": "KZ Declaration Item"
-  },
-  {
-   "fieldname": "jami_deklaratsiya",
-   "fieldtype": "Currency",
-   "label": "Jami deklaratsiya \u2014 CNY (\u5408\u8ba1)",
-   "read_only": 1
   },
   {
    "fieldname": "sec_boshqa",
