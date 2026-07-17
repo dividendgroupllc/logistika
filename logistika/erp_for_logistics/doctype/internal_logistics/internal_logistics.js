@@ -237,48 +237,90 @@ function bind_order_import_clicks(frm, $wrapper) {
 		const $status = $(this).siblings(".il-order-import-status");
 		const reader = new FileReader();
 		reader.onload = function (ev) {
-			import_pekin_list_via_ai(frm, ev.target.result, order_name, $status);
+			try {
+				const n = import_pekin_csv_for_order(frm, ev.target.result, order_name);
+				frm.refresh_field("pekin_list");
+				render_orders_summary(frm);
+				frm.dirty();
+				frappe.show_alert({
+					message: __("{0} qator qo'shildi. Endi Save bosing.", [n]),
+					indicator: "green",
+				});
+			} catch (err) {
+				$status.removeClass("text-muted").css("color", "#dc2626").text(`${__("Xato")}: ${err.message}`);
+			}
 		};
 		reader.readAsText(file, "UTF-8");
 	});
 }
 
-// Foydalanuvchilar pekin list faylini har xil formatda (ustunlar tartibi/nomi/tili
-// har xil) yuborishadi — shuning uchun qattiq header-nomi moslashtirish o'rniga,
-// fayl matni Claude API'ga yuboriladi va Internal Logistics Item sxemasiga moslab
-// qaytariladi (server: pekin_import_ai.py). Xodim baribir Save bosishdan oldin
-// natijani ko'rib chiqadi — hech narsa avtomatik saqlanmaydi.
-function import_pekin_list_via_ai(frm, text, order_name, $status) {
-	$status.removeClass("text-danger").addClass("text-muted").text(__("AI orqali o'qilmoqda..."));
-	frappe.call({
-		method: "logistika.erp_for_logistics.pekin_import_ai.parse_pekin_list",
-		args: { file_content: text },
-		freeze: true,
-		freeze_message: __("AI orqali o'qilmoqda..."),
-		callback: (r) => {
-			const rows = r.message || [];
-			if (!rows.length) {
-				$status.removeClass("text-muted").css("color", "#dc2626").text(__("Hech qanday mahsulot topilmadi."));
-				return;
-			}
-			rows.forEach((data) => {
-				const row = frm.add_child("pekin_list");
-				row.order = order_name;
-				Object.assign(row, data);
-			});
-			frm.refresh_field("pekin_list");
-			render_orders_summary(frm);
-			frm.dirty();
-			$status.text("");
-			frappe.show_alert({
-				message: __("{0} qator qo'shildi (AI orqali). Endi Save bosing.", [rows.length]),
-				indicator: "green",
-			});
-		},
-		error: () => {
-			$status.removeClass("text-muted").css("color", "#dc2626").text(__("Xatolik yuz berdi."));
-		},
+// "Internal Logistics - CSV Import" nomli (bazadagi, gitda yo'q) Client Script'dagi
+// parsing mantig'idan olingan — bir xil template/format ishlatilishi uchun qasddan
+// bir xil qilib yozilgan, faqat bu yerda har bir qatorga aniq order beriladi.
+function import_pekin_csv_for_order(frm, text, order_name) {
+	text = text.replace(/^﻿/, "");
+	const lines = text.split(/\r?\n/).filter((l) => l.trim().length);
+	if (!lines.length) {
+		throw new Error(__("Fayl bo'sh"));
+	}
+
+	const semi = (text.match(/;/g) || []).length;
+	const comma = (text.match(/,/g) || []).length;
+	const delim = semi > comma ? ";" : ",";
+	const fnames = [
+		"part_name",
+		"quantity",
+		"total_boxes",
+		"net_weight",
+		"volume_cbm",
+		"uzunlik",
+		"kenglik",
+		"balandlik",
+	];
+
+	let hIdx = -1;
+	let cols = [];
+	for (let i = 0; i < lines.length; i++) {
+		const p = lines[i].split(delim).map((s) => s.trim());
+		if (p.some((x) => fnames.includes(x))) {
+			hIdx = i;
+			cols = p;
+			break;
+		}
+	}
+	if (hIdx === -1) {
+		throw new Error(__("Sarlavha (part_name...) qatori topilmadi."));
+	}
+
+	const map = {};
+	cols.forEach((c, idx) => {
+		if (fnames.includes(c)) map[c] = idx;
 	});
+
+	let count = 0;
+	for (let i = hIdx + 1; i < lines.length; i++) {
+		const parts = lines[i].split(delim);
+		const g = (fn) => (parts[map[fn]] !== undefined ? String(parts[map[fn]]).trim() : "");
+		const q = parseFloat(g("quantity").replace(",", "."));
+		const tb = parseFloat(g("total_boxes").replace(",", "."));
+		const cbm = parseFloat(g("volume_cbm").replace(",", "."));
+		if (isNaN(q) && isNaN(tb) && isNaN(cbm)) {
+			continue;
+		}
+		const row = frm.add_child("pekin_list");
+		row.order = order_name;
+		fnames.forEach((fn) => {
+			let v = g(fn);
+			if (v === "") return;
+			if (fn !== "part_name") {
+				v = parseFloat(v.replace(",", "."));
+				if (isNaN(v)) return;
+			}
+			row[fn] = v;
+		});
+		count++;
+	}
+	return count;
 }
 
 function escape_html(value) {
