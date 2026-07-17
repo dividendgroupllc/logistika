@@ -2,19 +2,26 @@
 # For license information, please see license.txt
 
 # Har bir Order Item (Xitoy fura) qatorida "Sug'urta" (sugurta) summasi kiritilib
-# saqlansa, avtomatik Journal Entry yaratiladi (Debit: xarajat, Credit: kreditor —
-# "Sugurta Sozlamalari" singleton'da bir marta sozlanadi). Summa 0'ga tushirilsa
-# yoki boshqa qiymatga o'zgartirilsa, eski JE cancel qilinib, kerak bo'lsa yangisi
-# yaratiladi — Kassa doctype'dagi "submit yaratadi / cancel bekor qiladi" naqshi
-# bilan bir xil, faqat bu yerda Order (parent) hech qachon submittable bo'lmagani
-# uchun (pipeline statusi Order'ni oylab qayta-qayta saqlab turadi) submit/cancel
-# ceremony emas, oddiy SAQLASH orqali ishlaydi.
+# saqlansa, avtomatik Journal Entry yaratiladi — Debit: "Ichki sugurta xarajati"
+# (xarajat), Credit: "Insurance" (naqd pul/cash hisobi). Ikkala hisob ham NOMI
+# BO'YICHA avtomatik topiladi (Chart of Accounts'da haqiqatda shu nomlar bilan
+# mavjud, kompaniyaning o'zi ham hisobning `company` maydonidan olinadi) — alohida
+# sozlash sahifasi (masalan "Sugurta Sozlamalari") SHART EMAS.
+#
+# Summa 0'ga tushirilsa yoki boshqa qiymatga o'zgartirilsa, eski JE cancel
+# qilinib, kerak bo'lsa yangisi yaratiladi — Kassa doctype'dagi "submit yaratadi /
+# cancel bekor qiladi" naqshi bilan bir xil, faqat bu yerda Order (parent) hech
+# qachon submittable bo'lmagani uchun (pipeline statusi Order'ni oylab qayta-qayta
+# saqlab turadi) submit/cancel ceremony emas, oddiy SAQLASH orqali ishlaydi.
 
 import frappe
 from frappe import _
 from frappe.utils import flt, today
 
 from logistika.erp_for_logistics.doctype.kassa.kassa import get_account_currency_amount, get_exchange_rate
+
+SUGURTA_XARAJAT_ACCOUNT_NAME = "Ichki sugurta xarajati"
+SUGURTA_KREDIT_ACCOUNT_NAME = "Insurance"
 
 
 def capture_insurance_changes(doc):
@@ -65,33 +72,51 @@ def process_insurance_changes(doc):
 			frappe.db.set_value("Order Item", row.name, "sugurta_je", je_name, update_modified=False)
 
 
-def _get_settings():
-	settings = frappe.get_single("Sugurta Sozlamalari")
-	if not (settings.company and settings.sugurta_xarajat_hisobi and settings.sugurta_kreditor_hisobi):
+def _resolve_accounts():
+	"""Ikkala hisobni ham NOMI bo'yicha (Chart of Accounts'da haqiqatda shu nomlar
+	bilan mavjud) topadi — sozlash sahifasi shart emas."""
+	expense_account = frappe.db.get_value(
+		"Account",
+		{"account_name": SUGURTA_XARAJAT_ACCOUNT_NAME, "is_group": 0},
+		["name", "company"],
+		as_dict=True,
+	)
+	credit_account = frappe.db.get_value(
+		"Account",
+		{"account_name": SUGURTA_KREDIT_ACCOUNT_NAME, "is_group": 0},
+		["name", "company"],
+		as_dict=True,
+	)
+	if not expense_account or not credit_account:
 		frappe.throw(
 			_(
-				'Sug\'urta summasidan avtomatik Journal Entry yaratish uchun avval "Sugurta '
-				'Sozlamalari"da kompaniya, xarajat va kreditor hisoblarini to\'ldiring.'
+				'Chart of Accounts\'da "{0}" va/yoki "{1}" hisoblari topilmadi — sug\'urta '
+				"summasidan avtomatik Journal Entry yaratib bo'lmadi."
+			).format(SUGURTA_XARAJAT_ACCOUNT_NAME, SUGURTA_KREDIT_ACCOUNT_NAME)
+		)
+	if expense_account.company != credit_account.company:
+		frappe.throw(
+			_('"{0}" va "{1}" hisoblari bir xil kompaniyaga tegishli bo\'lishi kerak.').format(
+				SUGURTA_XARAJAT_ACCOUNT_NAME, SUGURTA_KREDIT_ACCOUNT_NAME
 			)
 		)
-	return settings
+	return expense_account.name, credit_account.name, expense_account.company
 
 
 def _create_insurance_je(order_doc, row, amount):
-	settings = _get_settings()
+	expense_account, credit_account, company = _resolve_accounts()
 	posting_date = today()
-	company_currency = frappe.get_cached_value("Company", settings.company, "default_currency")
+	company_currency = frappe.get_cached_value("Company", company, "default_currency")
 
 	# `sugurta` (amount) kompaniya valyutasida deb hisoblanadi (Order Item'da alohida
-	# valyuta maydoni yo'q). Debit tomoni (xarajat hisobi) odatda kompaniya valyutasida
-	# bo'ladi, lekin kreditor hisobi boshqa valyutada bo'lishi mumkin (masalan, Xitoy
-	# yetkazib beruvchisi uchun CNY hisobvaraq) — Kassa'dagi bir xil naqsh bilan
-	# valyutalarni mos keladigan qiladi.
+	# valyuta maydoni yo'q). Ikkala hisob ham odatda kompaniya valyutasida bo'ladi,
+	# lekin bo'lmasa ham (masalan boshqa valyutadagi hisob) — Kassa'dagi bir xil
+	# naqsh bilan valyutalarni mos keladigan qiladi.
 	debit_account_currency = (
-		frappe.get_cached_value("Account", settings.sugurta_xarajat_hisobi, "account_currency") or company_currency
+		frappe.get_cached_value("Account", expense_account, "account_currency") or company_currency
 	)
 	credit_account_currency = (
-		frappe.get_cached_value("Account", settings.sugurta_kreditor_hisobi, "account_currency") or company_currency
+		frappe.get_cached_value("Account", credit_account, "account_currency") or company_currency
 	)
 	is_multicurrency = debit_account_currency != company_currency or credit_account_currency != company_currency
 
@@ -103,12 +128,12 @@ def _create_insurance_je(order_doc, row, amount):
 	)
 
 	debit_row = {
-		"account": settings.sugurta_xarajat_hisobi,
+		"account": expense_account,
 		"debit_in_account_currency": debit_in_account_currency,
 		"debit": amount,
 	}
 	credit_row = {
-		"account": settings.sugurta_kreditor_hisobi,
+		"account": credit_account,
 		"credit_in_account_currency": credit_in_account_currency,
 		"credit": amount,
 	}
@@ -119,25 +144,23 @@ def _create_insurance_je(order_doc, row, amount):
 		credit_row["exchange_rate"] = credit_exchange_rate
 
 	# ERPNext Payable/Receivable turidagi hisoblar uchun Journal Entry qatorida
-	# Party Type + Party bo'lishini talab qiladi (aks holda validate() xato beradi) —
-	# shuning uchun kreditor hisobi shunday turdami tekshirib, kerak bo'lsa
-	# sozlamalardan qo'shamiz.
-	account_type = frappe.get_cached_value("Account", settings.sugurta_kreditor_hisobi, "account_type")
+	# Party Type + Party bo'lishini talab qiladi. Hozircha "Insurance" hisobi Cash
+	# turida (Party shart emas) — agar kelajakda Payable/Receivable turiga
+	# o'zgartirilsa, bu yerga alohida moslashtirish kerak bo'ladi (aniq xato bilan).
+	account_type = frappe.get_cached_value("Account", credit_account, "account_type")
 	if account_type in ("Payable", "Receivable"):
-		if not (settings.kreditor_party_type and settings.kreditor_party):
-			frappe.throw(
-				_(
-					'"{0}" — Payable/Receivable turidagi hisob, shuning uchun "Sugurta Sozlamalari"da '
-					"Kreditor Party Type va Kreditor Party ham to'ldirilishi kerak."
-				).format(settings.sugurta_kreditor_hisobi)
-			)
-		credit_row["party_type"] = settings.kreditor_party_type
-		credit_row["party"] = settings.kreditor_party
+		frappe.throw(
+			_(
+				'"{0}" — Payable/Receivable turidagi hisob, bunday hisoblar uchun Journal Entry\'da '
+				"Party Type/Party kerak bo'ladi, lekin buni avtomatik aniqlab bo'lmaydi — "
+				"administratordan so'rang."
+			).format(credit_account)
+		)
 
 	je = frappe.new_doc("Journal Entry")
 	je.voucher_type = "Journal Entry"
 	je.posting_date = posting_date
-	je.company = settings.company
+	je.company = company
 	je.multi_currency = 1 if is_multicurrency else 0
 	je.user_remark = _("Sug'urta: {0} — {1}").format(order_doc.name, row.xitoy_mashina_nomeri or "")
 	je.append("accounts", debit_row)
