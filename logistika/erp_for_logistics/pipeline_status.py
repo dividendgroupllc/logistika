@@ -129,7 +129,12 @@ def get_pipeline_rows(order=None, status=None):
 			max(td.kub) as kz_truck_kub,
 			max(td.tonna) as kz_truck_tonna,
 			max(td.haydovchi_ismi) as haydovchi_ismi,
-			max(td.china_arrival) as yetib_kelish_sanasi,
+			-- oi.kelish_sanasi ("Kelish sanasi") ustunga Order Item darajasida kiritiladi va
+			-- Truck Dispatch yaratilganda (china_truck tanlanganda) DB-only Client Script
+			-- orqali td.china_arrival'ga nusxalanadi. Hali Truck Dispatch yaratilmagan
+			-- (masalan "Внутринний фура" bosqichidagi) furalar uchun td qatori umuman yo'q —
+			-- shunday hollarda oi.kelish_sanasi'ga to'g'ridan-to'g'ri qaytamiz.
+			max(coalesce(td.china_arrival, oi.kelish_sanasi)) as yetib_kelish_sanasi,
 			max(coalesce(kzl.kz_truck, prg.kz_truck)) as kzl_kz_fura,
 			max(coalesce(kzl.sana, prg.sana)) as yuklangan_sana
 		from `tabOrder Item` oi
