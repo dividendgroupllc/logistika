@@ -1,0 +1,56 @@
+{
+ "actions": [],
+ "creation": "2026-07-17 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "kimi_api_key",
+  "model",
+  "base_url",
+  "is_active"
+ ],
+ "fields": [
+  {
+   "fieldname": "kimi_api_key",
+   "fieldtype": "Password",
+   "label": "Kimi API kaliti"
+  },
+  {
+   "default": "kimi-k2.6",
+   "description": "https://api.moonshot.ai/v1/models orqali shu kalitga ruxsat berilgan modellar ro'yxatini ko'rish mumkin",
+   "fieldname": "model",
+   "fieldtype": "Data",
+   "label": "Model"
+  },
+  {
+   "default": "https://api.moonshot.ai/v1",
+   "fieldname": "base_url",
+   "fieldtype": "Data",
+   "label": "API manzili (base URL)"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Faol"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-07-17 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "Kimi Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

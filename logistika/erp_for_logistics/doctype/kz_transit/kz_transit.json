@@ -29,7 +29,9 @@
   "slijeniya",
   "sec_yakun",
   "fakt_yetib_borgan",
-  "kliyent_oldi_hujjat"
+  "kliyent_oldi_hujjat",
+  "sec_chat",
+  "customer_chat_html"
  ],
  "fields": [
   {
@@ -166,6 +168,16 @@
    "fieldname": "kliyent_oldi_hujjat",
    "fieldtype": "Attach",
    "label": "Kliyent oldi \u2014 hujjat (\u5ba2\u6237\u7b7e\u6536)"
+  },
+  {
+   "fieldname": "sec_chat",
+   "fieldtype": "Section Break",
+   "label": "Mijoz bilan suhbat"
+  },
+  {
+   "fieldname": "customer_chat_html",
+   "fieldtype": "HTML",
+   "label": "Mijoz bilan suhbat"
   }
  ],
  "grid_page_length": 50,

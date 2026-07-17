@@ -1,0 +1,95 @@
+{
+ "actions": [],
+ "autoname": "OCM-.YYYY.-.#####",
+ "creation": "2026-07-17 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "order",
+  "sender",
+  "cb_top",
+  "xodim",
+  "telegram_chat_id",
+  "sec_matn",
+  "matn",
+  "tarjima"
+ ],
+ "fields": [
+  {
+   "fieldname": "order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Order / Zakaz",
+   "options": "Order",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sender",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Kim yozdi",
+   "options": "Mijoz\nXodim",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_top",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Faqat \"Xodim\" xabarlari uchun — javobni kim yozgani",
+   "fieldname": "xodim",
+   "fieldtype": "Link",
+   "label": "Xodim",
+   "options": "User"
+  },
+  {
+   "fieldname": "telegram_chat_id",
+   "fieldtype": "Data",
+   "label": "Telegram chat_id",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sec_matn",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "matn",
+   "fieldtype": "Text",
+   "in_list_view": 1,
+   "label": "Matn (asl tilida)",
+   "reqd": 1
+  },
+  {
+   "description": "Mijoz xabari uchun — o'zbekcha tarjimasi (xodim o'qishi uchun). Xodim xabari uchun — mijozga yuborilgan tarjima (mijoz tiliga).",
+   "fieldname": "tarjima",
+   "fieldtype": "Text",
+   "label": "Tarjima"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-17 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "Order Chat Message",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "ASC",
+ "states": [],
+ "track_changes": 1
+}

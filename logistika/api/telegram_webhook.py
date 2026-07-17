@@ -22,11 +22,16 @@ import re
 
 import frappe
 
-from logistika.telegram.keyboards import phone_request_keyboard
+from logistika.telegram.keyboards import MENU_QA, MENU_UPLOAD, main_menu_keyboard, phone_request_keyboard
 from logistika.telegram.messages import (
 	ALREADY_LINKED,
 	ASK_PHONE,
 	PHONE_NOT_FOUND,
+	QA_NO_ORDERS,
+	QA_ORDER_EXPIRED,
+	QA_ORDER_PICKED,
+	QA_PICK_ORDER,
+	QA_RECEIVED,
 	UPLOAD_NO_ORDERS,
 	UPLOAD_NOT_LINKED,
 	UPLOAD_ORDER_EXPIRED,
@@ -41,6 +46,10 @@ from logistika.telegram.sender import answer_callback_query, download_incoming_f
 
 _UPLOAD_CACHE_PREFIX = "telegram_upload_pending"
 _UPLOAD_CACHE_TTL = 900  # 15 daqiqa
+
+_QA_CACHE_PREFIX = "telegram_qa_pending"
+_QA_CACHE_TTL = 3600  # 1 soat, har xabarda yangilanadi (sliding window)
+_QA_CANDIDATES_CACHE_PREFIX = "telegram_qa_candidates"
 
 
 @frappe.whitelist(allow_guest=True)
@@ -78,12 +87,21 @@ def _on_message(message: dict) -> None:
 	if text.startswith("/start"):
 		_cmd_start(chat_id)
 		return
-	if text.startswith("/upload"):
+	if text.startswith("/upload") or text == MENU_UPLOAD:
+		_clear_pending_qa(chat_id)
 		_cmd_upload(chat_id)
+		return
+	if text.startswith("/savol") or text == MENU_QA:
+		_cmd_qa_start(chat_id)
+		return
+
+	pending_order = _get_pending_qa(chat_id)
+	if pending_order and text:
+		_handle_qa_message(chat_id, pending_order, text)
 		return
 
 	if _is_linked(chat_id):
-		send_message(chat_id, ALREADY_LINKED)
+		send_message(chat_id, ALREADY_LINKED, reply_markup=main_menu_keyboard())
 	else:
 		send_message(chat_id, ASK_PHONE, reply_markup=phone_request_keyboard())
 
@@ -93,10 +111,17 @@ def _on_callback_query(callback_query: dict) -> None:
 	chat_id = callback_query["message"]["chat"]["id"]
 	data = callback_query.get("data", "")
 
-	if not data.startswith("upload_ld:"):
-		answer_callback_query(callback_id)
+	if data.startswith("upload_ld:"):
+		_handle_upload_ld_callback(callback_id, chat_id, data)
+		return
+	if data.startswith("qa_order:"):
+		_handle_qa_order_callback(callback_id, chat_id, data)
 		return
 
+	answer_callback_query(callback_id)
+
+
+def _handle_upload_ld_callback(callback_id, chat_id, data) -> None:
 	ld_name = data.split(":", 1)[1]
 	ld = frappe.db.get_value(
 		"Logistic Documentation", ld_name, ["name", "order", "pekin_invoice"], as_dict=True
@@ -116,6 +141,31 @@ def _on_callback_query(callback_query: dict) -> None:
 	send_message(chat_id, UPLOAD_ORDER_PICKED.format(order=ld.order))
 
 
+def _handle_qa_order_callback(callback_id, chat_id, data) -> None:
+	candidates = _get_pending_qa_candidates(chat_id)
+	try:
+		order_name = candidates[int(data.split(":", 1)[1])]
+	except (IndexError, ValueError, TypeError):
+		order_name = None
+
+	contact_name = _get_contact_by_chat_id(chat_id)
+	valid = bool(
+		order_name
+		and contact_name
+		and frappe.db.exists("Order", order_name)
+		and _contact_owns_order(contact_name, order_name)
+	)
+
+	if not valid:
+		answer_callback_query(callback_id)
+		send_message(chat_id, QA_ORDER_EXPIRED)
+		return
+
+	_set_pending_qa(chat_id, order_name)
+	answer_callback_query(callback_id)
+	send_message(chat_id, QA_ORDER_PICKED.format(order=order_name))
+
+
 def _cmd_upload(chat_id) -> None:
 	contact_name = _get_contact_by_chat_id(chat_id)
 	if not contact_name:
@@ -129,6 +179,64 @@ def _cmd_upload(chat_id) -> None:
 
 	buttons = [[{"text": c.order, "callback_data": f"upload_ld:{c.name}"}] for c in candidates]
 	send_message(chat_id, UPLOAD_PICK_ORDER, reply_markup={"inline_keyboard": buttons})
+
+
+def _cmd_qa_start(chat_id) -> None:
+	_clear_pending_upload(chat_id)  # ikkala oqim bir vaqtda faol bo'lib qolmasligi uchun
+
+	contact_name = _get_contact_by_chat_id(chat_id)
+	if not contact_name:
+		send_message(chat_id, UPLOAD_NOT_LINKED)
+		return
+
+	candidates = _get_qa_order_candidates(contact_name)
+	if not candidates:
+		send_message(chat_id, QA_NO_ORDERS)
+		return
+
+	# Order.name formati "{kliyent}-{##}" — mijoz nomi uzun bo'lsa (haqiqiy kompaniya
+	# nomlari 30-50+ belgi bo'lishi mumkin), to'g'ridan-to'g'ri callback_data'ga qo'ysak
+	# Telegramning 64 baytlik chegarasidan oshib ketishi mumkin (butun tugma jim
+	# yuborilmay qoladi). Shuning uchun order nomi o'rniga qisqa indeks ishlatamiz,
+	# haqiqiy nomlar chat_id bo'yicha cache'da saqlanadi.
+	order_names = [c.name for c in candidates]
+	_set_pending_qa_candidates(chat_id, order_names)
+	buttons = [[{"text": name, "callback_data": f"qa_order:{idx}"}] for idx, name in enumerate(order_names)]
+	send_message(chat_id, QA_PICK_ORDER, reply_markup={"inline_keyboard": buttons})
+
+
+def _get_qa_order_candidates(contact_name):
+	customer_names = _get_linked_customers(contact_name)
+	if not customer_names:
+		return []
+
+	return frappe.get_all(
+		"Order",
+		filters={"kliyent": ["in", customer_names]},
+		fields=["name"],
+		order_by="creation desc",
+		limit_page_length=15,
+	)
+
+
+def _handle_qa_message(chat_id, order_name, text) -> None:
+	# TTL har xabarda yangilanadi (sliding window), shuning uchun suhbat qancha uzoq
+	# davom etsa egalik shuncha uzoq muddat qayta tekshirilmasdan qolib ketishi mumkin
+	# edi — masalan xodim mijozning Telegram bog'lanishini keyinroq bekor qilsa. Shu
+	# sabab bu yerda ham (faqat tanlash paytida emas) qayta tekshiramiz.
+	contact_name = _get_contact_by_chat_id(chat_id)
+	if not (
+		contact_name and frappe.db.exists("Order", order_name) and _contact_owns_order(contact_name, order_name)
+	):
+		_clear_pending_qa(chat_id)
+		send_message(chat_id, QA_ORDER_EXPIRED)
+		return
+
+	from logistika.erp_for_logistics.order_chat import save_customer_message
+
+	save_customer_message(order_name, chat_id, text)
+	_set_pending_qa(chat_id, order_name)  # sliding TTL — suhbat davom etayotganda muddati uzayadi
+	send_message(chat_id, QA_RECEIVED)
 
 
 def _handle_uploaded_file(chat_id, message: dict) -> None:
@@ -231,9 +339,34 @@ def _clear_pending_upload(chat_id) -> None:
 	frappe.cache().delete_value(f"{_UPLOAD_CACHE_PREFIX}:{chat_id}")
 
 
+def _set_pending_qa(chat_id, order_name) -> None:
+	frappe.cache().set_value(f"{_QA_CACHE_PREFIX}:{chat_id}", order_name, expires_in_sec=_QA_CACHE_TTL)
+
+
+def _get_pending_qa(chat_id) -> str | None:
+	return frappe.cache().get_value(f"{_QA_CACHE_PREFIX}:{chat_id}", expires=True)
+
+
+def _set_pending_qa_candidates(chat_id, order_names) -> None:
+	"""Order nomi (masalan mijoz nomini o'z ichiga olgani uchun uzun bo'lishi mumkin)
+	Telegram callback_data'ning 64 baytlik chegarasidan oshib ketmasligi uchun,
+	tugmalarda indeks ishlatiladi — haqiqiy nomlar shu yerda saqlanadi."""
+	frappe.cache().set_value(
+		f"{_QA_CANDIDATES_CACHE_PREFIX}:{chat_id}", order_names, expires_in_sec=_QA_CACHE_TTL
+	)
+
+
+def _get_pending_qa_candidates(chat_id) -> list:
+	return frappe.cache().get_value(f"{_QA_CANDIDATES_CACHE_PREFIX}:{chat_id}", expires=True) or []
+
+
+def _clear_pending_qa(chat_id) -> None:
+	frappe.cache().delete_value(f"{_QA_CACHE_PREFIX}:{chat_id}")
+
+
 def _cmd_start(chat_id) -> None:
 	if _is_linked(chat_id):
-		send_message(chat_id, ALREADY_LINKED)
+		send_message(chat_id, ALREADY_LINKED, reply_markup=main_menu_keyboard())
 		return
 
 	send_message(chat_id, ASK_PHONE, reply_markup=phone_request_keyboard())
@@ -267,7 +400,7 @@ def _handle_shared_contact(chat_id, sender_user_id, contact: dict) -> None:
 	customer_names = _get_linked_customers(contact_name)
 	customer_label = ", ".join(customer_names) if customer_names else "sizning kompaniyangiz"
 
-	send_message(chat_id, WELCOME_CUSTOMER.format(customer=customer_label))
+	send_message(chat_id, WELCOME_CUSTOMER.format(customer=customer_label), reply_markup=main_menu_keyboard())
 
 
 def _normalize_phone(raw: str) -> str:

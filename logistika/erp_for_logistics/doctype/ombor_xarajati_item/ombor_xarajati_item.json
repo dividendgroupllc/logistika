@@ -24,7 +24,7 @@
   {
    "columns": 3,
    "fieldname": "summa",
-   "fieldtype": "Currency",
+   "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Summa",
    "reqd": 1

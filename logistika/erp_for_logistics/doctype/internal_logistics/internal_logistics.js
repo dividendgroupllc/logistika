@@ -175,13 +175,25 @@ function render_orders_summary(frm) {
 					<input type="file" accept=".csv,.txt" class="il-order-file" data-order="${order_attr}" style="display:none;" />
 					<span class="il-order-import-status text-muted" style="margin-left: 8px;"></span>
 				</div>
+				<div class="il-order-chat" style="margin-top: 12px; border-top: 1px solid #e5e7eb; padding-top: 8px;">
+					<div style="font-weight: 600; margin-bottom: 6px;">${__("Mijoz bilan suhbat")}</div>
+					<div class="il-chat-log" data-order="${order_attr}"
+						style="max-height: 220px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px; margin-bottom: 6px; background: #fafafa;">
+					</div>
+					<div style="display: flex; gap: 6px;">
+						<input type="text" class="form-control il-chat-input" data-order="${order_attr}" placeholder="${__("Javob yozing...")}" style="flex: 1;" />
+						<button type="button" class="btn btn-xs btn-primary il-chat-send" data-order="${order_attr}">${__("Yuborish")}</button>
+					</div>
+				</div>
 			</details>
 		`;
 	});
 
 	$wrapper.html(html);
 	bind_order_import_clicks(frm, $wrapper);
+	bind_order_chat_clicks($wrapper);
 	refresh_telegram_status($wrapper, buyurtmalar);
+	render_order_chats($wrapper, buyurtmalar);
 }
 
 // Har bir buyurtma yonida shu buyurtmaning mijozi Telegram botiga ro'yxatdan
@@ -235,19 +247,50 @@ function bind_order_import_clicks(frm, $wrapper) {
 		const file = e.target.files[0];
 		if (!file) return;
 		const $status = $(this).siblings(".il-order-import-status");
+		const finish = (n) => {
+			frm.refresh_field("pekin_list");
+			render_orders_summary(frm);
+			frm.dirty();
+			frappe.show_alert({
+				message: __("{0} qator qo'shildi. Endi Save bosing.", [n]),
+				indicator: "green",
+			});
+		};
 		const reader = new FileReader();
 		reader.onload = function (ev) {
+			const text = ev.target.result;
 			try {
-				const n = import_pekin_csv_for_order(frm, ev.target.result, order_name);
-				frm.refresh_field("pekin_list");
-				render_orders_summary(frm);
-				frm.dirty();
-				frappe.show_alert({
-					message: __("{0} qator qo'shildi. Endi Save bosing.", [n]),
-					indicator: "green",
-				});
+				finish(import_pekin_csv_for_order(frm, text, order_name));
 			} catch (err) {
-				$status.removeClass("text-muted").css("color", "#dc2626").text(`${__("Xato")}: ${err.message}`);
+				// Qattiq andoza (part_name... sarlavhali qator) topilmadi — Kimi orqali
+				// har xil til/ustun tartibidagi faylni ham o'qishga urinib ko'ramiz.
+				$status.removeClass("text-muted").text(__("Andoza mos kelmadi, Kimi orqali o'qilmoqda..."));
+				frappe.call({
+					method: "logistika.erp_for_logistics.pekin_list_import.smart_parse_pekin_list",
+					args: { file_content: text },
+					freeze: true,
+					freeze_message: __("Kimi orqali o'qilmoqda..."),
+					callback: (r) => {
+						const rows = r.message || [];
+						rows.forEach((data) => {
+							const row = frm.add_child("pekin_list");
+							row.order = order_name;
+							Object.assign(row, data);
+						});
+						$status.text("");
+						finish(rows.length);
+					},
+					error: () => {
+						// Bu yerdagi xato andoza mos kelmagani uchun EMAS (shuning uchun eskirgan
+						// `err`ni ko'rsatmaymiz) — Kimi so'rovining o'zi muvaffaqiyatsiz bo'ldi.
+						// Aniq sababi (masalan API kaliti sozlanmagan) frappe.call'ning o'zi
+						// avtomatik popup orqali ko'rsatadi.
+						$status
+							.removeClass("text-muted")
+							.css("color", "#dc2626")
+							.text(__("Kimi orqali o'qib bo'lmadi — tafsilot yuqoridagi xabarda"));
+					},
+				});
 			}
 		};
 		reader.readAsText(file, "UTF-8");
@@ -321,6 +364,32 @@ function import_pekin_csv_for_order(frm, text, order_name) {
 		count++;
 	}
 	return count;
+}
+
+// Har bir buyurtma bloki ichidagi "Mijoz bilan suhbat" — render/yuborish logikasi
+// logistika.order_chat'da (public/js/order_chat_widget.js) umumiy qilib chiqarilgan,
+// KZ Transit ham xuddi shu funksiyalarni chaqiradi (kz_transit.js).
+function render_order_chats($wrapper, buyurtmalar) {
+	const order_names = [...new Set(buyurtmalar.map((b) => b.order).filter(Boolean))];
+	order_names.forEach((order_name) => {
+		const $log = $wrapper.find(".il-chat-log").filter(function () {
+			return $(this).attr("data-order") === order_name;
+		});
+		if ($log.length) logistika.order_chat.load_and_render($log, order_name);
+	});
+}
+
+function bind_order_chat_clicks($wrapper) {
+	$wrapper.find(".il-chat-send").on("click", function () {
+		const order_name = $(this).attr("data-order");
+		const $input = $wrapper.find(".il-chat-input").filter(function () {
+			return $(this).attr("data-order") === order_name;
+		});
+		const $log = $wrapper.find(".il-chat-log").filter(function () {
+			return $(this).attr("data-order") === order_name;
+		});
+		logistika.order_chat.send_reply(order_name, $input, $log, $(this));
+	});
 }
 
 function escape_html(value) {

@@ -6,8 +6,43 @@ frappe.ui.form.on("KZ Transit", {
 		apply_gps_row_states(frm);
 		setTimeout(() => apply_gps_row_states(frm), 200);
 		bind_gps_row_clicks();
+		render_customer_chat(frm);
+	},
+	order(frm) {
+		render_customer_chat(frm);
 	},
 });
+
+// "Mijoz bilan suhbat" — render/yuborish logikasi logistika.order_chat'da
+// (public/js/order_chat_widget.js) umumiy qilib chiqarilgan, Internal Logistics ham
+// xuddi shu funksiyalarni chaqiradi (internal_logistics.js). Bu yerda `order` bitta
+// bo'lgani uchun (Internal Logistics'dan farqli, u yerda har order alohida) bitta
+// widget yetarli.
+function render_customer_chat(frm) {
+	const $wrapper = frm.fields_dict.customer_chat_html?.$wrapper;
+	if (!$wrapper) return;
+
+	if (!frm.doc.order) {
+		$wrapper.html(`<div class="text-muted">${__("Avval Order tanlang")}</div>`);
+		return;
+	}
+
+	if ($wrapper.data("chat-order") !== frm.doc.order) {
+		$wrapper.data("chat-order", frm.doc.order);
+		$wrapper.html(`
+			<div class="kzt-chat-log" style="max-height: 260px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px; margin-bottom: 6px; background: #fafafa;"></div>
+			<div style="display: flex; gap: 6px;">
+				<input type="text" class="form-control kzt-chat-input" placeholder="${__("Javob yozing...")}" style="flex: 1;" />
+				<button type="button" class="btn btn-xs btn-primary kzt-chat-send">${__("Yuborish")}</button>
+			</div>
+		`);
+		$wrapper.find(".kzt-chat-send").on("click", function () {
+			logistika.order_chat.send_reply(frm.doc.order, $wrapper.find(".kzt-chat-input"), $wrapper.find(".kzt-chat-log"), $(this));
+		});
+	}
+
+	logistika.order_chat.load_and_render($wrapper.find(".kzt-chat-log"), frm.doc.order);
+}
 
 function apply_gps_row_states(frm) {
 	const grid_field = frm.fields_dict["slijeniya"];

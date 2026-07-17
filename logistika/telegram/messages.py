@@ -73,3 +73,16 @@ UPLOAD_SAVE_FAILED = (
 	"Kechirasiz, faylni saqlashda xatolik yuz berdi. Iltimos, qaytadan urinib ko'ring "
 	"yoki menejeringiz bilan bog'laning."
 )
+
+QA_NO_ORDERS = "Sizda hozircha buyurtma topilmadi."
+
+QA_PICK_ORDER = "Qaysi buyurtma bo'yicha savolingiz bor?"
+
+QA_ORDER_EXPIRED = "Bu buyurtma topilmadi. Qaytadan tanlab ko'ring."
+
+QA_ORDER_PICKED = (
+	"✅ <b>{order}</b> buyurtmasi tanlandi.\n"
+	"Endi savolingizni shu yerga yozing — xodimlarimiz tez orada javob berishadi."
+)
+
+QA_RECEIVED = "✅ Savolingiz qabul qilindi, tez orada javob beramiz."
