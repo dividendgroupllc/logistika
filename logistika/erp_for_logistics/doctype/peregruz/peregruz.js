@@ -11,6 +11,9 @@ frappe.ui.form.on("Peregruz", {
 		frm.set_query("harajat_turi", "yuklash_xarajatlari", () => {
 			return { query: "logistika.erp_for_logistics.ombor_xarajatlari.get_ombor_xarajati_accounts" };
 		});
+		frm.set_query("harajat_turi", "yetkazish_xarajatlari", () => {
+			return { query: "logistika.erp_for_logistics.ombor_xarajatlari.get_yetkazish_xarajati_accounts" };
+		});
 	},
 	order: async function (frm) {
 		await load_select_options(frm);
