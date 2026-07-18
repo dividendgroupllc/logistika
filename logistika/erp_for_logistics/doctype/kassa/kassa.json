@@ -27,6 +27,7 @@
   "party_name",
   "party_currency",
   "column_break_2",
+  "order",
   "expense_account",
   "expense_account_name",
   "section_break_amount",
@@ -230,6 +231,14 @@
   {
    "fieldname": "column_break_2",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.party_type === 'Customer' && doc.party",
+   "fieldname": "order",
+   "fieldtype": "Link",
+   "label": "Заказ",
+   "no_copy": 1,
+   "options": "Order"
   },
   {
    "depends_on": "eval:doc.party_type === 'Расходы'",

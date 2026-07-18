@@ -27,8 +27,8 @@ CATEGORY_LABELS = {
 
 def execute(filters=None):
     columns = get_columns()
-    data, expense_summaries, dividend_summaries = get_data(filters)
-    summary_html = get_summary_html(data, expense_summaries, dividend_summaries)
+    data, expense_summaries, dividend_summaries, opening_balances, closing_balances = get_data(filters)
+    summary_html = get_summary_html(data, expense_summaries, dividend_summaries, opening_balances, closing_balances)
     return columns, data, summary_html
 
 
@@ -36,6 +36,7 @@ def get_columns():
     return [
         {"fieldname": "posting_date", "label": _("Сана"), "fieldtype": "Date", "width": 100},
         {"fieldname": "account", "label": _("Касса счёт"), "fieldtype": "Link", "options": "Account", "width": 180},
+        {"fieldname": "currency", "label": _("Валюта"), "fieldtype": "Link", "options": "Currency", "width": 80},
         {"fieldname": "description", "label": _("Категория"), "fieldtype": "Data", "width": 250},
         {"fieldname": "kirim", "label": _("Кирим"), "fieldtype": "Currency", "width": 130},
         {"fieldname": "chiqim", "label": _("Чиқим"), "fieldtype": "Currency", "width": 130},
@@ -48,9 +49,13 @@ def get_columns():
 def get_data(filters):
     cash_accounts = get_cash_accounts(filters)
     if not cash_accounts:
-        return [], {}, {}
+        return [], {}, {}, {}, {}
 
-    opening_balance = get_opening_balance(cash_accounts, filters)
+    # Kassa hisoblari turli valyutada bo'lishi mumkin (USD/UZS/CNY) — ularni
+    # bitta songa aralashtirib qo'shib bo'lmaydi, shuning uchun balans va
+    # summary'lar valyuta bo'yicha ALOHIDA hisoblanadi.
+    account_currency = get_account_currency_map(cash_accounts)
+    opening_balances = get_opening_balance(cash_accounts, filters)
     transactions = get_transactions(cash_accounts, filters)
 
     pe_vouchers = [r.voucher_no for r in transactions if r.voucher_type == "Payment Entry"]
@@ -74,13 +79,13 @@ def get_data(filters):
     category_filter_val = filters.get("category")
     filter_category = CATEGORY_MAP.get(category_filter_val)
 
+    # Har biri: {currency: {desc: {"kirim":.., "chiqim":..}}}
     expense_summaries = {}
     dividend_summaries = {}
-    balance = opening_balance
-    total_kirim = 0
-    total_chiqim = 0
+    balances = dict(opening_balances)
 
     for row in transactions:
+        currency = account_currency.get(row.account)
         kirim = flt(row.debit_in_account_currency)
         chiqim = flt(row.credit_in_account_currency)
 
@@ -88,40 +93,39 @@ def get_data(filters):
 
         # Category filter
         if filter_category and info["category"] != filter_category:
-            balance += kirim - chiqim
+            balances[currency] = balances.get(currency, 0) + kirim - chiqim
             continue
 
         # Party filter
         if filter_party_type and info.get("party_type") != filter_party_type:
-            balance += kirim - chiqim
+            balances[currency] = balances.get(currency, 0) + kirim - chiqim
             continue
         if filter_party and info.get("party") != filter_party:
-            balance += kirim - chiqim
+            balances[currency] = balances.get(currency, 0) + kirim - chiqim
             continue
 
-        balance += kirim - chiqim
-        total_kirim += kirim
-        total_chiqim += chiqim
+        balances[currency] = balances.get(currency, 0) + kirim - chiqim
 
-        # Xarajatlarni guruhlash
+        # Xarajatlarni guruhlash (valyuta bo'yicha alohida)
         if info["category"] == "expense":
             desc = info["description"]
-            if desc not in expense_summaries:
-                expense_summaries[desc] = {"kirim": 0, "chiqim": 0}
-            expense_summaries[desc]["kirim"] += kirim
-            expense_summaries[desc]["chiqim"] += chiqim
+            bucket = expense_summaries.setdefault(currency, {})
+            bucket.setdefault(desc, {"kirim": 0, "chiqim": 0})
+            bucket[desc]["kirim"] += kirim
+            bucket[desc]["chiqim"] += chiqim
 
-        # Dividendlarni guruhlash (har bir dividend accounti alohida)
+        # Dividendlarni guruhlash (har bir dividend accounti alohida, valyuta bo'yicha)
         if info["category"] == "dividend":
             desc = strip_category_prefix(info["description"])
-            if desc not in dividend_summaries:
-                dividend_summaries[desc] = {"kirim": 0, "chiqim": 0}
-            dividend_summaries[desc]["kirim"] += kirim
-            dividend_summaries[desc]["chiqim"] += chiqim
+            bucket = dividend_summaries.setdefault(currency, {})
+            bucket.setdefault(desc, {"kirim": 0, "chiqim": 0})
+            bucket[desc]["kirim"] += kirim
+            bucket[desc]["chiqim"] += chiqim
 
         data.append({
             "posting_date": row.posting_date,
             "account": row.account,
+            "currency": currency,
             "direction": "Кирим" if kirim else "Чиқим",
             "description": strip_category_prefix(info["description"]),
             "category": info["category"],
@@ -135,14 +139,7 @@ def get_data(filters):
             "chiqim": chiqim,
         })
 
-    final_data = list(data)
-
-    # opening_balance va closing balance ni summary HTML uchun saqlash
-    if final_data:
-        final_data[0]["_opening_balance"] = opening_balance
-        final_data[-1]["_closing_balance"] = balance
-
-    return final_data, expense_summaries, dividend_summaries
+    return data, expense_summaries, dividend_summaries, opening_balances, balances
 
 
 def get_cash_accounts(filters):
@@ -160,20 +157,44 @@ def get_cash_accounts(filters):
     return list(set(a for a in accounts if a))
 
 
+def get_account_currency_map(cash_accounts):
+    if not cash_accounts:
+        return {}
+
+    rows = frappe.get_all(
+        "Account",
+        filters={"name": ["in", cash_accounts]},
+        fields=["name", "account_currency"],
+    )
+    return {r.name: r.account_currency for r in rows}
+
+
 def get_opening_balance(cash_accounts, filters):
+    """Har bir kassa hisobining ochilish qoldig'ini o'z valyutasida qaytaradi:
+    {currency: balance, ...}. Turli valyutadagi hisoblarni bitta songa
+    qo'shib bo'lmaydi (masalan $ + сум), shuning uchun account bo'yicha
+    guruhlab, keyin har bir account o'z valyutasi bo'yicha yig'iladi."""
     placeholders = ", ".join(["%s"] * len(cash_accounts))
 
-    result = frappe.db.sql("""
-        SELECT IFNULL(SUM(debit_in_account_currency) - SUM(credit_in_account_currency), 0)
+    rows = frappe.db.sql("""
+        SELECT account, IFNULL(SUM(debit_in_account_currency) - SUM(credit_in_account_currency), 0) as balance
         FROM `tabGL Entry`
         WHERE account IN ({placeholders})
           AND posting_date < %s
           AND is_cancelled = 0
+        GROUP BY account
     """.format(placeholders=placeholders),
-        tuple(cash_accounts) + (filters["from_date"],)
+        tuple(cash_accounts) + (filters["from_date"],),
+        as_dict=True,
     )
 
-    return flt(result[0][0]) if result else 0
+    account_currency = get_account_currency_map(cash_accounts)
+    balances = {}
+    for row in rows:
+        currency = account_currency.get(row.account)
+        balances[currency] = balances.get(currency, 0) + flt(row.balance)
+
+    return balances
 
 
 def get_transactions(cash_accounts, filters):
@@ -391,19 +412,40 @@ def get_party_name(party_type, party):
     return party
 
 
-def get_summary_html(data, expense_summaries=None, dividend_summaries=None):
+def get_summary_html(data, expense_summaries=None, dividend_summaries=None, opening_balances=None, closing_balances=None):
+    """Har bir valyuta uchun alohida summary blok chiqaradi — USD/UZS/CNY
+    kassalarini bitta jadvalga aralashtirib qo'yish ma'nosiz bo'lardi
+    (masalan $ va сум yig'indisi)."""
     if not data:
         return ""
 
-    # Opening va closing balancelarni data dan olish
-    opening = 0
-    closing_balance = 0
-    for row in data:
-        if "_opening_balance" in row:
-            opening = flt(row["_opening_balance"])
-        if "_closing_balance" in row:
-            closing_balance = flt(row["_closing_balance"])
+    opening_balances = opening_balances or {}
+    closing_balances = closing_balances or {}
+    expense_summaries = expense_summaries or {}
+    dividend_summaries = dividend_summaries or {}
 
+    currencies = sorted({
+        *(c for c in opening_balances if c),
+        *(c for c in closing_balances if c),
+        *(row.get("currency") for row in data if row.get("currency")),
+    })
+
+    blocks = "".join(
+        _render_currency_summary_block(
+            currency,
+            [row for row in data if row.get("currency") == currency],
+            expense_summaries.get(currency, {}),
+            dividend_summaries.get(currency, {}),
+            flt(opening_balances.get(currency, 0)),
+            flt(closing_balances.get(currency, 0)),
+        )
+        for currency in currencies
+    )
+
+    return f'<div style="margin-top: 20px;">{blocks}</div>'
+
+
+def _render_currency_summary_block(currency, rows, expense_summary, dividend_summary, opening, closing):
     customer_kirim = 0
     customer_chiqim = 0
     supplier_kirim = 0
@@ -419,10 +461,7 @@ def get_summary_html(data, expense_summaries=None, dividend_summaries=None):
     other_kirim = 0
     other_chiqim = 0
 
-    for row in data:
-        if row.get("is_total"):
-            continue
-
+    for row in rows:
         category = row.get("category") or "other"
         kirim = flt(row.get("kirim"))
         chiqim = flt(row.get("chiqim"))
@@ -449,67 +488,66 @@ def get_summary_html(data, expense_summaries=None, dividend_summaries=None):
             other_kirim += kirim
             other_chiqim += chiqim
 
-    closing = opening + (customer_kirim + supplier_kirim + expense_kirim + dividend_kirim + transfer_kirim + employee_kirim + other_kirim) - (customer_chiqim + supplier_chiqim + expense_chiqim + dividend_chiqim + transfer_chiqim + employee_chiqim + other_chiqim)
-    if closing_balance:
-        closing = closing_balance
-
     def fmt(val):
         return f"{flt(val):,.2f}"
 
-    def dash_or_val(val):
-        return "—" if flt(val) == 0 else f"<span style='color: inherit;'>{fmt(val)}</span>"
+    # Har bir valyuta bloki uchun unikal DOM ID/klass — bir nechta valyuta
+    # bir sahifada ko'rsatilganda collapsible tugmalar bir-biriga
+    # ta'sir qilmasligi uchun.
+    safe_currency = (currency or "na").lower()
 
     # Расходы subcategory qatorlarini tayyorlash
     expense_sub_rows = ""
-    if expense_summaries:
-        for desc, totals in expense_summaries.items():
+    if expense_summary:
+        for desc, totals in expense_summary.items():
             display_name = desc.replace("Расходы: ", "") if desc.startswith("Расходы: ") else desc
             sub_kirim = fmt(totals["kirim"]) if totals["kirim"] else "—"
             sub_chiqim = fmt(totals["chiqim"]) if totals["chiqim"] else "—"
             expense_sub_rows += f"""
-                <tr class="dds-expense-sub" style="display: none; background-color: #fff8e1;">
+                <tr class="dds-expense-sub-{safe_currency}" style="display: none; background-color: #fff8e1;">
                     <td style="padding: 8px 10px 8px 30px; border: 1px solid #ddd; font-style: italic;">{display_name}</td>
                     <td style="padding: 8px 10px; border: 1px solid #ddd; text-align: right; color: #388e3c;">{sub_kirim}</td>
                     <td style="padding: 8px 10px; border: 1px solid #ddd; text-align: right; color: #d32f2f;">{sub_chiqim}</td>
                 </tr>"""
 
-    expense_arrow = '<span id="dds-expense-arrow" style="margin-right: 5px; font-size: 10px;">&#9654;</span>' if expense_summaries else ""
-    expense_cursor = "cursor: pointer;" if expense_summaries else ""
-    expense_onclick = """onclick="(function(){
-        var rows = document.querySelectorAll('.dds-expense-sub');
-        var arrow = document.getElementById('dds-expense-arrow');
+    expense_arrow = f'<span id="dds-expense-arrow-{safe_currency}" style="margin-right: 5px; font-size: 10px;">&#9654;</span>' if expense_summary else ""
+    expense_cursor = "cursor: pointer;" if expense_summary else ""
+    expense_onclick = f"""onclick="(function(){{
+        var rows = document.querySelectorAll('.dds-expense-sub-{safe_currency}');
+        var arrow = document.getElementById('dds-expense-arrow-{safe_currency}');
         if (!rows.length) return;
         var visible = rows[0].style.display !== 'none';
-        for (var i = 0; i < rows.length; i++) { rows[i].style.display = visible ? 'none' : 'table-row'; }
+        for (var i = 0; i < rows.length; i++) {{ rows[i].style.display = visible ? 'none' : 'table-row'; }}
         arrow.innerHTML = visible ? '&#9654;' : '&#9660;';
-    })()" """ if expense_summaries else ""
+    }})()" """ if expense_summary else ""
 
     # Дивиденды subcategory qatorlarini tayyorlash (har bir dividend alohida)
     dividend_sub_rows = ""
-    if dividend_summaries:
-        for desc, totals in dividend_summaries.items():
+    if dividend_summary:
+        for desc, totals in dividend_summary.items():
             sub_kirim = fmt(totals["kirim"]) if totals["kirim"] else "—"
             sub_chiqim = fmt(totals["chiqim"]) if totals["chiqim"] else "—"
             dividend_sub_rows += f"""
-                <tr class="dds-dividend-sub" style="display: none; background-color: #fff8e1;">
+                <tr class="dds-dividend-sub-{safe_currency}" style="display: none; background-color: #fff8e1;">
                     <td style="padding: 8px 10px 8px 30px; border: 1px solid #ddd; font-style: italic;">{desc}</td>
                     <td style="padding: 8px 10px; border: 1px solid #ddd; text-align: right; color: #388e3c;">{sub_kirim}</td>
                     <td style="padding: 8px 10px; border: 1px solid #ddd; text-align: right; color: #d32f2f;">{sub_chiqim}</td>
                 </tr>"""
 
-    dividend_arrow = '<span id="dds-dividend-arrow" style="margin-right: 5px; font-size: 10px;">&#9654;</span>' if dividend_summaries else ""
-    dividend_cursor = "cursor: pointer;" if dividend_summaries else ""
-    dividend_onclick = """onclick="(function(){
-        var rows = document.querySelectorAll('.dds-dividend-sub');
-        var arrow = document.getElementById('dds-dividend-arrow');
+    dividend_arrow = f'<span id="dds-dividend-arrow-{safe_currency}" style="margin-right: 5px; font-size: 10px;">&#9654;</span>' if dividend_summary else ""
+    dividend_cursor = "cursor: pointer;" if dividend_summary else ""
+    dividend_onclick = f"""onclick="(function(){{
+        var rows = document.querySelectorAll('.dds-dividend-sub-{safe_currency}');
+        var arrow = document.getElementById('dds-dividend-arrow-{safe_currency}');
         if (!rows.length) return;
         var visible = rows[0].style.display !== 'none';
-        for (var i = 0; i < rows.length; i++) { rows[i].style.display = visible ? 'none' : 'table-row'; }
+        for (var i = 0; i < rows.length; i++) {{ rows[i].style.display = visible ? 'none' : 'table-row'; }}
         arrow.innerHTML = visible ? '&#9654;' : '&#9660;';
-    })()" """ if dividend_summaries else ""
+    }})()" """ if dividend_summary else ""
 
-    html = f"""
-    <div style="margin-top: 20px; padding: 15px; background-color: #f9f9f9; border-radius: 5px;">
+    return f"""
+    <div style="margin-top: 12px; padding: 15px; background-color: #f9f9f9; border-radius: 5px;">
+        <div style="font-weight: bold; margin-bottom: 8px; font-size: 14px;">{currency or ""}</div>
         <table style="width: 100%; border-collapse: collapse; background: white;">
             <thead>
                 <tr style="background-color: #f0f0f0;">
@@ -568,5 +606,3 @@ def get_summary_html(data, expense_summaries=None, dividend_summaries=None):
         </table>
     </div>
     """
-
-    return html

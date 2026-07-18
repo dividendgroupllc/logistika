@@ -1,6 +1,13 @@
 import frappe
 from frappe.utils import flt
 
+# Tizimda yoqilgan 3 ta valyuta (Currency doctype, enabled=1) — Kassa shu
+# valyutalarda ishlaydi, shuning uchun bu report ham har uchalasini alohida
+# ustunlarda ko'rsatishi kerak (avval faqat UZS/USD bo'lgani uchun CNY
+# kontragentlar — masalan Xitoy zavod — balansi ko'rinmas edi).
+CURRENCIES = ["UZS", "USD", "CNY"]
+
+
 def execute(filters=None):
     if not filters:
         return [], []
@@ -13,6 +20,7 @@ def execute(filters=None):
 
 def get_columns(filters):
     currency = filters.get("currency", "")
+    currencies_to_show = [currency] if currency else CURRENCIES
 
     # Base columns
     columns = [
@@ -22,51 +30,28 @@ def get_columns(filters):
         {"label": "Акт Сверка", "fieldname": "akt_sverka_link", "fieldtype": "Data", "width": 120},
     ]
 
-    # If currency filter is empty, show all currencies
-    if not currency:
+    # Bitta valyuta filtri tanlansa, ustun nomlarida valyuta kodi ko'rsatilmaydi
+    # (barchasi bir xil bo'lgani uchun) — barcha valyutalar ko'rsatilsa, har
+    # ustun o'z valyuta kodi bilan farqlanadi.
+    label_prefix = (lambda cur: "") if currency else (lambda cur: f" {cur}")
+
+    for cur in currencies_to_show:
+        suffix = cur.lower()
         columns.extend([
-            # Opening balances UZS
-            {"label": "Кредит UZS (дан олдин)", "fieldname": "opening_credit_uzs", "fieldtype": "Currency", "width": 150},
-            {"label": "Дебет UZS (дан олдин)", "fieldname": "opening_debit_uzs", "fieldtype": "Currency", "width": 150},
-            # Opening balances USD
-            {"label": "Кредит USD (дан олдин)", "fieldname": "opening_credit_usd", "fieldtype": "Currency", "width": 150},
-            {"label": "Дебет USD (дан олдин)", "fieldname": "opening_debit_usd", "fieldtype": "Currency", "width": 150},
-            # Period balances UZS
-            {"label": "Кредит UZS (давр)", "fieldname": "period_credit_uzs", "fieldtype": "Currency", "width": 150},
-            {"label": "Дебет UZS (давр)", "fieldname": "period_debit_uzs", "fieldtype": "Currency", "width": 150},
-            # Period balances USD
-            {"label": "Кредит USD (давр)", "fieldname": "period_credit_usd", "fieldtype": "Currency", "width": 150},
-            {"label": "Дебет USD (давр)", "fieldname": "period_debit_usd", "fieldtype": "Currency", "width": 150},
-            # Final balances UZS
-            {"label": "Сўнгги Кредит UZS", "fieldname": "final_credit_uzs", "fieldtype": "Currency", "width": 150},
-            {"label": "Сўнгги Дебет UZS", "fieldname": "final_debit_uzs", "fieldtype": "Currency", "width": 150},
-            # Final balances USD
-            {"label": "Сўнгги Кредит USD", "fieldname": "final_credit_usd", "fieldtype": "Currency", "width": 150},
-            {"label": "Сўнгги Дебет USD", "fieldname": "final_debit_usd", "fieldtype": "Currency", "width": 150},
+            {"label": f"Кредит{label_prefix(cur)} (дан олдин)", "fieldname": f"opening_credit_{suffix}", "fieldtype": "Currency", "width": 150},
+            {"label": f"Дебет{label_prefix(cur)} (дан олдин)", "fieldname": f"opening_debit_{suffix}", "fieldtype": "Currency", "width": 150},
         ])
-    elif currency == "UZS":
+    for cur in currencies_to_show:
+        suffix = cur.lower()
         columns.extend([
-            # Opening balances UZS
-            {"label": "Кредит (дан олдин)", "fieldname": "opening_credit_uzs", "fieldtype": "Currency", "width": 150},
-            {"label": "Дебет (дан олдин)", "fieldname": "opening_debit_uzs", "fieldtype": "Currency", "width": 150},
-            # Period balances UZS
-            {"label": "Кредит (давр)", "fieldname": "period_credit_uzs", "fieldtype": "Currency", "width": 150},
-            {"label": "Дебет (давр)", "fieldname": "period_debit_uzs", "fieldtype": "Currency", "width": 150},
-            # Final balances UZS
-            {"label": "Сўнгги Кредит", "fieldname": "final_credit_uzs", "fieldtype": "Currency", "width": 150},
-            {"label": "Сўнгги Дебет", "fieldname": "final_debit_uzs", "fieldtype": "Currency", "width": 150},
+            {"label": f"Кредит{label_prefix(cur)} (давр)", "fieldname": f"period_credit_{suffix}", "fieldtype": "Currency", "width": 150},
+            {"label": f"Дебет{label_prefix(cur)} (давр)", "fieldname": f"period_debit_{suffix}", "fieldtype": "Currency", "width": 150},
         ])
-    elif currency == "USD":
+    for cur in currencies_to_show:
+        suffix = cur.lower()
         columns.extend([
-            # Opening balances USD
-            {"label": "Кредит (дан олдин)", "fieldname": "opening_credit_usd", "fieldtype": "Currency", "width": 150},
-            {"label": "Дебет (дан олдин)", "fieldname": "opening_debit_usd", "fieldtype": "Currency", "width": 150},
-            # Period balances USD
-            {"label": "Кредит (давр)", "fieldname": "period_credit_usd", "fieldtype": "Currency", "width": 150},
-            {"label": "Дебет (давр)", "fieldname": "period_debit_usd", "fieldtype": "Currency", "width": 150},
-            # Final balances USD
-            {"label": "Сўнгги Кредит", "fieldname": "final_credit_usd", "fieldtype": "Currency", "width": 150},
-            {"label": "Сўнгги Дебет", "fieldname": "final_debit_usd", "fieldtype": "Currency", "width": 150},
+            {"label": f"Сўнгги Кредит{label_prefix(cur)}", "fieldname": f"final_credit_{suffix}", "fieldtype": "Currency", "width": 150},
+            {"label": f"Сўнгги Дебет{label_prefix(cur)}", "fieldname": f"final_debit_{suffix}", "fieldtype": "Currency", "width": 150},
         ])
 
     return columns
@@ -85,20 +70,12 @@ def get_data(filters):
     data = []
 
     # Initialize totals
-    totals = {
-        "opening_credit_uzs": 0,
-        "opening_debit_uzs": 0,
-        "opening_credit_usd": 0,
-        "opening_debit_usd": 0,
-        "period_credit_uzs": 0,
-        "period_debit_uzs": 0,
-        "period_credit_usd": 0,
-        "period_debit_usd": 0,
-        "final_credit_uzs": 0,
-        "final_debit_uzs": 0,
-        "final_credit_usd": 0,
-        "final_debit_usd": 0,
-    }
+    totals = {}
+    for cur in CURRENCIES:
+        suffix = cur.lower()
+        for prefix in ("opening", "period", "final"):
+            for kind in ("credit", "debit"):
+                totals[f"{prefix}_{kind}_{suffix}"] = 0
 
     for party_info in parties:
         row = calculate_party_balances(party_info, from_date, to_date)
@@ -156,50 +133,35 @@ def get_parties(party_type=None, party=None):
 
 
 def calculate_party_balances(party_info, from_date, to_date):
-    """Calculate all balances for a party"""
+    """Calculate all balances for a party, for every currency in CURRENCIES."""
     party_type = party_info.get("party_type")
     party = party_info.get("party")
 
     # Get party currency from Party Financial Defaults
     currency = get_party_currency(party_type, party)
 
-    # Calculate opening balances (before from_date)
-    opening_uzs = calculate_opening_balance(party_type, party, from_date, "UZS")
-    opening_usd = calculate_opening_balance(party_type, party, from_date, "USD")
-
-    # Calculate period balances (from_date to to_date)
-    period_uzs = calculate_period_balance(party_type, party, from_date, to_date, "UZS")
-    period_usd = calculate_period_balance(party_type, party, from_date, to_date, "USD")
-
-    # Calculate final balances
-    final_uzs_net = (opening_uzs['credit'] - opening_uzs['debit']) + (period_uzs['credit'] - period_uzs['debit'])
-    final_usd_net = (opening_usd['credit'] - opening_usd['debit']) + (period_usd['credit'] - period_usd['debit'])
-
-    # Determine final credit/debit
-    final_credit_uzs = final_uzs_net if final_uzs_net > 0 else 0
-    final_debit_uzs = abs(final_uzs_net) if final_uzs_net < 0 else 0
-
-    final_credit_usd = final_usd_net if final_usd_net > 0 else 0
-    final_debit_usd = abs(final_usd_net) if final_usd_net < 0 else 0
-
-    return {
+    row = {
         "party_type": party_type,
         "party": party,
         "currency": currency,
         "akt_sverka_link": "Акт Сверка",  # Will be formatted as link in JS
-        "opening_credit_uzs": opening_uzs['credit'] if opening_uzs['credit'] > 0 else 0,
-        "opening_debit_uzs": opening_uzs['debit'] if opening_uzs['debit'] > 0 else 0,
-        "opening_credit_usd": opening_usd['credit'] if opening_usd['credit'] > 0 else 0,
-        "opening_debit_usd": opening_usd['debit'] if opening_usd['debit'] > 0 else 0,
-        "period_credit_uzs": period_uzs['credit'],
-        "period_debit_uzs": period_uzs['debit'],
-        "period_credit_usd": period_usd['credit'],
-        "period_debit_usd": period_usd['debit'],
-        "final_credit_uzs": final_credit_uzs,
-        "final_debit_uzs": final_debit_uzs,
-        "final_credit_usd": final_credit_usd,
-        "final_debit_usd": final_debit_usd,
     }
+
+    for cur in CURRENCIES:
+        suffix = cur.lower()
+        opening = calculate_opening_balance(party_type, party, from_date, cur)
+        period = calculate_period_balance(party_type, party, from_date, to_date, cur)
+
+        final_net = (opening['credit'] - opening['debit']) + (period['credit'] - period['debit'])
+
+        row[f"opening_credit_{suffix}"] = opening['credit'] if opening['credit'] > 0 else 0
+        row[f"opening_debit_{suffix}"] = opening['debit'] if opening['debit'] > 0 else 0
+        row[f"period_credit_{suffix}"] = period['credit']
+        row[f"period_debit_{suffix}"] = period['debit']
+        row[f"final_credit_{suffix}"] = final_net if final_net > 0 else 0
+        row[f"final_debit_{suffix}"] = abs(final_net) if final_net < 0 else 0
+
+    return row
 
 
 def get_party_currency(party_type, party):

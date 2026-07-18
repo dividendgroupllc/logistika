@@ -10,12 +10,10 @@
 # "account_name_zh" (ko'rib chiqish uchun qoralama maydon) ga yozadi, (2) shu tarjimalarni
 # haqiqiy "Translation" yozuvlariga sinxronlaydi.
 
-import json
-import re
-
 import frappe
 
 from logistika.erp_for_logistics.kimi_client import chat as kimi_chat
+from logistika.erp_for_logistics.label_translation import _extract_json, _upsert_translation
 
 SYSTEM_PROMPT = """Sen buxgalteriya hisoblari (Chart of Accounts) nomlarini professional \
 xitoy tiliga (soddalashtirilgan — Simplified Chinese) tarjima qiluvchi yordamchisan. \
@@ -30,16 +28,6 @@ qo'shma:
 
 {"translations": {"<asl ingliz nomi>": "<xitoycha tarjima>", ...}}
 """
-
-
-def _extract_json(content):
-	text = content.strip()
-	text = re.sub(r"^```(?:json)?\s*", "", text)
-	text = re.sub(r"\s*```$", "", text)
-	start, end = text.find("{"), text.rfind("}")
-	if start == -1 or end == -1 or end < start:
-		frappe.throw("Kimi javobidan JSON topilmadi")
-	return json.loads(text[start : end + 1])
 
 
 @frappe.whitelist()
@@ -83,33 +71,6 @@ def translate_chart_of_accounts(company=None):
 	frappe.db.commit()
 
 	return {"updated": updated, "missing": missing, "total_unique_names": len(unique_names)}
-
-
-def _upsert_translation(source_text, translated_text, language):
-	"""source_text/translated_text bir xil bo'lsa (masalan Kimi ingliz so'zni o'zgarishsiz
-	qaytarsa) hech narsa yozmaydi — mazmunsiz "tarjima" Translation jadvalini chiqindi bilan
-	to'ldirmasligi uchun."""
-	if not source_text or not translated_text or source_text == translated_text:
-		return 0, 0
-
-	existing_name = frappe.db.get_value("Translation", {"source_text": source_text, "language": language}, "name")
-	if existing_name:
-		if frappe.db.get_value("Translation", existing_name, "translated_text") != translated_text:
-			frappe.db.set_value(
-				"Translation", existing_name, "translated_text", translated_text, update_modified=False
-			)
-			return 0, 1
-		return 0, 0
-
-	frappe.get_doc(
-		{
-			"doctype": "Translation",
-			"source_text": source_text,
-			"translated_text": translated_text,
-			"language": language,
-		}
-	).insert(ignore_permissions=True)
-	return 1, 0
 
 
 def _sync_account_translation(acc, language):

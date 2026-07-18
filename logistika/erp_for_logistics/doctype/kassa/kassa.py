@@ -7,9 +7,10 @@ from frappe.model.document import Document
 from frappe.utils import cint, flt
 from erpnext.accounts.party import get_party_account as erpnext_get_party_account
 
-# Konvertatsiya faqat shu valyutalar juftligida (UZS ↔ USD) amalga oshiriladi.
-# Mode of Payment turi nomidan EMAS, ulangan cash account valyutasidan aniqlanadi.
-CONVERSION_CURRENCIES = ("UZS", "USD")
+# Konvertatsiya shu valyutalar orasida amalga oshiriladi (tizimda yoqilgan
+# barcha valyutalar — Currency doctype, enabled=1). Mode of Payment turi
+# nomidan EMAS, ulangan cash account valyutasidan aniqlanadi.
+CONVERSION_CURRENCIES = ("UZS", "USD", "CNY")
 
 
 def is_dividend_party_type(party_type):
@@ -38,6 +39,7 @@ class Kassa(Document):
         self.set_payment_exchange_details()
         self.set_balance()
         self.validate_party()
+        self.validate_order()
         self.validate_transfer()
         self.validate_conversion()
         self.validate_amount()
@@ -514,6 +516,18 @@ class Kassa(Document):
                     frappe.throw(_("Пожалуйста, выберите контрагента"))
                 self.expense_account = None
 
+    def validate_order(self):
+        """Order faqat Customer kontragent uchun tegishli — boshqa holatlarda
+        tozalanadi. Tanlangan bo'lsa, order haqiqatan ham shu kontragentga
+        tegishli ekanini tekshiradi (masalan, order tanlangandan keyin
+        kontragent boshqasiga almashtirilgan bo'lishi mumkin)."""
+        if self.party_type != "Customer" or not self.party:
+            self.order = None
+            return
+
+        if self.order and frappe.db.get_value("Order", self.order, "kliyent") != self.party:
+            frappe.throw(_("Выбранный заказ не относится к контрагенту {0}").format(self.party))
+
     def validate_transfer(self):
         """Transfer validatsiyasi"""
         if self.transaction_type == "Перемещения":
@@ -561,7 +575,9 @@ class Kassa(Document):
             frappe.throw(_("Не удалось определить валюту счетов для конвертации"))
 
         if from_currency not in CONVERSION_CURRENCIES or to_currency not in CONVERSION_CURRENCIES:
-            frappe.throw(_("Для конвертации выберите счета в UZS или USD"))
+            frappe.throw(
+                _("Для конвертации выберите счета в {0}").format(", ".join(CONVERSION_CURRENCIES))
+            )
 
         if from_currency == to_currency:
             frappe.throw(

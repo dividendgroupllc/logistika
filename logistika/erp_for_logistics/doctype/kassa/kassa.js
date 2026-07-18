@@ -5,6 +5,9 @@
 // ulangan cash account valyutasi bilan aniqlanadi (server query orqali).
 const DIVIDEND_PARTY_TYPES = ["Дивиденд"];
 
+// kassa.py'dagi CONVERSION_CURRENCIES bilan bir xil bo'lishi kerak.
+const CONVERSION_CURRENCIES = ["UZS", "USD", "CNY"];
+
 frappe.ui.form.on("Kassa", {
     onload: function(frm) {
         frm.trigger("clear_copied_linked_document");
@@ -20,6 +23,15 @@ frappe.ui.form.on("Kassa", {
                 query: "logistika.erp_for_logistics.doctype.kassa.kassa.get_expense_accounts",
                 filters: {
                     company: frm.doc.company
+                }
+            };
+        });
+
+        // Order faqat tanlangan kliyentga (Customer) tegishli buyurtmalar bilan filtrlanadi.
+        frm.set_query("order", function() {
+            return {
+                filters: {
+                    kliyent: frm.doc.party
                 }
             };
         });
@@ -96,11 +108,11 @@ frappe.ui.form.on("Kassa", {
                         frm.set_value("cash_account", r.message.account);
                         frm.set_value("cash_account_currency", r.message.currency);
 
-                        // Konvertatsiya faqat UZS/USD account valyutasida ishlaydi.
+                        // Konvertatsiya faqat CONVERSION_CURRENCIES ichidagi valyutalarda ishlaydi.
                         if (frm.doc.transaction_type === "Конвертация"
                             && r.message.currency
-                            && !["UZS", "USD"].includes(r.message.currency)) {
-                            frappe.msgprint(__("Для конвертации выберите способ оплаты в UZS или USD."));
+                            && !CONVERSION_CURRENCIES.includes(r.message.currency)) {
+                            frappe.msgprint(__("Для конвертации выберите способ оплаты в {0}.", [CONVERSION_CURRENCIES.join(", ")]));
                         }
 
                         frm.trigger("update_balance");
@@ -453,9 +465,24 @@ frappe.ui.form.on("Kassa", {
         frm.set_df_property("credit_amount", "read_only", 0);
 
         if (showPartyExchange) {
+            // Kurs/summa yorliqlari valyuta kodlarini o'z ichiga oladi — bular har xil
+            // bo'lgani uchun (UZS/USD/RMB va h.k. kombinatsiyalari) tayyor Translation
+            // yozuvi to'g'ridan-to'g'ri mos kelmaydi; shuning uchun __() ni shu yerda,
+            // shablon (placeholder) bilan chaqiramiz — bitta Translation yozuvi
+            // ("Курс {0} к {1}") istalgan valyuta juftligi uchun ishlaydi.
             frm.set_df_property("section_break_conversion", "label", "Мультивалютный платеж");
-            frm.set_df_property("exchange_rate", "label", `Курс ${frm.doc.cash_account_currency || ""} к ${frm.doc.party_currency || ""}`.trim());
-            frm.set_df_property("credit_amount", "label", `Сумма в валюте контрагента${frm.doc.party_currency ? ` (${frm.doc.party_currency})` : ""}`);
+            frm.set_df_property(
+                "exchange_rate",
+                "label",
+                __("Курс {0} к {1}", [frm.doc.cash_account_currency || "", frm.doc.party_currency || ""]).trim()
+            );
+            frm.set_df_property(
+                "credit_amount",
+                "label",
+                frm.doc.party_currency
+                    ? __("Сумма в валюте контрагента ({0})", [frm.doc.party_currency])
+                    : __("Сумма в валюте контрагента")
+            );
         } else {
             frm.set_df_property("section_break_conversion", "label", "Конвертация");
             frm.set_df_property("exchange_rate", "label", "Курс");
@@ -519,6 +546,7 @@ frappe.ui.form.on("Kassa", {
         frm.set_value("expense_account", "");
         frm.set_value("party_name", "");
         frm.set_value("expense_account_name", "");
+        frm.set_value("order", "");
 
         if (frm.doc.party_type === "Расходы") {
             frm.set_df_property("expense_account", "reqd", 1);
@@ -538,6 +566,10 @@ frappe.ui.form.on("Kassa", {
     },
 
     party: function(frm) {
+        // Kliyent almashtirilsa, oldingi kliyentga tegishli tanlangan buyurtma
+        // endi noto'g'ri bo'lib qolishi mumkin — tozalanadi.
+        frm.set_value("order", "");
+
         if (frm.doc.party && frm.doc.party_type) {
             let name_field = get_party_name_field(frm.doc.party_type);
             if (name_field) {
@@ -586,43 +618,45 @@ frappe.ui.form.on("Kassa", {
         const sourceMode = frm.doc.mode_of_payment;
         const targetMode = frm.doc.mode_of_payment_to;
 
+        // Bu yorliqlar avval __() ga o'ralmagan, hardcoded HTML ichida edi — Translation
+        // yozuvlari qo'shilsa ham hech qachon tarjima qilinmasdi. Endi __() orqali.
         if (txType) {
-            rows.push(`<div><strong>Операция:</strong> ${frappe.utils.escape_html(txType)}</div>`);
+            rows.push(`<div><strong>${__("Операция")}:</strong> ${frappe.utils.escape_html(txType)}</div>`);
         }
 
         if (sourceMode || sourceCurrency) {
             rows.push(
-                `<div><strong>Источник:</strong> ${frappe.utils.escape_html(sourceMode || "-")} ${sourceCurrency ? `(${frappe.utils.escape_html(sourceCurrency)})` : ""}</div>`
+                `<div><strong>${__("Источник")}:</strong> ${frappe.utils.escape_html(sourceMode || "-")} ${sourceCurrency ? `(${frappe.utils.escape_html(sourceCurrency)})` : ""}</div>`
             );
         }
 
         if (targetMode || targetCurrency) {
             rows.push(
-                `<div><strong>Назначение:</strong> ${frappe.utils.escape_html(targetMode || "-")} ${targetCurrency ? `(${frappe.utils.escape_html(targetCurrency)})` : ""}</div>`
+                `<div><strong>${__("Назначение")}:</strong> ${frappe.utils.escape_html(targetMode || "-")} ${targetCurrency ? `(${frappe.utils.escape_html(targetCurrency)})` : ""}</div>`
             );
         }
 
         if (frm.doc.party && frm.doc.party_currency) {
             rows.push(
-                `<div><strong>Контрагент:</strong> ${frappe.utils.escape_html(frm.doc.party)} (${frappe.utils.escape_html(frm.doc.party_currency)})</div>`
+                `<div><strong>${__("Контрагент")}:</strong> ${frappe.utils.escape_html(frm.doc.party)} (${frappe.utils.escape_html(frm.doc.party_currency)})</div>`
             );
         }
 
         if (frm.doc.exchange_rate && (txType === "Конвертация" || isPartyMulticurrencyPayment(frm))) {
             rows.push(
-                `<div><strong>Курс:</strong> 1 ${frappe.utils.escape_html(sourceCurrency || "-")} = ${frappe.format(frm.doc.exchange_rate, {fieldtype: "Float", precision: 6})} ${frappe.utils.escape_html((txType === "Конвертация" ? targetCurrency : frm.doc.party_currency) || "-")}</div>`
+                `<div><strong>${__("Курс")}:</strong> 1 ${frappe.utils.escape_html(sourceCurrency || "-")} = ${frappe.format(frm.doc.exchange_rate, {fieldtype: "Float", precision: 6})} ${frappe.utils.escape_html((txType === "Конвертация" ? targetCurrency : frm.doc.party_currency) || "-")}</div>`
             );
         }
 
         if (isPartyMulticurrencyPayment(frm) && frm.doc.credit_amount) {
             rows.push(
-                `<div><strong>Сумма в валюте контрагента:</strong> ${frappe.format(frm.doc.credit_amount, {fieldtype: "Currency"})} ${frappe.utils.escape_html(frm.doc.party_currency || "")}</div>`
+                `<div><strong>${__("Сумма в валюте контрагента")}:</strong> ${frappe.format(frm.doc.credit_amount, {fieldtype: "Currency"})} ${frappe.utils.escape_html(frm.doc.party_currency || "")}</div>`
             );
         }
 
         const note = getCurrencyInfoNote(frm, sourceCurrency, targetCurrency);
         if (note) {
-            rows.push(`<div style="margin-top: 8px;"><strong>Подсказка:</strong> ${frappe.utils.escape_html(note)}</div>`);
+            rows.push(`<div style="margin-top: 8px;"><strong>${__("Подсказка")}:</strong> ${frappe.utils.escape_html(note)}</div>`);
         }
 
         if (!rows.length) {
@@ -697,17 +731,10 @@ function getExchangePair(frm) {
 }
 
 function getDefaultConversionTargetCurrency(frm) {
-    const sourceCurrency = frm.doc.cash_account_currency;
-    if (!sourceCurrency) return "";
-
-    if (sourceCurrency === "USD") {
-        return "UZS";
-    }
-
-    if (sourceCurrency === "UZS") {
-        return "USD";
-    }
-
+    // 3 valyuta (UZS/USD/CNY) orasida bitta aniq "qarama-qarshi" valyuta yo'q
+    // (masalan USD manba bo'lsa, UZS ham CNY ham bo'lishi mumkin) — shuning
+    // uchun taxminiy default berilmaydi, foydalanuvchi "Способ оплаты (куда)"
+    // ni tanlaganda haqiqiy valyuta _cash_account_to_currency orqali keladi.
     return "";
 }
 
@@ -728,25 +755,27 @@ function isDividendPartyType(partyType) {
 }
 
 function getCurrencyInfoNote(frm, sourceCurrency, targetCurrency) {
+    // Bu funksiya avval hardcoded rus jumlalarni qaytarardi, __() ga o'ralmagan —
+    // Translation yozuvlari qo'shilsa ham tarjima qilinmasdi. Endi __() orqali.
     if (frm.doc.transaction_type === "Перемещения") {
-        return "Перемещение должно быть между счетами одной валюты.";
+        return __("Перемещение должно быть между счетами одной валюты.");
     }
 
     if (frm.doc.transaction_type === "Конвертация") {
         if (sourceCurrency && targetCurrency) {
             return sourceCurrency === targetCurrency
-                ? "Для конвертации нужно выбрать счета с разной валютой."
-                : "Для конвертации выбраны счета с разной валютой. Проверьте курс и суммы.";
+                ? __("Для конвертации нужно выбрать счета с разной валютой.")
+                : __("Для конвертации выбраны счета с разной валютой. Проверьте курс и суммы.");
         }
-        return "Для конвертации выберите источник, назначение и курс.";
+        return __("Для конвертации выберите источник, назначение и курс.");
     }
 
     if (isPartyMulticurrencyPayment(frm)) {
-        return "Будет создан мультивалютный Payment Entry: сумма кассы и сумма контрагента будут рассчитаны по курсу.";
+        return __("Будет создан мультивалютный Payment Entry: сумма кассы и сумма контрагента будут рассчитаны по курсу.");
     }
 
     if (frm.doc.transaction_type && frm.doc.party_type && frm.doc.party_currency) {
-        return "Для платежа будет использован реальный ledger-счет контрагента из ERPNext.";
+        return __("Для платежа будет использован реальный ledger-счет контрагента из ERPNext.");
     }
 
     return "";
