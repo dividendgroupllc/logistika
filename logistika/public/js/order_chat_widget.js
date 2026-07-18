@@ -65,23 +65,46 @@ logistika.order_chat.warn_on_send_result = function (result) {
 // o'zgartirish) butun jadval-ko'rinishi ko'p marta qayta chiziladi (render_orders_summary
 // ~15 xil hodisadan chaqiriladi) — shu chizishlarning HAR birida chat logini qaytadan
 // serverdan so'rash keraksiz tarmoq yukini beradi. Shuning uchun order bo'yicha oddiy
-// keshlaymiz: bir marta olingandan keyin, aniq "force" so'ralmasa (hujjat qayta
-// yuklanganda yoki yangi javob yuborilgandan keyin), keshdan chiziladi.
+// keshlaymiz, lekin CHEKLANGAN muddatga (TTL) — mijoz yozgan xabarning tarjimasi
+// (xitoycha/ruscha) fon vazifasi (background job) sifatida bir necha soniyadan keyin
+// qo'shiladi, keshni cheksiz saqlasak xodim sahifani ochiб turgan holda hech qachon
+// yangi tarjimani ko'rmay qolardi (aynan shu holat sinovda uchradi).
 logistika.order_chat._cache = {};
+const ORDER_CHAT_CACHE_TTL_MS = 8000;
+const ORDER_CHAT_PENDING_POLL_MS = 3000;
+const ORDER_CHAT_PENDING_POLL_MAX_TRIES = 8; // ~24s, background job odatda shundan oldinroq tugaydi
 
-// Bitta order uchun: log'ni (kesh bo'lmasa yoki force=true bo'lsa serverdan) olib,
-// $log ichiga chizadi.
-logistika.order_chat.load_and_render = function ($log, order_name, force) {
-	if (!force && logistika.order_chat._cache[order_name]) {
-		logistika.order_chat.render_bubbles($log, logistika.order_chat._cache[order_name]);
+function _order_chat_has_pending_translation(messages) {
+	return messages.some((m) => m.sender === "Mijoz" && !m.tarjima_xitoycha && !m.tarjima_ruscha);
+}
+
+// Bitta order uchun: log'ni (kesh yangi bo'lmasa yoki force=true bo'lsa serverdan) olib,
+// $log ichiga chizadi. Agar mijoz xabari hali tarjima kutayotgan bo'lsa (fon vazifasi
+// tugamagan), tayyor bo'lguncha bir necha marta avtomatik qayta so'raydi.
+logistika.order_chat.load_and_render = function ($log, order_name, force, _pollAttempt) {
+	const cached = logistika.order_chat._cache[order_name];
+	const isFresh = cached && Date.now() - cached.fetchedAt < ORDER_CHAT_CACHE_TTL_MS;
+	if (!force && isFresh) {
+		logistika.order_chat.render_bubbles($log, cached.messages);
 		return;
 	}
 	frappe.call({
 		method: "logistika.erp_for_logistics.order_chat.get_order_chat_log",
 		args: { order: order_name },
 		callback: (r) => {
-			logistika.order_chat._cache[order_name] = r.message || [];
-			logistika.order_chat.render_bubbles($log, logistika.order_chat._cache[order_name]);
+			const messages = r.message || [];
+			logistika.order_chat._cache[order_name] = { messages, fetchedAt: Date.now() };
+			logistika.order_chat.render_bubbles($log, messages);
+
+			const attempt = _pollAttempt || 0;
+			if (_order_chat_has_pending_translation(messages) && attempt < ORDER_CHAT_PENDING_POLL_MAX_TRIES) {
+				setTimeout(() => {
+					// Sahifa/hujjat almashgan bo'lsa (masalan boshqa order'ga o'tilgan) DOM'dan
+					// uzilib qoladi — shu holda keraksiz so'rovni to'xtatamiz.
+					if (!$.contains(document.documentElement, $log[0])) return;
+					logistika.order_chat.load_and_render($log, order_name, true, attempt + 1);
+				}, ORDER_CHAT_PENDING_POLL_MS);
+			}
 		},
 	});
 };
