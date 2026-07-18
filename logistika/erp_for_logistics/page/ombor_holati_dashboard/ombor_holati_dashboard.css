@@ -645,6 +645,32 @@
 	font-variant-numeric: tabular-nums;
 	letter-spacing: 0.2px;
 }
+/* "Tarix" dialogi uchun — ld-table'dan farqli, matn kesilib qolmasligi (o'ralishi)
+   va dialog kengligiga to'g'ri sig'ishi kerak (bu jadval o'zining scroll
+   konteyneriga tayanmaydi, ld-table esa tayanadi). */
+.ld-history-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 12px;
+	table-layout: fixed;
+}
+.ld-history-table th,
+.ld-history-table td {
+	padding: 8px 10px;
+	border-bottom: 1px solid var(--oh-gridline);
+	text-align: left;
+	white-space: normal;
+	word-break: break-word;
+}
+.ld-history-table th:first-child,
+.ld-history-table td:first-child {
+	width: 52%;
+}
+.ld-history-table th.is-num,
+.ld-history-table td.is-num {
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
 .ld-td-products {
 	white-space: normal;
 	max-width: 260px;

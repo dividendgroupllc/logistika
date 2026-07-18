@@ -37,6 +37,21 @@ def orders_for_truck(fura=None):
 
 
 @frappe.whitelist()
+def internal_logistics_for_order(order):
+	"""Berilgan Order'ning "Pekin list"i qaysi Internal Logistics hujjat(lar)ida
+	borligini topadi (buyurtmalar jadvali orqali) — Logistic Documentation'ning
+	Transit bo'limida shu hujjatga link berish uchun ishlatiladi."""
+	if not order:
+		return []
+	return frappe.get_all(
+		"Internal Logistics Order",
+		filters={"order": order},
+		pluck="parent",
+		distinct=True,
+	)
+
+
+@frappe.whitelist()
 def telegram_registration_status(order_names):
 	"""Berilgan Order'lar ro'yxati uchun, har birining mijozi (Customer) Telegram
 	botiga ro'yxatdan o'tganmi (kamida bitta Contact'ida telegram_chat_id bormi) —

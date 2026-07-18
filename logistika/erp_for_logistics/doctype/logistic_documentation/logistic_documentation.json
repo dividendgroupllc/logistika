@@ -23,14 +23,22 @@
   "tab_cl",
   "sec_cl",
   "pekin_invoice",
+  "ttn_hujjat",
   "eksport_deklaratsiya",
   "cb_cl",
   "send_eksport_deklaratsiya",
   "eksport_sent",
+  "sec_cl_cmr",
+  "cl_go_to_transit",
+  "cl_cmr_preview_html",
+  "cl_cmr_tasdiqlandi",
   "tab_tr",
   "sec_tr",
+  "tr_docs_preview_html",
+  "tr_docs_tasdiqlandi",
   "tranzit_check",
   "tranzit_hujjat",
+  "tr_hujjat_turi",
   "tranzit_matn",
   "tranzit_xarajat"
  ],
@@ -84,7 +92,8 @@
   {
    "fieldname": "peregruz_hujjat",
    "fieldtype": "Attach",
-   "label": "\u041f\u0435\u0440\u0435\u0433\u0440\u0443\u0437 \u0434\u0430\u043d\u043d\u044b\u0439 \u2014 hujjat"
+   "label": "\u041f\u0435\u0440\u0435\u0433\u0440\u0443\u0437 \u0434\u0430\u043d\u043d\u044b\u0439 \u2014 hujjat",
+   "permlevel": 1
   },
   {
    "default": "0",
@@ -122,12 +131,20 @@
   {
    "fieldname": "pekin_invoice",
    "fieldtype": "Attach",
-   "label": "Pekin invoice (kliyentdan)"
+   "label": "Pekin invoice (kliyentdan)",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "ttn_hujjat",
+   "fieldtype": "Attach",
+   "label": "TTN hujjati",
+   "permlevel": 1
   },
   {
    "fieldname": "eksport_deklaratsiya",
    "fieldtype": "Attach",
-   "label": "Eksport deklaratsiya (ED/CO)"
+   "label": "Eksport deklaratsiya (ED/CO)",
+   "permlevel": 1
   },
   {
    "fieldname": "cb_cl",
@@ -147,6 +164,28 @@
    "read_only": 1
   },
   {
+   "fieldname": "sec_cl_cmr",
+   "fieldtype": "Section Break",
+   "label": "CMR (Transit bo'limidan)"
+  },
+  {
+   "fieldname": "cl_go_to_transit",
+   "fieldtype": "Button",
+   "label": "\u2192 Transit bo'limiga o'tish"
+  },
+  {
+   "fieldname": "cl_cmr_preview_html",
+   "fieldtype": "HTML",
+   "label": "CMR"
+  },
+  {
+   "default": "0",
+   "description": "Transit bo'limida biriktirilgan CMR hujjatini ko'rib, to'g'riligini tasdiqlash",
+   "fieldname": "cl_cmr_tasdiqlandi",
+   "fieldtype": "Check",
+   "label": "CMR ko'rib tasdiqlandi \u2713"
+  },
+  {
    "fieldname": "tab_tr",
    "fieldtype": "Tab Break",
    "label": "\u0422\u0440\u0430\u043d\u0437\u0438\u0442"
@@ -157,6 +196,18 @@
    "label": "\u0422\u0440\u0430\u043d\u0437\u0438\u0442"
   },
   {
+   "fieldname": "tr_docs_preview_html",
+   "fieldtype": "HTML",
+   "label": "\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b \u043a\u043b\u0438\u0435\u043d\u0442\u0430"
+  },
+  {
+   "default": "0",
+   "description": "Pekin invoice, TTN \u0438 Pekin list (Internal Logistics) \u043f\u0440\u043e\u0432\u0435\u0440\u0435\u043d\u044b",
+   "fieldname": "tr_docs_tasdiqlandi",
+   "fieldtype": "Check",
+   "label": "\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b \u043f\u0440\u043e\u0432\u0435\u0440\u0435\u043d\u044b \u2713"
+  },
+  {
    "default": "0",
    "fieldname": "tranzit_check",
    "fieldtype": "Check",
@@ -165,17 +216,24 @@
   {
    "fieldname": "tranzit_hujjat",
    "fieldtype": "Attach",
-   "label": "Tranzit hujjati"
+   "label": "CMR",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "tr_hujjat_turi",
+   "fieldtype": "Select",
+   "label": "\u0422\u0438\u043f \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430",
+   "options": "\u0422\u0438\u0440 \u043a\u0430\u0440\u043d\u0435\u0442\n\u0410\u043a\u0442 \u043f\u0435\u0440\u0435\u0433\u0440\u0443\u0437\u0430"
   },
   {
    "fieldname": "tranzit_matn",
    "fieldtype": "Data",
-   "label": "Izoh"
+   "label": "\u041f\u0440\u0438\u043c\u0435\u0447\u0430\u043d\u0438\u0435"
   },
   {
    "fieldname": "tranzit_xarajat",
    "fieldtype": "Currency",
-   "label": "Xarajatlar summasi"
+   "label": "\u0421\u0443\u043c\u043c\u0430 \u0440\u0430\u0441\u0445\u043e\u0434\u043e\u0432"
   }
  ],
  "grid_page_length": 50,
@@ -198,6 +256,12 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
    "write": 1
   }
  ],

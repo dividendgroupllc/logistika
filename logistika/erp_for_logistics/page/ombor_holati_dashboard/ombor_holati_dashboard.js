@@ -419,14 +419,21 @@ logistika.ui.OmborHolatiDashboardPage = class OmborHolatiDashboardPage {
 							.join("")
 					: `<tr><td colspan="3">${__("Hali tarix yo'q")}</td></tr>`;
 
+				// ld-table klassi (asosiy pipeline jadvali uchun) matnni bitta qatorga
+				// majburlaydi (white-space: nowrap) va o'zining scroll konteyneriga
+				// tayanadi — bu tarix oynasida yo'q, shuning uchun uzun status nomlari
+				// ("Ожидания документа Клиент → Транзитний оформеления" kabi) dialog
+				// tashqarisiga chiqib, kesilib qolardi. Shu yerda alohida, o'raladigan
+				// (wrap) jadval klassi ishlatiladi.
 				const dialog = new frappe.ui.Dialog({
 					title: __("{0} — status tarixi", [fura]),
+					size: "large",
 					fields: [
 						{
 							fieldtype: "HTML",
 							fieldname: "history_html",
 							options: `
-								<table class="ld-table">
+								<table class="ld-history-table">
 									<thead>
 										<tr>
 											<th>${__("O'zgarish")}</th>

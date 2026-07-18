@@ -121,7 +121,53 @@ def save_customer_message(order, chat_id, text):
 		doc_name=doc.name,
 		text=text,
 	)
+	_notify_document_owners(order, text)
 	return doc.name
+
+
+def _notify_document_owners(order, text):
+	"""Mijoz yangi xabar yozganda, shu order bog'langan Internal Logistics/KZ Transit
+	hujjat(lar)ini YARATGAN xodimga Frappe'ning o'z bildirishnoma tizimi orqali
+	(qo'ng'iroq belgisi + real-time popup) xabar boradi — xuddi assignment/mention
+	kabi. Bitta order bir nechta hujjatga (masalan bir nechta Internal Logistics'ning
+	buyurtmalar jadvaliga) tegishli bo'lishi mumkin, shuning uchun har biriga alohida."""
+	from frappe.desk.doctype.notification_log.notification_log import enqueue_create_notification
+
+	targets = frappe.db.sql(
+		"""
+		select 'Internal Logistics' as doctype, il.name as name, il.owner as owner
+		from `tabInternal Logistics` il
+		inner join `tabInternal Logistics Order` ilo on ilo.parent = il.name
+		where ilo.order = %(order)s
+		union
+		select 'KZ Transit' as doctype, kzt.name as name, kzt.owner as owner
+		from `tabKZ Transit` kzt
+		where kzt.order = %(order)s
+		""",
+		{"order": order},
+		as_dict=True,
+	)
+
+	preview = text if len(text) <= 120 else text[:117] + "..."
+	for t in targets:
+		if not t.owner:
+			continue
+		# enqueue_create_notification "users" parametri EMAIL kutadi (docstring: "list
+		# of user emails"), owner (User.name) emas — Administrator kabi hollarda ikkalasi
+		# har xil bo'lishi mumkin (name="Administrator", email="admin@..."), aks holda
+		# hech kimga yetib bormay, jimgina hech narsa qilmay qo'yadi.
+		email = frappe.db.get_value("User", t.owner, "email")
+		if not email:
+			continue
+		enqueue_create_notification(
+			email,
+			{
+				"type": "Alert",
+				"document_type": t.doctype,
+				"document_name": t.name,
+				"subject": f"Mijoz «{order}» buyurtmasi bo'yicha yozdi: {preview}",
+			},
+		)
 
 
 def _translate_customer_message_async(doc_name, text):

@@ -34,7 +34,13 @@ fixtures = [
 
 # include js, css files in header of desk.html
 app_include_css = "/assets/logistika/css/internal_logistics.css"
-app_include_js = "/assets/logistika/js/order_chat_widget.js"
+# `?v=N` — bu fayl to'g'ridan-to'g'ri (esbuild bundle'siz) statik xizmat qilinadi,
+# nginx uni "Cache-Control: max-age=31536000" (1 yil!) bilan yuboradi — fayl
+# o'zgarganda ham brauzer/oraliq keshlar buni sezmasligi mumkin edi (aynan shu holat
+# 2026-07-18'da sodir bo'ldi). Shuning uchun har safar bu faylga MUHIM o'zgarish
+# kiritilganda shu raqamni oshirish kerak — URL o'zgarishi barcha keshlarni majburan
+# chetlab o'tadi.
+app_include_js = "/assets/logistika/js/order_chat_widget.js?v=3"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/logistika/css/logistika.css"
