@@ -245,6 +245,31 @@
 	text-decoration: underline;
 	text-decoration-color: transparent;
 }
+/* "Tarix" dialogi uchun — od-table'dan farqli, matn o'ralishi (kesilib qolmasligi)
+   va dialog kengligiga to'g'ri sig'ishi kerak. */
+.od-history-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 12px;
+	table-layout: fixed;
+}
+.od-history-table th,
+.od-history-table td {
+	padding: 8px 10px;
+	border-bottom: 1px solid var(--od-gridline);
+	text-align: left;
+	white-space: normal;
+	word-break: break-word;
+}
+.od-history-table th:first-child,
+.od-history-table td:first-child {
+	width: 52%;
+}
+.od-history-table th.is-num,
+.od-history-table td.is-num {
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
 .od-table td.is-link:hover {
 	text-decoration-color: currentColor;
 }

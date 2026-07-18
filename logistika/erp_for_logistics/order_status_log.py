@@ -72,11 +72,26 @@ def log_status_changes(doc):
 		).insert(ignore_permissions=True)
 
 
+def format_duration(seconds):
+	"""Vaqt farqini o'qish qulay formatda qaytaradi. Har doim "kun"da ko'rsatsak,
+	kunga yetmagan (masalan 5 daqiqalik) farqlar yaxlitlashda "0 kun" bo'lib ko'rinib,
+	farqning o'zi yo'qolib qolardi — shuning uchun kunga yetmasa soat/daqiqada."""
+	if seconds is None:
+		return None
+	seconds = max(seconds, 0)
+	if seconds < 60:
+		return "1 daqiqadan kam"
+	if seconds < 3600:
+		return f"{round(seconds / 60)} daqiqa"
+	if seconds < 86400:
+		return f"{round(seconds / 3600, 1)} soat"
+	return f"{round(seconds / 86400, 1)} kun"
+
+
 @frappe.whitelist()
 def get_status_history(order, fura):
 	"""Berilgan (order, fura) uchun butun status tarixini, har bir bosqich
-	orasida ketgan vaqt (kun) bilan birga qaytaradi — "batafsil tarix" oynasi
-	uchun."""
+	orasida ketgan vaqt bilan birga qaytaradi — "batafsil tarix" oynasi uchun."""
 	if not order or not fura:
 		return []
 
@@ -90,27 +105,26 @@ def get_status_history(order, fura):
 	history = []
 	previous_at = None
 	for row in rows:
-		days_in_previous_stage = None
+		duration = None
 		if previous_at:
-			days_in_previous_stage = round((row.changed_at - previous_at).total_seconds() / 86400, 1)
+			duration = format_duration((row.changed_at - previous_at).total_seconds())
 		history.append(
 			{
 				"old_status": row.old_status,
 				"new_status": row.new_status,
 				"changed_at": str(row.changed_at),
-				"days_in_previous_stage": days_in_previous_stage,
+				"duration": duration,
 			}
 		)
 		previous_at = row.changed_at
 
 	if previous_at:
-		days_in_current_stage = round((now_datetime() - previous_at).total_seconds() / 86400, 1)
 		history.append(
 			{
 				"old_status": rows[-1].new_status,
 				"new_status": None,
 				"changed_at": None,
-				"days_in_current_stage": days_in_current_stage,
+				"duration": format_duration((now_datetime() - previous_at).total_seconds()),
 			}
 		)
 
@@ -146,9 +160,9 @@ def get_last_change_map(order_furas):
 
 def attach_current_stage_durations(rows):
 	"""Pipeline qatorlariga (order, fura kaliti bo'yicha) "days_in_current_stage"ni
-	qo'shadi — bu funksiya ishga tushirilishidan OLDIN status o'zgargan (hali
-	tarixi yozilmagan) eski furalar uchun bu qiymat None (noma'lum) bo'lib qoladi,
-	taxmin qilinmaydi."""
+	(o'qish qulay formatdagi matn — kun, soat yoki daqiqa) qo'shadi — bu funksiya
+	ishga tushirilishidan OLDIN status o'zgargan (hali tarixi yozilmagan) eski
+	furalar uchun bu qiymat None (noma'lum) bo'lib qoladi, taxmin qilinmaydi."""
 	order_furas = [(r["order"], r["china_fura"]) for r in rows]
 	last_change_map = get_last_change_map(order_furas)
 
@@ -156,7 +170,7 @@ def attach_current_stage_durations(rows):
 	for row in rows:
 		last_changed_at = last_change_map.get((row["order"], row["china_fura"]))
 		if last_changed_at:
-			row["days_in_current_stage"] = round((now - last_changed_at).total_seconds() / 86400, 1)
+			row["days_in_current_stage"] = format_duration((now - last_changed_at).total_seconds())
 		else:
 			row["days_in_current_stage"] = None
 	return rows

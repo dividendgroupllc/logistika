@@ -155,7 +155,7 @@ logistika.ui.OrderDashboardPage = class OrderDashboardPage {
 		const label = statusText ? frappe.utils.escape_html(statusText) : __("Noma'lum");
 		const daysLabel =
 			daysInCurrentStage !== null && daysInCurrentStage !== undefined
-				? __("Joriy bosqichda: {0} kun", [daysInCurrentStage])
+				? __("Joriy bosqichda: {0}", [daysInCurrentStage])
 				: "";
 		return `
 			<div class="od-stepper">
@@ -179,12 +179,11 @@ logistika.ui.OrderDashboardPage = class OrderDashboardPage {
 				const rowsHtml = history.length
 					? history
 							.map((h) => {
-								const duration =
-									h.days_in_previous_stage !== undefined && h.days_in_previous_stage !== null
-										? __("{0} kun", [h.days_in_previous_stage])
-										: h.days_in_current_stage !== undefined
-											? __("{0} kun (davom etmoqda)", [h.days_in_current_stage])
-											: "—";
+								const duration = h.new_status
+									? h.duration || "—"
+									: h.duration
+										? __("{0} (davom etmoqda)", [h.duration])
+										: "—";
 								const line = h.new_status
 									? `${frappe.utils.escape_html(h.old_status || "")} → ${frappe.utils.escape_html(h.new_status)}`
 									: `${frappe.utils.escape_html(h.old_status || "")} (${__("joriy")})`;
@@ -197,14 +196,18 @@ logistika.ui.OrderDashboardPage = class OrderDashboardPage {
 							.join("")
 					: `<tr><td colspan="3">${__("Hali tarix yo'q")}</td></tr>`;
 
+				// od-table klassi (asosiy pipeline jadvali uchun) matnni bitta qatorga
+				// majburlaydi va o'zining scroll konteyneriga tayanadi — bu tarix
+				// oynasida yo'q, shuning uchun uzun status nomlari kesilib qolardi.
 				const dialog = new frappe.ui.Dialog({
 					title: __("{0} — status tarixi", [fura]),
+					size: "large",
 					fields: [
 						{
 							fieldtype: "HTML",
 							fieldname: "history_html",
 							options: `
-								<table class="od-table">
+								<table class="od-history-table">
 									<thead>
 										<tr>
 											<th>${__("O'zgarish")}</th>

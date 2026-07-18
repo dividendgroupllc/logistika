@@ -380,7 +380,7 @@ logistika.ui.OmborHolatiDashboardPage = class OmborHolatiDashboardPage {
 		const label = statusText ? frappe.utils.escape_html(statusText) : __("Noma'lum");
 		const daysTitle =
 			daysInCurrentStage !== null && daysInCurrentStage !== undefined
-				? __("Joriy bosqichda: {0} kun", [daysInCurrentStage])
+				? __("Joriy bosqichda: {0}", [daysInCurrentStage])
 				: "";
 		return `
 			<div class="ld-stepper" title="${daysTitle}">
@@ -401,12 +401,11 @@ logistika.ui.OmborHolatiDashboardPage = class OmborHolatiDashboardPage {
 				const rowsHtml = history.length
 					? history
 							.map((h) => {
-								const duration =
-									h.days_in_previous_stage !== undefined && h.days_in_previous_stage !== null
-										? __("{0} kun", [h.days_in_previous_stage])
-										: h.days_in_current_stage !== undefined
-											? __("{0} kun (davom etmoqda)", [h.days_in_current_stage])
-											: "—";
+								const duration = h.new_status
+									? h.duration || "—"
+									: h.duration
+										? __("{0} (davom etmoqda)", [h.duration])
+										: "—";
 								const line = h.new_status
 									? `${frappe.utils.escape_html(h.old_status || "")} → ${frappe.utils.escape_html(h.new_status)}`
 									: `${frappe.utils.escape_html(h.old_status || "")} (${__("joriy")})`;
