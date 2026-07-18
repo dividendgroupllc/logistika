@@ -42,6 +42,12 @@ umuman sarlavhasiz). Har bir mahsulot qatoridan quyidagi maydonlarni chiqarib ol
 - volume_cbm: hajm / CBM (m³), JAMI
 - uzunlik, kenglik, balandlik: bitta quti/karobkaning o'lchamlari (sm)
 
+Fayl bir nechta bo'limdan iborat bo'lishi mumkin: yuqorida mahsulot nomi/soni bilan asosiy \
+jadval, pastroqda esa xuddi shu mahsulotlarning o'lchami/vazni ALOHIDA, boshqa ustun tartibida \
+yozilgan bo'lishi mumkin. Shunday holatda: pastdagi qo'shimcha ma'lumotlarni mahsulotlar asosiy \
+jadvalda RO'YXATDA turgan TARTIBIGA (1-mahsulot, 2-mahsulot, ...) qarab mos mahsulotga biriktir \
+— uzoq mulohaza qilib o'tirma, shunchaki tartib bo'yicha ketma-ket moslashtir.
+
 Faqat FAKTIK matnda bor qiymatlarni chiqar — bo'lmagan maydonni taxmin qilma, shunchaki tashlab \
 ket. Javobni FAQAT quyidagi JSON formatida qaytar, boshqa hech qanday matn (izoh, tushuntirish, \
 markdown) qo'shma:
@@ -84,11 +90,17 @@ def _clean_row(raw):
 	return row
 
 
-# Kimi (kimi-k2.6) juda katta kontekst oynasiga ega (262k token) — bu chegara xarajat/
-# tezlikni cheklash uchun, real fayllar bundan ancha kichik. Baribir kesilib qolsa,
+# Kimi juda katta kontekst oynasiga ega (262k token) — bu chegara xarajat/tezlikni
+# cheklash uchun, real fayllar bundan ancha kichik. Baribir kesilib qolsa,
 # foydalanuvchiga ogohlantirish beriladi (aks holda oxirgi qatorlar sababsiz tushib
 # qolgani sezilmay qolardi).
 MAX_FILE_CHARS = 100_000
+
+# Bir nechta bo'limga bo'lingan (masalan mahsulot va uning o'lchamlari alohida
+# joylashgan) murakkab fayllarda ~75s gacha vaqt ketishi kuzatildi (sinovda) — default
+# 60s'dan ko'proq zahira beramiz. Xodim "freeze" spinner bilan kutadi, shuning uchun
+# bu Telegram webhook'dagidek kritik emas.
+_CSV_IMPORT_TIMEOUT = 100
 
 
 @frappe.whitelist()
@@ -110,7 +122,8 @@ def smart_parse_pekin_list(file_content):
 		[
 			{"role": "system", "content": SYSTEM_PROMPT},
 			{"role": "user", "content": file_content[:MAX_FILE_CHARS]},
-		]
+		],
+		timeout=_CSV_IMPORT_TIMEOUT,
 	)
 	parsed = _extract_json(content)
 	rows = parsed.get("rows") if isinstance(parsed, dict) else parsed

@@ -340,30 +340,49 @@ function import_pekin_csv_for_order(frm, text, order_name) {
 		if (fnames.includes(c)) map[c] = idx;
 	});
 
-	let count = 0;
+	// Ikki bosqichli: avval frm'ga TEGMASDAN faqat tekshiramiz (parts) — agar faylda
+	// mahsulot nomisiz, lekin baribir ma'lumotli qator qolib ketsa (masalan alohida
+	// bo'limga yozilgan o'lcham/vazn — bitta qattiq sarlavhaga sig'maydigan tuzilish),
+	// bu qattiq andoza faylni TO'LIQ tushunmayapti degani — shu holda hech narsa
+	// qo'shmasdan xato tashlaymiz, chaqiruvchi joyda bu Kimi fallback'ni ishga
+	// tushiradi (Kimi butun faylni yaxlit, bo'lim-bo'lim bo'lgan bo'lsa ham o'qiy oladi).
+	// Agar avval qisman qator qo'shib qo'yilsa, Kimi qaytadan xuddi shu mahsulotlarni
+	// qo'shganda dublikat paydo bo'lardi — shuning uchun frm.add_child hammasi
+	// muvaffaqiyatli bo'lgandagina, oxirida bir yo'la chaqiriladi.
+	const parsed = [];
+	let hasUnconsumedData = false;
 	for (let i = hIdx + 1; i < lines.length; i++) {
 		const parts = lines[i].split(delim);
 		const g = (fn) => (parts[map[fn]] !== undefined ? String(parts[map[fn]]).trim() : "");
-		const q = parseFloat(g("quantity").replace(",", "."));
-		const tb = parseFloat(g("total_boxes").replace(",", "."));
-		const cbm = parseFloat(g("volume_cbm").replace(",", "."));
-		if (isNaN(q) && isNaN(tb) && isNaN(cbm)) {
+		const part_name = g("part_name");
+		if (!part_name) {
+			if (parts.some((p) => p.trim().length > 0)) {
+				hasUnconsumedData = true;
+			}
 			continue;
 		}
-		const row = frm.add_child("pekin_list");
-		row.order = order_name;
+		const row = { part_name };
 		fnames.forEach((fn) => {
+			if (fn === "part_name") return;
 			let v = g(fn);
 			if (v === "") return;
-			if (fn !== "part_name") {
-				v = parseFloat(v.replace(",", "."));
-				if (isNaN(v)) return;
-			}
+			v = parseFloat(v.replace(",", "."));
+			if (isNaN(v)) return;
 			row[fn] = v;
 		});
-		count++;
+		parsed.push(row);
 	}
-	return count;
+
+	if (hasUnconsumedData) {
+		throw new Error(__("Faylda qo'shimcha, andozaga sig'magan ma'lumot bor"));
+	}
+
+	parsed.forEach((data) => {
+		const row = frm.add_child("pekin_list");
+		row.order = order_name;
+		Object.assign(row, data);
+	});
+	return parsed.length;
 }
 
 // Har bir buyurtma bloki ichidagi "Mijoz bilan suhbat" — render/yuborish logikasi

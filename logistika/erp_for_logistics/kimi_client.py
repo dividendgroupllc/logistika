@@ -10,7 +10,7 @@ import requests
 from frappe.utils.password import get_decrypted_password
 
 DEFAULT_BASE_URL = "https://api.moonshot.ai/v1"
-DEFAULT_MODEL = "kimi-k2.6"
+DEFAULT_MODEL = "kimi-k2.7-code-highspeed"
 
 
 def _get_settings():
@@ -31,12 +31,22 @@ def chat(messages, timeout=60):
 	— shuning uchun temperature parametri ataylab yuborilmaydi."""
 	api_key, base_url, model = _get_settings()
 
-	response = requests.post(
-		f"{base_url}/chat/completions",
-		headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
-		json={"model": model, "messages": messages},
-		timeout=timeout,
-	)
+	try:
+		response = requests.post(
+			f"{base_url}/chat/completions",
+			headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+			json={"model": model, "messages": messages},
+			timeout=timeout,
+		)
+	except requests.exceptions.Timeout:
+		# Ayrim (juda chalkash tuzilgan) matnlarda Kimi `timeout`dan ancha uzoqroq
+		# javob berishi mumkin — bu holatda ham raw exception/traceback emas,
+		# tushunarli xabar chiqishi kerak (chaqiruvchi joyda try/except bo'lmasa ham).
+		frappe.throw("Kimi javob bermadi (vaqt tugadi) — fayl juda murakkab bo'lishi mumkin, qayta urinib ko'ring")
+	except requests.exceptions.RequestException as e:
+		frappe.log_error(str(e), "Kimi ulanish xatosi")
+		frappe.throw("Kimi API bilan bog'lanib bo'lmadi — internet yoki server muammosi bo'lishi mumkin")
+
 	if not response.ok:
 		frappe.log_error(response.text[:2000], "Kimi API xatosi")
 		frappe.throw(f"Kimi API xatosi ({response.status_code}): {response.text[:500]}")

@@ -63,12 +63,13 @@ def _detect_language(text, timeout=60):
 
 
 def save_customer_message(order, chat_id, text):
-	"""Telegram webhook mijozdan kelgan xabarni saqlaydi. Kimi (kimi-k2.6, fikrlash
-	modeli) o'lchangan tarjima vaqti 13-17s — buni webhook javobidan OLDIN kutib
-	tursak, Telegram javobni kutmasdan xabarni QAYTA yuborishi (duplikat xabar/javob)
-	xavfi bor edi. Shuning uchun xabar tarjimasiz DARHOL saqlanadi (webhook tez javob
-	qaytaradi), o'zbekcha tarjima esa fon vazifasi (background job) sifatida keyinroq
-	qo'shiladi — xodim buni ochganda odatda allaqachon tayyor bo'ladi."""
+	"""Telegram webhook mijozdan kelgan xabarni saqlaydi. Tarjima Kimi API'ga tashqi
+	so'rov bo'lgani uchun (hozirgi model bilan odatda ~1-2s, lekin tarmoq/API sekinlashsa
+	uzayishi mumkin) buni webhook javobidan OLDIN kutib tursak, Telegram javobni
+	kutmasdan xabarni QAYTA yuborishi (duplikat xabar/javob) xavfi bor edi. Shuning
+	uchun xabar tarjimasiz DARHOL saqlanadi (webhook tez javob qaytaradi), o'zbekcha
+	tarjima esa fon vazifasi (background job) sifatida keyinroq qo'shiladi — xodim buni
+	ochganda odatda allaqachon tayyor bo'ladi."""
 	doc = frappe.get_doc(
 		{
 			"doctype": "Order Chat Message",

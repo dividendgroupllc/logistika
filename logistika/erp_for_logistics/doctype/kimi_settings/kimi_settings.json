@@ -16,7 +16,7 @@
    "label": "Kimi API kaliti"
   },
   {
-   "default": "kimi-k2.6",
+   "default": "kimi-k2.7-code-highspeed",
    "description": "https://api.moonshot.ai/v1/models orqali shu kalitga ruxsat berilgan modellar ro'yxatini ko'rish mumkin",
    "fieldname": "model",
    "fieldtype": "Data",
