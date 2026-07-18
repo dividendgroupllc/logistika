@@ -9,7 +9,11 @@ app_license = "mit"
 fixtures = [
 	{
 		"dt": "Custom Field",
-		"filters": [["name", "in", ["Contact-telegram_chat_id"]]],
+		"filters": [["name", "in", ["Contact-telegram_chat_id", "Account-account_name_zh"]]],
+	},
+	{
+		"dt": "Property Setter",
+		"filters": [["doc_type", "=", "Account"], ["property", "=", "translated_doctype"]],
 	},
 ]
 
@@ -151,13 +155,21 @@ app_include_js = "/assets/logistika/js/order_chat_widget.js?v=3"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+	"Account": {
+		# Yangi hisob qo'shilganda yoki nomi o'zgartirilganda, Chart of Accounts'ning
+		# xitoycha tarjimasi (Kimi orqali) avtomatik yaratiladi/yangilanadi — qo'lda
+		# translate_chart_of_accounts/sync_coa_translations qayta ishga tushirish shart
+		# emas. Bu fon vazifasi (background job) sifatida ishlaydi, hisobni saqlashni
+		# sekinlashtirmaydi.
+		"after_insert": "logistika.erp_for_logistics.coa_translation.queue_translation_for_new_account",
+		"on_update": "logistika.erp_for_logistics.coa_translation.queue_translation_for_renamed_account",
+		# ERPNext hisob nomini o'zgartirishda odatiy save() emas, balki
+		# update_account_number() (frappe.rename_doc) yo'lini ishlatadi — shu yo'l
+		# on_update'ni chaqirmaydi, faqat after_rename'ni.
+		"after_rename": "logistika.erp_for_logistics.coa_translation.queue_translation_after_rename",
+	}
+}
 
 # Scheduled Tasks
 # ---------------
