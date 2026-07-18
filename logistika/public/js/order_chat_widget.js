@@ -21,9 +21,18 @@ logistika.order_chat.render_bubbles = function ($log, messages) {
 			const bubble_style = mine
 				? "background:#dbeafe; margin-left:20%; text-align:right;"
 				: "background:#fff; margin-right:20%; border:1px solid #e5e7eb;";
-			const sub = m.tarjima
-				? `<div style="font-size:11px; color:#6b7280; margin-top:2px;">(${frappe.utils.escape_html(m.tarjima)})</div>`
-				: "";
+			// Xodim xabari — mijozga yuborilgan (bitta) tarjima. Mijoz xabari — xodim
+			// o'qishi uchun DOIM ikkala tilga (xitoycha, ruscha) tarjima ko'rsatiladi,
+			// mijoz qaysi tilda yozganidan qat'i nazar.
+			let sub = "";
+			if (mine && m.tarjima) {
+				sub = `<div style="font-size:11px; color:#6b7280; margin-top:2px;">(${frappe.utils.escape_html(m.tarjima)})</div>`;
+			} else if (!mine && (m.tarjima_xitoycha || m.tarjima_ruscha)) {
+				const parts = [];
+				if (m.tarjima_xitoycha) parts.push(`🇨🇳 ${frappe.utils.escape_html(m.tarjima_xitoycha)}`);
+				if (m.tarjima_ruscha) parts.push(`🇷🇺 ${frappe.utils.escape_html(m.tarjima_ruscha)}`);
+				sub = `<div style="font-size:11px; color:#6b7280; margin-top:2px;">${parts.join("<br>")}</div>`;
+			}
 			return `
 				<div style="padding:6px 8px; border-radius:8px; margin-bottom:6px; ${bubble_style}">
 					<div style="font-size:11px; color:#6b7280;">${mine ? __("Xodim") : __("Mijoz")} — ${frappe.datetime.str_to_user(m.creation)}</div>

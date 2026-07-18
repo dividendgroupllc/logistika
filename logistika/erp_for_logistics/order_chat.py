@@ -4,10 +4,12 @@
 # Mijoz (Telegram) <-> Xodim (ERP) suhbati — "Order Chat Message" orqali bitta Order
 # darajasida saqlanadi (Internal Logistics ko'p buyurtmali bo'lgani uchun har bir order
 # alohida-alohida ko'rsatiladi, KZ Transit'da esa hujjatning o'zi bitta order'ga tegishli).
-# Til: mijoz qaysi tilda yozsa, shu tilda saqlanadi; xodimga o'qish uchun o'zbekcha
-# tarjimasi ham qo'shiladi. Xodim javobni RU/UZ (o'zi bilgan tilda) yozadi, Kimi uni
-# mijozning oxirgi xabari qaysi tilda bo'lsa o'sha tilga tarjima qilib, Telegram orqali
-# o'sha tilda yuboradi.
+# Til: mijoz asl matni saqlanadi, xodim o'qishi uchun DOIM ikkala tilga (xitoycha,
+# ruscha) tarjimasi ham qo'shiladi — mijoz qaysi tilda yozgan bo'lishidan qat'i nazar.
+# Xodim javobni RU/UZ (o'zi bilgan tilda) yozadi, Kimi uni mijozning oxirgi xabari
+# qaysi tilda bo'lsa o'sha tilga tarjima qilib, Telegram orqali o'sha tilda yuboradi.
+
+import json
 
 import frappe
 
@@ -34,6 +36,36 @@ def _translate(text, target_language, timeout=60):
 	except Exception:
 		frappe.log_error(frappe.get_traceback(), "Kimi tarjima xatosi")
 		return None
+
+
+def _translate_dual(text, timeout=60):
+	"""Xodim mijoz xabarini o'qiy olishi uchun DOIM ikkala tilga (xitoycha, ruscha)
+	tarjima qiladi — mijoz o'zi qaysi tilda yozganidan qat'i nazar. Bitta so'rovda
+	ikkalasini ham so'raymiz (2 alohida _translate() chaqirig'idan tezroq/arzonroq)."""
+	try:
+		content = kimi_chat(
+			[
+				{
+					"role": "system",
+					"content": (
+						"Quyidagi matnni IKKALA tilga tarjima qil: xitoycha va ruscha. Agar matn "
+						"allaqachon shu tillardan birida bo'lsa, o'sha til uchun matnni o'zgarishsiz "
+						'qaytar. Javobni FAQAT quyidagi JSON formatida qaytar, boshqa hech qanday '
+						'matn (izoh, markdown) qo\'shma: {"xitoycha": "...", "ruscha": "..."}'
+					),
+				},
+				{"role": "user", "content": text},
+			],
+			timeout=timeout,
+		)
+		start, end = content.find("{"), content.rfind("}")
+		if start == -1 or end == -1:
+			return None, None
+		data = json.loads(content[start : end + 1])
+		return data.get("xitoycha") or None, data.get("ruscha") or None
+	except Exception:
+		frappe.log_error(frappe.get_traceback(), "Kimi ikki tilga tarjima xatosi")
+		return None, None
 
 
 def _detect_language(text, timeout=60):
@@ -77,7 +109,8 @@ def save_customer_message(order, chat_id, text):
 			"sender": "Mijoz",
 			"telegram_chat_id": str(chat_id),
 			"matn": text,
-			"tarjima": None,
+			"tarjima_xitoycha": None,
+			"tarjima_ruscha": None,
 		}
 	)
 	doc.insert(ignore_permissions=True)
@@ -92,9 +125,14 @@ def save_customer_message(order, chat_id, text):
 
 
 def _translate_customer_message_async(doc_name, text):
-	translation = _translate(text, "o'zbek")
-	if translation:
-		frappe.db.set_value("Order Chat Message", doc_name, "tarjima", translation, update_modified=False)
+	xitoycha, ruscha = _translate_dual(text)
+	values = {}
+	if xitoycha:
+		values["tarjima_xitoycha"] = xitoycha
+	if ruscha:
+		values["tarjima_ruscha"] = ruscha
+	if values:
+		frappe.db.set_value("Order Chat Message", doc_name, values, update_modified=False)
 		frappe.db.commit()
 
 
@@ -104,7 +142,7 @@ def get_order_chat_log(order):
 	return frappe.get_all(
 		"Order Chat Message",
 		filters={"order": order},
-		fields=["name", "sender", "matn", "tarjima", "creation", "xodim"],
+		fields=["name", "sender", "matn", "tarjima", "tarjima_xitoycha", "tarjima_ruscha", "creation", "xodim"],
 		order_by="creation asc",
 	)
 

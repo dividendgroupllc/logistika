@@ -12,7 +12,10 @@
   "telegram_chat_id",
   "sec_matn",
   "matn",
-  "tarjima"
+  "tarjima",
+  "cb_tarjima",
+  "tarjima_xitoycha",
+  "tarjima_ruscha"
  ],
  "fields": [
   {
@@ -61,10 +64,26 @@
    "reqd": 1
   },
   {
-   "description": "Mijoz xabari uchun — o'zbekcha tarjimasi (xodim o'qishi uchun). Xodim xabari uchun — mijozga yuborilgan tarjima (mijoz tiliga).",
+   "description": "Faqat \"Xodim\" xabarlari uchun — mijozga yuborilgan tarjima (mijoz tiliga).",
    "fieldname": "tarjima",
    "fieldtype": "Text",
-   "label": "Tarjima"
+   "label": "Tarjima (mijozga yuborilgan)"
+  },
+  {
+   "fieldname": "cb_tarjima",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Faqat \"Mijoz\" xabarlari uchun — xodim o'qishi uchun xitoycha tarjima",
+   "fieldname": "tarjima_xitoycha",
+   "fieldtype": "Text",
+   "label": "Tarjima — xitoycha"
+  },
+  {
+   "description": "Faqat \"Mijoz\" xabarlari uchun — xodim o'qishi uchun ruscha tarjima",
+   "fieldname": "tarjima_ruscha",
+   "fieldtype": "Text",
+   "label": "Tarjima — ruscha"
   }
  ],
  "index_web_pages_for_search": 1,
