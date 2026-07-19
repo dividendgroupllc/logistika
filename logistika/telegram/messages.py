@@ -86,3 +86,8 @@ QA_ORDER_PICKED = (
 )
 
 QA_RECEIVED = "✅ Savolingiz qabul qilindi, tez orada javob beramiz."
+
+QA_ORDER_DELIVERED = (
+	"Bu buyurtma allaqachon yetkazib berilgan, shuning uchun bu yerda yangi xabar "
+	"yozib bo'lmaydi. Savolingiz bo'lsa, boshqa buyurtma tanlang yoki bizga to'g'ridan-to'g'ri murojaat qiling."
+)

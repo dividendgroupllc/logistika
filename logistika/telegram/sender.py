@@ -26,10 +26,10 @@ def send_message(
 	try:
 		r = requests.post(_url("sendMessage"), json=payload, timeout=10)
 		if not r.ok:
-			frappe.log_error(r.text, f"Telegram sendMessage Error (chat_id={chat_id})")
+			frappe.log_error(title=f"Telegram sendMessage Error (chat_id={chat_id})", message=r.text)
 		return r.ok
 	except Exception as e:
-		frappe.log_error(str(e), f"Telegram sendMessage Exception (chat_id={chat_id})")
+		frappe.log_error(title=f"Telegram sendMessage Exception (chat_id={chat_id})", message=str(e))
 		return False
 
 
@@ -42,10 +42,10 @@ def send_location(chat_id, latitude: float, longitude: float) -> bool:
 	try:
 		r = requests.post(_url("sendLocation"), json=payload, timeout=10)
 		if not r.ok:
-			frappe.log_error(r.text, f"Telegram sendLocation Error (chat_id={chat_id})")
+			frappe.log_error(title=f"Telegram sendLocation Error (chat_id={chat_id})", message=r.text)
 		return r.ok
 	except Exception as e:
-		frappe.log_error(str(e), f"Telegram sendLocation Exception (chat_id={chat_id})")
+		frappe.log_error(title=f"Telegram sendLocation Exception (chat_id={chat_id})", message=str(e))
 		return False
 
 
@@ -64,10 +64,10 @@ def send_document(chat_id, file_url: str, caption: Optional[str] = None) -> bool
 				data["caption"] = caption
 			r = requests.post(_url("sendDocument"), data=data, files=files, timeout=30)
 		if not r.ok:
-			frappe.log_error(r.text, f"Telegram sendDocument Error (chat_id={chat_id})")
+			frappe.log_error(title=f"Telegram sendDocument Error (chat_id={chat_id})", message=r.text)
 		return r.ok
 	except Exception as e:
-		frappe.log_error(str(e), f"Telegram sendDocument Exception (chat_id={chat_id})")
+		frappe.log_error(title=f"Telegram sendDocument Exception (chat_id={chat_id})", message=str(e))
 		return False
 
 
@@ -80,7 +80,7 @@ def answer_callback_query(callback_query_id: str, text: Optional[str] = None) ->
 		r = requests.post(_url("answerCallbackQuery"), json=payload, timeout=10)
 		return r.ok
 	except Exception as e:
-		frappe.log_error(str(e), "Telegram answerCallbackQuery Exception")
+		frappe.log_error(title="Telegram answerCallbackQuery Exception", message=str(e))
 		return False
 
 
@@ -93,18 +93,18 @@ def download_incoming_file(file_id: str) -> tuple[bytes, str] | None:
 		result = r.json().get("result") if r.ok else None
 		file_path = result.get("file_path") if result else None
 		if not file_path:
-			frappe.log_error(r.text, f"Telegram getFile Error (file_id={file_id})")
+			frappe.log_error(title=f"Telegram getFile Error (file_id={file_id})", message=r.text)
 			return None
 
 		file_url = f"https://api.telegram.org/file/bot{get_bot_token()}/{file_path}"
 		content_r = requests.get(file_url, timeout=30)
 		if not content_r.ok:
-			frappe.log_error(content_r.text, f"Telegram file download Error (file_id={file_id})")
+			frappe.log_error(title=f"Telegram file download Error (file_id={file_id})", message=content_r.text)
 			return None
 
 		return content_r.content, file_path.rsplit("/", 1)[-1]
 	except Exception as e:
-		frappe.log_error(str(e), f"Telegram download_incoming_file Exception (file_id={file_id})")
+		frappe.log_error(title=f"Telegram download_incoming_file Exception (file_id={file_id})", message=str(e))
 		return None
 
 

@@ -7,8 +7,8 @@ def get_bot_token() -> str:
 
 	if not token or set(str(token)) == {"*"}:
 		frappe.log_error(
-			"Bot token kiritilmagan. Telegram Bot Settings ga kiring.",
-			"Telegram Config",
+			title="Telegram Config",
+			message="Bot token kiritilmagan. Telegram Bot Settings ga kiring.",
 		)
 		raise ValueError("Bot token sozlanmagan")
 	return token

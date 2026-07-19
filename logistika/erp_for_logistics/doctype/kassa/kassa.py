@@ -44,6 +44,7 @@ class Kassa(Document):
         self.validate_conversion()
         self.validate_amount()
         self.validate_currency()
+        self.validate_company_exchange_rates_available()
 
     def on_submit(self):
         """Submit bo'lganda Payment Entry yoki Journal Entry yaratish"""
@@ -228,9 +229,14 @@ class Kassa(Document):
 
         if is_multicurrency:
             je.multi_currency = 1
+            # validate_expense_dividend_exchange_rate() bu holatni allaqachon
+            # validate() bosqichida ushlagan bo'lishi kerak — shu yerda "1" bilan
+            # jim almashtirish EMAS, aniq xato (himoya uchun ikkinchi qatlam).
             exchange_rate = get_exchange_rate(cash_account_currency, company_currency, self.date)
-            if not exchange_rate or exchange_rate == 0:
-                exchange_rate = 1
+            if not exchange_rate or flt(exchange_rate) <= 0:
+                frappe.throw(
+                    _("Не найден курс {0} к валюте компании {1}").format(cash_account_currency, company_currency)
+                )
             company_amount = flt(self.amount) * exchange_rate
             dividend_account_currency = (
                 frappe.get_cached_value("Account", dividend_account, "account_currency") or company_currency
@@ -304,9 +310,14 @@ class Kassa(Document):
 
         if is_multicurrency:
             je.multi_currency = 1
+            # validate_expense_dividend_exchange_rate() bu holatni allaqachon
+            # validate() bosqichida ushlagan bo'lishi kerak — shu yerda "1" bilan
+            # jim almashtirish EMAS, aniq xato (himoya uchun ikkinchi qatlam).
             exchange_rate = get_exchange_rate(cash_account_currency, company_currency, self.date)
-            if not exchange_rate or exchange_rate == 0:
-                exchange_rate = 1
+            if not exchange_rate or flt(exchange_rate) <= 0:
+                frappe.throw(
+                    _("Не найден курс {0} к валюте компании {1}").format(cash_account_currency, company_currency)
+                )
             company_amount = flt(self.amount) * exchange_rate
             expense_amount, expense_exchange_rate = get_account_currency_amount(
                 company_amount, expense_account_currency, company_currency, self.date
@@ -527,6 +538,60 @@ class Kassa(Document):
 
         if self.order and frappe.db.get_value("Order", self.order, "kliyent") != self.party:
             frappe.throw(_("Выбранный заказ не относится к контрагенту {0}").format(self.party))
+
+    def validate_company_exchange_rates_available(self):
+        """on_submit() (Payment Entry/Journal Entry yaratish) kerak qiladigan HAMMA
+        "valyuta -> kompaniya valyutasi" kurslarini ALDIN, shu yerda tekshiradi.
+
+        Bu muhim: Frappe submit() oqimida docstatus=1 DB'ga on_submit() ishga
+        tushishidan OLDIN yozib bo'lingan bo'ladi — agar kurs yo'qligi faqat
+        on_submit() ichida (create_payment_entry/create_conversion_payment_entry/
+        create_expense_journal_entry/create_dividend_journal_entry orqali
+        get_company_exchange_rate()) aniqlansa, Kassa hujjati "submitted" deb
+        saqlanib qoladi, lekin unga bog'liq buxgalteriya yozuvi yaratilmay yoki
+        muvozanatsiz holda qoladi (productionda sinovda aynan shu — imzosiz,
+        muvozanatsiz Journal Entry — yuzaga keldi, chunki UZS uchun Currency
+        Exchange kursi sozlanmagan edi). Shu sabab har bir on_submit() yo'li
+        qaysi valyutalarga muhtoj bo'lsa, o'sha ro'yxat shu yerda takrorlanadi."""
+        if self.transaction_type not in ["Приход", "Расход", "Конвертация"]:
+            return
+
+        company_currency = frappe.get_cached_value("Company", self.company, "default_currency")
+        if not company_currency:
+            return
+
+        needed_currencies = set()
+
+        if self.transaction_type == "Конвертация":
+            # create_conversion_payment_entry() ikkala tomon uchun ham
+            # get_company_exchange_rate()ni chaqiradi.
+            needed_currencies.update(filter(None, [self.cash_account_currency, self.cash_account_to_currency]))
+        elif self.party_type in ["Customer", "Supplier", "Employee"]:
+            # create_payment_entry() faqat cash va party hisob valyutasi FARQ
+            # qilganda (is_party_multicurrency_payment()) get_company_exchange_rate()
+            # chaqiradi — bir xil bo'lsa umuman kerak emas.
+            if self.is_party_multicurrency_payment():
+                needed_currencies.update(filter(None, [self.cash_account_currency, self.party_currency]))
+        elif self.party_type == "Расходы" or is_dividend_party_type(self.party_type):
+            # create_expense_journal_entry()/create_dividend_journal_entry() faqat
+            # cash hisobi kompaniya valyutasidan farq qilganda kurs so'raydi.
+            needed_currencies.update(filter(None, [self.cash_account_currency]))
+
+        needed_currencies.discard(company_currency)
+        if not needed_currencies:
+            return
+
+        missing = [
+            currency
+            for currency in sorted(needed_currencies)
+            if not (rate := get_exchange_rate(currency, company_currency, self.date)) or flt(rate) <= 0
+        ]
+        if missing:
+            frappe.throw(
+                _("Не найден курс {0} к валюте компании {1} на дату {2} — добавьте Currency Exchange").format(
+                    ", ".join(missing), company_currency, self.date
+                )
+            )
 
     def validate_transfer(self):
         """Transfer validatsiyasi"""

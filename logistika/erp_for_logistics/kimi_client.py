@@ -44,11 +44,15 @@ def chat(messages, timeout=60):
 		# tushunarli xabar chiqishi kerak (chaqiruvchi joyda try/except bo'lmasa ham).
 		frappe.throw("Kimi javob bermadi (vaqt tugadi) — fayl juda murakkab bo'lishi mumkin, qayta urinib ko'ring")
 	except requests.exceptions.RequestException as e:
-		frappe.log_error(str(e), "Kimi ulanish xatosi")
+		# frappe.log_error(title, message) — argumentlar teskari berilsa, uzun matn
+		# "title"ga tushib (140 belgi limiti bor), xatoni logga yozishning o'zi
+		# CharacterLengthExceededError bilan qulaydi (uzun xato matnlarida sodir
+		# bo'lishi aniqlandi — kalit so'z bilan chaqirish shart).
+		frappe.log_error(title="Kimi ulanish xatosi", message=str(e))
 		frappe.throw("Kimi API bilan bog'lanib bo'lmadi — internet yoki server muammosi bo'lishi mumkin")
 
 	if not response.ok:
-		frappe.log_error(response.text[:2000], "Kimi API xatosi")
+		frappe.log_error(title="Kimi API xatosi", message=response.text[:2000])
 		frappe.throw(f"Kimi API xatosi ({response.status_code}): {response.text[:500]}")
 
 	return response.json()["choices"][0]["message"]["content"]

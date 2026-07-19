@@ -28,6 +28,7 @@ from logistika.telegram.messages import (
 	ASK_PHONE,
 	PHONE_NOT_FOUND,
 	QA_NO_ORDERS,
+	QA_ORDER_DELIVERED,
 	QA_ORDER_EXPIRED,
 	QA_ORDER_PICKED,
 	QA_PICK_ORDER,
@@ -149,11 +150,15 @@ def _handle_qa_order_callback(callback_id, chat_id, data) -> None:
 		order_name = None
 
 	contact_name = _get_contact_by_chat_id(chat_id)
+
+	from logistika.erp_for_logistics.order_chat import is_order_delivered
+
 	valid = bool(
 		order_name
 		and contact_name
 		and frappe.db.exists("Order", order_name)
 		and _contact_owns_order(contact_name, order_name)
+		and not is_order_delivered(order_name)
 	)
 
 	if not valid:
@@ -210,13 +215,19 @@ def _get_qa_order_candidates(contact_name):
 	if not customer_names:
 		return []
 
-	return frappe.get_all(
+	from logistika.erp_for_logistics.order_chat import is_order_delivered
+
+	# Yetkazib berilgan orderlar bilan yangi Savol-Javob suhbati boshlab bo'lmaydi —
+	# ro'yxatdan ataylab chetlab o'tiladi. Filtrlashdan keyin ham 15 tasi qolishi
+	# uchun boshida ko'proq (50) olinadi.
+	candidates = frappe.get_all(
 		"Order",
 		filters={"kliyent": ["in", customer_names]},
 		fields=["name"],
 		order_by="creation desc",
-		limit_page_length=15,
+		limit_page_length=50,
 	)
+	return [c for c in candidates if not is_order_delivered(c.name)][:15]
 
 
 def _handle_qa_message(chat_id, order_name, text) -> None:
@@ -234,7 +245,14 @@ def _handle_qa_message(chat_id, order_name, text) -> None:
 
 	from logistika.erp_for_logistics.order_chat import save_customer_message
 
-	save_customer_message(order_name, chat_id, text)
+	# save_customer_message() order allaqachon yetkazib berilgan bo'lsa None qaytaradi
+	# (yagona haqiqiy manba — is_order_delivered() shu funksiya ichida tekshiriladi).
+	doc_name = save_customer_message(order_name, chat_id, text)
+	if not doc_name:
+		_clear_pending_qa(chat_id)
+		send_message(chat_id, QA_ORDER_DELIVERED)
+		return
+
 	_set_pending_qa(chat_id, order_name)  # sliding TTL — suhbat davom etayotganda muddati uzayadi
 	send_message(chat_id, QA_RECEIVED)
 

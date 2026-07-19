@@ -156,7 +156,7 @@ def translate_and_sync_single_account(account):
 		frappe.db.commit()
 		frappe.translate.clear_cache()
 	except Exception:
-		frappe.log_error(frappe.get_traceback(), "Hisob nomini avtomatik tarjima qilishda xato")
+		frappe.log_error(title="Hisob nomini avtomatik tarjima qilishda xato", message=frappe.get_traceback())
 
 
 def queue_translation_for_new_account(doc, method=None):

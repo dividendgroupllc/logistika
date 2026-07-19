@@ -34,7 +34,7 @@ def _translate(text, target_language, timeout=60):
 			timeout=timeout,
 		).strip()
 	except Exception:
-		frappe.log_error(frappe.get_traceback(), "Kimi tarjima xatosi")
+		frappe.log_error(title="Kimi tarjima xatosi", message=frappe.get_traceback())
 		return None
 
 
@@ -64,7 +64,7 @@ def _translate_dual(text, timeout=60):
 		data = json.loads(content[start : end + 1])
 		return data.get("xitoycha") or None, data.get("ruscha") or None
 	except Exception:
-		frappe.log_error(frappe.get_traceback(), "Kimi ikki tilga tarjima xatosi")
+		frappe.log_error(title="Kimi ikki tilga tarjima xatosi", message=frappe.get_traceback())
 		return None, None
 
 
@@ -90,8 +90,23 @@ def _detect_language(text, timeout=60):
 		).strip()
 		return lang or None
 	except Exception:
-		frappe.log_error(frappe.get_traceback(), "Kimi til aniqlash xatosi")
+		frappe.log_error(title="Kimi til aniqlash xatosi", message=frappe.get_traceback())
 		return None
+
+
+def is_order_delivered(order):
+	"""Order to'liq yakunlangan (barcha zakaz_mahsulotlari qatorlari pipeline'ning
+	OXIRGI bosqichiga — "Клиент получил" — yetgan) bo'lsa True qaytaradi. Shunday
+	order uchun mijozdan Telegram orqali yangi Savol-Javob xabari qabul qilinmaydi —
+	yetkazib berilgandan keyin suhbat davom etishining ma'nosi yo'q."""
+	from logistika.erp_for_logistics.pipeline_status import PIPELINE_STAGES
+
+	statuses = frappe.get_all("Order Item", filters={"parent": order}, pluck="status")
+	if not statuses:
+		return False
+
+	final_stage = PIPELINE_STAGES[-1]
+	return all(status == final_stage for status in statuses)
 
 
 def save_customer_message(order, chat_id, text):
@@ -101,7 +116,14 @@ def save_customer_message(order, chat_id, text):
 	kutmasdan xabarni QAYTA yuborishi (duplikat xabar/javob) xavfi bor edi. Shuning
 	uchun xabar tarjimasiz DARHOL saqlanadi (webhook tez javob qaytaradi), o'zbekcha
 	tarjima esa fon vazifasi (background job) sifatida keyinroq qo'shiladi — xodim buni
-	ochganda odatda allaqachon tayyor bo'ladi."""
+	ochganda odatda allaqachon tayyor bo'ladi.
+
+	Order allaqachon yetkazib berilgan bo'lsa, hech narsa saqlamasdan None qaytaradi —
+	bu shu funksiyaning yagona, haqiqiy manba (chaqiruvchi joy — Telegram webhook —
+	shunga qarab mijozga tushunarli xabar ko'rsatadi)."""
+	if is_order_delivered(order):
+		return None
+
 	doc = frappe.get_doc(
 		{
 			"doctype": "Order Chat Message",
