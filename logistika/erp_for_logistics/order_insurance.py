@@ -72,6 +72,21 @@ def process_insurance_changes(doc):
 			frappe.db.set_value("Order Item", row.name, "sugurta_je", je_name, update_modified=False)
 
 
+def cancel_all_insurance_entries(doc):
+	"""Order.on_trash()da (o'chirilishidan OLDIN) chaqiriladi — barcha Order Item
+	qatorlariga bog'langan FAOL sug'urta Journal Entry'larini cancel qiladi.
+
+	Order — Kassa'dan farqli o'laroq — submittable emas (haqiqiy "Cancel" tugmasi
+	yo'q, faqat saqlash/o'chirish bor). Sug'urta summasini 0'ga tushirib saqlash
+	orqali JE cancel qilinishi allaqachon ishlaydi (process_insurance_changes), lekin
+	Order to'g'ridan-to'g'ri O'CHIRILSA, bu yo'l chaqirilmaydi — natijada JE hech
+	qanday manba hujjatga bog'lanmagan holda "submitted" bo'lib qolib ketardi
+	(productionda haqiqiy sinovda aynan shu holat aniqlandi)."""
+	for row in doc.zakaz_mahsulotlari:
+		if row.sugurta_je:
+			_cancel_insurance_je(row.sugurta_je)
+
+
 def _resolve_accounts():
 	"""Ikkala hisobni ham NOMI bo'yicha (Chart of Accounts'da haqiqatda shu nomlar
 	bilan mavjud) topadi — sozlash sahifasi shart emas."""

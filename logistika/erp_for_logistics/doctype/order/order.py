@@ -14,3 +14,6 @@ class Order(Document):
 	def on_update(self):
 		order_status_log.log_status_changes(self)
 		order_insurance.process_insurance_changes(self)
+
+	def on_trash(self):
+		order_insurance.cancel_all_insurance_entries(self)
