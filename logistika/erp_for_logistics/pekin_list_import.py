@@ -8,10 +8,12 @@
 # boshqa ustun tartibi, sarlavha umuman yo'q va h.k.) — shu holatlarda qattiq
 # parser xato beradi, shu yerda Kimi orqali "aqlli" tarzda o'qib olinadi.
 
+import base64
 import json
 import re
 
 import frappe
+from frappe.utils.xlsxutils import read_xls_file_from_attached_file, read_xlsx_file_from_attached_file
 
 from logistika.erp_for_logistics.kimi_client import chat as kimi_chat
 
@@ -134,3 +136,39 @@ def smart_parse_pekin_list(file_content):
 	if not cleaned:
 		frappe.throw("Faylda mahsulot qatorlari topilmadi")
 	return cleaned
+
+
+def _excel_rows_to_text(rows):
+	"""Excel qatorlarini (list of cell values) Kimi allaqachon tushunadigan
+	jadval-matn ko'rinishiga o'giradi — TAB bilan ajratilgan (mahsulot nomlarida
+	vergul bo'lishi mumkin, TAB esa Excel katakchalarida deyarli uchramaydi,
+	shu sabab vergulga qaraganda xavfsizroq)."""
+	lines = []
+	for row in rows:
+		cells = ["" if cell is None else str(cell) for cell in row]
+		if any(cell.strip() for cell in cells):
+			lines.append("\t".join(cells))
+	return "\n".join(lines)
+
+
+@frappe.whitelist()
+def smart_parse_pekin_list_excel(file_content_base64, file_extension="xlsx"):
+	"""Excel (.xlsx/.xls) faylini o'qiydi va qatorlarni matn ko'rinishiga o'girib,
+	xuddi CSV import bilan bir xil (o'zgarishsiz) smart_parse_pekin_list() orqali
+	Kimi'ga yuboradi — Kimi tomoni farq qilmaydi, faqat fayl formatini o'qish usuli
+	farqlanadi."""
+	try:
+		file_bytes = base64.b64decode(file_content_base64)
+	except Exception:
+		frappe.throw("Fayl mazmunini o'qib bo'lmadi (noto'g'ri fayl formati)")
+
+	ext = (file_extension or "").lower().lstrip(".")
+	if ext == "xls":
+		rows = read_xls_file_from_attached_file(file_bytes)
+	else:
+		rows = read_xlsx_file_from_attached_file(fcontent=file_bytes)
+
+	if not rows:
+		frappe.throw("Excel faylida ma'lumot topilmadi")
+
+	return smart_parse_pekin_list(_excel_rows_to_text(rows))

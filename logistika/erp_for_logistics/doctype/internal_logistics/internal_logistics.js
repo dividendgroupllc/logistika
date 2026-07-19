@@ -170,9 +170,9 @@ function render_orders_summary(frm) {
 				</table>
 				<div class="il-order-import-row" style="margin-top: 8px;">
 					<button type="button" class="btn btn-xs btn-default il-order-import" data-order="${order_attr}">
-						${__("📥 Shu buyurtma uchun CSV import")}
+						${__("📥 Shu buyurtma uchun fayl import (Excel/CSV)")}
 					</button>
-					<input type="file" accept=".csv,.txt" class="il-order-file" data-order="${order_attr}" style="display:none;" />
+					<input type="file" accept=".csv,.txt,.xlsx,.xls" class="il-order-file" data-order="${order_attr}" style="display:none;" />
 					<span class="il-order-import-status text-muted" style="margin-left: 8px;"></span>
 				</div>
 				<div class="il-order-chat" style="margin-top: 12px; border-top: 1px solid #e5e7eb; padding-top: 8px;">
@@ -256,7 +256,51 @@ function bind_order_import_clicks(frm, $wrapper) {
 				indicator: "green",
 			});
 		};
+		const apply_kimi_rows = (rows) => {
+			rows.forEach((data) => {
+				const row = frm.add_child("pekin_list");
+				row.order = order_name;
+				Object.assign(row, data);
+			});
+			$status.text("");
+			finish(rows.length);
+		};
+		const on_kimi_error = () => {
+			// Bu yerdagi xato andoza mos kelmagani uchun EMAS (shuning uchun eskirgan
+			// `err`ni ko'rsatmaymiz) — Kimi so'rovining o'zi muvaffaqiyatsiz bo'ldi.
+			// Aniq sababi (masalan API kaliti sozlanmagan) frappe.call'ning o'zi
+			// avtomatik popup orqali ko'rsatadi.
+			$status
+				.removeClass("text-muted")
+				.css("color", "#dc2626")
+				.text(__("Kimi orqali o'qib bo'lmadi — tafsilot yuqoridagi xabarda"));
+		};
+
+		const ext = (file.name.split(".").pop() || "").toLowerCase();
 		const reader = new FileReader();
+
+		if (ext === "xlsx" || ext === "xls") {
+			// Excel — CSV uchun mo'ljallangan qattiq andoza bu yerga tegishli emas
+			// (sarlavha nomi/ustun tartibi juda xilma-xil bo'ladi), shuning uchun
+			// to'g'ridan-to'g'ri Kimi orqali "aqlli" o'qishga o'tiladi — xuddi CSV
+			// andoza mos kelmaganda qilinganidek.
+			$status.removeClass("text-muted").text(__("Kimi orqali o'qilmoqda..."));
+			reader.onload = function (ev) {
+				// readAsDataURL natijasi "data:...;base64,XXXX" — faqat base64 qismi kerak.
+				const base64 = ev.target.result.split(",", 2)[1] || "";
+				frappe.call({
+					method: "logistika.erp_for_logistics.pekin_list_import.smart_parse_pekin_list_excel",
+					args: { file_content_base64: base64, file_extension: ext },
+					freeze: true,
+					freeze_message: __("Kimi orqali o'qilmoqda..."),
+					callback: (r) => apply_kimi_rows(r.message || []),
+					error: on_kimi_error,
+				});
+			};
+			reader.readAsDataURL(file);
+			return;
+		}
+
 		reader.onload = function (ev) {
 			const text = ev.target.result;
 			try {
@@ -270,26 +314,8 @@ function bind_order_import_clicks(frm, $wrapper) {
 					args: { file_content: text },
 					freeze: true,
 					freeze_message: __("Kimi orqali o'qilmoqda..."),
-					callback: (r) => {
-						const rows = r.message || [];
-						rows.forEach((data) => {
-							const row = frm.add_child("pekin_list");
-							row.order = order_name;
-							Object.assign(row, data);
-						});
-						$status.text("");
-						finish(rows.length);
-					},
-					error: () => {
-						// Bu yerdagi xato andoza mos kelmagani uchun EMAS (shuning uchun eskirgan
-						// `err`ni ko'rsatmaymiz) — Kimi so'rovining o'zi muvaffaqiyatsiz bo'ldi.
-						// Aniq sababi (masalan API kaliti sozlanmagan) frappe.call'ning o'zi
-						// avtomatik popup orqali ko'rsatadi.
-						$status
-							.removeClass("text-muted")
-							.css("color", "#dc2626")
-							.text(__("Kimi orqali o'qib bo'lmadi — tafsilot yuqoridagi xabarda"));
-					},
+					callback: (r) => apply_kimi_rows(r.message || []),
+					error: on_kimi_error,
 				});
 			}
 		};
