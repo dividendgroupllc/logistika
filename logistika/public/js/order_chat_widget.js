@@ -21,22 +21,25 @@ logistika.order_chat.render_bubbles = function ($log, messages) {
 			const bubble_style = mine
 				? "background:#dbeafe; margin-left:20%; text-align:right;"
 				: "background:#fff; margin-right:20%; border:1px solid #e5e7eb;";
-			// Xodim xabari — mijozga yuborilgan (bitta) tarjima. Mijoz xabari — xodim
-			// o'qishi uchun DOIM ikkala tilga (xitoycha, ruscha) tarjima ko'rsatiladi,
-			// mijoz qaysi tilda yozganidan qat'i nazar.
+			// Xodim xabari — asosiy matn o'zi yozgan (matn), pastida mijozga yuborilgan
+			// (bitta) tarjima kichik harflarda. Mijoz xabari — xodim ko'pincha xitoycha
+			// o'qigani uchun ASOSIY (katta) matn sifatida xitoycha tarjima ko'rsatiladi
+			// (hali tarjima tayyor bo'lmasa, vaqtincha asl matn), pastida esa mijozning
+			// asl matni + ruscha tarjima kichik harflarda.
+			let main_text = m.matn;
 			let sub = "";
 			if (mine && m.tarjima) {
 				sub = `<div style="font-size:11px; color:#6b7280; margin-top:2px;">(${frappe.utils.escape_html(m.tarjima)})</div>`;
-			} else if (!mine && (m.tarjima_xitoycha || m.tarjima_ruscha)) {
-				const parts = [];
-				if (m.tarjima_xitoycha) parts.push(`🇨🇳 ${frappe.utils.escape_html(m.tarjima_xitoycha)}`);
+			} else if (!mine) {
+				main_text = m.tarjima_xitoycha || m.matn;
+				const parts = [`🇺🇿 ${frappe.utils.escape_html(m.matn)}`];
 				if (m.tarjima_ruscha) parts.push(`🇷🇺 ${frappe.utils.escape_html(m.tarjima_ruscha)}`);
 				sub = `<div style="font-size:11px; color:#6b7280; margin-top:2px;">${parts.join("<br>")}</div>`;
 			}
 			return `
 				<div style="padding:6px 8px; border-radius:8px; margin-bottom:6px; ${bubble_style}">
 					<div style="font-size:11px; color:#6b7280;">${mine ? __("Xodim") : __("Mijoz")} — ${frappe.datetime.str_to_user(m.creation)}</div>
-					<div>${frappe.utils.escape_html(m.matn)}</div>
+					<div>${frappe.utils.escape_html(main_text)}</div>
 					${sub}
 				</div>`;
 		})
@@ -158,4 +161,41 @@ logistika.order_chat.send_reply = function (order_name, $input, $log, $btn) {
 			toast.close();
 		};
 	});
+})();
+
+// Ko'p field/section/column label'lar "Uzbekcha nomi (中文)" ko'rinishida — parentez
+// ichidagi xitoycha qism ko'zga unchalik tashlanmayapti, kattaroq ko'rinishi kerak.
+// Buni to'g'ridan-to'g'ri DocType JSON'dagi `label` matniga HTML qo'shib QILMAYMIZ —
+// o'sha xom matn forma labelidan tashqari grid sarlavhalari, report ustunlari, print
+// formatlar kabi ko'plab boshqa joylarda ham ishlatiladi va ular hammasi ham HTML'ni
+// to'g'ri render qilishiga kafolat yo'q (xato "<span>" matni ko'rinib qolishi mumkin).
+// Shuning uchun FAQAT joriy render qilingan forma DOM'ida — xavfsiz, faqat vizual —
+// parentez ichidagi xitoycha qismni <span> bilan o'rab kattalashtiramiz.
+(function enlarge_chinese_parenthetical_labels() {
+	const CJK_PAREN_RE = /\(([^()]*[一-鿿][^()]*)\)\s*$/;
+	const LABEL_SELECTOR = ".control-label, .section-label, .column-label";
+
+	function process(el) {
+		if (el.dataset.zhEnlarged) return;
+		const text = el.textContent || "";
+		const m = text.match(CJK_PAREN_RE);
+		if (!m) return;
+		const before = text.slice(0, m.index);
+		el.innerHTML = `${frappe.utils.escape_html(before)}(<span style="font-size:1.25em; font-weight:600;">${frappe.utils.escape_html(m[1])}</span>)`;
+		el.dataset.zhEnlarged = "1";
+	}
+
+	let scheduled = false;
+	function scan() {
+		scheduled = false;
+		document.querySelectorAll(LABEL_SELECTOR).forEach(process);
+	}
+	function schedule_scan() {
+		if (scheduled) return;
+		scheduled = true;
+		requestAnimationFrame(scan);
+	}
+
+	new MutationObserver(schedule_scan).observe(document.body, { childList: true, subtree: true });
+	schedule_scan();
 })();

@@ -20,6 +20,7 @@
   "kelish_sanasi",
   "container",
   "container_raqami",
+  "container_zavodi",
   "konteyner_summasi",
   "status"
  ],
@@ -127,6 +128,12 @@
    "fieldname": "container_raqami",
    "fieldtype": "Data",
    "label": "Container raqami (\u96c6\u88c5\u7bb1\u53f7)"
+  },
+  {
+   "depends_on": "eval:doc.container",
+   "fieldname": "container_zavodi",
+   "fieldtype": "Data",
+   "label": "Konteyner zavodi (\u96c6\u88c5\u7bb1\u5de5\u5382)"
   },
   {
    "depends_on": "eval:doc.container",

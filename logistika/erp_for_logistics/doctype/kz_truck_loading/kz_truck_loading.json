@@ -23,6 +23,7 @@
   "kamar_soni",
   "cb_secure",
   "paddon_soni",
+  "yuklovchi_ismi",
   "yuklash_sxemasi",
   "yuklash_sxemasi_sanasi",
   "sec_yuklash_xarajati",
@@ -129,6 +130,11 @@
    "fieldname": "paddon_soni",
    "fieldtype": "Int",
    "label": "Paddon soni (\u6258\u76d8)"
+  },
+  {
+   "fieldname": "yuklovchi_ismi",
+   "fieldtype": "Data",
+   "label": "Kim yukladi (\u88c5\u8f66\u4eba)"
   },
   {
    "fieldname": "yuklash_sxemasi",

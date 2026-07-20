@@ -491,6 +491,7 @@ logistika.ui.OmborHolatiDashboardPage = class OmborHolatiDashboardPage {
 						<th>${__("China truck kub / tonna")}</th>
 						<th>${__("KZ fura")}</th>
 						<th>${__("KZ truck kub / tonna")}</th>
+						<th>${__("KZ truck yetib kelish sanasi")}</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -505,6 +506,7 @@ logistika.ui.OmborHolatiDashboardPage = class OmborHolatiDashboardPage {
 							<td class="is-num">${this.formatPipelineNumber(row.china_truck_kub)} / ${this.formatPipelineNumber(row.china_truck_tonna)}</td>
 							<td>${frappe.utils.escape_html(row.kz_fura || "—")}</td>
 							<td class="is-num">${this.formatPipelineNumber(row.kz_truck_kub)} / ${this.formatPipelineNumber(row.kz_truck_tonna)}</td>
+							<td>${frappe.utils.escape_html(row.kz_truck_yetib_kelish_sanasi || "—")}</td>
 						</tr>
 					`
 						)

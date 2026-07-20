@@ -25,8 +25,10 @@ def _translate(text, target_language, timeout=60):
 				{
 					"role": "system",
 					"content": (
-						f"Quyidagi matnni {target_language} tiliga tarjima qil. Faqat tarjima qilingan "
-						"matnni qaytar, boshqa hech qanday izoh yoki matn qo'shma."
+						f"Quyidagi matnni {target_language} tiliga tarjima qil. Shahar, chegara punkti, "
+						"joy va firma nomlari kabi atoqli otlarni TARJIMA QILMA — original yozilishicha "
+						"(masalan \"Xorgos\" so'zini \"Qo'rg'os\" emas, aynan \"Xorgos\" deb) saqlab qol. "
+						"Faqat tarjima qilingan matnni qaytar, boshqa hech qanday izoh yoki matn qo'shma."
 					),
 				},
 				{"role": "user", "content": text},
@@ -48,10 +50,14 @@ def _translate_dual(text, timeout=60):
 				{
 					"role": "system",
 					"content": (
-						"Quyidagi matnni IKKALA tilga tarjima qil: xitoycha va ruscha. Agar matn "
-						"allaqachon shu tillardan birida bo'lsa, o'sha til uchun matnni o'zgarishsiz "
-						'qaytar. Javobni FAQAT quyidagi JSON formatida qaytar, boshqa hech qanday '
-						'matn (izoh, markdown) qo\'shma: {"xitoycha": "...", "ruscha": "..."}'
+						"Quyidagi matnni IKKALA tilga tarjima qil: xitoycha va ruscha. Shahar, chegara "
+						"punkti, joy va firma nomlari kabi atoqli otlarni TARJIMA QILMA — original "
+						"yozilishiga eng yaqin, o'sha tilda odatda qanday yozilsa shundayligicha (masalan "
+						"\"Xorgos\" — xitoychada 霍尔果斯, ruschada Хоргос — ma'nosiz so'zma-so'z "
+						"o'girishga aylantirma) saqlab qol. Agar matn allaqachon shu tillardan birida "
+						"bo'lsa, o'sha til uchun matnni o'zgarishsiz qaytar. Javobni FAQAT quyidagi JSON "
+						'formatida qaytar, boshqa hech qanday matn (izoh, markdown) qo\'shma: '
+						'{"xitoycha": "...", "ruscha": "..."}'
 					),
 				},
 				{"role": "user", "content": text},
@@ -148,20 +154,21 @@ def save_customer_message(order, chat_id, text):
 
 
 def _notify_document_owners(order, text):
-	"""Mijoz yangi xabar yozganda, shu order bog'langan Internal Logistics/KZ Transit
-	hujjat(lar)ini YARATGAN xodimga Frappe'ning o'z bildirishnoma tizimi orqali
-	(qo'ng'iroq belgisi + real-time popup) xabar boradi — xuddi assignment/mention
-	kabi. Bitta order bir nechta hujjatga (masalan bir nechta Internal Logistics'ning
-	buyurtmalar jadvaliga) tegishli bo'lishi mumkin, shuning uchun har biriga alohida."""
+	"""Mijoz yangi xabar yozganda, shu order HOZIRGI bosqichga mos hujjat(lar)ini
+	YARATGAN xodimga Frappe'ning o'z bildirishnoma tizimi orqali (qo'ng'iroq belgisi
+	+ real-time popup) xabar boradi — xuddi assignment/mention kabi.
+
+	Order avval Internal Logistics (ichki, Xitoy tarafidagi) bosqichidan o'tadi,
+	keyingina KZ Transit (KZ furaning O'zbekistongacha yo'li) hujjati yaratiladi —
+	shuning uchun KZ Transit MAVJUD bo'lsa, order allaqachon shu bosqichga
+	o'tgan deb hisoblanadi va faqat O'SHA hujjat egasiga xabar boradi (Internal
+	Logistics'ga emas — u endi eskirgan bosqich). KZ Transit hali yaratilmagan
+	bo'lsa, Internal Logistics'ga qaytiladi (bir nechta bo'lishi mumkin, har
+	biriga alohida)."""
 	from frappe.desk.doctype.notification_log.notification_log import enqueue_create_notification
 
 	targets = frappe.db.sql(
 		"""
-		select 'Internal Logistics' as doctype, il.name as name, il.owner as owner
-		from `tabInternal Logistics` il
-		inner join `tabInternal Logistics Order` ilo on ilo.parent = il.name
-		where ilo.order = %(order)s
-		union
 		select 'KZ Transit' as doctype, kzt.name as name, kzt.owner as owner
 		from `tabKZ Transit` kzt
 		where kzt.order = %(order)s
@@ -169,6 +176,17 @@ def _notify_document_owners(order, text):
 		{"order": order},
 		as_dict=True,
 	)
+	if not targets:
+		targets = frappe.db.sql(
+			"""
+			select 'Internal Logistics' as doctype, il.name as name, il.owner as owner
+			from `tabInternal Logistics` il
+			inner join `tabInternal Logistics Order` ilo on ilo.parent = il.name
+			where ilo.order = %(order)s
+			""",
+			{"order": order},
+			as_dict=True,
+		)
 
 	preview = text if len(text) <= 120 else text[:117] + "..."
 	for t in targets:

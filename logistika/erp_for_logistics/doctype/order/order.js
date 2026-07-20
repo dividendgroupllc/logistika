@@ -12,5 +12,9 @@ frappe.ui.form.on("Order", {
 		frm.set_query("kliyent", () => {
 			return { filters: { customer_group: "Xitoy postavshik" } };
 		});
+
+		frm.set_query("harajat_turi", "qoshimcha_rasxodlar", () => {
+			return { query: "logistika.erp_for_logistics.ombor_xarajatlari.get_yetkazish_xarajati_accounts" };
+		});
 	},
 });

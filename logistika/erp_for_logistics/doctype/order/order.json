@@ -18,6 +18,8 @@
   "izoh",
   "sec_items",
   "zakaz_mahsulotlari",
+  "sec_rasxod",
+  "qoshimcha_rasxodlar",
   "sec_status",
   "status"
  ],
@@ -90,6 +92,17 @@
    "fieldtype": "Table",
    "label": "Zakaz mahsulotlari (\u8ba2\u5355\u4ea7\u54c1)",
    "options": "Order Item"
+  },
+  {
+   "fieldname": "sec_rasxod",
+   "fieldtype": "Section Break",
+   "label": "Qo'shimcha rasxod (\u989d\u5916\u8d39\u7528)"
+  },
+  {
+   "fieldname": "qoshimcha_rasxodlar",
+   "fieldtype": "Table",
+   "label": "Qo'shimcha rasxodlar",
+   "options": "Ombor Xarajati Item"
   },
   {
    "fieldname": "sec_status",

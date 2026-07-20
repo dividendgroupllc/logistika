@@ -171,6 +171,61 @@ def translation_coverage_report(language="zh", app="logistika"):
 	return report
 
 
+# DocType NOMLARI (breadcrumb, module/sidebar ro'yxati, list-view sarlavhasi — Frappe
+# bularni __(doctype_name) orqali ko'rsatadi) hech qachon Kimi orqali tarjima
+# qilinmagan — shu sabab "zh" tanlansa ham bular Uzbek/lotin holicha qolib ketardi.
+# Qo'lda (Kimi'siz) yozilgan, sohaga mos xitoycha nomlar.
+DOCTYPE_TITLE_TRANSLATIONS = {
+	"Expense Cost Center": "费用成本中心",
+	"Internal Logistics": "内部物流",
+	"Internal Logistics Item": "内部物流项目",
+	"Internal Logistics Order": "内部物流订单",
+	"Internal Logistics Tracking": "内部物流跟踪",
+	"Kassa": "出纳",
+	"Kimi Settings": "Kimi设置",
+	"KZ Load Item": "哈方装车项目",
+	"KZ Other Expense": "哈方其他费用",
+	"KZ Route Point": "哈方路线点",
+	"KZ Transit": "哈方过境运输",
+	"KZ Truck Loading": "哈方装车",
+	"Logistic Documentation": "物流单证",
+	"Ombor": "仓库",
+	"Ombor Harakati": "仓库出入库记录",
+	"Ombor Xarajati Item": "仓库费用项目",
+	"Order": "订单",
+	"Order Chat Message": "订单聊天消息",
+	"Order Item": "订单产品",
+	"Order Item Status Log": "订单状态日志",
+	"Peregruz": "直接换装",
+	"Peregruz Item": "直接换装项目",
+	"Telegram Bot Settings": "Telegram机器人设置",
+	"Transport Vositasi": "运输工具",
+	"Truck Dispatch": "车辆调度",
+	"Truck Type": "车辆类型",
+	"Warehouse Intake": "入库单",
+	"Warehouse Intake Item": "入库单项目",
+}
+
+
+@frappe.whitelist()
+def translate_doctype_titles(language="zh"):
+	"""DOCTYPE_TITLE_TRANSLATIONS'dagi qo'lda tayyorlangan nomlarni Translation
+	yozuvlariga yozadi — Kimi ishlatilmaydi, chunki bular nom sifatida aniq va
+	barqaror bo'lishi kerak (bir marta yozilib, keyin qo'lda tekshirib
+	o'zgartiriladigan narsa)."""
+	created = updated = 0
+	for doctype, translated in DOCTYPE_TITLE_TRANSLATIONS.items():
+		if not frappe.db.exists("DocType", doctype):
+			continue
+		c, u = _upsert_translation(doctype, translated, language)
+		created += c
+		updated += u
+
+	frappe.db.commit()
+	frappe.translate.clear_cache()
+	return {"language": language, "created": created, "updated": updated, "total": len(DOCTYPE_TITLE_TRANSLATIONS)}
+
+
 @frappe.whitelist()
 def translate_all_doctypes(language="zh", app="logistika"):
 	"""Ilovaning barcha (custom bo'lmagan) doctype'lari uchun ketma-ket

@@ -137,7 +137,8 @@ def get_pipeline_rows(order=None, status=None):
 			-- shunday hollarda oi.kelish_sanasi'ga to'g'ridan-to'g'ri qaytamiz.
 			max(coalesce(td.china_arrival, oi.kelish_sanasi)) as yetib_kelish_sanasi,
 			max(coalesce(kzl.kz_truck, prg.kz_truck)) as kzl_kz_fura,
-			max(coalesce(kzl.sana, prg.sana)) as yuklangan_sana
+			max(coalesce(kzl.sana, prg.sana)) as yuklangan_sana,
+			max(kzt.fakt_yetib_borgan) as kz_truck_yetib_kelish_sanasi
 		from `tabOrder Item` oi
 		left join `tabInternal Logistics` il on il.fura = oi.xitoy_mashina_nomeri
 		left join `tabInternal Logistics Order` ilo on ilo.parent = il.name and ilo.order = oi.parent
@@ -172,6 +173,9 @@ def get_pipeline_rows(order=None, status=None):
 				where prgi2.`order` = oi.parent and prgi2.china_truck = oi.xitoy_mashina_nomeri
 					and prg2.docstatus = 1
 			)
+		left join `tabKZ Transit` kzt
+			on kzt.`order` = oi.parent
+			and kzt.kz_truck = coalesce(kzl.kz_truck, prg.kz_truck, td.mashina_raqami)
 		where {where_clause}
 		group by oi.parent, oi.xitoy_mashina_nomeri
 		order by oi.parent, oi.xitoy_mashina_nomeri
@@ -204,6 +208,9 @@ def get_pipeline_rows(order=None, status=None):
 				"haydovchi_ismi": row.haydovchi_ismi,
 				"yetib_kelish_sanasi": str(row.yetib_kelish_sanasi) if row.yetib_kelish_sanasi else None,
 				"yuklangan_sana": str(row.yuklangan_sana) if row.yuklangan_sana else None,
+				"kz_truck_yetib_kelish_sanasi": (
+					str(row.kz_truck_yetib_kelish_sanasi) if row.kz_truck_yetib_kelish_sanasi else None
+				),
 				"status": status,
 				"stage_index": stage_index,
 			}

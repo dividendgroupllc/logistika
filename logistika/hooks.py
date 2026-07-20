@@ -44,7 +44,7 @@ app_include_css = "/assets/logistika/css/internal_logistics.css"
 # 2026-07-18'da sodir bo'ldi). Shuning uchun har safar bu faylga MUHIM o'zgarish
 # kiritilganda shu raqamni oshirish kerak — URL o'zgarishi barcha keshlarni majburan
 # chetlab o'tadi.
-app_include_js = "/assets/logistika/js/order_chat_widget.js?v=4"
+app_include_js = "/assets/logistika/js/order_chat_widget.js?v=5"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/logistika/css/logistika.css"
