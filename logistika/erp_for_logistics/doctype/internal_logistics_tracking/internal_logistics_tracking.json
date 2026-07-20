@@ -19,7 +19,7 @@
    "fieldname": "sana",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Sana (日期)",
+   "label": "Sana",
    "reqd": 1
   },
   {
@@ -27,14 +27,14 @@
    "fieldname": "vaqt",
    "fieldtype": "Time",
    "in_list_view": 1,
-   "label": "Vaqt (时间)"
+   "label": "Vaqt"
   },
   {
    "columns": 4,
    "fieldname": "qayerdaligi",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Qayerdaligi (位置)"
+   "label": "Qayerdaligi"
   },
   {
    "columns": 2,

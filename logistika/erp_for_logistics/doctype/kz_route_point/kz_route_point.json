@@ -23,21 +23,21 @@
    "fieldname": "sana",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Sana (日期)"
+   "label": "Sana"
   },
   {
    "columns": 2,
    "fieldname": "vaqt",
    "fieldtype": "Time",
    "in_list_view": 1,
-   "label": "Vaqt (时间)"
+   "label": "Vaqt"
   },
   {
    "columns": 3,
    "fieldname": "joylashuv",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Qayerdaligi (位置)"
+   "label": "Qayerdaligi"
   },
   {
    "columns": 2,

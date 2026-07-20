@@ -16,7 +16,7 @@
    "fieldname": "harajat_nomi",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Harajat nomi (\u8d39\u7528)",
+   "label": "Harajat nomi",
    "reqd": 1
   },
   {
@@ -24,7 +24,7 @@
    "fieldname": "summa",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Summa (\u91d1\u989d)",
+   "label": "Summa",
    "reqd": 1
   },
   {
@@ -32,7 +32,7 @@
    "fieldname": "izoh",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Izoh (\u5907\u6ce8)"
+   "label": "Izoh"
   }
  ],
  "grid_page_length": 50,

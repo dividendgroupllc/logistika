@@ -21,7 +21,7 @@
    "fieldname": "order",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Order / Zakaz (订单)",
+   "label": "Order / Zakaz",
    "options": "Order",
    "read_only": 1
   },
@@ -30,7 +30,7 @@
    "fieldname": "china_truck",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Manba Xitoy fura (来源车)",
+   "label": "Manba Xitoy fura",
    "read_only": 1
   },
   {
@@ -38,7 +38,7 @@
    "fieldname": "part_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Mahsulot (品名)",
+   "label": "Mahsulot",
    "read_only": 1
   },
   {
@@ -47,7 +47,7 @@
    "fieldname": "mavjud",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Mavjud (可用数量)",
+   "label": "Mavjud",
    "read_only": 1
   },
   {
@@ -55,14 +55,14 @@
    "fieldname": "fakt_transload",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "O'tkazilgan (装车数量)"
+   "label": "O'tkazilgan"
   },
   {
    "columns": 1,
    "fieldname": "volume_cbm",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "CBM (体积)",
+   "label": "CBM",
    "precision": "3",
    "read_only": 1
   },

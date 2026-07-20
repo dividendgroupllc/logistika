@@ -46,26 +46,26 @@
   {
    "fieldname": "tab_main",
    "fieldtype": "Tab Break",
-   "label": "Asosiy (\u57fa\u672c)"
+   "label": "Asosiy"
   },
   {
    "fieldname": "sec_top",
    "fieldtype": "Section Break",
-   "label": "Asosiy (\u57fa\u672c)"
+   "label": "Asosiy"
   },
   {
    "default": "Today",
    "fieldname": "sana",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Sana (\u65e5\u671f)",
+   "label": "Sana",
    "reqd": 1
   },
   {
    "fieldname": "order",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Order / Zakaz (\u8ba2\u5355)",
+   "label": "Order / Zakaz",
    "options": "Order",
    "reqd": 1
   },
@@ -77,7 +77,7 @@
    "fieldname": "kz_truck",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "KZ fura raqami (\u54c8\u65b9\u8f66\u53f7)"
+   "label": "KZ fura raqami"
   },
   {
    "fieldname": "tab_per",
@@ -121,12 +121,12 @@
   {
    "fieldname": "tab_cl",
    "fieldtype": "Tab Break",
-   "label": "Kliyent hujjatlari (\u5ba2\u6237\u6587\u4ef6)"
+   "label": "Kliyent hujjatlari"
   },
   {
    "fieldname": "sec_cl",
    "fieldtype": "Section Break",
-   "label": "Kliyent hujjatlari (\u5ba2\u6237\u6587\u4ef6)"
+   "label": "Kliyent hujjatlari"
   },
   {
    "fieldname": "pekin_invoice",

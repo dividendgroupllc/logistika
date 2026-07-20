@@ -24,7 +24,7 @@
    "fieldname": "davlat",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Davlat / fura mamlakati (\u56fd\u5bb6)",
+   "label": "Davlat / fura mamlakati",
    "options": "China\nKZ\nO'zbekiston\nBoshqa",
    "reqd": 1
   },
@@ -32,7 +32,7 @@
    "fieldname": "turi",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Turi (\u7c7b\u578b)",
+   "label": "Turi",
    "reqd": 1
   },
   {
@@ -43,46 +43,46 @@
    "fieldname": "kub",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Kubi \u2014 m\u00b3 (\u4f53\u79ef)"
+   "label": "Kubi — m³"
   },
   {
    "fieldname": "tonna",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Tonnaji \u2014 tonna (\u5428\u4f4d)"
+   "label": "Tonnaji — tonna"
   },
   {
    "fieldname": "sec_ichki",
    "fieldtype": "Section Break",
-   "label": "Ichki o'lchamlari (\u5185\u90e8\u5c3a\u5bf8) \u2014 Load Optimizer uchun"
+   "label": "Ichki o'lchamlari — Load Optimizer uchun"
   },
   {
-   "description": "Yuk bo'linmasining ichki bo'yi \u2014 santimetrda",
+   "description": "Yuk bo'linmasining ichki bo'yi — santimetrda",
    "fieldname": "ichki_uzunlik",
    "fieldtype": "Float",
-   "label": "Ichki uzunligi \u2014 sm (\u5185\u957f, cm)"
+   "label": "Ichki uzunligi — sm"
   },
   {
-   "description": "Yuk bo'linmasining ichki eni \u2014 santimetrda",
+   "description": "Yuk bo'linmasining ichki eni — santimetrda",
    "fieldname": "ichki_kenglik",
    "fieldtype": "Float",
-   "label": "Ichki eni \u2014 sm (\u5185\u5bbd, cm)"
+   "label": "Ichki eni — sm"
   },
   {
    "fieldname": "cb_ichki",
    "fieldtype": "Column Break"
   },
   {
-   "description": "Yuk bo'linmasining ichki balandligi \u2014 santimetrda",
+   "description": "Yuk bo'linmasining ichki balandligi — santimetrda",
    "fieldname": "ichki_balandlik",
    "fieldtype": "Float",
-   "label": "Ichki balandligi \u2014 sm (\u5185\u9ad8, cm)"
+   "label": "Ichki balandligi — sm"
   },
   {
-   "description": "ichki_uzunlik \u00d7 ichki_kenglik \u00d7 ichki_balandlik asosida avtomatik hisoblanadi \u2014 yuqoridagi \"Kubi\" maydoni bilan solishtirish uchun",
+   "description": "ichki_uzunlik × ichki_kenglik × ichki_balandlik asosida avtomatik hisoblanadi — yuqoridagi \"Kubi\" maydoni bilan solishtirish uchun",
    "fieldname": "ichki_hajm",
    "fieldtype": "Float",
-   "label": "Hisoblangan hajm \u2014 m\u00b3 (\u8ba1\u7b97\u4f53\u79ef)",
+   "label": "Hisoblangan hajm — m³",
    "precision": "3",
    "read_only": 1
   }

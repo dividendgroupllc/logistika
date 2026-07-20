@@ -18,8 +18,6 @@
   "izoh",
   "sec_items",
   "zakaz_mahsulotlari",
-  "sec_rasxod",
-  "qoshimcha_rasxodlar",
   "sec_status",
   "status"
  ],
@@ -27,21 +25,21 @@
   {
    "fieldname": "sec_asosiy",
    "fieldtype": "Section Break",
-   "label": "Asosiy (\u57fa\u672c)"
+   "label": "Asosiy"
   },
   {
    "default": "Today",
    "fieldname": "zakaz_sanasi",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Zakaz sanasi (\u4e0b\u5355\u65e5\u671f)",
+   "label": "Zakaz sanasi",
    "reqd": 1
   },
   {
    "fieldname": "kliyent",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Kliyent (\u5ba2\u6237)",
+   "label": "Kliyent",
    "options": "Customer",
    "reqd": 1
   },
@@ -50,18 +48,18 @@
    "fieldname": "brand",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Brand (\u54c1\u724c)",
+   "label": "Brand",
    "read_only": 1
   },
   {
    "fieldname": "kliyent_zavodi",
    "fieldtype": "Data",
-   "label": "Kliyent zavodi / O'zbekiston (\u5ba2\u6237\u5de5\u5382)"
+   "label": "Kliyent zavodi / O'zbekiston"
   },
   {
    "fieldname": "kim_buyurtma_qildi",
    "fieldtype": "Data",
-   "label": "Kim buyurtma qildi (\u4e0b\u5355\u4eba)"
+   "label": "Kim buyurtma qildi"
   },
   {
    "fieldname": "cb1",
@@ -70,51 +68,40 @@
   {
    "fieldname": "xitoy_zavod_raqami",
    "fieldtype": "Data",
-   "label": "Xitoy zavod raqami (\u5de5\u5382\u7f16\u53f7)"
+   "label": "Xitoy zavod raqami"
   },
   {
    "fieldname": "xitoy_postavshik",
    "fieldtype": "Data",
-   "label": "Xitoy postavshik (\u4f9b\u5e94\u5546)"
+   "label": "Xitoy postavshik"
   },
   {
    "fieldname": "izoh",
    "fieldtype": "Small Text",
-   "label": "Izoh (\u5907\u6ce8)"
+   "label": "Izoh"
   },
   {
    "fieldname": "sec_items",
    "fieldtype": "Section Break",
-   "label": "Zakaz mahsulotlari / Furalar (\u8f66\u8f86)"
+   "label": "Zakaz mahsulotlari / Furalar"
   },
   {
    "fieldname": "zakaz_mahsulotlari",
    "fieldtype": "Table",
-   "label": "Zakaz mahsulotlari (\u8ba2\u5355\u4ea7\u54c1)",
+   "label": "Zakaz mahsulotlari",
    "options": "Order Item"
-  },
-  {
-   "fieldname": "sec_rasxod",
-   "fieldtype": "Section Break",
-   "label": "Qo'shimcha rasxod (\u989d\u5916\u8d39\u7528)"
-  },
-  {
-   "fieldname": "qoshimcha_rasxodlar",
-   "fieldtype": "Table",
-   "label": "Qo'shimcha rasxodlar",
-   "options": "Ombor Xarajati Item"
   },
   {
    "fieldname": "sec_status",
    "fieldtype": "Section Break",
-   "label": "Holat (\u72b6\u6001)"
+   "label": "Holat"
   },
   {
    "default": "Yangi",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Status (\u72b6\u6001)",
+   "label": "Status",
    "options": "Yangi",
    "read_only": 1
   }

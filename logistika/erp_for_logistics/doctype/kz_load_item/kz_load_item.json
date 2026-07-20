@@ -21,7 +21,7 @@
    "fieldname": "order",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Order / Zakaz (订单)",
+   "label": "Order / Zakaz",
    "options": "Order",
    "read_only": 1
   },
@@ -30,7 +30,7 @@
    "fieldname": "china_truck",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Manba Xitoy fura (\u6765\u6e90\u8f66)",
+   "label": "Manba Xitoy fura",
    "read_only": 1
   },
   {
@@ -38,7 +38,7 @@
    "fieldname": "part_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Mahsulot (\u54c1\u540d)",
+   "label": "Mahsulot",
    "read_only": 1
   },
   {
@@ -47,7 +47,7 @@
    "fieldname": "ombor_fakt",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Ombor qoldiq (\u5e93\u5b58)",
+   "label": "Ombor qoldiq",
    "read_only": 1
   },
   {
@@ -55,14 +55,14 @@
    "fieldname": "fakt_ortilgan",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Ortilgan (\u88c5\u8f66)"
+   "label": "Ortilgan"
   },
   {
    "columns": 1,
    "fieldname": "volume_cbm",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "CBM (\u4f53\u79ef)",
+   "label": "CBM",
    "precision": "3",
    "read_only": 1
   },

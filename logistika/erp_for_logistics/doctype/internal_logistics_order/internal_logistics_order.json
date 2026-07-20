@@ -19,7 +19,7 @@
    "fieldname": "order",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Order / Zakaz (订单)",
+   "label": "Order / Zakaz",
    "options": "Order",
    "reqd": 1
   },
@@ -29,7 +29,7 @@
    "fieldname": "zavod_raqami",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Xitoy zavod raqami (工厂编号)",
+   "label": "Xitoy zavod raqami",
    "read_only": 1
   },
   {
@@ -38,7 +38,7 @@
    "fieldname": "postavshik",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Xitoy postavshik (供应商)",
+   "label": "Xitoy postavshik",
    "read_only": 1
   },
   {
@@ -46,7 +46,7 @@
    "fieldname": "jami_kub",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Jami kub — m³ (总体积)",
+   "label": "Jami kub \u2014 m\u00b3",
    "precision": "3",
    "read_only": 1
   },
@@ -55,7 +55,7 @@
    "fieldname": "jami_tonna",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Jami tonna (总重)",
+   "label": "Jami tonna",
    "precision": "3",
    "read_only": 1
   },

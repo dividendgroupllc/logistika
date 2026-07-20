@@ -22,7 +22,10 @@
   "container_raqami",
   "container_zavodi",
   "konteyner_summasi",
-  "status"
+  "status",
+  "harajat_turi",
+  "summa",
+  "izoh"
  ],
  "fields": [
   {
@@ -30,7 +33,7 @@
    "fieldname": "mahsulot_nomi",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Mahsulot nomi (\u54c1\u540d)",
+   "label": "Mahsulot nomi",
    "reqd": 1
   },
   {
@@ -38,14 +41,14 @@
    "fieldname": "xitoy_fura_telefon",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Xitoy fura telefon (\u53f8\u673a\u7535\u8bdd)"
+   "label": "Xitoy fura telefon"
   },
   {
    "columns": 2,
    "fieldname": "xitoy_mashina_nomeri",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Xitoy mashina nomeri (\u8f66\u724c\u53f7)"
+   "label": "Xitoy mashina nomeri"
   },
   {
    "columns": 1,
@@ -61,7 +64,7 @@
    "fieldname": "truck_kub",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Kubi — m³ (体积)",
+   "label": "Kubi \u2014 m\u00b3",
    "precision": "3",
    "read_only": 1
   },
@@ -71,7 +74,7 @@
    "fieldname": "truck_tonna",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Tonnaji (吨位)",
+   "label": "Tonnaji",
    "precision": "3",
    "read_only": 1
   },
@@ -80,12 +83,12 @@
    "fieldname": "sugurta",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Sug'urta (\u4fdd\u9669)"
+   "label": "Sug'urta"
   },
   {
    "fieldname": "sugurta_hujjat",
    "fieldtype": "Attach",
-   "label": "Sug'urta hujjati (\u4fdd\u9669\u5355)"
+   "label": "Sug'urta hujjati"
   },
   {
    "fieldname": "sugurta_je",
@@ -105,41 +108,41 @@
    "fieldname": "xitoy_fura_summasi",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Fura olib kelish summasi (\u8fd0\u8d39)"
+   "label": "Fura olib kelish summasi"
   },
   {
    "fieldname": "zavoddan_chiqish_sanasi",
    "fieldtype": "Date",
-   "label": "Zavoddan chiqish sanasi (\u51fa\u5382\u65e5\u671f)"
+   "label": "Zavoddan chiqish sanasi"
   },
   {
    "fieldname": "kelish_sanasi",
    "fieldtype": "Date",
-   "label": "Kelish sanasi (\u5230\u8d27\u65e5\u671f)"
+   "label": "Kelish sanasi"
   },
   {
    "default": "0",
    "fieldname": "container",
    "fieldtype": "Check",
-   "label": "Container (\u96c6\u88c5\u7bb1)"
+   "label": "Container"
   },
   {
    "depends_on": "eval:doc.container",
    "fieldname": "container_raqami",
    "fieldtype": "Data",
-   "label": "Container raqami (\u96c6\u88c5\u7bb1\u53f7)"
+   "label": "Container raqami"
   },
   {
    "depends_on": "eval:doc.container",
    "fieldname": "container_zavodi",
    "fieldtype": "Data",
-   "label": "Konteyner zavodi (\u96c6\u88c5\u7bb1\u5de5\u5382)"
+   "label": "Konteyner zavodi"
   },
   {
    "depends_on": "eval:doc.container",
    "fieldname": "konteyner_summasi",
    "fieldtype": "Currency",
-   "label": "Konteyner summasi (\u96c6\u88c5\u7bb1\u8d39)"
+   "label": "Konteyner summasi"
   },
   {
    "columns": 1,
@@ -147,9 +150,25 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Status (\u72b6\u6001)",
+   "label": "Status",
    "read_only": 1,
    "options": "\u0412\u043d\u0443\u0442\u0440\u0438\u043d\u043d\u0438\u0439 \u0444\u0443\u0440\u0430\n\u041f\u043e\u0434\u0433\u043e\u0442\u043e\u0432\u043a\u0430 \u0444\u0443\u0440\u0430 \u041a\u0417\n\u0422\u0430\u043c\u043e\u0436\u043d\u0438\u044f \u0441\u043a\u043b\u0430\u0434\n\u0422\u043e\u0432\u0430\u0440 \u043f\u043e\u0433\u0440\u0443\u0436\u0435\u043d \u041a\u0417\n\u041f\u0435\u0440\u0435\u0433\u0440\u0443\u0437 \u0434\u0430\u043d\u043d\u044b\u0439\n\u041e\u0436\u0438\u0434\u0430\u043d\u0438\u044f \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430 \u041a\u043b\u0438\u0435\u043d\u0442\n\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f ED CO \u0434\u043b\u044f \u043a\u043b\u0438\u0435\u043d\u0442\u0430\n\u0422\u0440\u0430\u043d\u0437\u0438\u0442\u043d\u0438\u0439 \u043e\u0444\u043e\u0440\u043c\u0435\u043b\u0435\u043d\u0438\u044f\n\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b \u043f\u0440\u043e\u0432\u0435\u0440\u0435\u043d\u044b\n\u0412 \u043f\u0443\u0442\u0438 \u043a \u0434\u043e\u0441\u0442\u0430\u0432\u043a\u0435\n\u0422\u0430\u043c\u043e\u0436\u0435\u043d\u043d\u044b\u0439 \u043f\u0440\u043e\u0446\u0435\u0441\u0441\n\u041a\u043b\u0438\u0435\u043d\u0442 \u043f\u043e\u043b\u0443\u0447\u0438\u043b"
+  },
+  {
+   "fieldname": "harajat_turi",
+   "fieldtype": "Link",
+   "label": "Qo'shimcha rasxod turi",
+   "options": "Account"
+  },
+  {
+   "fieldname": "summa",
+   "fieldtype": "Currency",
+   "label": "Qo'shimcha rasxod summasi"
+  },
+  {
+   "fieldname": "izoh",
+   "fieldtype": "Data",
+   "label": "Rasxod izohi"
   }
  ],
  "grid_page_length": 50,

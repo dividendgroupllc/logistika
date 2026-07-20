@@ -20,7 +20,7 @@
    "fieldtype": "Autocomplete",
    "ignore_validation": 1,
    "in_list_view": 1,
-   "label": "Mashina raqami / Fura (车牌号)",
+   "label": "Mashina raqami / Fura",
    "reqd": 1,
    "unique": 1
   },
@@ -40,18 +40,18 @@
   {
    "fieldname": "haydovchi",
    "fieldtype": "Data",
-   "label": "Haydovchi (司机)"
+   "label": "Haydovchi"
   },
   {
    "default": "1",
    "fieldname": "faol",
    "fieldtype": "Check",
-   "label": "Faol (启用)"
+   "label": "Faol"
   },
   {
    "fieldname": "izoh",
    "fieldtype": "Small Text",
-   "label": "Izoh (备注)"
+   "label": "Izoh"
   }
  ],
  "grid_page_length": 50,

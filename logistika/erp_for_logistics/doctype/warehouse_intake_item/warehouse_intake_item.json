@@ -21,7 +21,7 @@
    "fieldname": "order",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Order / Zakaz (订单)",
+   "label": "Order / Zakaz",
    "options": "Order",
    "read_only": 1
   },
@@ -30,7 +30,7 @@
    "fieldname": "part_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Mahsulot nomi (\u54c1\u540d)",
+   "label": "Mahsulot nomi",
    "read_only": 1
   },
   {
@@ -38,7 +38,7 @@
    "fieldname": "quantity",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Reja soni (\u6570\u91cf)",
+   "label": "Reja soni",
    "read_only": 1
   },
   {
@@ -46,7 +46,7 @@
    "fieldname": "total_boxes",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Karobka (\u7bb1\u6570)",
+   "label": "Karobka",
    "read_only": 1
   },
   {
@@ -54,26 +54,26 @@
    "fieldname": "fakt_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Fakt soni (\u5b9e\u6536)"
+   "label": "Fakt soni"
   },
   {
    "columns": 1,
    "fieldname": "farq",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Farq (\u5dee\u5f02)",
+   "label": "Farq",
    "read_only": 1
   },
   {
    "fieldname": "net_weight",
    "fieldtype": "Float",
-   "label": "Net vazn (\u51c0\u91cd)",
+   "label": "Net vazn",
    "read_only": 1
   },
   {
    "fieldname": "volume_cbm",
    "fieldtype": "Float",
-   "label": "CBM (\u4f53\u79ef)",
+   "label": "CBM",
    "precision": "3",
    "read_only": 1
   }

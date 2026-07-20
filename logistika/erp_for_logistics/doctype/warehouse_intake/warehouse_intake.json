@@ -23,21 +23,21 @@
   {
    "fieldname": "sec_top",
    "fieldtype": "Section Break",
-   "label": "Asosiy (\u57fa\u672c)"
+   "label": "Asosiy"
   },
   {
    "default": "Today",
    "fieldname": "sana",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Sana (\u65e5\u671f)",
+   "label": "Sana",
    "reqd": 1
   },
   {
    "fieldname": "order",
    "fieldtype": "Link",
    "hidden": 1,
-   "label": "Order / Zakaz (\u8ba2\u5355) \u2014 eski, endi fura orqali avtomatik aniqlanadi",
+   "label": "Order / Zakaz — eski, endi fura orqali avtomatik aniqlanadi",
    "options": "Order"
   },
   {
@@ -50,7 +50,7 @@
    "fieldtype": "Autocomplete",
    "ignore_validation": 1,
    "in_list_view": 1,
-   "label": "Fura (\u8f66\u724c\u53f7)",
+   "label": "Fura",
    "reqd": 1
   },
   {
@@ -66,14 +66,14 @@
    "fieldname": "holati",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Holati (\u72b6\u6001)",
+   "label": "Holati",
    "options": "Yangi\nTo'liq\nNedostatka",
    "read_only": 1
   },
   {
    "fieldname": "sec_items",
    "fieldtype": "Section Break",
-   "label": "Pekin list / Fakt qabul (\u88c5\u7bb1\u5355)"
+   "label": "Pekin list / Fakt qabul"
   },
   {
    "fieldname": "items",

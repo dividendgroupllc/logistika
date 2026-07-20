@@ -208,6 +208,26 @@ DOCTYPE_TITLE_TRANSLATIONS = {
 
 
 @frappe.whitelist()
+def upsert_translations(pairs, language="zh"):
+	"""Berilgan {source_text: translated_text} lug'atini Translation yozuvlariga
+	yozadi (yaratadi yoki yangilaydi) — bilingual label'lar ("X (中文)") DocType
+	JSON'idan ajratilib, sof "X" label + alohida Translation yozuviga
+	aylantirilganda ishlatiladi."""
+	if isinstance(pairs, str):
+		pairs = json.loads(pairs)
+
+	created = updated = 0
+	for source_text, translated_text in pairs.items():
+		c, u = _upsert_translation(source_text, translated_text, language)
+		created += c
+		updated += u
+
+	frappe.db.commit()
+	frappe.translate.clear_cache()
+	return {"language": language, "created": created, "updated": updated, "total": len(pairs)}
+
+
+@frappe.whitelist()
 def translate_doctype_titles(language="zh"):
 	"""DOCTYPE_TITLE_TRANSLATIONS'dagi qo'lda tayyorlangan nomlarni Translation
 	yozuvlariga yozadi — Kimi ishlatilmaydi, chunki bular nom sifatida aniq va

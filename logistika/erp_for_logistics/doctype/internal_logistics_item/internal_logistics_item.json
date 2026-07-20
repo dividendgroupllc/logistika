@@ -23,7 +23,7 @@
    "fieldname": "order",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Order / Zakaz (\u8ba2\u5355)",
+   "label": "Order / Zakaz",
    "options": "Order",
    "reqd": 1
   },
@@ -32,7 +32,7 @@
    "fieldname": "part_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Mahsulot nomi (\u54c1\u540d)",
+   "label": "Mahsulot nomi",
    "reqd": 1
   },
   {
@@ -40,21 +40,21 @@
    "fieldname": "quantity",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Soni (\u6570\u91cf)"
+   "label": "Soni"
   },
   {
    "columns": 1,
    "fieldname": "total_boxes",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Karobka soni (\u7bb1\u6570)"
+   "label": "Karobka soni"
   },
   {
    "columns": 1,
    "fieldname": "net_weight",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Net vazn \u2014 jami (\u51c0\u91cd)"
+   "label": "Net vazn \u2014 jami"
   },
   {
    "columns": 1,
@@ -69,7 +69,7 @@
    "fieldname": "volume_cbm",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Hajm / CBM \u2014 jami (\u4f53\u79ef)",
+   "label": "Hajm / CBM \u2014 jami",
    "precision": "3"
   },
   {
@@ -78,7 +78,7 @@
    "fieldname": "uzunlik",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Bitta karobka bo'yi (\u5355\u7bb1\u957f)"
+   "label": "Bitta karobka bo'yi"
   },
   {
    "columns": 1,
@@ -86,7 +86,7 @@
    "fieldname": "kenglik",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Bitta karobka eni (\u5355\u7bb1\u5bbd)"
+   "label": "Bitta karobka eni"
   },
   {
    "columns": 1,
@@ -94,7 +94,7 @@
    "fieldname": "balandlik",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Bitta karobka balandligi (\u5355\u7bb1\u9ad8)"
+   "label": "Bitta karobka balandligi"
   },
   {
    "columns": 1,

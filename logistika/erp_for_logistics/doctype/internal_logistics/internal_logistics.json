@@ -38,37 +38,37 @@
   {
    "fieldname": "sec_buyurtmalar",
    "fieldtype": "Section Break",
-   "label": "Buyurtmalar (订单列表)"
+   "label": "Buyurtmalar"
   },
   {
    "description": "Bitta furada bir nechta buyurtmaning mahsuloti bo'lishi mumkin — har biri uchun alohida qator qo'shing",
    "fieldname": "buyurtmalar",
    "fieldtype": "Table",
-   "label": "Buyurtmalar (订单列表)",
+   "label": "Buyurtmalar",
    "options": "Internal Logistics Order"
   },
   {
    "fieldname": "sec_top",
    "fieldtype": "Section Break",
-   "label": "Asosiy (基本)"
+   "label": "Asosiy"
   },
   {
    "fieldname": "order",
    "fieldtype": "Link",
    "hidden": 1,
-   "label": "Order / Zakaz (订单) — eski, endi \"Buyurtmalar\" jadvaliga ko'chirilgan",
+   "label": "Order / Zakaz — eski, endi \"Buyurtmalar\" jadvaliga ko'chirilgan",
    "options": "Order"
   },
   {
    "fieldname": "fura",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Fura / mashina nomeri (车牌号)"
+   "label": "Fura / mashina nomeri"
   },
   {
    "fieldname": "fura_phone",
    "fieldtype": "Data",
-   "label": "Fura telefon (司机电话)",
+   "label": "Fura telefon",
    "read_only": 1
   },
   {
@@ -77,7 +77,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Holati (状态)",
+   "label": "Holati",
    "options": "Yo'lda\nYakunlangan"
   },
   {
@@ -96,46 +96,46 @@
    "fieldname": "zavod_raqami",
    "fieldtype": "Data",
    "hidden": 1,
-   "label": "Xitoy zavod raqami (工厂编号) — eski, endi har bir buyurtma o'zinikini ko'rsatadi",
+   "label": "Xitoy zavod raqami — eski, endi har bir buyurtma o'zinikini ko'rsatadi",
    "read_only": 1
   },
   {
    "fieldname": "postavshik",
    "fieldtype": "Data",
    "hidden": 1,
-   "label": "Xitoy postavshik (供应商) — eski, endi har bir buyurtma o'zinikini ko'rsatadi",
+   "label": "Xitoy postavshik — eski, endi har bir buyurtma o'zinikini ko'rsatadi",
    "read_only": 1
   },
   {
    "description": "Barcha buyurtmalar bo'yicha JAMI (avtomatik hisoblanadi)",
    "fieldname": "jami_kub",
    "fieldtype": "Float",
-   "label": "Jami kub — m³ (总体积)",
+   "label": "Jami kub — m³",
    "precision": "3",
    "read_only": 1
   },
   {
    "fieldname": "jami_tonna",
    "fieldtype": "Float",
-   "label": "Jami tonna (总重)",
+   "label": "Jami tonna",
    "precision": "3",
    "read_only": 1
   },
   {
    "fieldname": "sec_pekin",
    "fieldtype": "Section Break",
-   "label": "Pekin list / mahsulotlar (装箱单)"
+   "label": "Pekin list / mahsulotlar"
   },
   {
    "fieldname": "pekin_list",
    "fieldtype": "Table",
-   "label": "Pekin list (装箱单)",
+   "label": "Pekin list",
    "options": "Internal Logistics Item"
   },
   {
    "fieldname": "sec_sigim",
    "fieldtype": "Section Break",
-   "label": "Truck sig'imi / bo'sh joy (车辆容量)"
+   "label": "Truck sig'imi / bo'sh joy"
   },
   {
    "description": "Fura'ning Order Item'dagi Truck Type'idan olinadi (avtomatik)",
@@ -187,7 +187,7 @@
   {
    "fieldname": "sec_buyurtmalar_korinishi",
    "fieldtype": "Section Break",
-   "label": "Buyurtmalar bo'yicha ko'rinish (按订单查看)"
+   "label": "Buyurtmalar bo'yicha ko'rinish"
   },
   {
    "fieldname": "buyurtmalar_korinishi",
@@ -197,13 +197,13 @@
   {
    "fieldname": "sec_kuzatuv",
    "fieldtype": "Section Break",
-   "label": "Kunlik slijeniya (每日跟踪)"
+   "label": "Kunlik slijeniya"
   },
   {
    "description": "Manzilni qo'lda kiriting, so'ng \"Send\" orqali mijozga (agar Telegram botiga ro'yxatdan o'tgan bo'lsa) yuboring",
    "fieldname": "kunlik_kuzatuv",
    "fieldtype": "Table",
-   "label": "Kunlik slijeniya (每日跟踪)",
+   "label": "Kunlik slijeniya",
    "options": "Internal Logistics Tracking"
   }
  ],

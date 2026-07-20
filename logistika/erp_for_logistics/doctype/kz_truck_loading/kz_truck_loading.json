@@ -34,21 +34,21 @@
   {
    "fieldname": "sec_top",
    "fieldtype": "Section Break",
-   "label": "Asosiy (\u57fa\u672c)"
+   "label": "Asosiy"
   },
   {
    "default": "Today",
    "fieldname": "sana",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Sana (\u65e5\u671f)",
+   "label": "Sana",
    "reqd": 1
   },
   {
    "fieldname": "order",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Order / Zakaz (\u8ba2\u5355)",
+   "label": "Order / Zakaz",
    "options": "Order",
    "reqd": 1
   },
@@ -60,20 +60,20 @@
    "fieldname": "kz_truck",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "KZ fura raqami (\u54c8\u65b9\u8f66\u53f7)"
+   "label": "KZ fura raqami"
   },
   {
    "fieldname": "sec_load",
    "fieldtype": "Section Break",
-   "label": "Yuklar (\u88c5\u8f66)"
+   "label": "Yuklar"
   },
   {
    "fieldname": "manba_china_truck",
    "fieldtype": "Select",
-   "label": "Manba Xitoy fura (\u6765\u6e90\u8f66) \u2014 tanlab \"Yuklarni tortish\""
+   "label": "Manba Xitoy fura — tanlab \"Yuklarni tortish\""
   },
   {
-   "description": "Qaysi ombordan yuk chiqarilayotgani \u2014 \"Yuklarni tortish\" shu ombor qoldig'idan hisoblaydi",
+   "description": "Qaysi ombordan yuk chiqarilayotgani — \"Yuklarni tortish\" shu ombor qoldig'idan hisoblaydi",
    "fieldname": "ombor",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -90,37 +90,37 @@
   {
    "fieldname": "sec_jami",
    "fieldtype": "Section Break",
-   "label": "Jami (\u5408\u8ba1)"
+   "label": "Jami"
   },
   {
    "fieldname": "jami_kub",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Jami kub \u2014 m\u00b3 (\u4f53\u79ef)",
+   "label": "Jami kub — m³",
    "precision": "3",
    "read_only": 1
   },
   {
    "fieldname": "jami_tonna",
    "fieldtype": "Float",
-   "label": "Jami tonna (\u5428\u4f4d)",
+   "label": "Jami tonna",
    "precision": "3",
    "read_only": 1
   },
   {
    "fieldname": "sec_secure",
    "fieldtype": "Section Break",
-   "label": "Mustahkamlash (\u52a0\u56fa)"
+   "label": "Mustahkamlash"
   },
   {
    "fieldname": "zanjir_soni",
    "fieldtype": "Int",
-   "label": "Zanjir soni (\u94fe\u6761)"
+   "label": "Zanjir soni"
   },
   {
    "fieldname": "kamar_soni",
    "fieldtype": "Int",
-   "label": "Kamar soni (\u7ed1\u5e26)"
+   "label": "Kamar soni"
   },
   {
    "fieldname": "cb_secure",
@@ -129,12 +129,12 @@
   {
    "fieldname": "paddon_soni",
    "fieldtype": "Int",
-   "label": "Paddon soni (\u6258\u76d8)"
+   "label": "Paddon soni"
   },
   {
    "fieldname": "yuklovchi_ismi",
    "fieldtype": "Data",
-   "label": "Kim yukladi (\u88c5\u8f66\u4eba)"
+   "label": "Kim yukladi"
   },
   {
    "fieldname": "yuklash_sxemasi",

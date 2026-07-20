@@ -37,21 +37,21 @@
   {
    "fieldname": "sec_top",
    "fieldtype": "Section Break",
-   "label": "Asosiy (\u57fa\u672c)"
+   "label": "Asosiy"
   },
   {
    "default": "Today",
    "fieldname": "sana",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Sana (\u65e5\u671f)",
+   "label": "Sana",
    "reqd": 1
   },
   {
    "fieldname": "order",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Order / Zakaz (\u8ba2\u5355)",
+   "label": "Order / Zakaz",
    "options": "Order",
    "reqd": 1
   },
@@ -63,12 +63,12 @@
    "fieldname": "kz_truck",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "KZ fura raqami (\u54c8\u65b9\u8f66\u53f7)"
+   "label": "KZ fura raqami"
   },
   {
    "fieldname": "haydovchi_ismi",
    "fieldtype": "Data",
-   "label": "Haydovchi (\u53f8\u673a)",
+   "label": "Haydovchi",
    "read_only": 1
   },
   {
@@ -78,7 +78,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Holati (\u72b6\u6001)",
+   "label": "Holati",
    "options": "Yo'lda\nYakunlangan"
   },
   {
@@ -94,17 +94,17 @@
   {
    "fieldname": "sec_sug",
    "fieldtype": "Section Break",
-   "label": "Sug'urta va to'lov (\u4fdd\u9669/\u4ed8\u6b3e)"
+   "label": "Sug'urta va to'lov"
   },
   {
    "fieldname": "sugurta_summa",
    "fieldtype": "Currency",
-   "label": "Sug'urta harajati (\u4fdd\u9669\u8d39)"
+   "label": "Sug'urta harajati"
   },
   {
    "fieldname": "sugurta_hujjat",
    "fieldtype": "Attach",
-   "label": "Sug'urta hujjati (\u4fdd\u9669\u5355)"
+   "label": "Sug'urta hujjati"
   },
   {
    "fieldname": "cb_sug",
@@ -113,12 +113,12 @@
   {
    "fieldname": "oldindan_tolov",
    "fieldtype": "Currency",
-   "label": "Haydovchiga oldindan to'lov (\u9884\u4ed8\u6b3e)"
+   "label": "Haydovchiga oldindan to'lov"
   },
   {
    "fieldname": "sec_boshqa",
    "fieldtype": "Section Break",
-   "label": "Boshqa harajatlar (\u5176\u4ed6\u8d39\u7528)"
+   "label": "Boshqa harajatlar"
   },
   {
    "fieldname": "boshqa_harajatlar",
@@ -129,23 +129,23 @@
   {
    "fieldname": "jami_boshqa",
    "fieldtype": "Currency",
-   "label": "Jami boshqa harajat (\u5408\u8ba1)",
+   "label": "Jami boshqa harajat",
    "read_only": 1
   },
   {
    "fieldname": "sec_ovqat",
    "fieldtype": "Section Break",
-   "label": "Haydovchi kunlik (\u9910\u8d39)"
+   "label": "Haydovchi kunlik"
   },
   {
    "fieldname": "kunlik_ovqat_puli",
    "fieldtype": "Currency",
-   "label": "Kunlik oziq-ovqat puli (jami) (\u9910\u8d39)"
+   "label": "Kunlik oziq-ovqat puli (jami)"
   },
   {
    "fieldname": "sec_slij",
    "fieldtype": "Section Break",
-   "label": "Kunlik slijeniya (\u6bcf\u65e5\u8ddf\u8e2a)"
+   "label": "Kunlik slijeniya"
   },
   {
    "fieldname": "slijeniya",
@@ -156,18 +156,18 @@
   {
    "fieldname": "sec_yakun",
    "fieldtype": "Section Break",
-   "label": "Yakun (\u5b8c\u6210)"
+   "label": "Yakun"
   },
   {
    "fieldname": "fakt_yetib_borgan",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Fakt yetib borgan sana (\u5230\u8fbe\u65e5\u671f)"
+   "label": "Fakt yetib borgan sana"
   },
   {
    "fieldname": "kliyent_oldi_hujjat",
    "fieldtype": "Attach",
-   "label": "Kliyent oldi \u2014 hujjat (\u5ba2\u6237\u7b7e\u6536)"
+   "label": "Kliyent oldi \u2014 hujjat"
   },
   {
    "fieldname": "sec_chat",

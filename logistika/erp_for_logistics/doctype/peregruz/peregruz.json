@@ -27,21 +27,21 @@
   {
    "fieldname": "sec_top",
    "fieldtype": "Section Break",
-   "label": "Asosiy (基本)"
+   "label": "Asosiy"
   },
   {
    "default": "Today",
    "fieldname": "sana",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Sana (日期)",
+   "label": "Sana",
    "reqd": 1
   },
   {
    "fieldname": "order",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Order / Zakaz (订单)",
+   "label": "Order / Zakaz",
    "options": "Order",
    "reqd": 1
   },
@@ -53,18 +53,18 @@
    "fieldname": "kz_truck",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "KZ fura raqami (哈方车号)"
+   "label": "KZ fura raqami"
   },
   {
    "fieldname": "sec_load",
    "fieldtype": "Section Break",
-   "label": "O'tkazilgan yuklar (中转货物)"
+   "label": "O'tkazilgan yuklar"
   },
   {
    "description": "Ombordan o'tmasdan, to'g'ridan shu KZ furaga o'tkazilayotgan Xitoy fura",
    "fieldname": "manba_china_truck",
    "fieldtype": "Select",
-   "label": "Manba Xitoy fura (来源车) — tanlab \"Yuklarni tortish\""
+   "label": "Manba Xitoy fura — tanlab \"Yuklarni tortish\""
   },
   {
    "fieldname": "yuklar",
@@ -75,20 +75,20 @@
   {
    "fieldname": "sec_jami",
    "fieldtype": "Section Break",
-   "label": "Jami (合计)"
+   "label": "Jami"
   },
   {
    "fieldname": "jami_kub",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Jami kub — m³ (体积)",
+   "label": "Jami kub — m³",
    "precision": "3",
    "read_only": 1
   },
   {
    "fieldname": "jami_tonna",
    "fieldtype": "Float",
-   "label": "Jami tonna (吨位)",
+   "label": "Jami tonna",
    "precision": "3",
    "read_only": 1
   },
