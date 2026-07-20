@@ -181,14 +181,25 @@ def _notify_document_owners(order, text):
 		email = frappe.db.get_value("User", t.owner, "email")
 		if not email:
 			continue
+		subject = f"Mijoz «{order}» buyurtmasi bo'yicha yozdi: {preview}"
 		enqueue_create_notification(
 			email,
 			{
 				"type": "Alert",
 				"document_type": t.doctype,
 				"document_name": t.name,
-				"subject": f"Mijoz «{order}» buyurtmasi bo'yicha yozdi: {preview}",
+				"subject": subject,
 			},
+		)
+		# Qo'ng'iroqcha (Notification Log) bilan bir qatorda — brauzer o'zining
+		# tabiiy Notification API'si orqali "Windows-style" toast ham chiqarishi
+		# uchun (order_chat_widget.js shu event'ni tinglaydi). Faqat SHU xodimga
+		# (owner) yuboriladi, hammaga emas.
+		frappe.publish_realtime(
+			"logistika_chat_notification",
+			{"subject": subject, "document_type": t.doctype, "document_name": t.name},
+			user=t.owner,
+			after_commit=True,
 		)
 
 

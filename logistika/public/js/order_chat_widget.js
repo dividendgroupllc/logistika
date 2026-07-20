@@ -127,3 +127,35 @@ logistika.order_chat.send_reply = function (order_name, $input, $log, $btn) {
 		always: () => $btn.prop("disabled", false),
 	});
 };
+
+// Mijozdan yangi xabar kelganda qo'ng'iroqcha (Notification Log) bilan bir qatorda
+// brauzerning o'z Notification API'si orqali "Windows-style" toast ham ko'rsatiladi
+// (order_chat.py::_notify_document_owners shu "logistika_chat_notification" realtime
+// event'ini shu xodimning o'ziga (user room) yuboradi). Ruxsat brauzer tomonidan
+// so'ralishi kerak — foydalanuvchi rad etsa yoki brauzer qo'llab-quvvatlamasa, bu
+// funksiya jimgina hech narsa qilmaydi (bell-icon bildirishnoma baribir ishlayveradi).
+(function setup_browser_toast_notifications() {
+	if (typeof Notification === "undefined") return;
+
+	if (Notification.permission === "default") {
+		// Faqat bir marta so'raladi — foydalanuvchi "Block" desa, brauzer keyingi
+		// safar avtomatik so'ramaydi (bu standart brauzer xatti-harakati).
+		Notification.requestPermission();
+	}
+
+	frappe.realtime.on("logistika_chat_notification", (data) => {
+		if (Notification.permission !== "granted") return;
+		const toast = new Notification("Logistika", {
+			body: data.subject,
+			icon: "/assets/frappe/images/frappe-favicon.svg",
+			tag: `${data.document_type}:${data.document_name}`,
+		});
+		toast.onclick = () => {
+			window.focus();
+			if (data.document_type && data.document_name) {
+				frappe.set_route("Form", data.document_type, data.document_name);
+			}
+			toast.close();
+		};
+	});
+})();

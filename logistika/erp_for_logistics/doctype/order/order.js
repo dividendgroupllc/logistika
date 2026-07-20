@@ -6,5 +6,11 @@ frappe.ui.form.on("Order", {
 		frm.set_query("truck_type", "zakaz_mahsulotlari", () => {
 			return { filters: { davlat: "China" } };
 		});
+
+		// Kliyent faqat "Xitoy postavshik" customer group'idagi mijozlar bilan
+		// filtrlanadi.
+		frm.set_query("kliyent", () => {
+			return { filters: { customer_group: "Xitoy postavshik" } };
+		});
 	},
 });

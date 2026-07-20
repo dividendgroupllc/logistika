@@ -10,7 +10,8 @@
   "zavod_raqami",
   "postavshik",
   "jami_kub",
-  "jami_tonna"
+  "jami_tonna",
+  "jonatish_xabari_yuborildi"
  ],
  "fields": [
   {
@@ -56,6 +57,15 @@
    "in_list_view": 1,
    "label": "Jami tonna (总重)",
    "precision": "3",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "jonatish_xabari_yuborildi",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Jo'natish xabari yuborildi",
+   "no_copy": 1,
    "read_only": 1
   }
  ],

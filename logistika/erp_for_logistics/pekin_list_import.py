@@ -11,9 +11,11 @@
 import base64
 import json
 import re
+from io import BytesIO
 
 import frappe
 from frappe.utils.xlsxutils import read_xls_file_from_attached_file, read_xlsx_file_from_attached_file
+from pypdf import PdfReader
 
 from logistika.erp_for_logistics.kimi_client import chat as kimi_chat
 
@@ -46,9 +48,25 @@ umuman sarlavhasiz). Har bir mahsulot qatoridan quyidagi maydonlarni chiqarib ol
 
 Fayl bir nechta bo'limdan iborat bo'lishi mumkin: yuqorida mahsulot nomi/soni bilan asosiy \
 jadval, pastroqda esa xuddi shu mahsulotlarning o'lchami/vazni ALOHIDA, boshqa ustun tartibida \
-yozilgan bo'lishi mumkin. Shunday holatda: pastdagi qo'shimcha ma'lumotlarni mahsulotlar asosiy \
-jadvalda RO'YXATDA turgan TARTIBIGA (1-mahsulot, 2-mahsulot, ...) qarab mos mahsulotga biriktir \
-— uzoq mulohaza qilib o'tirma, shunchaki tartib bo'yicha ketma-ket moslashtir.
+yozilgan bo'lishi mumkin (PDF'dan chiqarilgan matnda ustunlar bir-biridan uzilib, boshqa joyga \
+tushib qolishi ham mumkin — bu ham xuddi shu holat). Shunday holatda: pastdagi qo'shimcha \
+ma'lumotlarni mahsulotlar asosiy jadvalda RO'YXATDA turgan TARTIBIGA (1-mahsulot, 2-mahsulot, \
+...) qarab mos mahsulotga biriktir — uzoq mulohaza qilib o'tirma, shunchaki tartib bo'yicha \
+ketma-ket moslashtir.
+
+"Итого"/"总计"/"Total"/"Grand Total" kabi YAKUNIY JAMI qatorlari, shuningdek qadoqlash \
+materiali haqidagi eslatmalar (masalan "16 再生木托" — "16 dona qayta ishlangan yog'och \
+paletka", tovar emas, qadoqlash uchun ishlatilgan material) uchun ALOHIDA qator YARATMA — bular \
+sotiladigan/tashiladigan mahsulot emas. Raqamni FAQAT aniq "soni"/"quantity"/"箱数" kabi o'z \
+USTUNIDA yozilgan bo'lsagina miqdor sifatida ol — matn/izoh ichida tasodifan uchragan raqamni \
+(masalan mahsulot nomi bilan bitta katakchada yozilgan) miqdor deb OLMA. Xuddi shunday, agar \
+hajm (CBM) yoki vazn FAQAT butun jo'natma uchun BITTA umumiy son sifatida ko'rsatilgan bo'lsa \
+(har bir mahsulot uchun emas), bu umumiy sonni HAR BIR qatorga nusxalab qo'yma — faqat chindan \
+ham shu mahsulotga tegishli, aniq ko'rsatilgan qiymatlarni ol.
+
+Agar mahsulot nomi umumiy/bir xil takrorlanib tursa (masalan bir nechta qatorda bir xil nom), \
+lekin yonida alohida model/artikul/spec raqami ustuni bo'lsa — ikkalasini birlashtirib \
+part_name qil (masalan "nom (model raqami)"), aks holda qatorlar bir-biridan farqlanmay qoladi.
 
 Faqat FAKTIK matnda bor qiymatlarni chiqar — bo'lmagan maydonni taxmin qilma, shunchaki tashlab \
 ket. Javobni FAQAT quyidagi JSON formatida qaytar, boshqa hech qanday matn (izoh, tushuntirish, \
@@ -172,3 +190,31 @@ def smart_parse_pekin_list_excel(file_content_base64, file_extension="xlsx"):
 		frappe.throw("Excel faylida ma'lumot topilmadi")
 
 	return smart_parse_pekin_list(_excel_rows_to_text(rows))
+
+
+@frappe.whitelist()
+def smart_parse_pekin_list_pdf(file_content_base64):
+	"""PDF faylidan matnni chiqarib olib, xuddi CSV/Excel import bilan bir xil
+	(o'zgarishsiz) smart_parse_pekin_list() orqali Kimi'ga yuboradi. PDF'dan
+	chiqarilgan matn ko'pincha buzilgan/tartibsiz bo'ladi (ustunlar bir-biridan
+	uzilib, boshqa joyga tushib qolishi mumkin) — bu SYSTEM_PROMPT'dagi "fayl bir
+	nechta bo'limdan iborat, tartib bo'yicha mosla" ko'rsatmasi bilan allaqachon
+	hisobga olingan (real hujjatlar bilan sinovdan o'tgan)."""
+	try:
+		file_bytes = base64.b64decode(file_content_base64)
+	except Exception:
+		frappe.throw("Fayl mazmunini o'qib bo'lmadi (noto'g'ri fayl formati)")
+
+	try:
+		reader = PdfReader(BytesIO(file_bytes))
+		text = "\n".join(page.extract_text() or "" for page in reader.pages)
+	except Exception:
+		frappe.throw("PDF faylini o'qib bo'lmadi — fayl buzilgan yoki himoyalangan bo'lishi mumkin")
+
+	if not text.strip():
+		frappe.throw(
+			"PDF faylidan matn chiqarib bo'lmadi — bu skanerlangan rasm (matn qatlamisiz PDF) "
+			"bo'lishi mumkin, bunday fayllar hozircha qo'llab-quvvatlanmaydi"
+		)
+
+	return smart_parse_pekin_list(text)

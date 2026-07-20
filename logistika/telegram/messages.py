@@ -91,3 +91,8 @@ QA_ORDER_DELIVERED = (
 	"Bu buyurtma allaqachon yetkazib berilgan, shuning uchun bu yerda yangi xabar "
 	"yozib bo'lmaydi. Savolingiz bo'lsa, boshqa buyurtma tanlang yoki bizga to'g'ridan-to'g'ri murojaat qiling."
 )
+
+ORDER_DISPATCHED = (
+	"🚚 Sizning <b>{order}</b> buyurtmangiz yo'lga chiqdi!\n\n"
+	"Yukingiz endi tashish jarayonida — holati yangilanganda shu yerga xabar kelib turadi."
+)

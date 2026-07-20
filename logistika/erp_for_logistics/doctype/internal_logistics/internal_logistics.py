@@ -29,6 +29,45 @@ class InternalLogistics(Document):
 		self.warn_orphaned_pekin_items()
 		self.compute_truck_capacity()
 		self.compute_pekin_item_derived_fields()
+		self.capture_new_orders()
+
+	def on_update(self):
+		self.notify_new_order_customers()
+
+	def capture_new_orders(self):
+		"""Saqlashdan OLDIN (validate()), bazadagi eski "Buyurtmalar" qatorlari bilan
+		joriy (hozir saqlanayotgan) qatorlarni solishtirib, YANGI qo'shilgan
+		order'larni self.flags ichida vaqtincha saqlab qo'yadi — order_insurance.py
+		bilan bir xil naqsh. Yangi hujjat uchun ham ishlaydi (eski qatorlar bo'sh deb
+		olinadi), chunki truck birinchi marta yaratilganda ham unga qo'shilgan
+		orderlarga "jo'natildi" xabari borishi kerak."""
+		old_orders = set(
+			frappe.get_all("Internal Logistics Order", filters={"parent": self.name}, pluck="order")
+		)
+		new_rows = [
+			row
+			for row in self.buyurtmalar
+			if row.order and row.order not in old_orders and not row.jonatish_xabari_yuborildi
+		]
+		self.flags.newly_added_buyurtma_rows = new_rows
+
+	def notify_new_order_customers(self):
+		"""Saqlangandan KEYIN (on_update()), capture_new_orders() aniqlagan har bir
+		yangi order uchun — agar mijoz Telegram'da ro'yxatdan o'tgan bo'lsa —
+		"jo'natildi" xabarini yuboradi va shu qatorni qayta xabar yuborilmasligi
+		uchun belgilab qo'yadi."""
+		from logistika.erp_for_logistics.ld_telegram import get_order_chat_ids
+		from logistika.telegram.messages import ORDER_DISPATCHED
+		from logistika.telegram.sender import send_message
+
+		new_rows = self.flags.get("newly_added_buyurtma_rows") or []
+		for row in new_rows:
+			chat_ids = get_order_chat_ids(row.order)
+			for chat_id in chat_ids:
+				send_message(chat_id, ORDER_DISPATCHED.format(order=row.order))
+			frappe.db.set_value(
+				"Internal Logistics Order", row.name, "jonatish_xabari_yuborildi", 1, update_modified=False
+			)
 
 	def check_duplicate_orders(self):
 		"""Bitta order "Buyurtmalar" jadvalida ikki marta kiritilsa, jami kub/tonna

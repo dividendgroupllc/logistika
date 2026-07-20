@@ -17,8 +17,6 @@
   "items",
   "sec_yuklash_xarajati",
   "yuklash_xarajatlari",
-  "sec_yetkazish_xarajati",
-  "yetkazish_xarajatlari",
   "amended_from"
  ],
  "fields": [
@@ -92,17 +90,6 @@
    "fieldname": "yuklash_xarajatlari",
    "fieldtype": "Table",
    "label": "Yuklash xarajatlari",
-   "options": "Ombor Xarajati Item"
-  },
-  {
-   "fieldname": "sec_yetkazish_xarajati",
-   "fieldtype": "Section Break",
-   "label": "Yetkazish xarajatlari"
-  },
-  {
-   "fieldname": "yetkazish_xarajatlari",
-   "fieldtype": "Table",
-   "label": "Yetkazish xarajatlari",
    "options": "Ombor Xarajati Item"
   },
   {

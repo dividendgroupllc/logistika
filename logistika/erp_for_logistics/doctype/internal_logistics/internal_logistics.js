@@ -169,10 +169,10 @@ function render_orders_summary(frm) {
 					<tbody>${rows}</tbody>
 				</table>
 				<div class="il-order-import-row" style="margin-top: 8px;">
-					<button type="button" class="btn btn-xs btn-default il-order-import" data-order="${order_attr}">
-						${__("📥 Shu buyurtma uchun fayl import (Excel/CSV)")}
-					</button>
-					<input type="file" accept=".csv,.txt,.xlsx,.xls" class="il-order-file" data-order="${order_attr}" style="display:none;" />
+					<div class="il-order-dropzone" data-order="${order_attr}" style="border: 1px dashed #c3c9d1; border-radius: 6px; padding: 10px 12px; text-align: center; cursor: pointer; color: #6b7280; font-size: 12px; transition: background-color 0.15s, border-color 0.15s;">
+						${__("📥 Pekin list faylini shu yerga tashlang yoki bosing (Excel / CSV / PDF)")}
+					</div>
+					<input type="file" accept=".csv,.txt,.xlsx,.xls,.pdf" class="il-order-file" data-order="${order_attr}" style="display:none;" />
 					<span class="il-order-import-status text-muted" style="margin-left: 8px;"></span>
 				</div>
 				<div class="il-order-chat" style="margin-top: 12px; border-top: 1px solid #e5e7eb; padding-top: 8px;">
@@ -228,25 +228,14 @@ function refresh_telegram_status($wrapper, buyurtmalar) {
 	});
 }
 
-// Har bir buyurtma bloki uchun alohida CSV import — foydalanuvchi mahsulotlarni
+// Har bir buyurtma bloki uchun alohida fayl import — foydalanuvchi mahsulotlarni
 // har bir orderni ALOHIDA-ALOHIDA import qiladi, shuning uchun har qatorga shu
-// blokning order'i avtomatik yoziladi (qo'lda order tanlash shart emas).
+// blokning order'i avtomatik yoziladi (qo'lda order tanlash shart emas). Bosib
+// fayl tanlash HAM, faylni to'g'ridan-to'g'ri shu yerga tashlash (drag & drop) HAM
+// ishlaydi — ikkalasi ham bitta handle_order_file() orqali ishlanadi.
 function bind_order_import_clicks(frm, $wrapper) {
-	$wrapper.find(".il-order-import").on("click", function () {
-		const order_name = $(this).attr("data-order");
-		$wrapper
-			.find(".il-order-file")
-			.filter(function () {
-				return $(this).attr("data-order") === order_name;
-			})
-			.trigger("click");
-	});
-
-	$wrapper.find(".il-order-file").on("change", function (e) {
-		const order_name = $(this).attr("data-order");
-		const file = e.target.files[0];
+	function handle_order_file(order_name, file, $status) {
 		if (!file) return;
-		const $status = $(this).siblings(".il-order-import-status");
 		const finish = (n) => {
 			frm.refresh_field("pekin_list");
 			render_orders_summary(frm);
@@ -279,8 +268,8 @@ function bind_order_import_clicks(frm, $wrapper) {
 		const ext = (file.name.split(".").pop() || "").toLowerCase();
 		const reader = new FileReader();
 
-		if (ext === "xlsx" || ext === "xls") {
-			// Excel — CSV uchun mo'ljallangan qattiq andoza bu yerga tegishli emas
+		if (ext === "xlsx" || ext === "xls" || ext === "pdf") {
+			// Excel/PDF — CSV uchun mo'ljallangan qattiq andoza bu yerga tegishli emas
 			// (sarlavha nomi/ustun tartibi juda xilma-xil bo'ladi), shuning uchun
 			// to'g'ridan-to'g'ri Kimi orqali "aqlli" o'qishga o'tiladi — xuddi CSV
 			// andoza mos kelmaganda qilinganidek.
@@ -288,9 +277,17 @@ function bind_order_import_clicks(frm, $wrapper) {
 			reader.onload = function (ev) {
 				// readAsDataURL natijasi "data:...;base64,XXXX" — faqat base64 qismi kerak.
 				const base64 = ev.target.result.split(",", 2)[1] || "";
+				const method =
+					ext === "pdf"
+						? "logistika.erp_for_logistics.pekin_list_import.smart_parse_pekin_list_pdf"
+						: "logistika.erp_for_logistics.pekin_list_import.smart_parse_pekin_list_excel";
+				const args =
+					ext === "pdf"
+						? { file_content_base64: base64 }
+						: { file_content_base64: base64, file_extension: ext };
 				frappe.call({
-					method: "logistika.erp_for_logistics.pekin_list_import.smart_parse_pekin_list_excel",
-					args: { file_content_base64: base64, file_extension: ext },
+					method: method,
+					args: args,
 					freeze: true,
 					freeze_message: __("Kimi orqali o'qilmoqda..."),
 					callback: (r) => apply_kimi_rows(r.message || []),
@@ -320,6 +317,55 @@ function bind_order_import_clicks(frm, $wrapper) {
 			}
 		};
 		reader.readAsText(file, "UTF-8");
+	}
+
+	$wrapper.find(".il-order-dropzone").on("click", function () {
+		const order_name = $(this).attr("data-order");
+		$wrapper
+			.find(".il-order-file")
+			.filter(function () {
+				return $(this).attr("data-order") === order_name;
+			})
+			.trigger("click");
+	});
+
+	$wrapper.find(".il-order-file").on("change", function (e) {
+		const order_name = $(this).attr("data-order");
+		const $status = $(this).siblings(".il-order-import-status");
+		handle_order_file(order_name, e.target.files[0], $status);
+		// Bir xil faylni qayta tanlaganda ham "change" ishga tushishi uchun.
+		$(this).val("");
+	});
+
+	// Fayl aniq dropzone tashqarisiga (lekin shu blok ichiga) tashlansa ham,
+	// brauzer faylni ochib, formani tark etib ketmasligi uchun.
+	$wrapper.on("dragover drop", function (e) {
+		e.preventDefault();
+	});
+
+	$wrapper.find(".il-order-dropzone").each(function () {
+		const $zone = $(this);
+		const order_name = $zone.attr("data-order");
+
+		$zone.on("dragover", function (e) {
+			e.preventDefault();
+			e.stopPropagation();
+			$zone.css({ "background-color": "#eff6ff", "border-color": "#2490ef" });
+		});
+		$zone.on("dragleave", function (e) {
+			e.preventDefault();
+			e.stopPropagation();
+			$zone.css({ "background-color": "", "border-color": "" });
+		});
+		$zone.on("drop", function (e) {
+			e.preventDefault();
+			e.stopPropagation();
+			$zone.css({ "background-color": "", "border-color": "" });
+			const file = e.originalEvent.dataTransfer && e.originalEvent.dataTransfer.files[0];
+			if (!file) return;
+			const $status = $zone.siblings(".il-order-import-status");
+			handle_order_file(order_name, file, $status);
+		});
 	});
 }
 

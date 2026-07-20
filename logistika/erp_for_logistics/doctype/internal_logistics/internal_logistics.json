@@ -1,6 +1,5 @@
 {
  "actions": [],
- "allow_import": 1,
  "allow_rename": 1,
  "autoname": "IL-.YYYY.-.#####",
  "creation": "2026-07-09 07:00:11.386503",
@@ -128,7 +127,6 @@
    "label": "Pekin list / mahsulotlar (装箱单)"
   },
   {
-   "allow_bulk_edit": 1,
    "fieldname": "pekin_list",
    "fieldtype": "Table",
    "label": "Pekin list (装箱单)",
