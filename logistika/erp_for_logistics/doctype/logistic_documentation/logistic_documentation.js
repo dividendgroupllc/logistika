@@ -7,9 +7,20 @@ frappe.ui.form.on("Logistic Documentation", {
 	refresh(frm) {
 		render_tr_docs_preview(frm);
 		render_cl_cmr_preview(frm);
+		render_driver_preview(frm);
+		if (!frm.is_new()) {
+			frm.add_custom_button(__("🔄 Qayta hisoblash"), () => calc_eksport_summa(frm), __("Eksport deklaratsiya"));
+		}
 	},
 	order(frm) {
 		render_tr_docs_preview(frm);
+		render_driver_preview(frm);
+		if (!frm.doc.eksport_deklaratsiya_summa) {
+			calc_eksport_summa(frm);
+		}
+	},
+	kz_truck(frm) {
+		render_driver_preview(frm);
 	},
 	pekin_invoice(frm) {
 		render_tr_docs_preview(frm);
@@ -30,6 +41,51 @@ frappe.ui.form.on("Logistic Documentation", {
 		$(frm.wrapper).find('button[data-fieldname="tab_tr"]').trigger("click");
 	},
 });
+
+// Eksport deklaratsiya summasi — shu Order'ga bog'liq Internal Logistics
+// hujjat(lar)idagi "Pekin list" jadvalida nechta ALOHIDA buyurtma (=alohida
+// import qilingan pekin list) borligiga qarab avtomatik hisoblanadi (har biri
+// $100, logistika.erp_for_logistics.api.calc_eksport_deklaratsiya_summa'da).
+// Faqat maydon hali BO'SH bo'lsa avtomatik to'ldiriladi — qo'lda kiritilgan/
+// tuzatilgan qiymatni bosib o'tmaydi. Pekin list keyinroq o'zgarsa, yuqoridagi
+// "🔄 Qayta hisoblash" tugmasi bilan qo'lda qayta hisoblash mumkin.
+function calc_eksport_summa(frm) {
+	if (!frm.doc.order) return;
+	frappe.call({
+		method: "logistika.erp_for_logistics.api.calc_eksport_deklaratsiya_summa",
+		args: { order: frm.doc.order },
+		callback: (r) => {
+			if (r.message) {
+				frm.set_value("eksport_deklaratsiya_summa", r.message);
+			}
+		},
+	});
+}
+
+// Transit bo'limida — Order + KZ fura bo'yicha Truck Dispatch'dagi haydovchi/
+// mashina ma'lumotlarini ko'rsatadi (boshqa hujjatga o'tmasdan tekshirish uchun).
+function render_driver_preview(frm) {
+	const $wrapper = frm.fields_dict.tr_driver_preview_html?.$wrapper;
+	if (!$wrapper) return;
+
+	if (!frm.doc.order || !frm.doc.kz_truck) {
+		$wrapper.html(`<div class="text-muted">🚚 ${__("Haydovchi")}: ${__("Avval Order va KZ fura tanlang")}</div>`);
+		return;
+	}
+	frappe.call({
+		method: "logistika.erp_for_logistics.api.truck_dispatch_driver_info",
+		args: { order: frm.doc.order, kz_truck: frm.doc.kz_truck },
+		callback: (r) => {
+			const info = r.message;
+			if (!info) {
+				$wrapper.html(`<div class="text-muted">🚚 ${__("Haydovchi")}: ${__("Truck Dispatch hujjati topilmadi")}</div>`);
+				return;
+			}
+			const parts = [info.haydovchi_ismi, info.haydovchi_telefon, info.vositachi].filter(Boolean);
+			$wrapper.html(`<div>🚚 ${__("Haydovchi")}: ${frappe.utils.escape_html(parts.join(" — ") || __("kiritilmagan"))}</div>`);
+		},
+	});
+}
 
 // Transit bo'limida (Kliyent hujjatlaridan) Pekin invoice, TTN va (Internal
 // Logistics'dan) Pekin list'ga tezkor havola — xodim boshqa tabga/hujjatga

@@ -20,11 +20,16 @@
   "cb_per",
   "send_peregruz_hujjat",
   "peregruz_sent",
+  "sec_ichki_dek",
+  "ichki_deklaratsiya",
+  "ichki_deklaratsiya_summa",
+  "ichki_deklaratsiya_tolovchi",
   "tab_cl",
   "sec_cl",
   "pekin_invoice",
   "ttn_hujjat",
   "eksport_deklaratsiya",
+  "eksport_deklaratsiya_summa",
   "cb_cl",
   "send_eksport_deklaratsiya",
   "eksport_sent",
@@ -35,6 +40,7 @@
   "tab_tr",
   "sec_tr",
   "tr_docs_preview_html",
+  "tr_driver_preview_html",
   "tr_docs_tasdiqlandi",
   "tranzit_check",
   "tranzit_hujjat",
@@ -119,6 +125,28 @@
    "read_only": 1
   },
   {
+   "fieldname": "sec_ichki_dek",
+   "fieldtype": "Section Break",
+   "label": "Ichki deklaratsiya"
+  },
+  {
+   "fieldname": "ichki_deklaratsiya",
+   "fieldtype": "Attach",
+   "label": "Ichki deklaratsiya",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "ichki_deklaratsiya_summa",
+   "fieldtype": "Currency",
+   "label": "Summa"
+  },
+  {
+   "fieldname": "ichki_deklaratsiya_tolovchi",
+   "fieldtype": "Select",
+   "label": "Kim to'ladi",
+   "options": "\nCustomer\nZavod"
+  },
+  {
    "fieldname": "tab_cl",
    "fieldtype": "Tab Break",
    "label": "Kliyent hujjatlari"
@@ -145,6 +173,12 @@
    "fieldtype": "Attach",
    "label": "Eksport deklaratsiya (ED/CO)",
    "permlevel": 1
+  },
+  {
+   "description": "Avtomatik: Internal Logistics'dagi shu Order'ning \"Pekin list\"iga tegishli buyurtmalar soni × $100 — kerak bo'lsa qo'lda o'zgartiring",
+   "fieldname": "eksport_deklaratsiya_summa",
+   "fieldtype": "Currency",
+   "label": "Eksport deklaratsiya summasi"
   },
   {
    "fieldname": "cb_cl",
@@ -199,6 +233,11 @@
    "fieldname": "tr_docs_preview_html",
    "fieldtype": "HTML",
    "label": "\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b \u043a\u043b\u0438\u0435\u043d\u0442\u0430"
+  },
+  {
+   "fieldname": "tr_driver_preview_html",
+   "fieldtype": "HTML",
+   "label": "Haydovchi / mashina"
   },
   {
    "default": "0",

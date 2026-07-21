@@ -51,6 +51,59 @@ def internal_logistics_for_order(order):
 	)
 
 
+EKSPORT_DEKLARATSIYA_RATE_PER_PEKIN_LIST = 100
+
+
+@frappe.whitelist()
+def calc_eksport_deklaratsiya_summa(order):
+	"""Eksport deklaratsiya summasi — Order'ga bog'liq Internal Logistics
+	hujjat(lar)ining "Pekin list" jadvalida NECHTA ALOHIDA buyurtma (=alohida
+	import qilingan "pekin list") borligiga qarab hisoblanadi (har biri
+	EKSPORT_DEKLARATSIYA_RATE_PER_PEKIN_LIST). Har bir buyurtma odatda ALOHIDA
+	fayldan import qilinadi (order_chat/internal_logistics.js'dagi per-order
+	drag-and-drop import naqshi) — shuning uchun bitta Internal Logistics
+	hujjatidagi (bitta fura) distinct order soni = shu furaga tegishli
+	"pekin list" (invoys) soni."""
+	if not order:
+		return 0
+
+	il_names = frappe.get_all(
+		"Internal Logistics Order", filters={"order": order}, pluck="parent", distinct=True
+	)
+	if not il_names:
+		return 0
+
+	pekin_list_count = 0
+	for il_name in il_names:
+		pekin_list_count += len(
+			frappe.get_all(
+				"Internal Logistics Item",
+				filters={"parent": il_name},
+				pluck="order",
+				distinct=True,
+			)
+		)
+
+	return pekin_list_count * EKSPORT_DEKLARATSIYA_RATE_PER_PEKIN_LIST
+
+
+@frappe.whitelist()
+def truck_dispatch_driver_info(order, kz_truck):
+	"""Logistic Documentation'ning Transit bo'limida ko'rsatish uchun — berilgan
+	(order, KZ fura) bo'yicha Truck Dispatch'dagi haydovchi/mashina
+	ma'lumotlarini topadi (mashina_raqami — KZ fura, Truck Dispatch'ning o'z
+	"kz_truck raqami" maydoni)."""
+	if not order or not kz_truck:
+		return None
+	return frappe.db.get_value(
+		"Truck Dispatch",
+		{"order": order, "mashina_raqami": kz_truck},
+		["haydovchi_ismi", "haydovchi_telefon", "vositachi", "mashina_raqami"],
+		as_dict=True,
+		order_by="creation desc",
+	)
+
+
 @frappe.whitelist()
 def telegram_registration_status(order_names):
 	"""Berilgan Order'lar ro'yxati uchun, har birining mijozi (Customer) Telegram
