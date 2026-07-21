@@ -11,6 +11,15 @@ frappe.ui.form.on("KZ Transit", {
 	order(frm) {
 		render_customer_chat(frm);
 	},
+	kz_truck(frm) {
+		if (!frm.is_new()) return;
+		if (!frm.doc.order || !frm.doc.kz_truck) return;
+		logistika.duplicate_warning.check(
+			frm,
+			{ order: frm.doc.order, kz_truck: frm.doc.kz_truck },
+			"Bu order va fura uchun KZ Transit"
+		);
+	},
 });
 
 // "Mijoz bilan suhbat" — render/yuborish logikasi logistika.order_chat'da

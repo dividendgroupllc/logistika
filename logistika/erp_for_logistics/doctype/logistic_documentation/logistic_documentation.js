@@ -11,6 +11,8 @@ frappe.ui.form.on("Logistic Documentation", {
 		if (!frm.is_new()) {
 			frm.add_custom_button(__("🔄 Qayta hisoblash"), () => calc_eksport_summa(frm), __("Eksport deklaratsiya"));
 		}
+		// route_options orqali Order + KZ fura oldindan to'ldirilgan holatni ham qamrab olish uchun
+		check_duplicate_ld(frm);
 	},
 	order(frm) {
 		render_tr_docs_preview(frm);
@@ -21,6 +23,9 @@ frappe.ui.form.on("Logistic Documentation", {
 	},
 	kz_truck(frm) {
 		render_driver_preview(frm);
+		// KZ fura — Order'dan keyin tanlanadigan, hal qiluvchi ikkinchi maydon: shu (order,
+		// kz_truck) juftlik uchun boshqa Logistic Documentation allaqachon bormi, tekshiramiz.
+		check_duplicate_ld(frm);
 	},
 	pekin_invoice(frm) {
 		render_tr_docs_preview(frm);
@@ -60,6 +65,19 @@ function calc_eksport_summa(frm) {
 			}
 		},
 	});
+}
+
+// Yangi (saqlanmagan) hujjatda Order + KZ fura ikkalasi ham tanlangan bo'lsa, xuddi shu
+// juftlik uchun boshqa Logistic Documentation allaqachon mavjudligini ogohlantiradi (saqlangan
+// hujjatni tahrirlashda kerak emas — u o'zi "mavjud" hujjat).
+function check_duplicate_ld(frm) {
+	if (!frm.is_new()) return;
+	if (!frm.doc.order || !frm.doc.kz_truck) return;
+	logistika.duplicate_warning.check(
+		frm,
+		{ order: frm.doc.order, kz_truck: frm.doc.kz_truck },
+		"Bu order+fura uchun Logistic Documentation"
+	);
 }
 
 // Transit bo'limida — Order + KZ fura bo'yicha Truck Dispatch'dagi haydovchi/

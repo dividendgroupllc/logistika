@@ -105,6 +105,28 @@ def truck_dispatch_driver_info(order, kz_truck):
 
 
 @frappe.whitelist()
+def find_duplicate_documents(doctype, filters, exclude_name=None):
+	"""Berilgan doctype'da, berilgan filtrlarga (masalan {"order": "...", "china_truck": "..."}) mos
+	keladigan MAVJUD hujjat(lar)ni topadi — yangi hujjat yaratishda 'bu allaqachon bormi?' ogohlantirish
+	uchun. exclude_name — joriy (tahrirlanayotgan) hujjatning o'zi natijaga tushmasligi uchun."""
+	if isinstance(filters, str):
+		import json
+		filters = json.loads(filters)
+	# skip the check entirely if any required filter value is empty/falsy — an incomplete
+	# key means "not enough info yet to check", not "no duplicates"
+	if not filters or any(not v for v in filters.values()):
+		return []
+	query_filters = dict(filters)
+	if exclude_name:
+		query_filters["name"] = ["!=", exclude_name]
+	# Bekor qilingan (docstatus=2) hujjatlar chiqarib tashlanadi — aks holda submit+cancel+
+	# amend siklidagi (masalan Peregruz) eski bekor qilingan nusxa yangi amendga "dublikat"
+	# bo'lib ko'rinar edi, garchi bu normal, kutilgan holat bo'lsa ham.
+	query_filters.setdefault("docstatus", ["!=", 2])
+	return frappe.get_all(doctype, filters=query_filters, fields=["name", "owner", "creation"], order_by="creation desc", limit_page_length=10)
+
+
+@frappe.whitelist()
 def telegram_registration_status(order_names):
 	"""Berilgan Order'lar ro'yxati uchun, har birining mijozi (Customer) Telegram
 	botiga ro'yxatdan o'tganmi (kamida bitta Contact'ida telegram_chat_id bormi) —

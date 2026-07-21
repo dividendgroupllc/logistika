@@ -27,6 +27,19 @@ frappe.ui.form.on("KZ Truck Loading", {
 			});
 		}
 	},
+	kz_truck(frm) {
+		// "kz_truck" (order'dan keyin, field_order bo'yicha) — yangi hujjat yaratishda
+		// odatda oxirida to'ldiriladigan maydon. Ikkalasi (order, kz_truck) ham bo'lsa,
+		// shu (order, kz_truck) juftligi uchun allaqachon hujjat bormi tekshiriladi —
+		// faqat hali SAQLANMAGAN hujjatda (saqlangan hujjat — o'zi "mavjud" hujjat).
+		if (!frm.is_new()) return;
+		if (!frm.doc.order || !frm.doc.kz_truck) return;
+		logistika.duplicate_warning.check(
+			frm,
+			{ order: frm.doc.order, kz_truck: frm.doc.kz_truck },
+			"Bu order + KZ fura uchun yuklash hujjati"
+		);
+	},
 });
 
 // Yopiq konteyner uchun — mahsulotlarni birma-bir sanab bo'lmasa, joriy tanlangan

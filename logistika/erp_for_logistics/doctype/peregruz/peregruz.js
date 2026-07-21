@@ -15,6 +15,15 @@ frappe.ui.form.on("Peregruz", {
 	order: async function (frm) {
 		await load_select_options(frm);
 	},
+	kz_truck: function (frm) {
+		if (!frm.is_new()) return;
+		if (!frm.doc.order || !frm.doc.kz_truck) return;
+		logistika.duplicate_warning.check(
+			frm,
+			{ order: frm.doc.order, kz_truck: frm.doc.kz_truck },
+			"Bu order va KZ fura uchun Peregruz"
+		);
+	},
 	refresh: async function (frm) {
 		await load_select_options(frm);
 		if (frm.doc.docstatus === 0) {

@@ -9,9 +9,11 @@ frappe.ui.form.on("Internal Logistics", {
 		render_orders_summary(frm);
 		setup_order_filter(frm);
 		refresh_order_filter(frm);
+		check_fura_duplicate(frm);
 	},
 	fura(frm) {
 		refresh_order_filter(frm);
+		check_fura_duplicate(frm);
 	},
 	buyurtmalar_add(frm) {
 		render_orders_summary(frm);
@@ -103,6 +105,23 @@ function refresh_order_filter(frm) {
 			frm._allowed_orders = (r.message || []).length ? r.message : null;
 		},
 	});
+}
+
+// Yangi (hali saqlanmagan) hujjatda "Fura" tanlanganda — xuddi shu fura uchun hali
+// YAKUNLANMAGAN (holati != "Yakunlangan") Internal Logistics allaqachon bormi, shuni
+// tekshirib, bo'lsa dashboard'da ogohlantirish beradi. "holati" bo'yicha cheklash
+// atayin — bir xil furaning oldingi, allaqachon YAKUNLANGAN reysi tasodifan
+// "duplikat" deb ko'rsatilmasligi kerak. Faqat frm.is_new()da ishlaydi — saqlangan
+// hujjatni tahrirlashda bu ogohlantirish ma'nosiz (hujjatning o'zi "mavjud" hujjat).
+function check_fura_duplicate(frm) {
+	if (!frm.is_new() || !frm.doc.fura) {
+		return;
+	}
+	logistika.duplicate_warning.check(
+		frm,
+		{ fura: frm.doc.fura, holati: ["!=", "Yakunlangan"] },
+		"Bu fura uchun tugallanmagan Internal Logistics"
+	);
 }
 
 // Har bir buyurtma (order) uchun ochiladigan/yopiladigan bo'lim — faqat KO'RISH uchun,
