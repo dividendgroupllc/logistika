@@ -1,6 +1,8 @@
 // Copyright (c) 2026, sardorbek qamchibekov  and contributors
 // For license information, please see license.txt
 
+const KZL_DUPLICATE_LABEL = "Bu order + KZ fura uchun yuklash hujjati";
+
 frappe.ui.form.on("KZ Truck Loading", {
 	onload(frm) {
 		frm.set_query("harajat_turi", "yuklash_xarajatlari", () => {
@@ -37,7 +39,7 @@ frappe.ui.form.on("KZ Truck Loading", {
 		logistika.duplicate_warning.check(
 			frm,
 			{ order: frm.doc.order, kz_truck: frm.doc.kz_truck },
-			"Bu order + KZ fura uchun yuklash hujjati"
+			KZL_DUPLICATE_LABEL
 		);
 	},
 });

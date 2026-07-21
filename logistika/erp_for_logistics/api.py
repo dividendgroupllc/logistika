@@ -1,4 +1,36 @@
 import frappe
+from frappe import _
+
+
+def assert_no_duplicate_document(doc, key_fields, label=None, extra_filters=None):
+	"""Server tomonidagi QAT'IY tekshiruv — brauzerdagi ogohlantirishdan farqli, buni
+	Desk, mobil ilova yoki API orqali saqlansa ham chetlab o'tib bo'lmaydi. Doctype'ning
+	`validate()`idan chaqiriladi. `key_fields` — masalan ["order", "china_truck"] — shu
+	maydonlarning BARCHASI to'ldirilgan bo'lsagina tekshiradi (hali to'liq kiritilmagan
+	hujjatga tegilmaydi). `extra_filters` — doc'dan emas, qo'lda beriladigan qo'shimcha
+	shart (masalan Internal Logistics'da {"holati": ["!=", "Yakunlangan"]} — faqat hali
+	tugallanmagan reys uchun tekshirish). Bekor qilingan (docstatus=2) hujjatlar hisobga
+	olinmaydi — submit -> cancel -> amend sikli (masalan Peregruz) noto'g'ri bloklanib
+	qolmasin."""
+	filters = {}
+	for field in key_fields:
+		value = doc.get(field)
+		if not value:
+			return
+		filters[field] = value
+	filters.update(extra_filters or {})
+
+	filters["docstatus"] = ["!=", 2]
+	if doc.name:
+		filters["name"] = ["!=", doc.name]
+
+	existing = frappe.get_all(doc.doctype, filters=filters, pluck="name", limit_page_length=1)
+	if existing:
+		frappe.throw(
+			_('{0} allaqachon mavjud: {1}. Yangisini yaratish o\'rniga o\'sha hujjatni oching/tahrirlang.').format(
+				label or _("Bu uchun hujjat"), existing[0]
+			)
+		)
 
 
 @frappe.whitelist()

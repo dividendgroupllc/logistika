@@ -6,6 +6,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
+from logistika.erp_for_logistics.api import assert_no_duplicate_document
 from logistika.erp_for_logistics.doctype.internal_logistics_item.internal_logistics_item import dims_to_cm
 
 
@@ -24,6 +25,12 @@ def resolve_truck_type_for_fura(fura):
 
 class InternalLogistics(Document):
 	def validate(self):
+		assert_no_duplicate_document(
+			self,
+			["fura"],
+			"Bu fura uchun tugallanmagan Internal Logistics",
+			extra_filters={"holati": ["!=", "Yakunlangan"]},
+		)
 		self.check_duplicate_orders()
 		self.compute_order_totals()
 		self.warn_orphaned_pekin_items()

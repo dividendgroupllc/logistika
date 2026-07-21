@@ -46,7 +46,7 @@ app_include_css = "/assets/logistika/css/internal_logistics.css"
 # chetlab o'tadi.
 app_include_js = [
 	"/assets/logistika/js/order_chat_widget.js?v=6",
-	"/assets/logistika/js/duplicate_warning.js?v=1",
+	"/assets/logistika/js/duplicate_warning.js?v=2",
 ]
 
 # include js, css files in header of web template

@@ -3,11 +3,16 @@
 
 from frappe.model.document import Document
 
+from logistika.erp_for_logistics.api import assert_no_duplicate_document
 from logistika.erp_for_logistics.ld_telegram import _advance_status
 
 
 class LogisticDocumentation(Document):
 	def validate(self):
+		assert_no_duplicate_document(
+			self, ["order", "kz_truck"], "Bu order+fura uchun Logistic Documentation"
+		)
+
 		# "Транзитний оформления" bosqichi endi Telegram orqali yuborish emas, shu
 		# checkbox belgilanganda oldinga suriladi (has_value_changed — faqat 0->1
 		# o'tishda, qayta saqlashda takrorlanmaydi).

@@ -7,6 +7,8 @@
 // 	},
 // });
 
+const TD_DUPLICATE_LABEL = "Bu order va fura uchun Truck Dispatch";
+
 frappe.ui.form.on("Truck Dispatch", {
 	china_truck(frm) {
 		if (!frm.is_new()) return;
@@ -14,7 +16,7 @@ frappe.ui.form.on("Truck Dispatch", {
 		logistika.duplicate_warning.check(
 			frm,
 			{ order: frm.doc.order, china_truck: frm.doc.china_truck },
-			"Bu order va fura uchun Truck Dispatch"
+			TD_DUPLICATE_LABEL
 		);
 	},
 });

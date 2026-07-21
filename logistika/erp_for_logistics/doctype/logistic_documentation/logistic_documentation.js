@@ -3,6 +3,8 @@
 
 // Tranzit hujjati endi Telegram orqali mijozga yuborilmaydi — faqat oddiy
 // biriktirma (attach) sifatida saqlanadi, xolos.
+const LD_DUPLICATE_LABEL = "Bu order+fura uchun Logistic Documentation";
+
 frappe.ui.form.on("Logistic Documentation", {
 	refresh(frm) {
 		render_tr_docs_preview(frm);
@@ -76,7 +78,7 @@ function check_duplicate_ld(frm) {
 	logistika.duplicate_warning.check(
 		frm,
 		{ order: frm.doc.order, kz_truck: frm.doc.kz_truck },
-		"Bu order+fura uchun Logistic Documentation"
+		LD_DUPLICATE_LABEL
 	);
 }
 

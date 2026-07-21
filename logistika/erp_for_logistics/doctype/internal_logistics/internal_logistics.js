@@ -1,6 +1,8 @@
 // Copyright (c) 2026, sardorbek qamchibekov  and contributors
 // For license information, please see license.txt
 
+const IL_DUPLICATE_LABEL = "Bu fura uchun tugallanmagan Internal Logistics";
+
 frappe.ui.form.on("Internal Logistics", {
 	refresh(frm) {
 		apply_gps_row_states(frm);
@@ -120,7 +122,7 @@ function check_fura_duplicate(frm) {
 	logistika.duplicate_warning.check(
 		frm,
 		{ fura: frm.doc.fura, holati: ["!=", "Yakunlangan"] },
-		"Bu fura uchun tugallanmagan Internal Logistics"
+		IL_DUPLICATE_LABEL
 	);
 }
 

@@ -4,10 +4,14 @@
 from frappe.model.document import Document
 
 from logistika.erp_for_logistics import ombor_ledger
+from logistika.erp_for_logistics.api import assert_no_duplicate_document
 
 
 class KZTruckLoading(Document):
 	def validate(self):
+		assert_no_duplicate_document(
+			self, ["order", "kz_truck"], "Bu order + KZ fura uchun yuklash hujjati"
+		)
 		ombor_ledger.validate_no_overissue(self)
 
 	def on_submit(self):

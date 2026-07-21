@@ -7,14 +7,16 @@
 // tekshirishi kerak edi — har biri alohida-alohida deyarli bir xil kod yozish o'rniga, bu yerda
 // bitta umumiy funksiya chiqarilgan. hooks.py'da app_include_js orqali har bir Desk sahifasida
 // yuklanadi.
+//
+// MUHIM: bu yerdagi tekshiruv FAQAT vizual — erta ogohlantirish uchun, xodim hali forma
+// to'ldirayotganda ko'rsin deb. Haqiqiy, chetlab bo'lmaydigan to'siq — Desk'dan tashqari
+// mobil ilova yoki API orqali saqlansa ham ishlaydigan — har bir doctype'ning o'z
+// `validate()`ida, `logistika.erp_for_logistics.api.assert_no_duplicate_document()`
+// orqali amalga oshiriladi (frappe.throw — saqlashni butunlay bekor qiladi).
 
 frappe.provide("logistika.duplicate_warning");
 
 logistika.duplicate_warning.check = function (frm, filters, label) {
-	// Faqat SAQLANGAN hujjat uchun ishlatiladi degani yo'q — aksincha, bu asosan YANGI
-	// (saqlanmagan) hujjatda yoki asosiy maydonlar o'zgarganda, xodim tasodifan takroriy
-	// hujjat saqlab qo'yishidan OLDIN ogohlantirish uchun mo'ljallangan. Saqlangandan keyin
-	// ham (banner osilib qolishi uchun) chaqirish mumkin.
 	frappe.call({
 		method: "logistika.erp_for_logistics.api.find_duplicate_documents",
 		args: { doctype: frm.doctype, filters, exclude_name: frm.doc.name },
@@ -26,7 +28,7 @@ logistika.duplicate_warning.check = function (frm, filters, label) {
 				.map((d) => `<a href="/app/${frappe.router.slug(frm.doctype)}/${encodeURIComponent(d.name)}" target="_blank">${frappe.utils.escape_html(d.name)}</a>`)
 				.join(", ");
 			frm.dashboard.set_headline_alert(
-				`⚠️ ${__(label || "Bu uchun allaqachon hujjat mavjud")}: ${links} — ${__("davom etishdan oldin tekshiring")}`,
+				`⚠️ ${__(label || "Bu uchun allaqachon hujjat mavjud")}: ${links} — ${__("saqlash bloklanadi, avval o'sha hujjatni oching")}`,
 				"orange"
 			);
 		},

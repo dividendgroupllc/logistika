@@ -6,6 +6,8 @@
 // hujjatidagi peregruz_hujjat/Telegram yuborish funksiyasi) BILAN BOG'LIQ EMAS — ikkalasi
 // shunchaki bir xil so'zni ishlatadi, butunlay boshqa-boshqa narsalar.
 
+const PRG_DUPLICATE_LABEL = "Bu order va KZ fura uchun Peregruz";
+
 frappe.ui.form.on("Peregruz", {
 	onload(frm) {
 		frm.set_query("harajat_turi", "yuklash_xarajatlari", () => {
@@ -21,7 +23,7 @@ frappe.ui.form.on("Peregruz", {
 		logistika.duplicate_warning.check(
 			frm,
 			{ order: frm.doc.order, kz_truck: frm.doc.kz_truck },
-			"Bu order va KZ fura uchun Peregruz"
+			PRG_DUPLICATE_LABEL
 		);
 	},
 	refresh: async function (frm) {

@@ -1,6 +1,8 @@
 // Copyright (c) 2026, sardorbek qamchibekov  and contributors
 // For license information, please see license.txt
 
+const KZT_DUPLICATE_LABEL = "Bu order va fura uchun KZ Transit";
+
 frappe.ui.form.on("KZ Transit", {
 	refresh(frm) {
 		apply_gps_row_states(frm);
@@ -17,7 +19,7 @@ frappe.ui.form.on("KZ Transit", {
 		logistika.duplicate_warning.check(
 			frm,
 			{ order: frm.doc.order, kz_truck: frm.doc.kz_truck },
-			"Bu order va fura uchun KZ Transit"
+			KZT_DUPLICATE_LABEL
 		);
 	},
 });
