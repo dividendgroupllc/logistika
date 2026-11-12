@@ -1,20 +1,16 @@
 # ============================================
 # LOGISTIKA — AUTO-DEPLOYMENT WORKFLOW
 # ============================================
-#
-# armada/dashboards/pokiza'dagi deploy.yml naqshi asosida, logistika'ning haqiqiy
-# production sozlamalariga moslab yozilgan (bench --site ... migrate --skip-failing
-# shart — sababi pastda izohlangan).
+# akfa_accounting2'dagi deploy.yml naqshi asosida.
 #
 # Kerakli GitHub Secrets (Settings -> Secrets and variables -> Actions):
-#   - SERVER_IP        production server IP (47.86.171.214)
+#   - SERVER_IP        production server IP
 #   - SSH_PRIVATE_KEY  root@SERVER_IP'ga ulanadigan SSH private key (parolsiz)
-#   - SITE_NAME        bench SAYT nomi — "logistika.local" (domen emas!
-#                       logistika.erpcontrol.uz — bu faqat nginx/DNS orqali shu
-#                       saytga yo'naltirilgan, bench ichida sayt papkasi nomi
-#                       logistika.local bo'lib qoladi)
+#   - SITE_NAME        bench SAYT nomi — "logistika.local" (domen emas: bench ichidagi
+#                      sayt papkasi nomi)
 #
-# main branchga push qilinganda avtomatik ishga tushadi.
+# main branchga push qilinganda avtomatik ishga tushadi. Actions -> "Deploy to Production"
+# -> "Run workflow" bilan qo'lda ham ishga tushirsa bo'ladi.
 # ============================================
 
 name: Deploy to Production
@@ -35,11 +31,15 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
 
+    # ikki push ketma-ket kelsa, deploylar bir-birini bosib ketmasin
     concurrency:
       group: production-deploy
       cancel-in-progress: false
 
     steps:
+      # ============================================
+      # 1. SOZLAMALARNI TEKSHIRISH
+      # ============================================
       - name: Validate secrets
         run: |
           if [ -z "${{ secrets.SERVER_IP }}" ]; then echo "ERROR: SERVER_IP secret not set!"; exit 1; fi
@@ -47,16 +47,26 @@ jobs:
           if [ -z "${{ secrets.SITE_NAME }}" ]; then echo "ERROR: SITE_NAME secret not set!"; exit 1; fi
           echo "All required secrets are configured"
 
+      # ============================================
+      # 2. SSH
+      # ============================================
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+          # faqat bitta kalit turi: aks holda keyscan 5 ta ulanish ochadi va serverdagi fail2ban
+          # GitHub IP'sini "muvaffaqiyatsiz urinish" deb ban qiladi (deploy "Connection closed" bilan yiqiladi)
+          ssh-keyscan -t ed25519 -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
 
-      - name: Deploy
+      # ============================================
+      # 3. YANGILASH
+      # ============================================
+      # SSH ulanmasa shu qadam asl SSH xatosi bilan to'xtaydi.
+      - name: Update deployment
         run: |
           ssh root@${{ secrets.SERVER_IP }} << ENDSSH
+            set -e
             su - frappe << 'FRAPPE_EOF'
           export SITE_NAME="${{ secrets.SITE_NAME }}"
           export BENCH_PATH="${{ env.BENCH_PATH }}"
@@ -76,17 +86,19 @@ jobs:
 
           cd \${BENCH_PATH}
 
+          # NOTE: bench setup requirements ataylab chaqirilmaydi.
+          # Sabab: har deployda setuptools 82+ o'rnatib, pkg_resources ni buzadi.
+          # Yangi dependency qo'shsangiz (pyproject.toml), serverda qo'lda:
+          #   cd /home/frappe/frappe-bench && ./env/bin/pip install <package>
+
           echo "Building frontend assets..."
           bench build --app \${APP_NAME}
 
-          # MUHIM: oddiy "migrate" bu benchda erpnext'ning eski
-          # (v11_1/rename_depends_on_lwp) patch registridagi versiya farqi sababli
-          # ModuleNotFoundError bilan yiqiladi — --skip-failing shart, aks holda
-          # har bir deploy shu joyda to'xtab qoladi. (Bu patch amalda hech narsaga
-          # ta'sir qilmaydi, faqat registrda mavjud emas.)
+          # migrate fixtures (custom_field.json va h.k.) ni ham qo'llaydi
           echo "Running database migrations..."
-          bench --site \${SITE_NAME} migrate --skip-failing
+          bench --site \${SITE_NAME} migrate
 
+          # har doim migrate'dan keyin
           echo "Clearing cache..."
           bench --site \${SITE_NAME} clear-cache
           bench --site \${SITE_NAME} clear-website-cache
@@ -94,15 +106,66 @@ jobs:
           echo "Frappe user tasks completed!"
           FRAPPE_EOF
 
-          echo "Restarting services..."
-          supervisorctl restart all
-          echo "Deployment updated successfully!"
+            # Restart (root). nohup + sleep: restart SSH sessiyasi toza yopilgandan keyin bo'ladi,
+            # aks holda supervisor restart paytida ulanish uzilib, qadam "xato" bilan tugashi mumkin
+            echo "Restarting services..."
+            nohup bash -c 'sleep 2 && supervisorctl restart all && systemctl reload nginx' &>/dev/null &
+            sleep 3
+            echo "Deployment updated successfully!"
           ENDSSH
 
+      # ============================================
+      # 4. SAYT ISHLAYAPTIMI
+      # ============================================
       - name: Health check
         run: |
-          sleep 5
+          SITE_URL="http://${{ secrets.SERVER_IP }}/api/method/ping"
+          for i in 1 2 3 4 5 6 7 8; do
+            sleep 8
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "$SITE_URL" || echo "000")
+            echo "Urinish $i: HTTP $HTTP_CODE"
+            case "$HTTP_CODE" in
+              200|301|302) echo "Site is accessible"; break ;;
+            esac
+          done
+
           ssh root@${{ secrets.SERVER_IP }} << 'ENDSSH'
             echo "Service Status:"
             supervisorctl status
+            echo ""
+            echo "Disk Usage:"
+            df -h / | tail -1
+            echo ""
+            echo "Memory Usage:"
+            free -h | grep -E "Mem|Swap"
           ENDSSH
+
+          case "$HTTP_CODE" in
+            200|301|302) ;;
+            *) echo "ERROR: sayt javob bermadi (HTTP $HTTP_CODE) — yuqoridagi supervisor holatini va serverdagi logs/ ni tekshiring"; exit 1 ;;
+          esac
+
+      # ============================================
+      # 5. NATIJA
+      # ============================================
+      - name: Success summary
+        if: success()
+        run: |
+          echo "Deployment successful!"
+          echo "Site:   http://${{ secrets.SERVER_IP }}"
+          echo "App:    ${{ github.repository }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Author: ${{ github.actor }}"
+
+      - name: Failure summary
+        if: failure()
+        run: |
+          echo "Deployment failed! Yuqoridagi qadamlar logini ko'ring."
+
+# ============================================
+# XAVFSIZLIK
+# ============================================
+# 1. Parol, kalit, IP'ni kodga yozmang — faqat GitHub Secrets'da.
+# 2. SSH key'ni hech qachon commit qilmang.
+# ============================================
