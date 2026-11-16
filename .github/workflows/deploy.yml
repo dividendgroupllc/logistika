@@ -24,6 +24,8 @@ on:
 env:
   BENCH_PATH: "/home/frappe/frappe-bench"
   APP_NAME: "logistika"
+  # serverda IP orqali kirish yopilgan — sayt faqat shu domen orqali javob beradi
+  SITE_DOMAIN: "horgos-litellla.erpcontrol.uz"
 
 jobs:
   deploy:
@@ -119,10 +121,12 @@ jobs:
       # ============================================
       - name: Health check
         run: |
-          SITE_URL="http://${{ secrets.SERVER_IP }}/api/method/ping"
+          SITE_URL="https://${{ env.SITE_DOMAIN }}/api/method/ping"
           for i in 1 2 3 4 5 6 7 8; do
             sleep 8
-            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "$SITE_URL" || echo "000")
+            # --resolve: DNS'ga qaramay to'g'ridan-to'g'ri shu serverni tekshiradi
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 \
+              --resolve "${{ env.SITE_DOMAIN }}:443:${{ secrets.SERVER_IP }}" "$SITE_URL" || echo "000")
             echo "Urinish $i: HTTP $HTTP_CODE"
             case "$HTTP_CODE" in
               200|301|302) echo "Site is accessible"; break ;;
@@ -152,7 +156,7 @@ jobs:
         if: success()
         run: |
           echo "Deployment successful!"
-          echo "Site:   http://${{ secrets.SERVER_IP }}"
+          echo "Site:   https://${{ env.SITE_DOMAIN }}"
           echo "App:    ${{ github.repository }}"
           echo "Branch: ${{ github.ref_name }}"
           echo "Commit: ${{ github.sha }}"

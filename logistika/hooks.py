@@ -9,7 +9,7 @@ app_license = "mit"
 fixtures = [
 	{
 		"dt": "Custom Field",
-		"filters": [["name", "in", ["Contact-telegram_chat_id", "Account-account_name_zh"]]],
+		"filters": [["name", "in", ["Contact-telegram_chat_id", "Account-account_name_zh", "Customer-brand"]]],
 	},
 	{
 		"dt": "Property Setter",
