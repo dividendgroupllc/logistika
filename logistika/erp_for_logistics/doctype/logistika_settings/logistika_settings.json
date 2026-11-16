@@ -1,0 +1,83 @@
+{
+ "actions": [],
+ "creation": "2026-11-16 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "xarajatlar_section",
+  "ichki_logistika_xarajat_guruhi",
+  "column_break_xarajat",
+  "yuklash_xarajat_guruhi",
+  "sugurta_section",
+  "sugurta_xarajat_hisobi",
+  "column_break_sugurta",
+  "sugurta_tolov_hisobi"
+ ],
+ "fields": [
+  {
+   "fieldname": "xarajatlar_section",
+   "fieldtype": "Section Break",
+   "label": "Xarajat papkalari"
+  },
+  {
+   "description": "Order → mahsulotlar jadvalidagi \"Qo'shimcha rasxod turi\" shu papka ichidagi hisoblardan tanlanadi",
+   "fieldname": "ichki_logistika_xarajat_guruhi",
+   "fieldtype": "Link",
+   "label": "Ichki logistika xarajatlari papkasi",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_xarajat",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Warehouse Intake, KZ Truck Loading va Peregruz'dagi \"Yuklash xarajatlari\" shu papka ichidagi hisoblardan tanlanadi",
+   "fieldname": "yuklash_xarajat_guruhi",
+   "fieldtype": "Link",
+   "label": "Yuklash xarajatlari papkasi",
+   "options": "Account"
+  },
+  {
+   "fieldname": "sugurta_section",
+   "fieldtype": "Section Break",
+   "label": "Sug'urta"
+  },
+  {
+   "description": "Order'dagi sug'urta summasi uchun Journal Entry debeti",
+   "fieldname": "sugurta_xarajat_hisobi",
+   "fieldtype": "Link",
+   "label": "Sug'urta xarajati hisobi",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_sugurta",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Sug'urta to'lanadigan Cash yoki Bank hisobi (Journal Entry krediti)",
+   "fieldname": "sugurta_tolov_hisobi",
+   "fieldtype": "Link",
+   "label": "Sug'urta to'lanadigan hisob",
+   "options": "Account"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-11-16 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "Logistika Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

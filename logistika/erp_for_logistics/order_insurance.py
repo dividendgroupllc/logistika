@@ -2,11 +2,9 @@
 # For license information, please see license.txt
 
 # Har bir Order Item (Xitoy fura) qatorida "Sug'urta" (sugurta) summasi kiritilib
-# saqlansa, avtomatik Journal Entry yaratiladi — Debit: "Ichki sugurta xarajati"
-# (xarajat), Credit: "Insurance" (naqd pul/cash hisobi). Ikkala hisob ham NOMI
-# BO'YICHA avtomatik topiladi (Chart of Accounts'da haqiqatda shu nomlar bilan
-# mavjud, kompaniyaning o'zi ham hisobning `company` maydonidan olinadi) — alohida
-# sozlash sahifasi (masalan "Sugurta Sozlamalari") SHART EMAS.
+# saqlansa, avtomatik Journal Entry yaratiladi — Debit: sug'urta xarajati hisobi,
+# Credit: sug'urta to'lanadigan Cash/Bank hisobi. Ikkala hisob ham Logistika
+# Settings'da belgilanadi; kompaniya xarajat hisobining `company` maydonidan olinadi.
 #
 # Summa 0'ga tushirilsa yoki boshqa qiymatga o'zgartirilsa, eski JE cancel
 # qilinib, kerak bo'lsa yangisi yaratiladi — Kassa doctype'dagi "submit yaratadi /
@@ -19,9 +17,8 @@ from frappe import _
 from frappe.utils import flt, today
 
 from logistika.erp_for_logistics.doctype.kassa.kassa import get_account_currency_amount, get_exchange_rate
+from logistika.erp_for_logistics.doctype.logistika_settings.logistika_settings import get_settings_account
 
-SUGURTA_XARAJAT_ACCOUNT_NAME = "Ichki sugurta xarajati"
-SUGURTA_KREDIT_ACCOUNT_NAME = "Insurance"
 
 
 def capture_insurance_changes(doc):
@@ -88,34 +85,13 @@ def cancel_all_insurance_entries(doc):
 
 
 def _resolve_accounts():
-	"""Ikkala hisobni ham NOMI bo'yicha (Chart of Accounts'da haqiqatda shu nomlar
-	bilan mavjud) topadi — sozlash sahifasi shart emas."""
-	expense_account = frappe.db.get_value(
-		"Account",
-		{"account_name": SUGURTA_XARAJAT_ACCOUNT_NAME, "is_group": 0},
-		["name", "company"],
-		as_dict=True,
-	)
-	credit_account = frappe.db.get_value(
-		"Account",
-		{"account_name": SUGURTA_KREDIT_ACCOUNT_NAME, "is_group": 0},
-		["name", "company"],
-		as_dict=True,
-	)
-	if not expense_account or not credit_account:
-		frappe.throw(
-			_(
-				'Chart of Accounts\'da "{0}" va/yoki "{1}" hisoblari topilmadi — sug\'urta '
-				"summasidan avtomatik Journal Entry yaratib bo'lmadi."
-			).format(SUGURTA_XARAJAT_ACCOUNT_NAME, SUGURTA_KREDIT_ACCOUNT_NAME)
-		)
-	if expense_account.company != credit_account.company:
-		frappe.throw(
-			_('"{0}" va "{1}" hisoblari bir xil kompaniyaga tegishli bo\'lishi kerak.').format(
-				SUGURTA_XARAJAT_ACCOUNT_NAME, SUGURTA_KREDIT_ACCOUNT_NAME
-			)
-		)
-	return expense_account.name, credit_account.name, expense_account.company
+	"""Sug'urta JE hisoblarini Logistika Settings'dan oladi (debet: xarajat,
+	kredit: sug'urta to'lanadigan Cash/Bank hisobi). Ikkalasining bir kompaniyaga
+	tegishli ekani sozlamaning o'zida tekshiriladi."""
+	expense_account = get_settings_account("sugurta_xarajat_hisobi")
+	credit_account = get_settings_account("sugurta_tolov_hisobi")
+	company = frappe.db.get_value("Account", expense_account, "company")
+	return expense_account, credit_account, company
 
 
 def _create_insurance_je(order_doc, row, amount):
