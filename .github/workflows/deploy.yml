@@ -121,17 +121,18 @@ jobs:
       # ============================================
       - name: Health check
         run: |
-          SITE_URL="https://${{ env.SITE_DOMAIN }}/api/method/ping"
-          for i in 1 2 3 4 5 6 7 8; do
-            sleep 8
-            # --resolve: DNS'ga qaramay to'g'ridan-to'g'ri shu serverni tekshiradi
-            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 \
-              --resolve "${{ env.SITE_DOMAIN }}:443:${{ secrets.SERVER_IP }}" "$SITE_URL" || echo "000")
-            echo "Urinish $i: HTTP $HTTP_CODE"
-            case "$HTTP_CODE" in
-              200|301|302) echo "Site is accessible"; break ;;
-            esac
-          done
+          # Tekshiruv serverning o'zida bajariladi (GitHub runner tarmog'iga bog'liq emas):
+          # nginx + SSL + gunicorn zanjirini domen orqali, 127.0.0.1 ga yo'naltirib tekshiradi.
+          HTTP_CODE=$(ssh root@${{ secrets.SERVER_IP }} 'D="${{ env.SITE_DOMAIN }}"
+            for i in 1 2 3 4 5 6 7 8; do
+              sleep 8
+              CODE=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 15 \
+                --resolve "$D:443:127.0.0.1" "https://$D/api/method/ping" 2>/tmp/healthcheck.err)
+              echo "Urinish $i: HTTP $CODE $(cat /tmp/healthcheck.err)" >&2
+              case "$CODE" in 200|301|302) break ;; esac
+            done
+            echo "$CODE"' || echo "000")
+          echo "Natija: HTTP $HTTP_CODE"
 
           ssh root@${{ secrets.SERVER_IP }} << 'ENDSSH'
             echo "Service Status:"
