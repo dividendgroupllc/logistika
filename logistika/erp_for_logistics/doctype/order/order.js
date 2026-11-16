@@ -7,12 +7,6 @@ frappe.ui.form.on("Order", {
 			return { filters: { davlat: "China" } };
 		});
 
-		// Kliyent faqat "Xitoy postavshik" customer group'idagi mijozlar bilan
-		// filtrlanadi.
-		frm.set_query("kliyent", () => {
-			return { filters: { customer_group: "Xitoy postavshik" } };
-		});
-
 		frm.set_query("harajat_turi", "zakaz_mahsulotlari", () => {
 			return { query: "logistika.erp_for_logistics.ombor_xarajatlari.get_yetkazish_xarajati_accounts" };
 		});
