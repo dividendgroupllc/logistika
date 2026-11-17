@@ -1,13 +1,10 @@
 # Copyright (c) 2026, sardorbek qamchibekov and contributors
 # For license information, please see license.txt
 
-# Order Item (har bir Xitoy fura) dan boshlab, unga bog'liq Internal Logistics (yuk hajmi),
-# Truck Dispatch (tayinlangan KZ fura+sig'imi), KZ Truck Loading (haqiqiy yuklangan KZ
-# fura+sana) va KZ Transit (yetib borgan sana)ni bog'lab, BUTUN pipeline bo'yicha har bir
-# furaning qaysi bosqichda ekanini (Order Item.status) bitta joyda hisoblaydi.
-#
-# Bu modulni "Ombor Holati Dashboard" (pastki bo'lim) va alohida "Order Dashboard" sahifasi
-# BIRGALIKDA ishlatadi — mantiq faqat shu yerda, ikki joyda takrorlanmaydi.
+# Har bir Order Detail (bitta Xitoy fura) uchun unga bog'liq Truck Dispatch (KZ fura),
+# KZ Truck Loading / Peregruz (yuklangan sana) va KZ Transit (yetib borgan sana)ni
+# bog'lab, BUTUN pipeline bo'yicha furaning qaysi bosqichda ekanini bitta joyda
+# hisoblaydi. "Ombor Holati Dashboard" va "Order Dashboard" shu modulni ishlatadi.
 
 import frappe
 from frappe.utils import flt, getdate, today
@@ -28,157 +25,87 @@ PIPELINE_STAGES = [
 ]
 
 
-def resolve_china_trucks_for_kz_truck(order, kz_truck):
-	"""Berilgan (order, KZ fura) uchun unga yuk yuklagan Xitoy fura(lar)ni topadi —
-	Logistic Documentation'da faqat `order` + `kz_truck` bor, qaysi Xitoy fura(lar)
-	ekanligi yo'q (bitta KZ furaga bir nechta Xitoy furaning yuki jamlanishi mumkin).
-	KZ Truck Loading/Peregruz'ning qator darajasidagi `china_truck`laridan (faqat
-	submit qilingan hujjatlardan) yig'ib olinadi."""
+def resolve_order_details_for_kz_truck(order, kz_truck):
+	"""Logistic Documentation / KZ Transit'da faqat `order` (mijoz Order'i) va `kz_truck`
+	bor — shu KZ furaga yuk ortilgan Order Detail'larni submit qilingan KZ Truck
+	Loading / Peregruz qatorlaridan (qator `order` = Order Detail) yig'adi."""
 	if not order or not kz_truck:
 		return []
-
-	from_kzl = frappe.get_all(
-		"KZ Load Item",
-		filters={"parent": ["in", frappe.get_all(
-			"KZ Truck Loading",
-			filters={"order": order, "kz_truck": kz_truck, "docstatus": 1},
-			pluck="name",
-		)], "order": order},
-		pluck="china_truck",
-	)
-	from_prg = frappe.get_all(
-		"Peregruz Item",
-		filters={"parent": ["in", frappe.get_all(
-			"Peregruz",
-			filters={"order": order, "kz_truck": kz_truck, "docstatus": 1},
-			pluck="name",
-		)], "order": order},
-		pluck="china_truck",
-	)
-	return list({t for t in (from_kzl + from_prg) if t})
+	names = set()
+	for parent_doctype, child_doctype in (("KZ Truck Loading", "KZ Load Item"), ("Peregruz", "Peregruz Item")):
+		parents = frappe.get_all(
+			parent_doctype, filters={"order": order, "kz_truck": kz_truck, "docstatus": 1}, pluck="name"
+		)
+		if parents:
+			names.update(
+				frappe.get_all(
+					child_doctype, filters={"parent": ["in", parents], "order": ["is", "set"]}, pluck="order"
+				)
+			)
+	return sorted(names)
 
 
 def get_distinct_orders():
-	return frappe.get_all(
-		"Order Item",
-		filters={"xitoy_mashina_nomeri": ["is", "set"]},
-		pluck="parent",
-		distinct=True,
-		order_by="parent asc",
-	)
+	return frappe.db.sql_list("select distinct `order` from `tabOrder Detail` order by `order`")
 
 
 def get_pipeline_rows(order=None, status=None):
-	conditions = ["oi.xitoy_mashina_nomeri is not null", "oi.xitoy_mashina_nomeri != ''"]
+	"""Har bir Order Detail (bitta Xitoy fura) bitta qator. `order` filtri mijoz
+	Order'i yoki Order Detail nomi bo'lishi mumkin. Qatordagi "order" kaliti —
+	Order Detail nomi (status tarixi va havolalar shu bo'yicha), "mijoz_order" —
+	mijoz Order'i."""
+	conditions = ["1=1"]
 	values = {}
 	if order:
-		conditions.append("oi.parent = %(order)s")
+		conditions.append("(od.`order` = %(order)s or od.name = %(order)s)")
 		values["order"] = order
 	if status:
-		conditions.append("oi.status = %(status)s")
+		conditions.append("od.status = %(status)s")
 		values["status"] = status
-	where_clause = " and ".join(conditions)
 
-	# max(oi.status) bo'yicha ALIFBO tartibida eng "kattasi" tanlanardi — bu pipeline
-	# tartibiga mos kelmaydi (masalan "Подготовка фура КЗ" alifboda "Перегруз данный"dan
-	# kattaroq, garchi pipeline'da undan OLDINROQ bo'lsa ham). Shuning uchun har bir
-	# statusni pipeline'dagi RAQAMIGA aylantirib, o'sha raqamning MAX'ini olamiz — shu
-	# orqali guruh ichidagi eng OLDINGA siljigan (haqiqiy eng so'nggi) statusni topamiz.
-	stage_case_sql = "case oi.status " + " ".join(
-		f"when %(stage{i})s then {i}" for i in range(len(PIPELINE_STAGES))
-	) + " else -1 end"
-	for i, stage in enumerate(PIPELINE_STAGES):
-		values[f"stage{i}"] = stage
-
-	# Bitta Xitoy fura bir nechta mahsulotni tashishi mumkin (Order Item'da har bir
-	# mahsulot uchun alohida qator bo'lib, hammasi bitta xitoy_mashina_nomeri'ga ega
-	# bo'ladi) — shuning uchun (order, fura) bo'yicha guruhlab, mahsulotlarni vergul
-	# bilan bitta qatorga yig'amiz (boshqa ustunlar shu guruh ichida bir xil bo'ladi,
-	# chunki ular order+fura bo'yicha bog'langan boshqa hujjatlardan keladi).
-	#
-	# Truck Dispatch/KZ Truck Loading — bitta (order, fura) uchun nazariy jihatdan bir
-	# nechta hujjat bo'lishi mumkin (masalan almashtirilgan mashina uchun yangi Truck
-	# Dispatch yaratilsa, eskisi o'chirilmasa). Shuning uchun har biridan faqat ENG
-	# SO'NGGI (creation bo'yicha) yozuvni tanlaymiz — aks holda ustunlarni alohida-alohida
-	# MAX() qilish, ikki xil hujjatning maydonlarini (masalan bittasining haydovchisi va
-	# ikkinchisining mashina raqamini) noto'g'ri birlashtirib yuborishi mumkin edi.
+	# Truck Dispatch / KZ Truck Loading / Peregruz — bitta Order Detail uchun bir
+	# nechta hujjat bo'lishi mumkin (masalan almashtirilgan mashina) — har biridan
+	# faqat ENG SO'NGGI (creation bo'yicha) yozuv olinadi.
 	rows = frappe.db.sql(
 		f"""
 		select
-			oi.parent as order_name,
-			group_concat(distinct oi.mahsulot_nomi separator ', ') as mahsulotlar,
-			oi.xitoy_mashina_nomeri as china_fura,
-			max(oi.truck_kub) as china_truck_kub,
-			max(oi.truck_tonna) as china_truck_tonna,
-			max(oi.status) as status_fallback,
-			max({stage_case_sql}) as stage_rank,
-			max(coalesce(
-				ilo.jami_kub,
-				case
-					when coalesce(ilo_count.buyurtmalar_count, 0) = 0 and il.`order` = oi.parent
-					then il.jami_kub
-				end
-			)) as il_kub,
-			max(coalesce(
-				ilo.jami_tonna,
-				case
-					when coalesce(ilo_count.buyurtmalar_count, 0) = 0 and il.`order` = oi.parent
-					then il.jami_tonna
-				end
-			)) as il_tonna,
-			max(td.mashina_raqami) as td_kz_fura,
-			max(td.kub) as kz_truck_kub,
-			max(td.tonna) as kz_truck_tonna,
-			max(td.haydovchi_ismi) as haydovchi_ismi,
-			-- oi.kelish_sanasi ("Kelish sanasi") ustunga Order Item darajasida kiritiladi va
-			-- Truck Dispatch yaratilganda (china_truck tanlanganda) DB-only Client Script
-			-- orqali td.china_arrival'ga nusxalanadi. Hali Truck Dispatch yaratilmagan
-			-- (masalan "Внутринний фура" bosqichidagi) furalar uchun td qatori umuman yo'q —
-			-- shunday hollarda oi.kelish_sanasi'ga to'g'ridan-to'g'ri qaytamiz.
-			max(coalesce(td.china_arrival, oi.kelish_sanasi)) as yetib_kelish_sanasi,
-			max(coalesce(kzl.kz_truck, prg.kz_truck)) as kzl_kz_fura,
-			max(coalesce(kzl.sana, prg.sana)) as yuklangan_sana,
-			max(kzt.fakt_yetib_borgan) as kz_truck_yetib_kelish_sanasi
-		from `tabOrder Item` oi
-		left join `tabInternal Logistics` il on il.fura = oi.xitoy_mashina_nomeri
-		left join `tabInternal Logistics Order` ilo on ilo.parent = il.name and ilo.order = oi.parent
-		left join (
-			select parent, count(*) as buyurtmalar_count
-			from `tabInternal Logistics Order`
-			group by parent
-		) ilo_count on ilo_count.parent = il.name
-		left join `tabTruck Dispatch` td
-			on td.order = oi.parent and td.china_truck = oi.xitoy_mashina_nomeri
-			and td.creation = (
-				select max(td2.creation) from `tabTruck Dispatch` td2
-				where td2.order = oi.parent and td2.china_truck = oi.xitoy_mashina_nomeri
-			)
-		left join `tabKZ Truck Loading` kzl
-			on kzl.order = oi.parent and kzl.manba_china_truck = oi.xitoy_mashina_nomeri
-			and kzl.docstatus = 1
-			and kzl.creation = (
-				select max(kzl2.creation) from `tabKZ Truck Loading` kzl2
-				where kzl2.order = oi.parent and kzl2.manba_china_truck = oi.xitoy_mashina_nomeri
-					and kzl2.docstatus = 1
-			)
-		left join `tabPeregruz Item` prgi
-			on prgi.`order` = oi.parent and prgi.china_truck = oi.xitoy_mashina_nomeri
-		left join `tabPeregruz` prg
-			on prg.name = prgi.parent
-			and prg.docstatus = 1
-			and prg.creation = (
-				select max(prg2.creation)
-				from `tabPeregruz` prg2
-				inner join `tabPeregruz Item` prgi2 on prgi2.parent = prg2.name
-				where prgi2.`order` = oi.parent and prgi2.china_truck = oi.xitoy_mashina_nomeri
-					and prg2.docstatus = 1
-			)
-		left join `tabKZ Transit` kzt
-			on kzt.`order` = oi.parent
-			and kzt.kz_truck = coalesce(kzl.kz_truck, prg.kz_truck, td.mashina_raqami)
-		where {where_clause}
-		group by oi.parent, oi.xitoy_mashina_nomeri
-		order by oi.parent, oi.xitoy_mashina_nomeri
+			od.name as order_detail,
+			od.`order` as mijoz_order,
+			od.mahsulot_nomi as mahsulotlar,
+			od.xitoy_mashina_nomeri as china_fura,
+			od.truck_kub as china_truck_kub,
+			od.truck_tonna as china_truck_tonna,
+			od.jami_kub as il_kub,
+			od.jami_tonna as il_tonna,
+			od.status,
+			td.mashina_raqami as td_kz_fura,
+			td.kub as kz_truck_kub,
+			td.tonna as kz_truck_tonna,
+			td.haydovchi_ismi,
+			coalesce(td.china_arrival, od.kelish_sanasi) as yetib_kelish_sanasi,
+			kzl.kz_truck as kzl_kz_fura,
+			kzl.sana as kzl_sana,
+			prg.kz_truck as prg_kz_fura,
+			prg.sana as prg_sana
+		from `tabOrder Detail` od
+		left join `tabTruck Dispatch` td on td.name = (
+			select td2.name from `tabTruck Dispatch` td2
+			where td2.`order` = od.name order by td2.creation desc limit 1
+		)
+		left join `tabKZ Truck Loading` kzl on kzl.name = (
+			select k2.name from `tabKZ Truck Loading` k2
+			inner join `tabKZ Load Item` ki on ki.parent = k2.name
+			where ki.`order` = od.name and k2.docstatus = 1
+			order by k2.creation desc limit 1
+		)
+		left join `tabPeregruz` prg on prg.name = (
+			select p2.name from `tabPeregruz` p2
+			inner join `tabPeregruz Item` pi on pi.parent = p2.name
+			where pi.`order` = od.name and p2.docstatus = 1
+			order by p2.creation desc limit 1
+		)
+		where {" and ".join(conditions)}
+		order by od.`order`, od.name
 		""",
 		values,
 		as_dict=True,
@@ -186,32 +113,33 @@ def get_pipeline_rows(order=None, status=None):
 
 	result = []
 	for row in rows:
-		stage_rank = int(row.stage_rank) if row.stage_rank is not None else -1
-		if stage_rank >= 0:
-			status = PIPELINE_STAGES[stage_rank]
-			stage_index = stage_rank
-		else:
-			status = row.status_fallback
-			stage_index = -1
+		kz_fura = row.kzl_kz_fura or row.prg_kz_fura or row.td_kz_fura
+		arrived = None
+		if kz_fura:
+			arrived = frappe.db.get_value(
+				"KZ Transit", {"order": row.mijoz_order, "kz_truck": kz_fura}, "fakt_yetib_borgan"
+			)
+		loaded = row.kzl_sana or row.prg_sana
+		stage_index = PIPELINE_STAGES.index(row.status) if row.status in PIPELINE_STAGES else -1
 		result.append(
 			{
-				"order": row.order_name,
+				"order": row.order_detail,
+				"order_detail": row.order_detail,
+				"mijoz_order": row.mijoz_order,
 				"mahsulotlar": row.mahsulotlar,
 				"china_fura": row.china_fura,
 				"china_truck_kub": flt(row.china_truck_kub) or None,
 				"china_truck_tonna": flt(row.china_truck_tonna) or None,
 				"il_kub": flt(row.il_kub) if row.il_kub is not None else None,
 				"il_tonna": flt(row.il_tonna) if row.il_tonna is not None else None,
-				"kz_fura": row.kzl_kz_fura or row.td_kz_fura,
+				"kz_fura": kz_fura,
 				"kz_truck_kub": flt(row.kz_truck_kub) if row.kz_truck_kub is not None else None,
 				"kz_truck_tonna": flt(row.kz_truck_tonna) if row.kz_truck_tonna is not None else None,
 				"haydovchi_ismi": row.haydovchi_ismi,
 				"yetib_kelish_sanasi": str(row.yetib_kelish_sanasi) if row.yetib_kelish_sanasi else None,
-				"yuklangan_sana": str(row.yuklangan_sana) if row.yuklangan_sana else None,
-				"kz_truck_yetib_kelish_sanasi": (
-					str(row.kz_truck_yetib_kelish_sanasi) if row.kz_truck_yetib_kelish_sanasi else None
-				),
-				"status": status,
+				"yuklangan_sana": str(loaded) if loaded else None,
+				"kz_truck_yetib_kelish_sanasi": str(arrived) if arrived else None,
+				"status": row.status,
 				"stage_index": stage_index,
 			}
 		)
@@ -272,31 +200,23 @@ def get_stat_tiles(rows):
 	]
 
 
-def advance_order_item_status(order, china_trucks, new_status):
-	"""Berilgan (order, xitoy furalar) uchun Order Item.status'ni FAQAT OLDINGA siljitadi
-	— bu 5 ta yashirin (bazada, gitda yo'q) Client Script'da alohida-alohida qayta
-	yozilgan `il_set_status(orderName, chinaTrucks, newStatus)` JS naqshining PYTHON'dagi
-	yagona nusxasi. Yangi, to'liq git-tracked hujjatlar (masalan Peregruz) shu funksiyani
-	chaqirishi kerak — DB-only Client Script yozish shart emas, chunki bu faylni to'liq
-	nazorat qilamiz.
+def advance_order_detail_status(order_detail_names, new_status):
+	"""Berilgan Order Detail'lar statusini FAQAT OLDINGA siljitadi. Status tarixi
+	("Order Item Status Log") Order Detail'ning o'zida (validate/on_update) yoziladi.
 
-	Order.save() chaqirilishi "Order Item Status Log" tarixini ham avtomatik yozadi
-	(order_status_log.py orqali, Order.on_update()'da allaqachon ulangan) — bu yerda
-	qo'shimcha logging kerak emas."""
-	if not order or not china_trucks or new_status not in PIPELINE_STAGES:
+	ignore_permissions — Telegram webhook (Guest) va boshqa avtomatik yo'llar ham shu
+	funksiyani chaqiradi; status o'zgarishi hujjat egasining harakati natijasi."""
+	if not order_detail_names or new_status not in PIPELINE_STAGES:
 		return
 	new_index = PIPELINE_STAGES.index(new_status)
-	trucks = set(china_trucks)
-
-	order_doc = frappe.get_doc("Order", order)
-	changed = False
-	for row in order_doc.zakaz_mahsulotlari:
-		if row.xitoy_mashina_nomeri not in trucks:
+	for name in set(order_detail_names):
+		current = frappe.db.get_value("Order Detail", name, "status")
+		if current is None:
 			continue
-		current_index = PIPELINE_STAGES.index(row.status) if row.status in PIPELINE_STAGES else -1
-		if new_index > current_index:
-			row.status = new_status
-			changed = True
-
-	if changed:
-		order_doc.save()
+		current_index = PIPELINE_STAGES.index(current) if current in PIPELINE_STAGES else -1
+		if new_index <= current_index:
+			continue
+		doc = frappe.get_doc("Order Detail", name)
+		doc.status = new_status
+		doc.flags.ignore_permissions = True
+		doc.save()

@@ -5,7 +5,6 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "order",
   "part_name",
   "quantity",
   "total_boxes",
@@ -18,15 +17,6 @@
   "birlik"
  ],
  "fields": [
-  {
-   "columns": 2,
-   "fieldname": "order",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Order / Zakaz",
-   "options": "Order",
-   "reqd": 1
-  },
   {
    "columns": 3,
    "fieldname": "part_name",
@@ -54,7 +44,7 @@
    "fieldname": "net_weight",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Net vazn \u2014 jami"
+   "label": "Net vazn — jami"
   },
   {
    "columns": 1,
@@ -69,7 +59,7 @@
    "fieldname": "volume_cbm",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Hajm / CBM \u2014 jami",
+   "label": "Hajm / CBM — jami",
    "precision": "3"
   },
   {

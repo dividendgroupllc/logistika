@@ -9,7 +9,11 @@ frappe.ui.form.on("KZ Truck Loading", {
 			return { query: "logistika.erp_for_logistics.ombor_xarajatlari.get_ombor_xarajati_accounts" };
 		});
 	},
+	order(frm) {
+		logistika.truck_options.apply(frm, { china: "manba_china_truck", kz: "kz_truck" });
+	},
 	refresh(frm) {
+		logistika.truck_options.apply(frm, { china: "manba_china_truck", kz: "kz_truck" });
 		if (frm.doc.docstatus === 0) {
 			frm.add_custom_button(
 				"📥 Yuklarni tortish (Xitoy fura)",
@@ -69,9 +73,11 @@ function fill_container(frm) {
 	frappe.confirm(
 		__("\"{0}\" furasining barcha mahsulotlari mavjud ombor qoldig'i bo'yicha TO'LIQ yuklandi deb belgilanadi — sanab chiqilmagan bo'lsa ham (yopiq konteyner uchun). Davom etasizmi?", [frm.doc.manba_china_truck]),
 		() => {
+			// Qoldiq (ombor_fakt) har bir (Order Detail, mahsulot) bo'yicha alohida.
 			const byPart = {};
 			rows.forEach((row) => {
-				(byPart[row.part_name] = byPart[row.part_name] || []).push(row);
+				const key = `${row.order}\u0000${row.part_name}`;
+				(byPart[key] = byPart[key] || []).push(row);
 			});
 
 			const zeroParts = [];
@@ -80,7 +86,7 @@ function fill_container(frm) {
 				const totalPlanned = group.reduce((sum, r) => sum + flt(r.quantity), 0);
 				const available = flt(group[0].ombor_fakt);
 				if (!available) {
-					zeroParts.push(partName);
+					zeroParts.push(group[0].part_name);
 				}
 				group.forEach((row) => {
 					const share = totalPlanned > 0 ? (flt(row.quantity) / totalPlanned) * available : 0;

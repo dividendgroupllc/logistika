@@ -8,9 +8,9 @@ frappe.query_reports["Ombor Holati"] = {
 		},
 		{
 			fieldname: "order",
-			label: __("Order / Zakaz"),
+			label: __("Order Detail"),
 			fieldtype: "Link",
-			options: "Order",
+			options: "Order Detail",
 		},
 		{
 			fieldname: "fura",

@@ -61,35 +61,10 @@ frappe.ui.form.on("Peregruz Item", {
 // Order'ga bog'liq Xitoy furalar va shu order uchun tayinlangan KZ furalar bilan
 // tanlov ro'yxatlarini to'ldiradi — "KZ Truck Loading - Pull va Jami" (yashirin) skripti
 // bilan bir xil naqsh, faqat bu yerda to'liq git-tracked holda.
-async function load_select_options(frm) {
-	if (!frm.doc.order) {
-		return;
-	}
-	try {
-		const ord = await frappe.db.get_doc("Order", frm.doc.order);
-		const chinaTrucks = (ord.zakaz_mahsulotlari || [])
-			.map((r) => r.xitoy_mashina_nomeri)
-			.filter((v) => v);
-		frm.set_df_property(
-			"manba_china_truck",
-			"options",
-			[""].concat([...new Set(chinaTrucks)]).join("\n")
-		);
-		const tds = await frappe.db.get_list("Truck Dispatch", {
-			filters: { order: frm.doc.order },
-			fields: ["mashina_raqami"],
-			limit: 50,
-		});
-		const kz = tds.map((t) => t.mashina_raqami).filter((v) => v);
-		frm.set_df_property("kz_truck", "options", [""].concat([...new Set(kz)]).join("\n"));
-	} catch (e) {
-		console.log(e);
-	}
+function load_select_options(frm) {
+	return logistika.truck_options.apply(frm, { china: "manba_china_truck", kz: "kz_truck" });
 }
 
-// Internal Logistics reja miqdoridan (Warehouse Intake'dan emas) mavjud qoldiqni tortadi.
-// Bir xil "manba Xitoy fura" uchun qayta bosilsa, faqat o'sha furaga tegishli qatorlar
-// almashtiriladi (boshqa furalardan tortilgan qatorlarga tegilmaydi).
 function pull_loads(frm) {
 	if (!frm.doc.manba_china_truck) {
 		frappe.msgprint(__("Avval \"Manba Xitoy fura\" tanlang."));

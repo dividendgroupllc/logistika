@@ -37,7 +37,7 @@
    "fieldname": "order",
    "fieldtype": "Link",
    "hidden": 1,
-   "label": "Order / Zakaz — eski, endi fura orqali avtomatik aniqlanadi",
+   "label": "Order",
    "options": "Order"
   },
   {
@@ -45,7 +45,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Order Item'lardagi mavjud fura raqamlaridan tavsiya qiladi, lekin yangi raqam yozishga ham ruxsat beradi",
+   "description": "Faqat yo'ldagi (hali omborga kelmagan) Order Detail'larning fura raqamlari",
    "fieldname": "fura",
    "fieldtype": "Autocomplete",
    "ignore_validation": 1,
@@ -106,7 +106,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-12 08:34:54.861976",
+ "modified": "2026-11-17 19:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Warehouse Intake",

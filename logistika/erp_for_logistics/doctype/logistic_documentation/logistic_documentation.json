@@ -88,24 +88,24 @@
   {
    "fieldname": "tab_per",
    "fieldtype": "Tab Break",
-   "label": "\u041f\u0435\u0440\u0435\u0433\u0440\u0443\u0437 \u0434\u0430\u043d\u043d\u044b\u0439"
+   "label": "Перегруз данный"
   },
   {
    "fieldname": "sec_per",
    "fieldtype": "Section Break",
-   "label": "\u041f\u0435\u0440\u0435\u0433\u0440\u0443\u0437 \u0434\u0430\u043d\u043d\u044b\u0439"
+   "label": "Перегруз данный"
   },
   {
    "fieldname": "peregruz_hujjat",
    "fieldtype": "Attach",
-   "label": "\u041f\u0435\u0440\u0435\u0433\u0440\u0443\u0437 \u0434\u0430\u043d\u043d\u044b\u0439 \u2014 hujjat",
+   "label": "Перегруз данный — hujjat",
    "permlevel": 1
   },
   {
    "default": "0",
    "fieldname": "peregruz_check",
    "fieldtype": "Check",
-   "label": "\u041f\u0435\u0440\u0435\u0433\u0440\u0443\u0437 \u0434\u0430\u043d\u043d\u044b\u0439 \u2713"
+   "label": "Перегруз данный ✓"
   },
   {
    "fieldname": "cb_per",
@@ -115,13 +115,13 @@
    "depends_on": "eval:doc.peregruz_hujjat",
    "fieldname": "send_peregruz_hujjat",
    "fieldtype": "Button",
-   "label": "\ud83d\udce4 Kliyentga yuborish (Telegram)"
+   "label": "📤 Kliyentga yuborish (Telegram)"
   },
   {
    "default": "0",
    "fieldname": "peregruz_sent",
    "fieldtype": "Check",
-   "label": "Kliyentga yuborilgan \u2713",
+   "label": "Kliyentga yuborilgan ✓",
    "read_only": 1
   },
   {
@@ -175,7 +175,7 @@
    "permlevel": 1
   },
   {
-   "description": "Avtomatik: Internal Logistics'dagi shu Order'ning \"Pekin list\"iga tegishli buyurtmalar soni × $100 — kerak bo'lsa qo'lda o'zgartiring",
+   "description": "Avtomatik: shu Order'ning pekin list'i bor Order Detail'lari soni × $100 — kerak bo'lsa qo'lda o'zgartiring",
    "fieldname": "eksport_deklaratsiya_summa",
    "fieldtype": "Currency",
    "label": "Eksport deklaratsiya summasi"
@@ -188,13 +188,13 @@
    "depends_on": "eval:doc.eksport_deklaratsiya",
    "fieldname": "send_eksport_deklaratsiya",
    "fieldtype": "Button",
-   "label": "\ud83d\udce4 Kliyentga yuborish (Telegram)"
+   "label": "📤 Kliyentga yuborish (Telegram)"
   },
   {
    "default": "0",
    "fieldname": "eksport_sent",
    "fieldtype": "Check",
-   "label": "Kliyentga yuborilgan \u2713",
+   "label": "Kliyentga yuborilgan ✓",
    "read_only": 1
   },
   {
@@ -205,7 +205,7 @@
   {
    "fieldname": "cl_go_to_transit",
    "fieldtype": "Button",
-   "label": "\u2192 Transit bo'limiga o'tish"
+   "label": "→ Transit bo'limiga o'tish"
   },
   {
    "fieldname": "cl_cmr_preview_html",
@@ -217,22 +217,22 @@
    "description": "Transit bo'limida biriktirilgan CMR hujjatini ko'rib, to'g'riligini tasdiqlash",
    "fieldname": "cl_cmr_tasdiqlandi",
    "fieldtype": "Check",
-   "label": "CMR ko'rib tasdiqlandi \u2713"
+   "label": "CMR ko'rib tasdiqlandi ✓"
   },
   {
    "fieldname": "tab_tr",
    "fieldtype": "Tab Break",
-   "label": "\u0422\u0440\u0430\u043d\u0437\u0438\u0442"
+   "label": "Транзит"
   },
   {
    "fieldname": "sec_tr",
    "fieldtype": "Section Break",
-   "label": "\u0422\u0440\u0430\u043d\u0437\u0438\u0442"
+   "label": "Транзит"
   },
   {
    "fieldname": "tr_docs_preview_html",
    "fieldtype": "HTML",
-   "label": "\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b \u043a\u043b\u0438\u0435\u043d\u0442\u0430"
+   "label": "Документы клиента"
   },
   {
    "fieldname": "tr_driver_preview_html",
@@ -241,16 +241,16 @@
   },
   {
    "default": "0",
-   "description": "Pekin invoice, TTN \u0438 Pekin list (Internal Logistics) \u043f\u0440\u043e\u0432\u0435\u0440\u0435\u043d\u044b",
+   "description": "Pekin invoice, TTN и Pekin list (Order Detail) проверены",
    "fieldname": "tr_docs_tasdiqlandi",
    "fieldtype": "Check",
-   "label": "\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b \u043f\u0440\u043e\u0432\u0435\u0440\u0435\u043d\u044b \u2713"
+   "label": "Документы проверены ✓"
   },
   {
    "default": "0",
    "fieldname": "tranzit_check",
    "fieldtype": "Check",
-   "label": "\u0422\u0440\u0430\u043d\u0437\u0438\u0442\u043d\u0438\u0439 \u043e\u0444\u043e\u0440\u043c\u0435\u043b\u0435\u043d\u0438\u044f \u2713"
+   "label": "Транзитний оформеления ✓"
   },
   {
    "fieldname": "tranzit_hujjat",
@@ -261,18 +261,18 @@
   {
    "fieldname": "tr_hujjat_turi",
    "fieldtype": "Select",
-   "label": "\u0422\u0438\u043f \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430",
-   "options": "\u0422\u0438\u0440 \u043a\u0430\u0440\u043d\u0435\u0442\n\u0410\u043a\u0442 \u043f\u0435\u0440\u0435\u0433\u0440\u0443\u0437\u0430"
+   "label": "Тип документа",
+   "options": "Тир карнет\nАкт перегруза"
   },
   {
    "fieldname": "tranzit_matn",
    "fieldtype": "Data",
-   "label": "\u041f\u0440\u0438\u043c\u0435\u0447\u0430\u043d\u0438\u0435"
+   "label": "Примечание"
   },
   {
    "fieldname": "tranzit_xarajat",
    "fieldtype": "Currency",
-   "label": "\u0421\u0443\u043c\u043c\u0430 \u0440\u0430\u0441\u0445\u043e\u0434\u043e\u0432"
+   "label": "Сумма расходов"
   }
  ],
  "grid_page_length": 50,

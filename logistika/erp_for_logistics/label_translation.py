@@ -177,9 +177,7 @@ def translation_coverage_report(language="zh", app="logistika"):
 # Qo'lda (Kimi'siz) yozilgan, sohaga mos xitoycha nomlar.
 DOCTYPE_TITLE_TRANSLATIONS = {
 	"Expense Cost Center": "费用成本中心",
-	"Internal Logistics": "内部物流",
 	"Internal Logistics Item": "内部物流项目",
-	"Internal Logistics Order": "内部物流订单",
 	"Internal Logistics Tracking": "内部物流跟踪",
 	"Kassa": "出纳",
 	"Kimi Settings": "Kimi设置",
@@ -194,7 +192,7 @@ DOCTYPE_TITLE_TRANSLATIONS = {
 	"Ombor Xarajati Item": "仓库费用项目",
 	"Order": "订单",
 	"Order Chat Message": "订单聊天消息",
-	"Order Item": "订单产品",
+	"Order Detail": "订单明细",
 	"Order Item Status Log": "订单状态日志",
 	"Peregruz": "直接换装",
 	"Peregruz Item": "直接换装项目",

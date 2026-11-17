@@ -1,0 +1,157 @@
+// Pekin list faylini (CSV / Excel / PDF) formadagi child jadvalga import qilish.
+// Avval Internal Logistics'da har bir buyurtma bloki uchun bo'lgan — endi Order
+// Detail formasida ishlatiladi. CSV qattiq andoza (part_name... sarlavhali) bo'yicha
+// o'qiladi, mos kelmasa yoki Excel/PDF bo'lsa — Kimi orqali (pekin_list_import.py).
+
+frappe.provide("logistika.pekin_import");
+
+logistika.pekin_import.FIELDS = [
+	"part_name",
+	"quantity",
+	"total_boxes",
+	"net_weight",
+	"volume_cbm",
+	"uzunlik",
+	"kenglik",
+	"balandlik",
+];
+
+logistika.pekin_import.render = function (frm, html_fieldname, table_fieldname) {
+	const field = frm.fields_dict[html_fieldname];
+	if (!field) return;
+	const $wrapper = field.$wrapper;
+	$wrapper.html(`
+		<div class="pekin-dropzone" style="border: 1px dashed #c3c9d1; border-radius: 6px; padding: 12px; text-align: center; cursor: pointer; color: #6b7280; font-size: 12px;">
+			${__("📥 Pekin list faylini shu yerga tashlang yoki bosing (Excel / CSV / PDF)")}
+		</div>
+		<input type="file" accept=".csv,.txt,.xlsx,.xls,.pdf" class="pekin-file" style="display:none;" />
+		<div class="pekin-status text-muted" style="margin-top: 6px;"></div>
+	`);
+	const $zone = $wrapper.find(".pekin-dropzone");
+	const $file = $wrapper.find(".pekin-file");
+	const $status = $wrapper.find(".pekin-status");
+	const handle = (file) => logistika.pekin_import.handle_file(frm, table_fieldname, file, $status);
+
+	$zone.on("click", () => $file.trigger("click"));
+	$file.on("change", function (e) {
+		handle(e.target.files[0]);
+		$(this).val("");
+	});
+	$wrapper.on("dragover drop", (e) => e.preventDefault());
+	$zone.on("dragover", (e) => {
+		e.preventDefault();
+		$zone.css({ "background-color": "#eff6ff", "border-color": "#2490ef" });
+	});
+	$zone.on("dragleave", (e) => {
+		e.preventDefault();
+		$zone.css({ "background-color": "", "border-color": "" });
+	});
+	$zone.on("drop", (e) => {
+		e.preventDefault();
+		e.stopPropagation();
+		$zone.css({ "background-color": "", "border-color": "" });
+		const dt = e.originalEvent.dataTransfer;
+		if (dt && dt.files[0]) handle(dt.files[0]);
+	});
+};
+
+logistika.pekin_import.add_rows = function (frm, table_fieldname, rows) {
+	rows.forEach((data) => Object.assign(frm.add_child(table_fieldname), data));
+	frm.refresh_field(table_fieldname);
+	frm.dirty();
+	frappe.show_alert({ message: __("{0} qator qo'shildi. Endi Save bosing.", [rows.length]), indicator: "green" });
+};
+
+logistika.pekin_import.handle_file = function (frm, table_fieldname, file, $status) {
+	if (!file) return;
+	const on_rows = (rows) => {
+		$status.text("");
+		logistika.pekin_import.add_rows(frm, table_fieldname, rows || []);
+	};
+	const on_error = () =>
+		$status.css("color", "#dc2626").text(__("Kimi orqali o'qib bo'lmadi — tafsilot yuqoridagi xabarda"));
+	const call_kimi = (method, args) =>
+		frappe.call({
+			method: `logistika.erp_for_logistics.pekin_list_import.${method}`,
+			args,
+			freeze: true,
+			freeze_message: __("Kimi orqali o'qilmoqda..."),
+			callback: (r) => on_rows(r.message),
+			error: on_error,
+		});
+
+	const ext = (file.name.split(".").pop() || "").toLowerCase();
+	const reader = new FileReader();
+	if (["xlsx", "xls", "pdf"].includes(ext)) {
+		$status.css("color", "").text(__("Kimi orqali o'qilmoqda..."));
+		reader.onload = (ev) => {
+			const base64 = ev.target.result.split(",", 2)[1] || "";
+			if (ext === "pdf") call_kimi("smart_parse_pekin_list_pdf", { file_content_base64: base64 });
+			else call_kimi("smart_parse_pekin_list_excel", { file_content_base64: base64, file_extension: ext });
+		};
+		reader.readAsDataURL(file);
+		return;
+	}
+	reader.onload = (ev) => {
+		const text = ev.target.result;
+		let rows;
+		try {
+			rows = logistika.pekin_import.parse_csv(text);
+		} catch (err) {
+			$status.css("color", "").text(__("Andoza mos kelmadi, Kimi orqali o'qilmoqda..."));
+			call_kimi("smart_parse_pekin_list", { file_content: text });
+			return;
+		}
+		on_rows(rows);
+	};
+	reader.readAsText(file, "UTF-8");
+};
+
+// Qattiq andoza: part_name... sarlavhali qator, ";" yoki "," ajratgich. Andozaga
+// sig'magan ma'lumotli qator bo'lsa — xato (chaqiruvchi Kimi'ga o'tadi), hech narsa
+// qisman qo'shilmaydi.
+logistika.pekin_import.parse_csv = function (text) {
+	const fnames = logistika.pekin_import.FIELDS;
+	text = text.replace(/^﻿/, "");
+	const lines = text.split(/\r?\n/).filter((l) => l.trim().length);
+	if (!lines.length) throw new Error(__("Fayl bo'sh"));
+
+	const delim = (text.match(/;/g) || []).length > (text.match(/,/g) || []).length ? ";" : ",";
+	let header_idx = -1;
+	let cols = [];
+	for (let i = 0; i < lines.length; i++) {
+		const parts = lines[i].split(delim).map((s) => s.trim());
+		if (parts.some((x) => fnames.includes(x))) {
+			header_idx = i;
+			cols = parts;
+			break;
+		}
+	}
+	if (header_idx === -1) throw new Error(__("Sarlavha (part_name...) qatori topilmadi."));
+
+	const map = {};
+	cols.forEach((c, idx) => {
+		if (fnames.includes(c)) map[c] = idx;
+	});
+
+	const parsed = [];
+	for (let i = header_idx + 1; i < lines.length; i++) {
+		const parts = lines[i].split(delim);
+		const get = (fn) => (parts[map[fn]] !== undefined ? String(parts[map[fn]]).trim() : "");
+		const part_name = get("part_name");
+		if (!part_name) {
+			if (parts.some((p) => p.trim().length > 0)) {
+				throw new Error(__("Faylda qo'shimcha, andozaga sig'magan ma'lumot bor"));
+			}
+			continue;
+		}
+		const row = { part_name };
+		fnames.forEach((fn) => {
+			if (fn === "part_name") return;
+			const value = parseFloat(get(fn).replace(",", "."));
+			if (!isNaN(value)) row[fn] = value;
+		});
+		parsed.push(row);
+	}
+	return parsed;
+};

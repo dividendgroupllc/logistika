@@ -317,7 +317,7 @@ logistika.ui.OmborHolatiDashboardPage = class OmborHolatiDashboardPage {
 						.map(
 							(row) => `
 						<tr>
-							<td class="is-link" data-doctype="Order" data-name="${frappe.utils.escape_html(row.order || "")}">${frappe.utils.escape_html(row.order || "")}</td>
+							<td class="is-link" data-doctype="Order Detail" data-name="${frappe.utils.escape_html(row.order || "")}">${frappe.utils.escape_html(row.order || "")}</td>
 							<td>${frappe.utils.escape_html(row.fura || "")}</td>
 							<td>${frappe.utils.escape_html(row.ombor || "")}</td>
 							<td>${frappe.utils.escape_html(row.part_name || "")}</td>
@@ -519,7 +519,7 @@ logistika.ui.OmborHolatiDashboardPage = class OmborHolatiDashboardPage {
 			const $el = $(e.currentTarget);
 			const order = $el.data("history-order");
 			const fura = $el.data("history-fura");
-			if (order && fura) this.show_status_history(order, fura);
+			if (order) this.show_status_history(order, fura);
 		});
 	}
 

@@ -11,6 +11,11 @@ from frappe.model.document import Document
 
 GROUP_FIELDS = ("ichki_logistika_xarajat_guruhi", "yuklash_xarajat_guruhi")
 PAYMENT_ACCOUNT_TYPES = ("Cash", "Bank")
+LEAF_GROUP_FIELDS = {
+	"postavshik_supplier_group": "Supplier Group",
+	"haydovchi_supplier_group": "Supplier Group",
+	"order_item_group": "Item Group",
+}
 
 
 def _get_account(name):
@@ -43,14 +48,22 @@ class LogistikaSettings(Document):
 		if expense_info and payment_info and expense_info.company != payment_info.company:
 			frappe.throw(_("Sug'urta xarajati va to'lanadigan hisob bir kompaniyaga tegishli bo'lishi kerak"))
 
+		for fieldname, doctype in LEAF_GROUP_FIELDS.items():
+			value = self.get(fieldname)
+			if value and frappe.db.get_value(doctype, value, "is_group"):
+				self._throw(fieldname, _("papka emas, oddiy guruh tanlang"))
+
 	def _throw(self, fieldname, message):
 		frappe.throw(f'"{_(self.meta.get_label(fieldname))}": {message}')
 
 
-def get_settings_account(fieldname):
-	"""Sozlamadagi hisobni qaytaradi; tanlanmagan bo'lsa aniq xato beradi."""
+def get_required_setting(fieldname):
+	"""Sozlamadagi qiymatni qaytaradi; tanlanmagan bo'lsa aniq xato beradi."""
 	value = frappe.db.get_single_value("Logistika Settings", fieldname)
 	if not value:
 		label = frappe.get_meta("Logistika Settings").get_label(fieldname)
 		frappe.throw(_('Logistika Settings\'da "{0}" tanlanmagan').format(_(label)))
 	return value
+
+
+get_settings_account = get_required_setting

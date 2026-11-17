@@ -7,6 +7,7 @@ const LD_DUPLICATE_LABEL = "Bu order+fura uchun Logistic Documentation";
 
 frappe.ui.form.on("Logistic Documentation", {
 	refresh(frm) {
+		logistika.truck_options.apply(frm, { kz: "kz_truck" });
 		render_tr_docs_preview(frm);
 		render_cl_cmr_preview(frm);
 		render_driver_preview(frm);
@@ -17,6 +18,7 @@ frappe.ui.form.on("Logistic Documentation", {
 		check_duplicate_ld(frm);
 	},
 	order(frm) {
+		logistika.truck_options.apply(frm, { kz: "kz_truck" });
 		render_tr_docs_preview(frm);
 		render_driver_preview(frm);
 		if (!frm.doc.eksport_deklaratsiya_summa) {
@@ -49,7 +51,7 @@ frappe.ui.form.on("Logistic Documentation", {
 	},
 });
 
-// Eksport deklaratsiya summasi — shu Order'ga bog'liq Internal Logistics
+// Eksport deklaratsiya summasi — shu Order'ning pekin list'i bor Order Detail'lari
 // hujjat(lar)idagi "Pekin list" jadvalida nechta ALOHIDA buyurtma (=alohida
 // import qilingan pekin list) borligiga qarab avtomatik hisoblanadi (har biri
 // $100, logistika.erp_for_logistics.api.calc_eksport_deklaratsiya_summa'da).
@@ -126,17 +128,17 @@ function render_tr_docs_preview(frm) {
 		return;
 	}
 	frappe.call({
-		method: "logistika.erp_for_logistics.api.internal_logistics_for_order",
+		method: "logistika.erp_for_logistics.api.order_details_with_pekin_list",
 		args: { order: frm.doc.order },
 		callback: (r) => {
 			const names = r.message || [];
 			const $row = $wrapper.find('[data-region="tr-il-row"]');
 			if (!names.length) {
-				$row.text(__("Pekin list — Internal Logistics hujjati topilmadi"));
+				$row.text(__("Pekin list — Order Detail'larda pekin list kiritilmagan"));
 				return;
 			}
 			const links = names
-				.map((n) => `<a href="/app/internal-logistics/${encodeURIComponent(n)}" target="_blank">${frappe.utils.escape_html(n)}</a>`)
+				.map((n) => `<a href="/app/order-detail/${encodeURIComponent(n)}" target="_blank">${frappe.utils.escape_html(n)}</a>`)
 				.join(", ");
 			$row.html(`📦 ${__("Pekin list")}: ${links}`);
 		},

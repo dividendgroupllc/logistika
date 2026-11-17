@@ -1,16 +1,13 @@
 # Copyright (c) 2026, sardorbek qamchibekov and contributors
 # For license information, please see license.txt
 
-# Har bir Order Item (Xitoy fura) qatorida "Sug'urta" (sugurta) summasi kiritilib
-# saqlansa, avtomatik Journal Entry yaratiladi — Debit: sug'urta xarajati hisobi,
+# Order Detail'da (bitta Xitoy fura) "Sug'urta" summasi (CNY) kiritilib saqlansa, avtomatik Journal Entry yaratiladi — Debit: sug'urta xarajati hisobi,
 # Credit: sug'urta to'lanadigan Cash/Bank hisobi. Ikkala hisob ham Logistika
 # Settings'da belgilanadi; kompaniya xarajat hisobining `company` maydonidan olinadi.
 #
 # Summa 0'ga tushirilsa yoki boshqa qiymatga o'zgartirilsa, eski JE cancel
-# qilinib, kerak bo'lsa yangisi yaratiladi — Kassa doctype'dagi "submit yaratadi /
-# cancel bekor qiladi" naqshi bilan bir xil, faqat bu yerda Order (parent) hech
-# qachon submittable bo'lmagani uchun (pipeline statusi Order'ni oylab qayta-qayta
-# saqlab turadi) submit/cancel ceremony emas, oddiy SAQLASH orqali ishlaydi.
+# qilinib, kerak bo'lsa yangisi yaratiladi. Order Detail submittable emas (pipeline
+# statusi uni qayta-qayta saqlaydi), shuning uchun bu oddiy SAQLASH orqali ishlaydi.
 
 import frappe
 from frappe import _
@@ -22,66 +19,43 @@ from logistika.erp_for_logistics.doctype.logistika_settings.logistika_settings i
 
 
 def capture_insurance_changes(doc):
-	"""Order.validate()da chaqiriladi — hali saqlanmasdan turib, bazadagi eski
-	sugurta qiymatlarini joriy (saqlanayotgan) qiymatlar bilan solishtirib,
-	aniqlangan o'zgarishlarni doc.flags ichida vaqtincha saqlab qo'yadi.
-
-	Yangi (hali saqlanmagan) Order uchun ham ishlaydi — bazada hali hech qanday
-	qator yo'q, shuning uchun `old_rows` bo'sh chiqadi va har bir qatorning eski
-	qiymati 0 deb olinadi (agar boshida sugurta > 0 kiritilgan bo'lsa ham, birinchi
-	saqlashning o'zida JE yaratilishi kerak — is_new() bo'yicha alohida chiqib
-	ketish (order_status_log'dagi kabi) shu yerda noto'g'ri bo'lardi)."""
-	old_rows = {
-		row.name: (row.sugurta, row.sugurta_je)
-		for row in frappe.get_all(
-			"Order Item", filters={"parent": doc.name}, fields=["name", "sugurta", "sugurta_je"]
-		)
-	}
-
-	# `row` obyektining o'zi saqlanadi (nomi emas) — yangi qo'shilgan qator uchun
-	# validate() paytidagi vaqtinchalik nomi keyin (on_update()da) haqiqiy saqlangan
-	# nomga almashtiriladi, lekin bu SHU obyektning o'zida (referens orqali) sodir
-	# bo'ladi, shuning uchun keyinroq qayta izlashning hojati yo'q.
-	changes = []
-	for row in doc.zakaz_mahsulotlari:
-		old_sugurta, old_je = old_rows.get(row.name, (0, None))
-		if flt(old_sugurta) != flt(row.sugurta):
-			changes.append({"row": row, "old_je": old_je, "new_sugurta": flt(row.sugurta)})
-	doc.flags.insurance_changes = changes
+	"""Order Detail.validate()da — bazadagi eski sug'urta summasini joriy qiymat bilan
+	solishtirib, o'zgarishni doc.flags'da saqlaydi (yangi hujjatda eski qiymat 0)."""
+	old_sugurta = 0 if doc.is_new() else flt(frappe.db.get_value(doc.doctype, doc.name, "sugurta"))
+	doc.flags.insurance_changed = flt(old_sugurta) != flt(doc.sugurta)
 
 
 def process_insurance_changes(doc):
-	"""Order.on_update()da chaqiriladi — saqlangandan KEYIN, capture_insurance_changes
-	aniqlagan har bir o'zgargan qator uchun eski Journal Entry'ni cancel qilib,
-	kerak bo'lsa (yangi summa > 0) yangisini yaratadi."""
-	changes = doc.flags.get("insurance_changes") or []
-	if not changes:
+	"""Order Detail.on_update()da — summa o'zgargan bo'lsa eski JE cancel qilinadi va
+	(yangi summa > 0 bo'lsa) yangisi yaratiladi."""
+	if not doc.flags.get("insurance_changed"):
 		return
+	doc.flags.insurance_changed = False
 
-	for change in changes:
-		row = change["row"]
-		if change["old_je"]:
-			_cancel_insurance_je(change["old_je"])
-			frappe.db.set_value("Order Item", row.name, "sugurta_je", None, update_modified=False)
+	if doc.sugurta_je:
+		_cancel_insurance_je(doc.sugurta_je)
+		doc.db_set("sugurta_je", None, update_modified=False)
 
-		if change["new_sugurta"] > 0:
-			je_name = _create_insurance_je(doc, row, change["new_sugurta"])
-			frappe.db.set_value("Order Item", row.name, "sugurta_je", je_name, update_modified=False)
+	if flt(doc.sugurta) > 0:
+		doc.db_set("sugurta_je", _create_insurance_je(doc, flt(doc.sugurta)), update_modified=False)
 
 
-def cancel_all_insurance_entries(doc):
-	"""Order.on_trash()da (o'chirilishidan OLDIN) chaqiriladi — barcha Order Item
-	qatorlariga bog'langan FAOL sug'urta Journal Entry'larini cancel qiladi.
+def cancel_insurance_entry(doc):
+	"""Order Detail.on_trash()da — bog'langan faol sug'urta JE'sini cancel qiladi,
+	aks holda JE hech qanday manba hujjatsiz "submitted" bo'lib qolib ketadi."""
+	if doc.sugurta_je:
+		_cancel_insurance_je(doc.sugurta_je)
 
-	Order — Kassa'dan farqli o'laroq — submittable emas (haqiqiy "Cancel" tugmasi
-	yo'q, faqat saqlash/o'chirish bor). Sug'urta summasini 0'ga tushirib saqlash
-	orqali JE cancel qilinishi allaqachon ishlaydi (process_insurance_changes), lekin
-	Order to'g'ridan-to'g'ri O'CHIRILSA, bu yo'l chaqirilmaydi — natijada JE hech
-	qanday manba hujjatga bog'lanmagan holda "submitted" bo'lib qolib ketardi
-	(productionda haqiqiy sinovda aynan shu holat aniqlandi)."""
-	for row in doc.zakaz_mahsulotlari:
-		if row.sugurta_je:
-			_cancel_insurance_je(row.sugurta_je)
+
+def _to_company_amount(amount, currency, company_currency, posting_date):
+	"""Order Detail summalari `currency`da (CNY) — JE'ning `debit`/`credit` maydonlari
+	esa kompaniya valyutasida bo'lishi kerak."""
+	if currency == company_currency:
+		return flt(amount)
+	rate = get_exchange_rate(currency, company_currency, posting_date)
+	if not rate or flt(rate) <= 0:
+		frappe.throw(_("Не найден курс {0} к валюте компании {1}").format(currency, company_currency))
+	return flt(flt(amount) * flt(rate), 2)
 
 
 def _resolve_accounts():
@@ -94,15 +68,14 @@ def _resolve_accounts():
 	return expense_account, credit_account, company
 
 
-def _create_insurance_je(order_doc, row, amount):
+def _create_insurance_je(doc, amount_in_doc_currency):
 	expense_account, credit_account, company = _resolve_accounts()
 	posting_date = today()
 	company_currency = frappe.get_cached_value("Company", company, "default_currency")
+	# Order Detail summasi o'z valyutasida (CNY) — JE'ning debit/credit'i kompaniya
+	# valyutasida, har bir hisob o'z valyutasidagi summasi Kassa naqshi bilan olinadi.
+	amount = _to_company_amount(amount_in_doc_currency, doc.valyuta or "CNY", company_currency, posting_date)
 
-	# `sugurta` (amount) kompaniya valyutasida deb hisoblanadi (Order Item'da alohida
-	# valyuta maydoni yo'q). Ikkala hisob ham odatda kompaniya valyutasida bo'ladi,
-	# lekin bo'lmasa ham (masalan boshqa valyutadagi hisob) — Kassa'dagi bir xil
-	# naqsh bilan valyutalarni mos keladigan qiladi.
 	debit_account_currency = (
 		frappe.get_cached_value("Account", expense_account, "account_currency") or company_currency
 	)
@@ -153,7 +126,7 @@ def _create_insurance_je(order_doc, row, amount):
 	je.posting_date = posting_date
 	je.company = company
 	je.multi_currency = 1 if is_multicurrency else 0
-	je.user_remark = _("Sug'urta: {0} — {1}").format(order_doc.name, row.xitoy_mashina_nomeri or "")
+	je.user_remark = _("Sug'urta: {0} — {1}").format(doc.name, doc.xitoy_mashina_nomeri or doc.mahsulot_nomi or "")
 	je.append("accounts", debit_row)
 	je.append("accounts", credit_row)
 	je.flags.ignore_permissions = True

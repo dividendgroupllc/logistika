@@ -4,7 +4,7 @@
 # Yuk tushirish/ortish xarajatlari (kran, kara, gruzchik va h.k.) — Warehouse Intake,
 # KZ Truck Loading, Peregruz hujjatlaridagi "Ombor Xarajati Item" jadvali
 # (yuklash_xarajatlari) orqali kiritiladi. Order darajasidagi "Qo'shimcha rasxod"
-# (Order Item.harajat_turi) ham xuddi shu naqshda ishlaydi.
+# (Order Detail.harajat_turi) ham xuddi shu naqshda ishlaydi.
 #
 # Ikkala joyda ham "Harajat turi" tanlovi Logistika Settings'da belgilangan
 # papka (Expense ichidagi guruh hisob) ICHIDAGI barcha avlod oddiy hisoblar bilan

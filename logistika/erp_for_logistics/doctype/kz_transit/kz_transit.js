@@ -5,12 +5,14 @@ const KZT_DUPLICATE_LABEL = "Bu order va fura uchun KZ Transit";
 
 frappe.ui.form.on("KZ Transit", {
 	refresh(frm) {
+		logistika.truck_options.apply(frm, { kz: "kz_truck" });
 		apply_gps_row_states(frm);
 		setTimeout(() => apply_gps_row_states(frm), 200);
 		bind_gps_row_clicks();
 		render_customer_chat(frm);
 	},
 	order(frm) {
+		logistika.truck_options.apply(frm, { kz: "kz_truck" });
 		render_customer_chat(frm);
 	},
 	kz_truck(frm) {

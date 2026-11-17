@@ -1,9 +1,66 @@
 # Copyright (c) 2026, sardorbek qamchibekov  and Contributors
 # See license.txt
 
-# import frappe
+import frappe
 from frappe.tests.utils import FrappeTestCase
+
+from logistika.erp_for_logistics import quick_create
+from logistika.erp_for_logistics.tests.utils import (
+	ensure_supplier,
+	ensure_supplier_group,
+	make_order,
+	setup_logistika_settings,
+)
 
 
 class TestOrder(FrappeTestCase):
-	pass
+	def setUp(self):
+		frappe.db.savepoint("order_test")
+		self.settings = setup_logistika_settings()
+
+	def tearDown(self):
+		frappe.db.rollback(save_point="order_test")
+
+	def test_naming_and_submit(self):
+		first = make_order(kliyent="_T Naming Mijoz")
+		second = make_order(kliyent="_T Naming Mijoz")
+		self.assertEqual(first.name, "_T Naming Mijoz-1")
+		self.assertEqual(second.name, "_T Naming Mijoz-2")
+		self.assertEqual(first.docstatus, 1)
+
+	def test_postavshik_must_be_in_settings_group(self):
+		other = ensure_supplier("_T Boshqa supplier", ensure_supplier_group("_T Boshqa guruh"))
+		with self.assertRaises(frappe.ValidationError):
+			make_order(xitoy_postavshik=other)
+
+	def test_zavod_raqami_validated_and_normalized(self):
+		with self.assertRaises(frappe.ValidationError):
+			make_order(xitoy_zavod_raqami="+998901234567")
+		doc = make_order(xitoy_zavod_raqami="+86 138 0013 8000")
+		self.assertEqual(doc.xitoy_zavod_raqami, "+8613800138000")
+
+	def test_create_customer_requires_phone(self):
+		with self.assertRaises(frappe.ValidationError):
+			quick_create.create_customer_with_phone("_T Yangi mijoz", "")
+
+	def test_create_customer_with_phone(self):
+		name = quick_create.create_customer_with_phone("_T Yangi mijoz", "+998 90 123 45 67")
+		contact = frappe.db.get_value("Customer", name, "customer_primary_contact")
+		self.assertTrue(contact)
+		self.assertEqual(frappe.db.get_value("Contact", contact, "mobile_no"), "+998901234567")
+
+	def test_create_postavshik(self):
+		with self.assertRaises(frappe.ValidationError):
+			quick_create.create_cn_supplier("_T Yangi postavshik", "+998901234567", "postavshik")
+		name = quick_create.create_cn_supplier("_T Yangi postavshik", "+86 138 0013 8000", "postavshik")
+		supplier = frappe.get_doc("Supplier", name)
+		self.assertEqual(supplier.supplier_group, self.settings.postavshik_supplier_group)
+		self.assertEqual(supplier.xitoy_telefon, "+8613800138000")
+
+	def test_create_haydovchi_requires_plate(self):
+		with self.assertRaises(frappe.ValidationError):
+			quick_create.create_cn_supplier("_T Haydovchi", "+8613800138000", "haydovchi")
+		name = quick_create.create_cn_supplier("_T Haydovchi", "+8613800138000", "haydovchi", "粤b 12345")
+		supplier = frappe.get_doc("Supplier", name)
+		self.assertEqual(supplier.supplier_group, self.settings.haydovchi_supplier_group)
+		self.assertEqual(supplier.xitoy_mashina_nomeri, "粤B12345")

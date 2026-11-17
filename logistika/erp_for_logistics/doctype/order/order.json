@@ -1,7 +1,7 @@
 {
  "actions": [],
- "allow_rename": 1,
- "autoname": "format:{kliyent}-{##}",
+ "allow_rename": 0,
+ "autoname": "{kliyent}.-.#",
  "creation": "2026-07-09 05:34:52.754711",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -13,13 +13,18 @@
   "kliyent_zavodi",
   "kim_buyurtma_qildi",
   "cb1",
-  "xitoy_zavod_raqami",
   "xitoy_postavshik",
+  "xitoy_zavod_raqami",
   "izoh",
-  "sec_items",
-  "zakaz_mahsulotlari",
-  "sec_status",
-  "status"
+  "sec_xizmat",
+  "xizmat_olchovi",
+  "cb2",
+  "valyuta",
+  "narx",
+  "amended_from",
+  "sec_chat",
+  "javob_kutilmoqda",
+  "chat_html"
  ],
  "fields": [
   {
@@ -39,6 +44,7 @@
    "fieldname": "kliyent",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Kliyent",
    "options": "Customer",
    "reqd": 1
@@ -66,57 +72,127 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "xitoy_zavod_raqami",
-   "fieldtype": "Data",
-   "label": "Xitoy zavod raqami"
-  },
-  {
    "fieldname": "xitoy_postavshik",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
+   "options": "Supplier",
    "label": "Xitoy postavshik"
   },
   {
+   "fieldname": "xitoy_zavod_raqami",
+   "fieldtype": "Data",
+   "options": "Phone",
+   "label": "Xitoy zavod raqami",
+   "description": "+86 bilan"
+  },
+  {
+   "allow_on_submit": 1,
    "fieldname": "izoh",
    "fieldtype": "Small Text",
    "label": "Izoh"
   },
   {
-   "fieldname": "sec_items",
+   "fieldname": "sec_xizmat",
    "fieldtype": "Section Break",
-   "label": "Zakaz mahsulotlari / Furalar"
+   "label": "Xizmat"
   },
   {
-   "fieldname": "zakaz_mahsulotlari",
-   "fieldtype": "Table",
-   "label": "Zakaz mahsulotlari",
-   "options": "Order Item"
-  },
-  {
-   "fieldname": "sec_status",
-   "fieldtype": "Section Break",
-   "label": "Holat"
-  },
-  {
-   "default": "Yangi",
-   "fieldname": "status",
+   "fieldname": "xizmat_olchovi",
    "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Status",
-   "options": "Yangi",
+   "options": "Tonna\nKub",
+   "default": "Tonna",
+   "label": "Xizmat o'lchovi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "valyuta",
+   "fieldtype": "Link",
+   "options": "Currency",
+   "default": "USD",
+   "read_only": 1,
+   "label": "Valyuta"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "narx",
+   "fieldtype": "Currency",
+   "options": "valyuta",
+   "label": "Narx (1 tonna / 1 kub uchun)",
+   "reqd": 1,
+   "non_negative": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "options": "Order",
+   "label": "Amended From",
+   "no_copy": 1,
+   "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "sec_chat",
+   "fieldtype": "Section Break",
+   "label": "Mijoz bilan suhbat"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "javob_kutilmoqda",
+   "fieldtype": "Check",
+   "label": "Javob kutilmoqda",
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "chat_html",
+   "fieldtype": "HTML",
+   "label": "Chat"
   }
  ],
  "grid_page_length": 50,
- "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2026-07-12 08:34:54.063633",
+ "links": [
+  {
+   "link_doctype": "Order Detail",
+   "link_fieldname": "order",
+   "group": "Furalar"
+  },
+  {
+   "link_doctype": "Kassa",
+   "link_fieldname": "order",
+   "group": "Moliya"
+  },
+  {
+   "link_doctype": "Logistic Documentation",
+   "link_fieldname": "order",
+   "group": "Hujjatlar"
+  },
+  {
+   "link_doctype": "KZ Transit",
+   "link_fieldname": "order",
+   "group": "Hujjatlar"
+  },
+  {
+   "link_doctype": "Order Chat Message",
+   "link_fieldname": "order",
+   "group": "Mijoz"
+  }
+ ],
+ "modified": "2026-11-17 18:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Order",
  "naming_rule": "Expression (old style)",
- "owner": "bnormurodov@gmail.com",
+ "owner": "Administrator",
  "permissions": [
   {
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -126,6 +202,7 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],
@@ -134,5 +211,6 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
- "track_changes": 1
+ "track_changes": 1,
+ "is_submittable": 1
 }

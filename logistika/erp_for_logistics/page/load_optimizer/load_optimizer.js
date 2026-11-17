@@ -174,7 +174,7 @@ logistika.ui.LoadOptimizerPage = class LoadOptimizerPage {
 				d.truck ? d.truck.length_cm : "",
 				d.truck ? d.truck.width_cm : "",
 				d.truck ? d.truck.height_cm : "",
-				__("karobka soni taxminiy, Internal Logistics'dagi o'lchamlar asosida hisoblangan"),
+				__("karobka soni taxminiy, Order Detail pekin list'idagi o'lchamlar asosida hisoblangan"),
 			])
 		);
 

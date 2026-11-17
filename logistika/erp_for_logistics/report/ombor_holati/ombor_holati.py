@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 # "Ombor holati" — har bir Order/Fura/Mahsulot bo'yicha, omborda hozir qancha qolgani va
-# shu buyurtmaning umumiy yetkazib berish pipeline'idagi joriy bosqichi (Order Item.status,
+# shu buyurtmaning umumiy yetkazib berish pipeline'idagi joriy bosqichi (Order Detail.status,
 # "Внутринний фура"dan "Клиент получил"gacha — Truck Dispatch/Warehouse Intake/KZ Truck
 # Loading/Logistic Documentation/KZ Transit saqlanganda avtomatik siljiydigan status).
 
@@ -10,7 +10,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
-from logistika.erp_for_logistics.ombor_ledger import get_order_item_status
+from logistika.erp_for_logistics.ombor_ledger import get_order_detail_status
 
 
 def execute(filters=None):
@@ -22,7 +22,7 @@ def execute(filters=None):
 
 def get_columns():
 	return [
-		{"fieldname": "order", "label": _("Order / Zakaz"), "fieldtype": "Link", "options": "Order", "width": 120},
+		{"fieldname": "order", "label": _("Order Detail"), "fieldtype": "Link", "options": "Order Detail", "width": 140},
 		{"fieldname": "fura", "label": _("Fura"), "fieldtype": "Data", "width": 100},
 		{"fieldname": "ombor", "label": _("Ombor"), "fieldtype": "Link", "options": "Ombor", "width": 120},
 		{"fieldname": "part_name", "label": _("Mahsulot nomi"), "fieldtype": "Data", "width": 220},
@@ -93,10 +93,9 @@ def get_data(filters):
 		if int(only_in_warehouse) and row.qoldiq <= 0:
 			continue
 
-		cache_key = (row.order, row.fura)
-		if cache_key not in status_cache:
-			status_cache[cache_key] = get_order_item_status(row.order, row.fura)
-		row["status"] = status_cache[cache_key]
+		if row.order not in status_cache:
+			status_cache[row.order] = get_order_detail_status(row.order)
+		row["status"] = status_cache[row.order]
 
 		data.append(row)
 

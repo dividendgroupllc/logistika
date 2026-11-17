@@ -20,15 +20,18 @@ from logistika.erp_for_logistics.doctype.internal_logistics_item.internal_logist
 
 
 def resolve_truck_type_for_kz_truck(order, kz_truck):
-	"""Berilgan KZ fura (mashina raqami) uchun Truck Type'ni Truck Dispatch'dan topadi —
-	Truck Dispatch aynan shu (order, KZ fura) juftligiga Truck Type'ni tayinlaydigan
-	hujjat."""
+	"""Berilgan KZ fura uchun Truck Type'ni Truck Dispatch'dan topadi — mijoz `order`ining
+	Order Detail'lariga tegishli, shu KZ furaga tayinlangan eng so'nggi Truck Dispatch."""
 	if not order or not kz_truck:
+		return None
+	order_details = frappe.get_all("Order Detail", filters={"order": order}, pluck="name")
+	if not order_details:
 		return None
 	return frappe.db.get_value(
 		"Truck Dispatch",
-		{"order": order, "mashina_raqami": kz_truck, "truck_type": ["is", "set"]},
+		{"order": ["in", order_details], "mashina_raqami": kz_truck, "truck_type": ["is", "set"]},
 		"truck_type",
+		order_by="creation desc",
 	)
 
 
@@ -93,24 +96,23 @@ def _validate_bay_dimensions(truck_type):
 		)
 
 
-def _resolve_box_dimensions(part_name, order=None):
-	"""Berilgan mahsulot nomi (va, agar berilsa, buyurtma) bo'yicha Internal Logistics
-	Item yozuvidan bitta karobka o'lchamlari/og'irligini topadi.
+def _resolve_box_dimensions(part_name, order_detail=None):
+	"""Berilgan mahsulot nomi (va, agar berilsa, Order Detail) bo'yicha pekin list
+	qatoridan bitta karobka o'lchamlari/og'irligini topadi.
 
 	Bitta mahsulot bir nechta qatorga bo'lingan bo'lishi mumkin (masalan turli
 	partiya/pallet, yoki eski CSV import qoldig'i) — ular orasida ENG KO'P karobka
 	soniga ega qatorni tanlaymiz: "1 karobka = butun partiya" kabi yakuniy/xulosa
 	qatorlar odatda noto'g'ri (masalan qo'lda xato kiritilgan yoki eski import
 	artefakti) bo'ladi, aksincha ko'p karobkali qator haqiqiy, batafsil qadoqlash
-	yozuvini aks ettiradi. `order` berilganda, faqat o'sha buyurtmaga (yoki hali
-	order bilan belgilanmagan eski qatorlarga) tegishli yozuvlar ko'rib chiqiladi —
-	aks holda BOSHQA buyurtmaning bir xil nomli, lekin butunlay boshqa o'lchamdagi
-	mahsuloti tasodifan tanlanib qolishi mumkin edi."""
+	yozuvini aks ettiradi. `order_detail` berilganda faqat o'sha Order Detail pekin
+	list'i ko'riladi — aks holda boshqa mijozning bir xil nomli, lekin boshqa
+	o'lchamdagi mahsuloti tanlanib qolishi mumkin."""
 	conditions = ["part_name = %(part_name)s", "uzunlik > 0", "kenglik > 0", "balandlik > 0", "total_boxes > 0"]
 	values = {"part_name": part_name}
-	if order:
-		conditions.append("(`order` = %(order)s or `order` is null)")
-		values["order"] = order
+	if order_detail:
+		conditions.append("parenttype = 'Order Detail' and parent = %(order_detail)s")
+		values["order_detail"] = order_detail
 	where_clause = " and ".join(conditions)
 	rows = frappe.db.sql(
 		f"""
@@ -128,12 +130,10 @@ def _resolve_box_dimensions(part_name, order=None):
 
 def _expand_kz_rows(rows, qty_fieldname, order):
 	"""KZ Load Item / Peregruz Item qatorlarini (haqiqatda yuklangan/o'tkazilgan miqdor
-	bo'yicha) alohida-alohida quti sifatida yozadi. `order` — hujjatning o'zidagi
-	buyurtma (qator darajasidagi `order` ko'pincha bo'sh bo'ladi, shuning uchun
-	hujjat darajasidagidan foydalanamiz).
+	bo'yicha) alohida-alohida quti sifatida yozadi. Qator `order`i — Order Detail.
 
 	Bu yerda hisoblangan karobka soni TAXMINIY — mahsulot o'lchami boshqa hujjatdan
-	(Internal Logistics) "qarz olinadi" va shu hujjatdagi bitta-karobka nisbati bilan
+	(Order Detail pekin list'i) "qarz olinadi" va shu hujjatdagi bitta-karobka nisbati bilan
 	haqiqiy miqdorga bo'linadi. Ikkita holatda mahsulot paketlanmaydi, "skipped"
 	ro'yxatida aniq sabab bilan ko'rsatiladi (jim tashlab yuborilmaydi):
 	- "no_matching_product": bu mahsulot uchun umuman o'lcham topilmadi.
@@ -146,7 +146,7 @@ def _expand_kz_rows(rows, qty_fieldname, order):
 		if actual_qty <= 0:
 			continue
 
-		row_order = row.order or order
+		row_order = row.order
 		dims = _resolve_box_dimensions(row.part_name, row_order)
 		if not dims:
 			skipped.append(

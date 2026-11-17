@@ -9,7 +9,19 @@ app_license = "mit"
 fixtures = [
 	{
 		"dt": "Custom Field",
-		"filters": [["name", "in", ["Contact-telegram_chat_id", "Account-account_name_zh", "Customer-brand"]]],
+		"filters": [
+			[
+				"name",
+				"in",
+				[
+					"Contact-telegram_chat_id",
+					"Account-account_name_zh",
+					"Customer-brand",
+					"Supplier-xitoy_telefon",
+					"Supplier-xitoy_mashina_nomeri",
+				],
+			]
+		],
 	},
 	{
 		"dt": "Property Setter",
@@ -45,8 +57,12 @@ app_include_css = "/assets/logistika/css/internal_logistics.css"
 # kiritilganda shu raqamni oshirish kerak — URL o'zgarishi barcha keshlarni majburan
 # chetlab o'tadi.
 app_include_js = [
-	"/assets/logistika/js/order_chat_widget.js?v=6",
+	"/assets/logistika/js/order_chat_widget.js?v=7",
 	"/assets/logistika/js/duplicate_warning.js?v=2",
+	"/assets/logistika/js/logistika_quick_create.js?v=1",
+	"/assets/logistika/js/pekin_list_import.js?v=1",
+	"/assets/logistika/js/truck_options.js?v=1",
+	"/assets/logistika/js/bugungi_joylashuv.js?v=1",
 ]
 
 # include js, css files in header of web template
@@ -159,6 +175,9 @@ app_include_js = [
 # Hook on document methods and events
 
 doc_events = {
+	"Supplier": {
+		"validate": "logistika.erp_for_logistics.quick_create.validate_supplier",
+	},
 	"Account": {
 		# Yangi hisob qo'shilganda yoki nomi o'zgartirilganda, Chart of Accounts'ning
 		# xitoycha tarjimasi (Kimi orqali) avtomatik yaratiladi/yangilanadi — qo'lda

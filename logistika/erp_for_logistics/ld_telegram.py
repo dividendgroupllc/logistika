@@ -8,7 +8,7 @@
 
 import frappe
 
-from logistika.erp_for_logistics.pipeline_status import advance_order_item_status, resolve_china_trucks_for_kz_truck
+from logistika.erp_for_logistics.pipeline_status import advance_order_detail_status, resolve_order_details_for_kz_truck
 from logistika.telegram.messages import PEKIN_LIST_GUIDANCE
 from logistika.telegram.sender import send_document, send_message
 
@@ -76,14 +76,11 @@ def send_ld_document(ld_name, fieldname):
 
 
 def _advance_status(doc, target_status):
-	"""Logistic Documentation'da faqat `order` + `kz_truck` bor (qaysi Xitoy fura
-	ekanligi yo'q) — shuning uchun avval shu KZ furaga yuk yuklagan Xitoy fura(lar)ni
-	topib, keyin ular uchun statusni suramiz."""
+	"""Logistic Documentation'da faqat mijoz `order`i + `kz_truck` bor — avval shu KZ
+	furaga ortilgan Order Detail'larni topib, keyin ularning statusini suramiz."""
 	if not doc.kz_truck:
 		return
-	china_trucks = resolve_china_trucks_for_kz_truck(doc.order, doc.kz_truck)
-	if china_trucks:
-		advance_order_item_status(doc.order, china_trucks, target_status)
+	advance_order_detail_status(resolve_order_details_for_kz_truck(doc.order, doc.kz_truck), target_status)
 
 
 def get_order_chat_ids(order_name):

@@ -35,52 +35,86 @@ def assert_no_duplicate_document(doc, key_fields, label=None, extra_filters=None
 
 @frappe.whitelist()
 def truck_plate_autocomplete(txt=None, **kwargs):
-	"""Order Item'lardagi (Zakaz mahsulotlari) "Xitoy mashina nomeri" ustunidan
-	takrorlanmas fura raqamlarini qaytaradi — Transport Vositasi'da mashina
-	raqamini tanlashda avtomatik tavsiya sifatida ishlatiladi."""
-	filters = {}
+	"""Order Detail'lardagi "Xitoy mashina nomeri"dan takrorlanmas fura raqamlari —
+	Transport Vositasi / Warehouse Intake'da avtomatik tavsiya uchun."""
+	filters = {"xitoy_mashina_nomeri": ["is", "set"]}
 	if txt:
 		filters["xitoy_mashina_nomeri"] = ["like", f"%{txt}%"]
-
 	plates = frappe.get_all(
-		"Order Item",
-		filters=filters,
-		pluck="xitoy_mashina_nomeri",
-		distinct=True,
-		limit_page_length=20,
+		"Order Detail", filters=filters, pluck="xitoy_mashina_nomeri", distinct=True, limit_page_length=20
 	)
 	return sorted({p for p in plates if p})
 
 
 @frappe.whitelist()
+def china_plates_on_road(txt=None, **kwargs):
+	"""Yo'ldagi (hali omborga yetib kelmagan) Order Detail'larning Xitoy fura raqamlari —
+	Warehouse Intake'da faqat shu furalarni tanlash uchun."""
+	from logistika.erp_for_logistics.doctype.order_detail.order_detail import ON_CHINA_TRUCK_STAGES
+
+	filters = {"status": ["in", ON_CHINA_TRUCK_STAGES], "xitoy_mashina_nomeri": ["is", "set"]}
+	if txt:
+		filters["xitoy_mashina_nomeri"] = ["like", f"%{txt}%"]
+	plates = frappe.get_all("Order Detail", filters=filters, pluck="xitoy_mashina_nomeri", distinct=True)
+	return sorted({p for p in plates if p})
+
+
+@frappe.whitelist()
 def orders_for_truck(fura=None):
-	"""Berilgan fura (Xitoy mashina nomeri) uchun kamida bitta Order Item'i mos
-	keladigan Order'lar ro'yxatini qaytaradi — Internal Logistics'da "Buyurtmalar"
-	jadvalidagi Order Link maydonini shu furaga tegishli buyurtmalar bilan
-	cheklash uchun ishlatiladi."""
+	"""Berilgan Xitoy fura raqamidagi Order Detail'lar."""
 	if not fura:
 		return []
+	return frappe.get_all("Order Detail", filters={"xitoy_mashina_nomeri": fura}, pluck="name")
+
+
+def _order_details_of(order):
+	return frappe.get_all("Order Detail", filters={"order": order}, pluck="name")
+
+
+@frappe.whitelist()
+def truck_options_for_order(order):
+	"""Mijoz Order'i bo'yicha formalardagi Select ro'yxatlari: Xitoy fura raqamlari
+	(Order Detail'lardan) va KZ fura raqamlari (shu Order Detail'larning Truck
+	Dispatch'laridan)."""
+	if not order:
+		return {"china_trucks": [], "kz_trucks": []}
+	frappe.has_permission("Order", "read", doc=order, throw=True)
+	details = frappe.get_all(
+		"Order Detail", filters={"order": order}, fields=["name", "xitoy_mashina_nomeri"], order_by="name asc"
+	)
+	kz = []
+	if details:
+		kz = frappe.get_all(
+			"Truck Dispatch",
+			filters={"order": ["in", [d.name for d in details]], "mashina_raqami": ["is", "set"]},
+			pluck="mashina_raqami",
+			order_by="creation asc",
+		)
+	return {
+		"china_trucks": list(dict.fromkeys(d.xitoy_mashina_nomeri for d in details if d.xitoy_mashina_nomeri)),
+		"kz_trucks": list(dict.fromkeys(kz)),
+	}
+
+
+def _order_details_with_pekin_list(order):
+	details = _order_details_of(order) if order else []
+	if not details:
+		return []
 	return frappe.get_all(
-		"Order Item",
-		filters={"xitoy_mashina_nomeri": fura},
+		"Internal Logistics Item",
+		filters={"parenttype": "Order Detail", "parent": ["in", details]},
 		pluck="parent",
 		distinct=True,
+		order_by="parent asc",
 	)
 
 
 @frappe.whitelist()
-def internal_logistics_for_order(order):
-	"""Berilgan Order'ning "Pekin list"i qaysi Internal Logistics hujjat(lar)ida
-	borligini topadi (buyurtmalar jadvali orqali) — Logistic Documentation'ning
-	Transit bo'limida shu hujjatga link berish uchun ishlatiladi."""
-	if not order:
-		return []
-	return frappe.get_all(
-		"Internal Logistics Order",
-		filters={"order": order},
-		pluck="parent",
-		distinct=True,
-	)
+def order_details_with_pekin_list(order):
+	"""Mijoz Order'ining pekin list'i kiritilgan Order Detail'lari — Logistic
+	Documentation'ning Transit bo'limida havola uchun."""
+	frappe.has_permission("Order", "read", doc=order, throw=True)
+	return _order_details_with_pekin_list(order)
 
 
 EKSPORT_DEKLARATSIYA_RATE_PER_PEKIN_LIST = 100
@@ -88,48 +122,25 @@ EKSPORT_DEKLARATSIYA_RATE_PER_PEKIN_LIST = 100
 
 @frappe.whitelist()
 def calc_eksport_deklaratsiya_summa(order):
-	"""Eksport deklaratsiya summasi — Order'ga bog'liq Internal Logistics
-	hujjat(lar)ining "Pekin list" jadvalida NECHTA ALOHIDA buyurtma (=alohida
-	import qilingan "pekin list") borligiga qarab hisoblanadi (har biri
-	EKSPORT_DEKLARATSIYA_RATE_PER_PEKIN_LIST). Har bir buyurtma odatda ALOHIDA
-	fayldan import qilinadi (order_chat/internal_logistics.js'dagi per-order
-	drag-and-drop import naqshi) — shuning uchun bitta Internal Logistics
-	hujjatidagi (bitta fura) distinct order soni = shu furaga tegishli
-	"pekin list" (invoys) soni."""
-	if not order:
-		return 0
-
-	il_names = frappe.get_all(
-		"Internal Logistics Order", filters={"order": order}, pluck="parent", distinct=True
-	)
-	if not il_names:
-		return 0
-
-	pekin_list_count = 0
-	for il_name in il_names:
-		pekin_list_count += len(
-			frappe.get_all(
-				"Internal Logistics Item",
-				filters={"parent": il_name},
-				pluck="order",
-				distinct=True,
-			)
-		)
-
-	return pekin_list_count * EKSPORT_DEKLARATSIYA_RATE_PER_PEKIN_LIST
+	"""Eksport deklaratsiya summasi — mijoz Order'ining pekin list'i bor Order Detail'lari
+	soni (har biri alohida pekin list / invoys) × EKSPORT_DEKLARATSIYA_RATE_PER_PEKIN_LIST."""
+	return len(_order_details_with_pekin_list(order)) * EKSPORT_DEKLARATSIYA_RATE_PER_PEKIN_LIST
 
 
 @frappe.whitelist()
 def truck_dispatch_driver_info(order, kz_truck):
-	"""Logistic Documentation'ning Transit bo'limida ko'rsatish uchun — berilgan
-	(order, KZ fura) bo'yicha Truck Dispatch'dagi haydovchi/mashina
+	"""Logistic Documentation'ning Transit bo'limida ko'rsatish uchun — mijoz Order'i
+	va KZ fura bo'yicha (Order Detail'lari orqali) Truck Dispatch'dagi haydovchi/mashina
 	ma'lumotlarini topadi (mashina_raqami — KZ fura, Truck Dispatch'ning o'z
 	"kz_truck raqami" maydoni)."""
 	if not order or not kz_truck:
 		return None
+	details = _order_details_of(order)
+	if not details:
+		return None
 	return frappe.db.get_value(
 		"Truck Dispatch",
-		{"order": order, "mashina_raqami": kz_truck},
+		{"order": ["in", details], "mashina_raqami": kz_truck},
 		["haydovchi_ismi", "haydovchi_telefon", "vositachi", "mashina_raqami"],
 		as_dict=True,
 		order_by="creation desc",

@@ -2,13 +2,31 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Order", {
-	refresh(frm) {
-		frm.set_query("truck_type", "zakaz_mahsulotlari", () => {
-			return { filters: { davlat: "China" } };
+	setup(frm) {
+		frm.set_query("xitoy_postavshik", () => {
+			const group = frm._postavshik_group;
+			return group ? { filters: { supplier_group: group } } : {};
 		});
+	},
 
-		frm.set_query("harajat_turi", "zakaz_mahsulotlari", () => {
-			return { query: "logistika.erp_for_logistics.ombor_xarajatlari.get_yetkazish_xarajati_accounts" };
-		});
+	onload(frm) {
+		frappe.db
+			.get_single_value("Logistika Settings", "postavshik_supplier_group")
+			.then((group) => (frm._postavshik_group = group));
+	},
+
+	refresh(frm) {
+		logistika.quick_create.attach(frm, "kliyent", "customer");
+		logistika.quick_create.attach(frm, "xitoy_postavshik", "postavshik");
+
+		if (!frm.is_new()) {
+			logistika.order_chat.render_panel(frm.fields_dict.chat_html.$wrapper, frm.doc.name);
+		}
+
+		if (frm.doc.docstatus === 1) {
+			frm.add_custom_button(__("Order Detail"), () => {
+				frappe.new_doc("Order Detail", { order: frm.doc.name });
+			}, __("Create"));
+		}
 	},
 });

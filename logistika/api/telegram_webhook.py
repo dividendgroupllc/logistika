@@ -222,7 +222,7 @@ def _get_qa_order_candidates(contact_name):
 	# uchun boshida ko'proq (50) olinadi.
 	candidates = frappe.get_all(
 		"Order",
-		filters={"kliyent": ["in", customer_names]},
+		filters={"kliyent": ["in", customer_names], "docstatus": 1},
 		fields=["name"],
 		order_by="creation desc",
 		limit_page_length=50,
@@ -312,7 +312,9 @@ def _get_pending_ld_candidates(contact_name):
 	if not customer_names:
 		return []
 
-	order_names = frappe.get_all("Order", filters={"kliyent": ["in", customer_names]}, pluck="name")
+	order_names = frappe.get_all(
+		"Order", filters={"kliyent": ["in", customer_names], "docstatus": 1}, pluck="name"
+	)
 	if not order_names:
 		return []
 

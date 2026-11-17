@@ -1,7 +1,7 @@
 import frappe
 from frappe.utils import flt, today
 
-from logistika.erp_for_logistics.pipeline_status import advance_order_item_status
+from logistika.erp_for_logistics.pipeline_status import advance_order_detail_status
 
 WAREHOUSE_INTAKE_TARGET_STATUS = "Таможния склад"
 KZ_TRUCK_LOADING_TARGET_STATUS = "Товар погружен КЗ"
@@ -84,38 +84,17 @@ def sync_kz_truck_loading_ledger(doc):
 
 
 def advance_warehouse_intake_status(doc):
-	"""Hujjat submit qilingandan keyin — shu hujjatdagi, HAQIQATDA qabul qilingan
-	(fakt_qty > 0) qatorlari bor buyurtmalar uchun Order Item.status'ni "Таможния
-	склад"ga siljitadi. Bitta Warehouse Intake bitta Xitoy furaning (doc.fura) yuki,
-	lekin turli buyurtmalarga tegishli qatorlarni o'z ichiga olishi mumkin — shuning
-	uchun har bir qatorni o'z order'i bo'yicha guruhlaymiz."""
-	if not doc.fura:
-		return
-	orders = {row.order for row in doc.items if row.order and flt(row.fakt_qty) > 0}
-	for order in orders:
-		advance_order_item_status(order, [doc.fura], WAREHOUSE_INTAKE_TARGET_STATUS)
+	"""Submit'dan keyin — HAQIQATDA qabul qilingan (fakt_qty > 0) qatorlari bor
+	Order Detail'lar statusini "Таможния склад"ga siljitadi."""
+	order_details = {row.order for row in doc.items if row.order and flt(row.fakt_qty) > 0}
+	advance_order_detail_status(list(order_details), WAREHOUSE_INTAKE_TARGET_STATUS)
 
 
 def advance_kz_truck_loading_status(doc):
-	"""Hujjat submit qilingandan keyin — shu hujjatdagi, HAQIQATDA yuklangan
-	(fakt_ortilgan > 0) qatorlari bor (order, Xitoy fura) juftliklari uchun Order
-	Item.status'ni "Товар погружен КЗ"ga siljitadi (Peregruz'ning maqsad bosqichi
-	bilan bir xil). Peregruz'ning advance_status'idan farqli — bu yerda har bir
-	QATOR o'zining order'iga ega bo'lishi mumkin (bitta yuklashda bir nechta
-	buyurtmaning yuki bo'lishi mumkin), shuning uchun yolg'iz doc.order'ga tayanib
-	bo'lmaydi — har bir qatorni o'z order'i (yoki, agar qator darajasida order bo'sh
-	bo'lsa, hujjatning umumiy order'i) bo'yicha guruhlaymiz."""
-	trucks_by_order = {}
-	for row in doc.yuklar:
-		if flt(row.fakt_ortilgan) <= 0 or not row.china_truck:
-			continue
-		order = row.order or doc.order
-		if not order:
-			continue
-		trucks_by_order.setdefault(order, set()).add(row.china_truck)
-
-	for order, trucks in trucks_by_order.items():
-		advance_order_item_status(order, list(trucks), KZ_TRUCK_LOADING_TARGET_STATUS)
+	"""Submit'dan keyin — HAQIQATDA yuklangan (fakt_ortilgan > 0) qatorlari bor Order
+	Detail'lar statusini "Товар погружен КЗ"ga siljitadi."""
+	order_details = {row.order for row in doc.yuklar if row.order and flt(row.fakt_ortilgan) > 0}
+	advance_order_detail_status(list(order_details), KZ_TRUCK_LOADING_TARGET_STATUS)
 
 
 def delete_ledger_for_document(reference_doctype, reference_name):
@@ -162,156 +141,148 @@ def get_balance(ombor, part_name, exclude_reference_doctype=None, exclude_refere
 	return flt(row.kirim) - flt(row.chiqim)
 
 
-@frappe.whitelist()
-def get_balances_for_parts(ombor, part_names, exclude_reference_doctype=None, exclude_reference_name=None):
-	"""get_balance'ning ko'plab mahsulot uchun bir martalik (N+1 so'rovsiz) varianti."""
-	if isinstance(part_names, str):
-		part_names = frappe.parse_json(part_names)
+def _query_balances(ombor, part_names, order_details=None, exclude=None, for_update=False):
+	"""(Order Detail, mahsulot) bo'yicha qoldiqlar: {(order, part_name): kirim - chiqim}.
+	Qoldiq Order Detail bo'yicha ajratiladi — bir omborda turli mijozlarning bir xil
+	nomli mahsuloti bo'lishi mumkin. FOR UPDATE — over-issue tekshiruvida poyga
+	holatining oldini olish uchun (ikki dispetcher bir vaqtda saqlasa)."""
 	if not ombor or not part_names:
 		return {}
-
 	conditions = ["ombor = %(ombor)s", "part_name in %(part_names)s"]
 	values = {"ombor": ombor, "part_names": tuple(part_names)}
-
-	if exclude_reference_doctype and exclude_reference_name:
+	if order_details:
+		conditions.append("`order` in %(order_details)s")
+		values["order_details"] = tuple(order_details)
+	if exclude and exclude[0] and exclude[1]:
 		conditions.append("not (reference_doctype = %(ex_dt)s and reference_name = %(ex_name)s)")
-		values["ex_dt"] = exclude_reference_doctype
-		values["ex_name"] = exclude_reference_name
-
-	where_clause = " and ".join(conditions)
+		values["ex_dt"], values["ex_name"] = exclude
 	rows = frappe.db.sql(
 		f"""
 		select
+			`order`,
 			part_name,
 			sum(case when harakat_turi = 'Kirim' then miqdor else 0 end) as kirim,
 			sum(case when harakat_turi = 'Chiqim' then miqdor else 0 end) as chiqim
 		from `tabOmbor Harakati`
-		where {where_clause}
-		group by part_name
+		where {" and ".join(conditions)}
+		group by `order`, part_name
+		{"for update" if for_update else ""}
 		""",
 		values,
 		as_dict=True,
 	)
-	balances = {part_name: 0.0 for part_name in part_names}
-	for row in rows:
-		balances[row.part_name] = flt(row.kirim) - flt(row.chiqim)
+	return {(row.order, row.part_name): flt(row.kirim) - flt(row.chiqim) for row in rows}
+
+
+@frappe.whitelist()
+def get_balances_for_parts(ombor, part_names, exclude_reference_doctype=None, exclude_reference_name=None):
+	"""Mahsulot bo'yicha jami qoldiq (barcha Order Detail'lar yig'indisi)."""
+	if isinstance(part_names, str):
+		part_names = frappe.parse_json(part_names)
+	balances = {part_name: 0.0 for part_name in part_names or []}
+	for (_order, part_name), qty in _query_balances(
+		ombor, part_names, exclude=(exclude_reference_doctype, exclude_reference_name)
+	).items():
+		balances[part_name] += qty
 	return balances
 
 
 @frappe.whitelist()
-def pull_for_kz_loading(china_truck, order=None, kz_truck_loading=None):
-	"""KZ Truck Loading'dagi "Yuklarni tortish" tugmasi uchun — berilgan Xitoy fura raqamiga
-	mos Warehouse Intake'ni topib, har bir mahsulot uchun JORIY (real vaqtdagi) ombor
-	qoldig'ini qaytaradi — eski bir martalik "surat" o'rniga.
+def pull_for_warehouse_intake(fura):
+	"""Warehouse Intake'dagi "Pekin list'dan tortish" tugmasi uchun — shu Xitoy fura
+	raqamidagi, hali omborga kirmagan barcha Order Detail'larning pekin list qatorlari."""
+	from logistika.erp_for_logistics.doctype.order_detail.order_detail import ON_CHINA_TRUCK_STAGES
 
-	Fura raqami (transport vositasi) turli buyurtmalar uchun qayta-qayta ishlatiladi —
-	shuning uchun faqat "fura" bo'yicha qidirish yetarli emas (eng eski, aloqasiz
-	Warehouse Intake topilib qolishi mumkin edi). `order` berilsa, avval xuddi shu
-	buyurtmaga tegishli item qatori bor Warehouse Intake'gina qidiriladi, va faqat
-	o'sha buyurtmaga tegishli qatorlar qaytariladi."""
-	if not china_truck:
-		frappe.throw("Manba Xitoy fura tanlanmagan")
-
-	if order:
-		matched = frappe.db.sql(
-			"""
-			select wi.name
-			from `tabWarehouse Intake` wi
-			inner join `tabWarehouse Intake Item` wii on wii.parent = wi.name
-			where wi.fura = %(fura)s and wii.order = %(order)s
-			order by wi.creation desc
-			limit 1
-			""",
-			{"fura": china_truck, "order": order},
-			as_dict=True,
-		)
-		if not matched:
-			# Eski (buyurtma refaktoridan oldingi) Warehouse Intake'larda item qatorlari
-			# umuman "order" bilan belgilanmagan bo'lishi mumkin (Internal Logistics'ning
-			# ham eski pekin_list qatorlari shunday). Bunday holda — agar shu furaga mos
-			# Warehouse Intake topilsa VA uning HECH BIR qatori boshqa (aniq) buyurtmaga
-			# belgilanmagan bo'lsa — xavfsiz zaxira sifatida qabul qilinadi. Aks holda
-			# (haqiqatda boshqa buyurtmaga tegishli bo'lsa) hali ham rad etiladi.
-			matched = frappe.db.sql(
-				"""
-				select wi.name
-				from `tabWarehouse Intake` wi
-				where wi.fura = %(fura)s
-					and not exists (
-						select 1 from `tabWarehouse Intake Item` wii2
-						where wii2.parent = wi.name and wii2.order is not null
-					)
-				order by wi.creation desc
-				limit 1
-				""",
-				{"fura": china_truck},
-				as_dict=True,
-			)
-		if not matched:
-			frappe.throw(
-				f'"{china_truck}" furasi va "{order}" buyurtmasi uchun mos Warehouse Intake '
-				"topilmadi. Fura raqami boshqa buyurtma uchun ishlatilgan bo'lishi mumkin."
-			)
-		intake_name = matched[0].name
-	else:
-		intakes = frappe.get_all(
-			"Warehouse Intake",
-			filters={"fura": china_truck},
-			order_by="creation desc",
-			limit_page_length=1,
-		)
-		if not intakes:
-			frappe.throw(f'"{china_truck}" furasi uchun Warehouse Intake topilmadi.')
-		intake_name = intakes[0].name
-
-	intake = frappe.get_doc("Warehouse Intake", intake_name)
-	if not intake.ombor:
-		frappe.throw(f'"{intake.name}" (Warehouse Intake) uchun Ombor tanlanmagan.')
-
-	items = [row for row in intake.items if flt(row.fakt_qty) > 0]
-	if order:
-		# O'z buyurtmamizga tegishli qatorlar + hali order bilan belgilanmagan (eski)
-		# qatorlarni olamiz; boshqa ANIQ buyurtmaga tegishli qatorlar tashlab ketiladi.
-		items = [row for row in items if row.order == order or not row.order]
-
-	part_names = [row.part_name for row in items]
-	balances = get_balances_for_parts(
-		intake.ombor,
-		part_names,
-		exclude_reference_doctype="KZ Truck Loading",
-		exclude_reference_name=kz_truck_loading,
+	frappe.has_permission("Order Detail", "read", throw=True)
+	if not fura:
+		frappe.throw("Fura tanlanmagan")
+	order_details = frappe.get_all(
+		"Order Detail",
+		filters={"xitoy_mashina_nomeri": fura, "status": ["in", ON_CHINA_TRUCK_STAGES]},
+		pluck="name",
+		order_by="name asc",
 	)
-
 	result = []
-	for row in items:
-		result.append(
-			{
-				"china_truck": china_truck,
-				"order": row.order,
-				"part_name": row.part_name,
-				"quantity": row.quantity,
-				"ombor_fakt": balances.get(row.part_name, 0.0),
-				"volume_cbm": row.volume_cbm,
-				"net_weight": row.net_weight,
-			}
-		)
+	for name in order_details:
+		for row in frappe.get_doc("Order Detail", name).pekin_list:
+			result.append(
+				{
+					"order": name,
+					"part_name": row.part_name,
+					"quantity": row.quantity,
+					"total_boxes": row.total_boxes,
+					"net_weight": row.net_weight,
+					"volume_cbm": row.volume_cbm,
+				}
+			)
 	return result
 
 
 @frappe.whitelist()
-def get_order_item_status(order, fura):
-	"""Berilgan (order, fura) uchun Order Item'dagi joriy pipeline holatini (status) qaytaradi
-	— "Внутринний фура" dan "Клиент получил"gacha bo'lgan bosqichlardan biri. Bu status
-	Truck Dispatch / Warehouse Intake / KZ Truck Loading / Logistic Documentation / KZ Transit
-	hujjatlari saqlanganda avtomatik oldinga siljitiladi (mos keladigan boshqa DB-only Client
-	Script'lar orqali) — bu yerda faqat JORIY qiymatini o'qib olamiz."""
-	if not order or not fura:
-		return None
-	return frappe.db.get_value(
-		"Order Item",
-		{"parent": order, "xitoy_mashina_nomeri": fura},
-		"status",
+def pull_for_kz_loading(china_truck, order=None, kz_truck_loading=None):
+	"""KZ Truck Loading'dagi "Yuklarni tortish" tugmasi uchun — berilgan Xitoy furaning
+	ENG SO'NGGI Warehouse Intake'idan (mijoz `order`i berilsa — faqat shu Order'ning
+	Order Detail'lari qatorlari) har bir mahsulot uchun JORIY ombor qoldig'ini qaytaradi."""
+	if not china_truck:
+		frappe.throw("Manba Xitoy fura tanlanmagan")
+
+	allowed = None
+	if order:
+		allowed = set(
+			frappe.get_all(
+				"Order Detail", filters={"order": order, "xitoy_mashina_nomeri": china_truck}, pluck="name"
+			)
+		)
+		if not allowed:
+			frappe.throw(f'"{order}" buyurtmasida "{china_truck}" furasi yo\'q.')
+
+	intakes = frappe.get_all(
+		"Warehouse Intake",
+		filters={"fura": china_truck, "docstatus": 1},
+		order_by="creation desc",
+		pluck="name",
 	)
+	intake = None
+	for name in intakes:
+		doc = frappe.get_doc("Warehouse Intake", name)
+		if allowed is None or any(row.order in allowed for row in doc.items):
+			intake = doc
+			break
+	if not intake:
+		frappe.throw(f'"{china_truck}" furasi uchun mos (submit qilingan) Warehouse Intake topilmadi.')
+	if not intake.ombor:
+		frappe.throw(f'"{intake.name}" (Warehouse Intake) uchun Ombor tanlanmagan.')
+
+	items = [
+		row for row in intake.items if flt(row.fakt_qty) > 0 and (allowed is None or row.order in allowed)
+	]
+	balances = _query_balances(
+		intake.ombor,
+		[row.part_name for row in items],
+		order_details=[row.order for row in items if row.order],
+		exclude=("KZ Truck Loading", kz_truck_loading),
+	)
+	return [
+		{
+			"china_truck": china_truck,
+			"order": row.order,
+			"part_name": row.part_name,
+			"quantity": row.quantity,
+			"ombor_fakt": balances.get((row.order, row.part_name), 0.0),
+			"volume_cbm": row.volume_cbm,
+			"net_weight": row.net_weight,
+		}
+		for row in items
+	]
+
+
+@frappe.whitelist()
+def get_order_detail_status(order_detail):
+	"""Order Detail'ning joriy pipeline holati."""
+	if not order_detail:
+		return None
+	frappe.has_permission("Order Detail", "read", throw=True)
+	return frappe.db.get_value("Order Detail", order_detail, "status")
 
 
 def validate_no_overissue(doc):
@@ -327,70 +298,33 @@ def validate_no_overissue(doc):
 	if not doc.ombor:
 		return
 
-	requested_by_part = {}
+	requested = {}
 	for row in doc.yuklar:
 		qty = flt(row.fakt_ortilgan)
 		if qty <= 0:
 			continue
-		requested_by_part[row.part_name] = requested_by_part.get(row.part_name, 0.0) + qty
+		key = (row.order, row.part_name)
+		requested[key] = requested.get(key, 0.0) + qty
 
-	if not requested_by_part:
+	if not requested:
 		return
 
-	balances = _get_balances_for_update(
+	balances = _query_balances(
 		doc.ombor,
-		list(requested_by_part.keys()),
-		exclude_reference_doctype="KZ Truck Loading",
-		exclude_reference_name=doc.name,
+		list({part for _order, part in requested}),
+		order_details=list({order for order, _part in requested if order}),
+		exclude=("KZ Truck Loading", doc.name),
+		for_update=True,
 	)
 
 	epsilon = 1e-6
-	for part_name, requested in requested_by_part.items():
-		available = balances.get(part_name, 0.0)
-		if requested > available + epsilon:
+	for (order, part_name), qty in requested.items():
+		available = balances.get((order, part_name), 0.0)
+		if qty > available + epsilon:
 			frappe.throw(
-				f'"{part_name}" uchun omborda faqat {available:.2f} dona qoldi, '
-				f"lekin {requested:.2f} dona yuklashga urinilmoqda — miqdorni tekshiring."
+				f'"{part_name}" ({order}) uchun omborda faqat {available:.2f} dona qoldi, '
+				f"lekin {qty:.2f} dona yuklashga urinilmoqda — miqdorni tekshiring."
 			)
-
-
-def _get_balances_for_update(ombor, part_names, exclude_reference_doctype=None, exclude_reference_name=None):
-	"""get_balances_for_parts bilan bir xil hisob, lekin `FOR UPDATE` bilan — mavjud
-	Ombor Harakati qatorlarini lock qiladi, shunda bir xil (ombor, mahsulot) uchun
-	bir vaqtda ikkita hujjat saqlanayotganda, ikkinchisi birinchisi commit bo'lguncha
-	kutadi (check-then-act poyga holatining oldini olish uchun). Faqat over-issue
-	tekshiruvi uchun ishlatiladi — report/dashboard o'qishlarida keraksiz lock
-	yaratmaslik uchun get_balances_for_parts alohida qoldirilgan."""
-	if not ombor or not part_names:
-		return {}
-
-	conditions = ["ombor = %(ombor)s", "part_name in %(part_names)s"]
-	values = {"ombor": ombor, "part_names": tuple(part_names)}
-
-	if exclude_reference_doctype and exclude_reference_name:
-		conditions.append("not (reference_doctype = %(ex_dt)s and reference_name = %(ex_name)s)")
-		values["ex_dt"] = exclude_reference_doctype
-		values["ex_name"] = exclude_reference_name
-
-	where_clause = " and ".join(conditions)
-	rows = frappe.db.sql(
-		f"""
-		select
-			part_name,
-			sum(case when harakat_turi = 'Kirim' then miqdor else 0 end) as kirim,
-			sum(case when harakat_turi = 'Chiqim' then miqdor else 0 end) as chiqim
-		from `tabOmbor Harakati`
-		where {where_clause}
-		group by part_name
-		for update
-		""",
-		values,
-		as_dict=True,
-	)
-	balances = {part_name: 0.0 for part_name in part_names}
-	for row in rows:
-		balances[row.part_name] = flt(row.kirim) - flt(row.chiqim)
-	return balances
 
 
 @frappe.whitelist()

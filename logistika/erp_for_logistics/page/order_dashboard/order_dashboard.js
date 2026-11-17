@@ -259,7 +259,7 @@ logistika.ui.OrderDashboardPage = class OrderDashboardPage {
 		const item = (row) => `
 			<div class="od-stage-item">
 				<div class="od-stage-item-top">
-					<span class="od-stage-item-order is-link" data-doctype="Order" data-name="${frappe.utils.escape_html(row.order || "")}">
+					<span class="od-stage-item-order is-link" data-doctype="Order Detail" data-name="${frappe.utils.escape_html(row.order || "")}">
 						${frappe.utils.escape_html(row.order || "")}
 					</span>
 					<span class="od-stage-item-history" data-history-order="${frappe.utils.escape_html(row.order || "")}" data-history-fura="${frappe.utils.escape_html(row.china_fura || "")}" title="${__("Tarix")}">⏱</span>
@@ -297,7 +297,7 @@ logistika.ui.OrderDashboardPage = class OrderDashboardPage {
 			const $el = $(e.currentTarget);
 			const order = $el.data("history-order");
 			const fura = $el.data("history-fura");
-			if (order && fura) this.show_status_history(order, fura);
+			if (order) this.show_status_history(order, fura);
 		});
 	}
 

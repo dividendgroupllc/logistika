@@ -101,13 +101,13 @@ def _detect_language(text, timeout=60):
 
 
 def is_order_delivered(order):
-	"""Order to'liq yakunlangan (barcha zakaz_mahsulotlari qatorlari pipeline'ning
+	"""Order to'liq yakunlangan (barcha Order Detail'lari pipeline'ning
 	OXIRGI bosqichiga — "Клиент получил" — yetgan) bo'lsa True qaytaradi. Shunday
 	order uchun mijozdan Telegram orqali yangi Savol-Javob xabari qabul qilinmaydi —
 	yetkazib berilgandan keyin suhbat davom etishining ma'nosi yo'q."""
 	from logistika.erp_for_logistics.pipeline_status import PIPELINE_STAGES
 
-	statuses = frappe.get_all("Order Item", filters={"parent": order}, pluck="status")
+	statuses = frappe.get_all("Order Detail", filters={"order": order}, pluck="status")
 	if not statuses:
 		return False
 
@@ -142,7 +142,9 @@ def save_customer_message(order, chat_id, text):
 		}
 	)
 	doc.insert(ignore_permissions=True)
+	frappe.db.set_value("Order", order, "javob_kutilmoqda", 1, update_modified=False)
 	frappe.db.commit()
+	frappe.publish_realtime("logistika_chat_message", {"order": order}, after_commit=True)
 	frappe.enqueue(
 		"logistika.erp_for_logistics.order_chat._translate_customer_message_async",
 		queue="short",
@@ -154,39 +156,18 @@ def save_customer_message(order, chat_id, text):
 
 
 def _notify_document_owners(order, text):
-	"""Mijoz yangi xabar yozganda, shu order HOZIRGI bosqichga mos hujjat(lar)ini
-	YARATGAN xodimga Frappe'ning o'z bildirishnoma tizimi orqali (qo'ng'iroq belgisi
-	+ real-time popup) xabar boradi — xuddi assignment/mention kabi.
-
-	Order avval Internal Logistics (ichki, Xitoy tarafidagi) bosqichidan o'tadi,
-	keyingina KZ Transit (KZ furaning O'zbekistongacha yo'li) hujjati yaratiladi —
-	shuning uchun KZ Transit MAVJUD bo'lsa, order allaqachon shu bosqichga
-	o'tgan deb hisoblanadi va faqat O'SHA hujjat egasiga xabar boradi (Internal
-	Logistics'ga emas — u endi eskirgan bosqich). KZ Transit hali yaratilmagan
-	bo'lsa, Internal Logistics'ga qaytiladi (bir nechta bo'lishi mumkin, har
-	biriga alohida)."""
+	"""Mijoz yangi xabar yozganda tegishli xodimlarga Frappe bildirishnomasi (qo'ng'iroqcha
+	+ real-time toast) yuboriladi; bildirishnoma Order'ni (chat shu yerda) ochadi."""
 	from frappe.desk.doctype.notification_log.notification_log import enqueue_create_notification
 
-	targets = frappe.db.sql(
-		"""
-		select 'KZ Transit' as doctype, kzt.name as name, kzt.owner as owner
-		from `tabKZ Transit` kzt
-		where kzt.order = %(order)s
-		""",
-		{"order": order},
-		as_dict=True,
-	)
-	if not targets:
-		targets = frappe.db.sql(
-			"""
-			select 'Internal Logistics' as doctype, il.name as name, il.owner as owner
-			from `tabInternal Logistics` il
-			inner join `tabInternal Logistics Order` ilo on ilo.parent = il.name
-			where ilo.order = %(order)s
-			""",
-			{"order": order},
-			as_dict=True,
-		)
+	# Chat endi Order formasida — bildirishnoma Order'ni ochadi. Qabul qiluvchilar:
+	# KZ Transit bo'lsa uning egalari, bo'lmasa Order Detail egalari, bo'lmasa Order egasi.
+	owners = frappe.get_all("KZ Transit", filters={"order": order}, pluck="owner", distinct=True)
+	if not owners:
+		owners = frappe.get_all("Order Detail", filters={"order": order}, pluck="owner", distinct=True)
+	if not owners:
+		owners = [frappe.db.get_value("Order", order, "owner")]
+	targets = [frappe._dict(doctype="Order", name=order, owner=owner) for owner in set(owners) if owner]
 
 	preview = text if len(text) <= 120 else text[:117] + "..."
 	for t in targets:
@@ -231,6 +212,17 @@ def _translate_customer_message_async(doc_name, text):
 	if values:
 		frappe.db.set_value("Order Chat Message", doc_name, values, update_modified=False)
 		frappe.db.commit()
+
+
+@frappe.whitelist()
+def get_quick_replies():
+	"""Logistika Settings'dagi tayyor javoblar matni (chat oynasidagi tugmalar uchun)."""
+	return frappe.get_all(
+		"Tayyor Javob",
+		filters={"parent": "Logistika Settings", "parenttype": "Logistika Settings"},
+		pluck="matn",
+		order_by="idx asc",
+	)
 
 
 @frappe.whitelist()
@@ -287,6 +279,7 @@ def send_staff_reply(order, message):
 		}
 	)
 	doc.insert(ignore_permissions=True)
+	frappe.db.set_value("Order", order, "javob_kutilmoqda", 0, update_modified=False)
 
 	chat_ids = get_order_chat_ids(order)
 	sent = 0

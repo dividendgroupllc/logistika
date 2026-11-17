@@ -44,21 +44,25 @@
    "fieldname": "order",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Order / Zakaz",
-   "options": "Order",
+   "label": "Order Detail",
+   "options": "Order Detail",
    "reqd": 1
   },
   {
    "fieldname": "china_truck",
-   "fieldtype": "Select",
+   "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Xitoy fura raqami"
+   "label": "Xitoy fura raqami",
+   "fetch_from": "order.xitoy_mashina_nomeri",
+   "read_only": 1
   },
   {
    "fieldname": "china_arrival",
    "fieldtype": "Date",
    "label": "Omborga yetib kelish sanasi",
-   "read_only": 1
+   "read_only": 1,
+   "fetch_from": "order.kelish_sanasi",
+   "fetch_if_empty": 1
   },
   {
    "fieldname": "cb_top",
@@ -74,14 +78,14 @@
    "fetch_from": "truck_type.kub",
    "fieldname": "kub",
    "fieldtype": "Float",
-   "label": "Kubi \u2014 m\u00b3",
+   "label": "Kubi — m³",
    "read_only": 1
   },
   {
    "fetch_from": "truck_type.tonna",
    "fieldname": "tonna",
    "fieldtype": "Float",
-   "label": "Tonnaji \u2014 tonna",
+   "label": "Tonnaji — tonna",
    "read_only": 1
   },
   {
@@ -132,7 +136,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-12 08:34:54.488656",
+ "modified": "2026-11-17 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Truck Dispatch",

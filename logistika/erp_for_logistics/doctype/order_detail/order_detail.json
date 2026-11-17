@@ -1,0 +1,423 @@
+{
+ "actions": [],
+ "autoname": "{order}.-.#",
+ "naming_rule": "Expression (old style)",
+ "creation": "2026-11-17 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "sec_asosiy",
+  "sana",
+  "order",
+  "kliyent",
+  "brand",
+  "kliyent_zavodi",
+  "cb_asosiy",
+  "xitoy_postavshik",
+  "xitoy_zavod_raqami",
+  "xizmat_olchovi",
+  "status",
+  "sec_fura",
+  "mahsulot_nomi",
+  "xitoy_haydovchi",
+  "xitoy_fura_telefon",
+  "xitoy_mashina_nomeri",
+  "truck_type",
+  "truck_kub",
+  "truck_tonna",
+  "cb_fura",
+  "zavoddan_chiqish_sanasi",
+  "kelish_sanasi",
+  "container",
+  "container_raqami",
+  "container_zavodi",
+  "item",
+  "sec_kuzatuv",
+  "jonatish_xabari_yuborildi",
+  "kunlik_kuzatuv",
+  "sec_xarajat",
+  "valyuta",
+  "xitoy_fura_summasi",
+  "sugurta",
+  "sugurta_hujjat",
+  "sugurta_je",
+  "konteyner_summasi",
+  "cb_xarajat",
+  "harajat_turi",
+  "summa",
+  "izoh",
+  "sec_pekin",
+  "pekin_import_html",
+  "pekin_list",
+  "jami_tonna",
+  "cb_pekin",
+  "jami_kub"
+ ],
+ "fields": [
+  {
+   "fieldname": "sec_asosiy",
+   "fieldtype": "Section Break",
+   "label": "Asosiy"
+  },
+  {
+   "default": "Today",
+   "fieldname": "sana",
+   "fieldtype": "Date",
+   "label": "Sana",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "order",
+   "fieldtype": "Link",
+   "options": "Order",
+   "label": "Order",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "order.kliyent",
+   "fieldname": "kliyent",
+   "fieldtype": "Link",
+   "options": "Customer",
+   "label": "Kliyent",
+   "read_only": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fetch_from": "order.brand",
+   "fieldname": "brand",
+   "fieldtype": "Data",
+   "label": "Brand",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "order.kliyent_zavodi",
+   "fieldname": "kliyent_zavodi",
+   "fieldtype": "Data",
+   "label": "Kliyent zavodi / O'zbekiston",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_asosiy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "order.xitoy_postavshik",
+   "fieldname": "xitoy_postavshik",
+   "fieldtype": "Link",
+   "options": "Supplier",
+   "label": "Xitoy postavshik",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "order.xitoy_zavod_raqami",
+   "fieldname": "xitoy_zavod_raqami",
+   "fieldtype": "Data",
+   "label": "Xitoy zavod raqami",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "order.xizmat_olchovi",
+   "fieldname": "xizmat_olchovi",
+   "fieldtype": "Data",
+   "label": "Xizmat o'lchovi",
+   "read_only": 1
+  },
+  {
+   "default": "Внутринний фура",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "options": "Внутринний фура\nПодготовка фура КЗ\nТаможния склад\nТовар погружен КЗ\nПерегруз данный\nОжидания документа Клиент\nДокументация ED CO для клиента\nТранзитний оформеления\nДокументы проверены\nВ пути к доставке\nТаможенный процесс\nКлиент получил",
+   "label": "Status",
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "sec_fura",
+   "fieldtype": "Section Break",
+   "label": "Fura"
+  },
+  {
+   "fieldname": "mahsulot_nomi",
+   "fieldtype": "Data",
+   "label": "Mahsulot nomi",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "xitoy_haydovchi",
+   "fieldtype": "Link",
+   "options": "Supplier",
+   "label": "Xitoy haydovchi ismi"
+  },
+  {
+   "fetch_from": "xitoy_haydovchi.xitoy_telefon",
+   "fieldname": "xitoy_fura_telefon",
+   "fieldtype": "Data",
+   "label": "Xitoy fura telefon",
+   "fetch_if_empty": 1
+  },
+  {
+   "fetch_from": "xitoy_haydovchi.xitoy_mashina_nomeri",
+   "fieldname": "xitoy_mashina_nomeri",
+   "fieldtype": "Data",
+   "label": "Xitoy mashina nomeri",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "search_index": 1,
+   "fetch_if_empty": 1
+  },
+  {
+   "fieldname": "truck_type",
+   "fieldtype": "Link",
+   "options": "Truck Type",
+   "label": "Truck Type"
+  },
+  {
+   "fetch_from": "truck_type.kub",
+   "fieldname": "truck_kub",
+   "fieldtype": "Float",
+   "label": "Kubi — m³",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "truck_type.tonna",
+   "fieldname": "truck_tonna",
+   "fieldtype": "Float",
+   "label": "Tonnaji",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_fura",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "zavoddan_chiqish_sanasi",
+   "fieldtype": "Date",
+   "label": "Zavoddan chiqish sanasi"
+  },
+  {
+   "fieldname": "kelish_sanasi",
+   "fieldtype": "Date",
+   "label": "Kelish sanasi"
+  },
+  {
+   "fieldname": "container",
+   "fieldtype": "Check",
+   "label": "Container"
+  },
+  {
+   "depends_on": "container",
+   "fieldname": "container_raqami",
+   "fieldtype": "Data",
+   "label": "Container raqami"
+  },
+  {
+   "depends_on": "container",
+   "fieldname": "container_zavodi",
+   "fieldtype": "Data",
+   "label": "Konteyner zavodi"
+  },
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "options": "Item",
+   "label": "Item",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "sec_kuzatuv",
+   "fieldtype": "Section Break",
+   "label": "Kunlik kuzatuv (omborga yetib kelguncha)",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "jonatish_xabari_yuborildi",
+   "fieldtype": "Check",
+   "label": "\"Yo'lga chiqdi\" xabari yuborilgan",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "kunlik_kuzatuv",
+   "fieldtype": "Table",
+   "options": "Internal Logistics Tracking",
+   "label": "Kunlik kuzatuv"
+  },
+  {
+   "fieldname": "sec_xarajat",
+   "fieldtype": "Section Break",
+   "label": "Xarajatlar (CNY)"
+  },
+  {
+   "default": "CNY",
+   "fieldname": "valyuta",
+   "fieldtype": "Link",
+   "options": "Currency",
+   "label": "Valyuta",
+   "read_only": 1
+  },
+  {
+   "fieldname": "xitoy_fura_summasi",
+   "fieldtype": "Currency",
+   "options": "valyuta",
+   "label": "Fura olib kelish summasi",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "sugurta",
+   "fieldtype": "Currency",
+   "options": "valyuta",
+   "label": "Sug'urta",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "sugurta_hujjat",
+   "fieldtype": "Attach",
+   "label": "Sug'urta hujjati"
+  },
+  {
+   "fieldname": "sugurta_je",
+   "fieldtype": "Link",
+   "options": "Journal Entry",
+   "label": "Sug'urta Journal Entry",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "depends_on": "container",
+   "fieldname": "konteyner_summasi",
+   "fieldtype": "Currency",
+   "options": "valyuta",
+   "label": "Konteyner summasi",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "cb_xarajat",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "harajat_turi",
+   "fieldtype": "Link",
+   "options": "Account",
+   "label": "Qo'shimcha rasxod turi"
+  },
+  {
+   "fieldname": "summa",
+   "fieldtype": "Currency",
+   "options": "valyuta",
+   "label": "Qo'shimcha rasxod summasi",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "izoh",
+   "fieldtype": "Data",
+   "label": "Rasxod izohi"
+  },
+  {
+   "fieldname": "sec_pekin",
+   "fieldtype": "Section Break",
+   "label": "Pekin list"
+  },
+  {
+   "fieldname": "pekin_import_html",
+   "fieldtype": "HTML",
+   "label": "Pekin list import"
+  },
+  {
+   "fieldname": "pekin_list",
+   "fieldtype": "Table",
+   "options": "Internal Logistics Item",
+   "label": "Pekin list"
+  },
+  {
+   "fieldname": "jami_tonna",
+   "fieldtype": "Float",
+   "label": "Jami tonna",
+   "read_only": 1,
+   "precision": "3"
+  },
+  {
+   "fieldname": "cb_pekin",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "jami_kub",
+   "fieldtype": "Float",
+   "label": "Jami kub",
+   "read_only": 1,
+   "precision": "3"
+  }
+ ],
+ "links": [
+  {
+   "link_doctype": "Truck Dispatch",
+   "link_fieldname": "order",
+   "group": "Fura"
+  },
+  {
+   "link_doctype": "Warehouse Intake",
+   "link_fieldname": "order",
+   "parent_doctype": "Warehouse Intake",
+   "table_fieldname": "items",
+   "is_child_table": 1,
+   "group": "Ombor"
+  },
+  {
+   "link_doctype": "KZ Truck Loading",
+   "link_fieldname": "order",
+   "parent_doctype": "KZ Truck Loading",
+   "table_fieldname": "yuklar",
+   "is_child_table": 1,
+   "group": "Ombor"
+  },
+  {
+   "link_doctype": "Peregruz",
+   "link_fieldname": "order",
+   "parent_doctype": "Peregruz",
+   "table_fieldname": "yuklar",
+   "is_child_table": 1,
+   "group": "Ombor"
+  },
+  {
+   "link_doctype": "Ombor Harakati",
+   "link_fieldname": "order",
+   "group": "Ombor"
+  },
+  {
+   "link_doctype": "Order Item Status Log",
+   "link_fieldname": "order",
+   "group": "Tarix"
+  }
+ ],
+ "modified": "2026-11-17 17:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "Order Detail",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "search_fields": "xitoy_mashina_nomeri,mahsulot_nomi,kliyent",
+ "show_title_field_in_link": 0,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

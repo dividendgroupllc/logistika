@@ -162,3 +162,81 @@ logistika.order_chat.send_reply = function (order_name, $input, $log, $btn) {
 		};
 	});
 })();
+
+// ---------------------------------------------------------------------------
+// Order darajasidagi chat paneli — Order formasida (chat_html) va Order ro'yxatidagi
+// 💬 dialogida bir xil. Enter — yuborish, Shift+Enter — yangi qator; tayyor javoblar
+// Logistika Settings'dan; yangi mijoz xabari kelganda ochiq panellar o'zi yangilanadi.
+
+logistika.order_chat._panels = {};
+logistika.order_chat._quick_replies = null;
+
+logistika.order_chat._load_quick_replies = function () {
+	if (logistika.order_chat._quick_replies) return Promise.resolve(logistika.order_chat._quick_replies);
+	return frappe
+		.call("logistika.erp_for_logistics.order_chat.get_quick_replies")
+		.then((r) => (logistika.order_chat._quick_replies = r.message || []));
+};
+
+logistika.order_chat.render_panel = function ($wrapper, order_name) {
+	if (!order_name) {
+		$wrapper.html("");
+		return;
+	}
+	$wrapper.html(`
+		<div class="lg-chat-log" style="height: 320px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px; margin-bottom: 6px; background: #fafafa;"></div>
+		<div class="lg-chat-quick" style="margin-bottom: 6px; display: flex; flex-wrap: wrap; gap: 4px;"></div>
+		<div style="display: flex; gap: 6px; align-items: flex-end;">
+			<textarea class="form-control lg-chat-input" rows="2" placeholder="${__("Javob yozing... (Enter — yuborish, Shift+Enter — yangi qator)")}" style="flex: 1; resize: vertical;"></textarea>
+			<button type="button" class="btn btn-primary btn-sm lg-chat-send">${__("Yuborish")}</button>
+		</div>`);
+	const $log = $wrapper.find(".lg-chat-log");
+	const $input = $wrapper.find(".lg-chat-input");
+	const $btn = $wrapper.find(".lg-chat-send");
+	const send = () => logistika.order_chat.send_reply(order_name, $input, $log, $btn);
+
+	$btn.on("click", send);
+	$input.on("keydown", (e) => {
+		if (e.key === "Enter" && !e.shiftKey) {
+			e.preventDefault();
+			send();
+		}
+	});
+	logistika.order_chat._load_quick_replies().then((replies) => {
+		const $quick = $wrapper.find(".lg-chat-quick");
+		replies.forEach((text) => {
+			$(`<button type="button" class="btn btn-default btn-xs"></button>`)
+				.text(text.length > 40 ? text.slice(0, 37) + "..." : text)
+				.attr("title", text)
+				.on("click", () => {
+					$input.val(text).trigger("focus");
+				})
+				.appendTo($quick);
+		});
+	});
+
+	logistika.order_chat._panels[order_name] = $log;
+	logistika.order_chat.load_and_render($log, order_name, true);
+};
+
+logistika.order_chat.open_dialog = function (order_name) {
+	frappe.db.get_value("Order", order_name, ["kliyent"]).then(({ message }) => {
+		const dialog = new frappe.ui.Dialog({
+			title: `💬 ${order_name}${message && message.kliyent ? " — " + message.kliyent : ""}`,
+			size: "large",
+			fields: [{ fieldtype: "HTML", fieldname: "chat" }],
+		});
+		dialog.show();
+		logistika.order_chat.render_panel(dialog.fields_dict.chat.$wrapper, order_name);
+		dialog.$wrapper.on("hidden.bs.modal", () => delete logistika.order_chat._panels[order_name]);
+		setTimeout(() => dialog.$wrapper.find(".lg-chat-input").trigger("focus"), 300);
+	});
+};
+
+frappe.realtime.on("logistika_chat_message", (data) => {
+	const $log = data && logistika.order_chat._panels[data.order];
+	if ($log && $.contains(document.documentElement, $log[0])) {
+		logistika.order_chat.load_and_render($log, data.order, true);
+	}
+	if (cur_list && cur_list.doctype === "Order") cur_list.refresh();
+});
