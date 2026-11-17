@@ -64,3 +64,22 @@ class TestOrder(FrappeTestCase):
 		supplier = frappe.get_doc("Supplier", name)
 		self.assertEqual(supplier.supplier_group, self.settings.haydovchi_supplier_group)
 		self.assertEqual(supplier.xitoy_mashina_nomeri, "粤B12345")
+
+	def test_customer_created_in_settings_group(self):
+		group = "_T Logistika mijozlar"
+		if not frappe.db.exists("Customer Group", group):
+			frappe.get_doc(
+				{"doctype": "Customer Group", "customer_group_name": group, "parent_customer_group": "All Customer Groups"}
+			).insert(ignore_permissions=True)
+		frappe.db.set_single_value("Logistika Settings", "mijoz_customer_group", group)
+		name = quick_create.create_customer_with_phone("_T Guruhli mijoz", "+998901112233")
+		self.assertEqual(frappe.db.get_value("Customer", name, "customer_group"), group)
+		other_group = frappe.get_all(
+			"Customer Group", filters={"is_group": 0, "name": ["!=", group]}, pluck="name", limit=1
+		)[0]
+		other = frappe.get_doc(
+			{"doctype": "Customer", "customer_name": "_T Boshqa guruh mijoz", "customer_group": other_group}
+		).insert(ignore_permissions=True)
+		with self.assertRaises(frappe.ValidationError):
+			make_order(kliyent=other.name)
+		make_order(kliyent=name)

@@ -17,6 +17,7 @@ class Order(Document):
 		if self.xitoy_zavod_raqami and (self.is_new() or self.has_value_changed("xitoy_zavod_raqami")):
 			self.xitoy_zavod_raqami = validate_cn_phone(self.xitoy_zavod_raqami, "Xitoy zavod raqami")
 		self.validate_postavshik_group()
+		self.validate_kliyent_group()
 
 	def before_cancel(self):
 		# Order Detail submittable emas — Frappe'ning standart link tekshiruvi uni
@@ -29,6 +30,13 @@ class Order(Document):
 					", ".join(details)
 				)
 			)
+
+	def validate_kliyent_group(self):
+		if not (self.is_new() or self.has_value_changed("kliyent")):
+			return
+		group = frappe.db.get_single_value("Logistika Settings", "mijoz_customer_group")
+		if group and frappe.db.get_value("Customer", self.kliyent, "customer_group") != group:
+			frappe.throw(_('"Kliyent" "{0}" guruhidan bo\'lishi kerak').format(group))
 
 	def validate_postavshik_group(self):
 		if not self.xitoy_postavshik:

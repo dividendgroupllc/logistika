@@ -12,6 +12,7 @@ from frappe.model.document import Document
 GROUP_FIELDS = ("ichki_logistika_xarajat_guruhi", "yuklash_xarajat_guruhi")
 PAYMENT_ACCOUNT_TYPES = ("Cash", "Bank")
 LEAF_GROUP_FIELDS = {
+	"mijoz_customer_group": "Customer Group",
 	"postavshik_supplier_group": "Supplier Group",
 	"haydovchi_supplier_group": "Supplier Group",
 	"order_item_group": "Item Group",

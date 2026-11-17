@@ -3,6 +3,10 @@
 
 frappe.ui.form.on("Order", {
 	setup(frm) {
+		frm.set_query("kliyent", () => {
+			const group = frm._mijoz_group;
+			return group ? { filters: { customer_group: group } } : {};
+		});
 		frm.set_query("xitoy_postavshik", () => {
 			const group = frm._postavshik_group;
 			return group ? { filters: { supplier_group: group } } : {};
@@ -11,8 +15,11 @@ frappe.ui.form.on("Order", {
 
 	onload(frm) {
 		frappe.db
-			.get_single_value("Logistika Settings", "postavshik_supplier_group")
-			.then((group) => (frm._postavshik_group = group));
+			.get_value("Logistika Settings", "Logistika Settings", ["postavshik_supplier_group", "mijoz_customer_group"])
+			.then(({ message }) => {
+				frm._postavshik_group = message && message.postavshik_supplier_group;
+				frm._mijoz_group = message && message.mijoz_customer_group;
+			});
 	},
 
 	refresh(frm) {

@@ -22,8 +22,12 @@ def _normalize_phone(phone):
 
 
 def _leaf_customer_group():
-	"""Selling Settings'dagi standart mijoz guruhi; u papka (is_group) bo'lsa —
-	birinchi oddiy guruh (ERPNext Customer'ga papka guruhini qabul qilmaydi)."""
+	"""Logistika Settings'dagi "Mijozlar guruhi"; bo'lmasa Selling Settings'dagi standart
+	guruh; u papka (is_group) bo'lsa — birinchi oddiy guruh (ERPNext Customer'ga papka
+	guruhini qabul qilmaydi)."""
+	value = frappe.db.get_single_value("Logistika Settings", "mijoz_customer_group")
+	if value:
+		return value
 	value = frappe.db.get_single_value("Selling Settings", "customer_group")
 	if value and not frappe.db.get_value("Customer Group", value, "is_group"):
 		return value
