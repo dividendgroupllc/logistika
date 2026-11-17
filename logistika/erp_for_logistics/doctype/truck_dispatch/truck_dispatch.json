@@ -95,13 +95,16 @@
   },
   {
    "fieldname": "haydovchi_ismi",
-   "fieldtype": "Data",
-   "label": "Haydovchi ismi"
+   "fieldtype": "Link",
+   "label": "Haydovchi",
+   "options": "Supplier"
   },
   {
    "fieldname": "haydovchi_telefon",
    "fieldtype": "Data",
-   "label": "Haydovchi telefon raqami"
+   "label": "Haydovchi telefon raqami",
+   "fetch_from": "haydovchi_ismi.mobile_no",
+   "fetch_if_empty": 1
   },
   {
    "fieldname": "vositachi",
@@ -136,7 +139,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-17 12:00:00.000000",
+ "modified": "2026-11-18 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Truck Dispatch",

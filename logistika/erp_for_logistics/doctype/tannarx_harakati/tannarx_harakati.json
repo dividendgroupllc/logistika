@@ -1,0 +1,188 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-11-18 14:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "sana",
+  "order_detail",
+  "mijoz_order",
+  "kz_fura",
+  "turi",
+  "kategoriya",
+  "cb1",
+  "wip_hisob",
+  "xarajat_hisob",
+  "summa",
+  "summa_valyutada",
+  "valyuta",
+  "kredit_hisob",
+  "tonna",
+  "sec_manba",
+  "manba_doctype",
+  "manba_name",
+  "cb2",
+  "voucher_type",
+  "voucher_no"
+ ],
+ "fields": [
+  {
+   "fieldname": "sana",
+   "fieldtype": "Date",
+   "label": "Sana",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "order_detail",
+   "fieldtype": "Link",
+   "options": "Order Detail",
+   "label": "Order Detail",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "mijoz_order",
+   "fieldtype": "Link",
+   "options": "Order",
+   "label": "Order",
+   "fetch_from": "order_detail.order",
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "kz_fura",
+   "fieldtype": "Data",
+   "label": "KZ fura",
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "turi",
+   "fieldtype": "Select",
+   "options": "Kirim\nChiqim\nXarajat",
+   "label": "Turi",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "kategoriya",
+   "fieldtype": "Select",
+   "options": "Sug'urta\nQo'shimcha rasxod\nKonteyner\nFura olib kelish\nOmbor\nKZ",
+   "label": "Kategoriya",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "cb1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "wip_hisob",
+   "fieldtype": "Link",
+   "options": "Account",
+   "label": "Aktiv hisob"
+  },
+  {
+   "fieldname": "xarajat_hisob",
+   "fieldtype": "Link",
+   "options": "Account",
+   "label": "Xarajat hisobi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "summa",
+   "fieldtype": "Currency",
+   "label": "Summa (kompaniya valyutasida)",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "summa_valyutada",
+   "fieldtype": "Float",
+   "label": "Summa (hujjat valyutasida)",
+   "precision": "2"
+  },
+  {
+   "fieldname": "valyuta",
+   "fieldtype": "Link",
+   "options": "Currency",
+   "label": "Valyuta"
+  },
+  {
+   "fieldname": "kredit_hisob",
+   "fieldtype": "Link",
+   "options": "Account",
+   "label": "Kredit (to'lov) hisobi"
+  },
+  {
+   "fieldname": "tonna",
+   "fieldtype": "Float",
+   "label": "Yetkazilgan tonna",
+   "precision": "3"
+  },
+  {
+   "fieldname": "sec_manba",
+   "fieldtype": "Section Break",
+   "label": "Manba"
+  },
+  {
+   "fieldname": "manba_doctype",
+   "fieldtype": "Link",
+   "options": "DocType",
+   "label": "Manba turi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "manba_name",
+   "fieldtype": "Dynamic Link",
+   "options": "manba_doctype",
+   "label": "Manba",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "cb2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Link",
+   "options": "DocType",
+   "label": "Buxgalteriya hujjati turi"
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Dynamic Link",
+   "options": "voucher_type",
+   "label": "Buxgalteriya hujjati"
+  }
+ ],
+ "in_create": 1,
+ "links": [],
+ "modified": "2026-11-18 21:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "Tannarx Harakati",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "read": 1,
+   "report": 1,
+   "export": 1,
+   "role": "System Manager"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "export": 1,
+   "role": "Accounts Manager"
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

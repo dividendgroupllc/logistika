@@ -191,6 +191,7 @@ def get_balances_for_parts(ombor, part_names, exclude_reference_doctype=None, ex
 def pull_for_warehouse_intake(fura):
 	"""Warehouse Intake'dagi "Pekin list'dan tortish" tugmasi uchun — shu Xitoy fura
 	raqamidagi, hali omborga kirmagan barcha Order Detail'larning pekin list qatorlari."""
+	from logistika.erp_for_logistics.doctype.ichki_deklaratsiya.ichki_deklaratsiya import get_pekin_rows
 	from logistika.erp_for_logistics.doctype.order_detail.order_detail import ON_CHINA_TRUCK_STAGES
 
 	frappe.has_permission("Order Detail", "read", throw=True)
@@ -204,12 +205,14 @@ def pull_for_warehouse_intake(fura):
 	)
 	result = []
 	for name in order_details:
-		for row in frappe.get_doc("Order Detail", name).pekin_list:
+		for row in get_pekin_rows(name):
 			result.append(
 				{
 					"order": name,
 					"part_name": row.part_name,
 					"quantity": row.quantity,
+					"fakt_qty": row.quantity,
+					"farq": 0,
 					"total_boxes": row.total_boxes,
 					"net_weight": row.net_weight,
 					"volume_cbm": row.volume_cbm,

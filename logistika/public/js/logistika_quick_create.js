@@ -58,7 +58,6 @@ logistika.quick_create.open = function (kind, typed, on_created) {
 					label: __("Xitoy mashina nomeri"),
 					fieldtype: "Data",
 					reqd: 1,
-					description: "粤B12345",
 				},
 			],
 			args: (v) => ({ supplier_name: v.supplier_name, phone: v.phone, plate: v.plate, kind: "haydovchi" }),

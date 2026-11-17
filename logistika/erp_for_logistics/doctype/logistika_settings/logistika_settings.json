@@ -17,9 +17,23 @@
   "postavshik_customer_group",
   "haydovchi_supplier_group",
   "column_break_guruh",
-  "order_item_group",
+  "kz_haydovchi_supplier_group",
   "chat_section",
-  "tayyor_javoblar"
+  "tayyor_javoblar",
+  "tannarx_section",
+  "wip_sugurta_hisobi",
+  "wip_fura_hisobi",
+  "wip_ichki_hisobi",
+  "cb_tannarx",
+  "wip_ombor_hisobi",
+  "wip_kz_hisobi",
+  "cogs_section",
+  "fura_xarajat_hisobi",
+  "kz_xarajat_hisobi",
+  "cb_cogs",
+  "daromad_hisobi",
+  "fura_xizmat_item",
+  "logistika_xizmat_item"
  ],
  "fields": [
   {
@@ -48,10 +62,10 @@
   {
    "fieldname": "sugurta_section",
    "fieldtype": "Section Break",
-   "label": "Sug'urta"
+   "label": "Sug'urta va to'lov"
   },
   {
-   "description": "Order'dagi sug'urta summasi uchun Journal Entry debeti",
+   "description": "Yuk yetkazilganda sug'urta tannarxi shu xarajat hisobiga o'tadi",
    "fieldname": "sugurta_xarajat_hisobi",
    "fieldtype": "Link",
    "label": "Sug'urta xarajati hisobi",
@@ -62,10 +76,10 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Sug'urta to'lanadigan Cash yoki Bank hisobi (Journal Entry krediti)",
+   "description": "Order Detail xarajatlari (sug'urta, qo'shimcha rasxod, konteyner) va boshqa hujjatlar uchun standart Cash/Bank hisobi (JE krediti)",
    "fieldname": "sugurta_tolov_hisobi",
    "fieldtype": "Link",
-   "label": "Sug'urta to'lanadigan hisob",
+   "label": "Xarajatlar to'lanadigan hisob",
    "options": "Account"
   },
   {
@@ -99,11 +113,11 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "order_item_group",
+   "fieldname": "kz_haydovchi_supplier_group",
    "fieldtype": "Link",
-   "options": "Item Group",
-   "label": "Order Detail Item guruhi",
-   "description": "Har bir Order Detail uchun yaratiladigan Item shu guruhga tegishli bo'ladi"
+   "options": "Supplier Group",
+   "label": "KZ haydovchilar guruhi",
+   "description": "Truck Dispatch'dagi \"Haydovchi\" shu guruhdagi supplier'lardan tanlanadi"
   },
   {
    "fieldname": "chat_section",
@@ -116,11 +130,93 @@
    "options": "Tayyor Javob",
    "label": "Tayyor javoblar",
    "description": "Chat oynasida bitta bosish bilan qo'yiladigan matnlar"
+  },
+  {
+   "fieldname": "tannarx_section",
+   "fieldtype": "Section Break",
+   "label": "Tannarx — yo'ldagi buyurtmalar (aktiv) hisoblari",
+   "description": "Xarajatlar yuk mijozga yetib borguncha shu aktiv hisoblarda turadi"
+  },
+  {
+   "fieldname": "wip_sugurta_hisobi",
+   "fieldtype": "Link",
+   "options": "Account",
+   "label": "Sug'urta (aktiv)"
+  },
+  {
+   "fieldname": "wip_fura_hisobi",
+   "fieldtype": "Link",
+   "options": "Account",
+   "label": "Fura olib kelish va konteyner (aktiv)"
+  },
+  {
+   "fieldname": "wip_ichki_hisobi",
+   "fieldtype": "Link",
+   "options": "Account",
+   "label": "Qo'shimcha rasxod (aktiv)"
+  },
+  {
+   "fieldname": "cb_tannarx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "wip_ombor_hisobi",
+   "fieldtype": "Link",
+   "options": "Account",
+   "label": "Ombor yuklash-tushirish (aktiv)"
+  },
+  {
+   "fieldname": "wip_kz_hisobi",
+   "fieldtype": "Link",
+   "options": "Account",
+   "label": "KZ tashish xarajatlari (aktiv)"
+  },
+  {
+   "fieldname": "cogs_section",
+   "fieldtype": "Section Break",
+   "label": "Yetkazilganda — xarajat va daromad",
+   "description": "Qo'shimcha rasxod va yuklash xarajatlari o'z qatoridagi \"Harajat turi\" hisobiga o'tadi"
+  },
+  {
+   "fieldname": "fura_xarajat_hisobi",
+   "fieldtype": "Link",
+   "options": "Account",
+   "label": "Fura olib kelish xarajati (Expense)"
+  },
+  {
+   "fieldname": "kz_xarajat_hisobi",
+   "fieldtype": "Link",
+   "options": "Account",
+   "label": "KZ tashish xarajati (Expense)"
+  },
+  {
+   "fieldname": "cb_cogs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "daromad_hisobi",
+   "fieldtype": "Link",
+   "options": "Account",
+   "label": "Logistika xizmati daromadi (Income)"
+  },
+  {
+   "fieldname": "fura_xizmat_item",
+   "fieldtype": "Link",
+   "options": "Item",
+   "label": "Fura olib kelish xizmati (Item)",
+   "description": "Haydovchidan Purchase Invoice qatori uchun"
+  },
+  {
+   "fieldname": "logistika_xizmat_item",
+   "fieldtype": "Link",
+   "options": "Item",
+   "label": "Logistika xizmati (Item)",
+   "description": "Mijozga Sales Invoice qatori uchun"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-11-18 11:00:00.000000",
+ "modified": "2026-11-18 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Logistika Settings",

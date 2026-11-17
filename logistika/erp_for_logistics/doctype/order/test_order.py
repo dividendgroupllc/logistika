@@ -60,10 +60,10 @@ class TestOrder(FrappeTestCase):
 	def test_create_haydovchi_requires_plate(self):
 		with self.assertRaises(frappe.ValidationError):
 			quick_create.create_cn_supplier("_T Haydovchi", "+8613800138000", "haydovchi")
-		name = quick_create.create_cn_supplier("_T Haydovchi", "+8613800138000", "haydovchi", "粤b 12345")
+		name = quick_create.create_cn_supplier("_T Haydovchi", "+8613800138000", "haydovchi", "粤B 12345")
 		supplier = frappe.get_doc("Supplier", name)
 		self.assertEqual(supplier.supplier_group, self.settings.haydovchi_supplier_group)
-		self.assertEqual(supplier.xitoy_mashina_nomeri, "粤B12345")
+		self.assertEqual(supplier.xitoy_mashina_nomeri, "粤B 12345")
 
 	def test_customer_created_in_settings_group(self):
 		group = "_T Logistika mijozlar"
@@ -83,3 +83,11 @@ class TestOrder(FrappeTestCase):
 		with self.assertRaises(frappe.ValidationError):
 			make_order(kliyent=other.name)
 		make_order(kliyent=name)
+
+	def test_narx_optional(self):
+		make_order(narx=None)
+
+	def test_zavod_raqami_from_postavshik(self):
+		name = quick_create.create_cn_postavshik("_T Raqamli postavshik", "+86 139 1111 2222")
+		doc = make_order(xitoy_postavshik=name)
+		self.assertEqual(doc.xitoy_zavod_raqami, "+8613911112222")

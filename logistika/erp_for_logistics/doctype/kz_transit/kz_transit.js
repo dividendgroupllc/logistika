@@ -236,3 +236,11 @@ function do_send(frm, row_name) {
 		error: () => frappe.msgprint(__("Xatolik yuz berdi. Qayta urinib ko'ring.")),
 	});
 }
+
+frappe.ui.form.on("KZ Transit", {
+	setup(frm) {
+		frm.set_query("tolov_hisobi", () => ({
+			filters: { account_type: ["in", ["Cash", "Bank"]], is_group: 0 },
+		}));
+	},
+});

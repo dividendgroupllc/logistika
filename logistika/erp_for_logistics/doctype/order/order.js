@@ -22,6 +22,13 @@ frappe.ui.form.on("Order", {
 			});
 	},
 
+	xitoy_postavshik(frm) {
+		if (!frm.doc.xitoy_postavshik) return;
+		frappe.db.get_value("Customer", frm.doc.xitoy_postavshik, "mobile_no").then(({ message }) => {
+			if (message && message.mobile_no) frm.set_value("xitoy_zavod_raqami", message.mobile_no);
+		});
+	},
+
 	refresh(frm) {
 		logistika.quick_create.attach(frm, "kliyent", "customer");
 		logistika.quick_create.attach(frm, "xitoy_postavshik", "postavshik");

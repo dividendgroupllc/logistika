@@ -1,0 +1,185 @@
+{
+ "actions": [],
+ "autoname": "format:ID-{order_detail}",
+ "naming_rule": "Expression",
+ "creation": "2026-11-18 19:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "sec_asosiy",
+  "order_detail",
+  "order",
+  "cb_asosiy",
+  "kliyent",
+  "xitoy_postavshik",
+  "xitoy_mashina_nomeri",
+  "sec_pekin",
+  "pekin_import_html",
+  "pekin_list",
+  "sec_pekin_jami",
+  "jami_tonna",
+  "cb_pekin",
+  "jami_kub",
+  "sec_deklaratsiya",
+  "ichki_deklaratsiya",
+  "ichki_deklaratsiya_summa",
+  "ichki_deklaratsiya_tolovchi",
+  "cb_deklaratsiya",
+  "valyuta"
+ ],
+ "fields": [
+  {
+   "fieldname": "sec_asosiy",
+   "fieldtype": "Section Break",
+   "label": "Asosiy"
+  },
+  {
+   "fieldname": "order_detail",
+   "fieldtype": "Link",
+   "options": "Order Detail",
+   "label": "Order Detail",
+   "reqd": 1,
+   "unique": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fetch_from": "order_detail.order",
+   "fieldname": "order",
+   "fieldtype": "Link",
+   "options": "Order",
+   "label": "Order",
+   "read_only": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "cb_asosiy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "order_detail.kliyent",
+   "fieldname": "kliyent",
+   "fieldtype": "Link",
+   "options": "Customer",
+   "label": "Kliyent",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fetch_from": "order_detail.xitoy_postavshik",
+   "fieldname": "xitoy_postavshik",
+   "fieldtype": "Link",
+   "options": "Customer",
+   "label": "Xitoy postavshik",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "order_detail.xitoy_mashina_nomeri",
+   "fieldname": "xitoy_mashina_nomeri",
+   "fieldtype": "Data",
+   "label": "Xitoy mashina nomeri",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "sec_pekin",
+   "fieldtype": "Section Break",
+   "label": "Pekin list"
+  },
+  {
+   "fieldname": "pekin_import_html",
+   "fieldtype": "HTML",
+   "label": "Pekin list import"
+  },
+  {
+   "fieldname": "pekin_list",
+   "fieldtype": "Table",
+   "options": "Internal Logistics Item",
+   "label": "Pekin list"
+  },
+  {
+   "fieldname": "sec_pekin_jami",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "jami_tonna",
+   "fieldtype": "Float",
+   "label": "Jami tonna",
+   "read_only": 1,
+   "precision": "3",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "cb_pekin",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "jami_kub",
+   "fieldtype": "Float",
+   "label": "Jami kub",
+   "read_only": 1,
+   "precision": "3"
+  },
+  {
+   "fieldname": "sec_deklaratsiya",
+   "fieldtype": "Section Break",
+   "label": "Ichki deklaratsiya"
+  },
+  {
+   "fieldname": "ichki_deklaratsiya",
+   "fieldtype": "Attach",
+   "label": "Ichki deklaratsiya hujjati"
+  },
+  {
+   "fieldname": "ichki_deklaratsiya_summa",
+   "fieldtype": "Currency",
+   "options": "valyuta",
+   "label": "Summa",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "ichki_deklaratsiya_tolovchi",
+   "fieldtype": "Link",
+   "options": "Customer",
+   "label": "Kim to'ladi",
+   "description": "Shu Order'ning mijozi yoki Xitoy postavshigi — deklaratsiyani o'zi to'laydi (bizda buxgalteriya yozuvi yo'q)"
+  },
+  {
+   "fieldname": "cb_deklaratsiya",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "CNY",
+   "fieldname": "valyuta",
+   "fieldtype": "Link",
+   "options": "Currency",
+   "label": "Valyuta",
+   "reqd": 1
+  }
+ ],
+ "links": [],
+ "modified": "2026-11-18 21:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "Ichki Deklaratsiya",
+ "owner": "Administrator",
+ "track_changes": 1,
+ "title_field": "order_detail",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

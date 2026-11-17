@@ -21,6 +21,9 @@
   "yuklash_sxemasi_sanasi",
   "sec_yuklash_xarajati",
   "yuklash_xarajatlari",
+  "valyuta",
+  "tolov_hisobi",
+  "tannarx_je",
   "amended_from"
  ],
  "fields": [
@@ -117,6 +120,30 @@
    "options": "Ombor Xarajati Item"
   },
   {
+   "fieldname": "valyuta",
+   "fieldtype": "Link",
+   "options": "Currency",
+   "default": "CNY",
+   "label": "Xarajatlar valyutasi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tolov_hisobi",
+   "fieldtype": "Link",
+   "options": "Account",
+   "label": "To'lov hisobi",
+   "description": "Bo'sh bo'lsa — Logistika Settings'dagi standart hisob"
+  },
+  {
+   "fieldname": "tannarx_je",
+   "fieldtype": "Link",
+   "options": "Journal Entry",
+   "label": "Xarajatlar Journal Entry",
+   "read_only": 1,
+   "no_copy": 1,
+   "allow_on_submit": 1
+  },
+  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -130,7 +157,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-17 12:00:00.000000",
+ "modified": "2026-11-18 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Peregruz",

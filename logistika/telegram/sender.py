@@ -117,24 +117,48 @@ def get_me() -> dict:
 		return {}
 
 
-@frappe.whitelist()
-def set_webhook(webhook_url: str) -> dict:
-	"""Register webhook URL with Telegram.
+WEBHOOK_PATH = "/api/method/logistika.api.telegram_webhook.handle"
 
-	Call from ERPNext console:
-		frappe.call("logistika.telegram.sender.set_webhook",
-					webhook_url="https://your-erp.com/api/method/...")
-	"""
+
+@frappe.whitelist()
+def set_webhook(webhook_url: str | None = None) -> dict:
+	"""Telegram webhook'ini shu saytga o'rnatadi (Telegram Bot Settings'dagi tugma).
+	URL berilmasa — joriy sayt manzili (frappe.utils.get_url) ishlatiladi."""
+	frappe.only_for("System Manager")
+	webhook_url = webhook_url or frappe.utils.get_url(WEBHOOK_PATH)
 	try:
 		r = requests.post(_url("setWebhook"), json={"url": webhook_url}, timeout=10)
-		return r.json()
+		result = r.json()
+		result["webhook_url"] = webhook_url
+		return result
 	except Exception as e:
-		return {"ok": False, "description": str(e)}
+		return {"ok": False, "description": str(e).split("/bot")[0], "webhook_url": webhook_url}
+
+
+@frappe.whitelist()
+def get_webhook_info() -> dict:
+	"""Telegram'da hozir qaysi webhook o'rnatilgani va oxirgi xatolik."""
+	frappe.only_for("System Manager")
+	try:
+		info = requests.get(_url("getWebhookInfo"), timeout=10).json().get("result", {})
+	except Exception as e:
+		return {"ok": False, "description": str(e).split("/bot")[0]}
+	expected = frappe.utils.get_url(WEBHOOK_PATH)
+	return {
+		"ok": True,
+		"url": info.get("url"),
+		"expected_url": expected,
+		"matches": info.get("url") == expected,
+		"pending_update_count": info.get("pending_update_count"),
+		"last_error_message": info.get("last_error_message"),
+		"last_error_date": info.get("last_error_date"),
+	}
 
 
 @frappe.whitelist()
 def delete_webhook() -> dict:
 	"""Remove the registered webhook."""
+	frappe.only_for("System Manager")
 	try:
 		r = requests.post(_url("deleteWebhook"), timeout=10)
 		return r.json()

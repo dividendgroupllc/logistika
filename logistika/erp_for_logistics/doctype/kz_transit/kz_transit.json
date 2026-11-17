@@ -16,6 +16,8 @@
   "holati",
   "gps_offline",
   "sec_sug",
+  "valyuta",
+  "tolov_hisobi",
   "sugurta_summa",
   "sugurta_hujjat",
   "cb_sug",
@@ -29,6 +31,9 @@
   "slijeniya",
   "sec_yakun",
   "fakt_yetib_borgan",
+  "tannarx_je",
+  "yetkazish_je",
+  "sales_invoice",
   "kliyent_oldi_hujjat",
   "sec_chat",
   "customer_chat_html"
@@ -97,9 +102,25 @@
    "label": "Sug'urta va to'lov"
   },
   {
+   "fieldname": "valyuta",
+   "fieldtype": "Link",
+   "options": "Currency",
+   "default": "USD",
+   "label": "Xarajatlar valyutasi",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tolov_hisobi",
+   "fieldtype": "Link",
+   "options": "Account",
+   "label": "To'lov hisobi",
+   "description": "Bo'sh bo'lsa — Logistika Settings'dagi standart hisob"
+  },
+  {
    "fieldname": "sugurta_summa",
    "fieldtype": "Currency",
-   "label": "Sug'urta harajati"
+   "label": "Sug'urta harajati",
+   "options": "valyuta"
   },
   {
    "fieldname": "sugurta_hujjat",
@@ -113,7 +134,8 @@
   {
    "fieldname": "oldindan_tolov",
    "fieldtype": "Currency",
-   "label": "Haydovchiga oldindan to'lov"
+   "label": "Haydovchiga oldindan to'lov",
+   "options": "valyuta"
   },
   {
    "fieldname": "sec_boshqa",
@@ -130,7 +152,8 @@
    "fieldname": "jami_boshqa",
    "fieldtype": "Currency",
    "label": "Jami boshqa harajat",
-   "read_only": 1
+   "read_only": 1,
+   "options": "valyuta"
   },
   {
    "fieldname": "sec_ovqat",
@@ -140,7 +163,8 @@
   {
    "fieldname": "kunlik_ovqat_puli",
    "fieldtype": "Currency",
-   "label": "Kunlik oziq-ovqat puli (jami)"
+   "label": "Kunlik oziq-ovqat puli (jami)",
+   "options": "valyuta"
   },
   {
    "fieldname": "sec_slij",
@@ -165,9 +189,33 @@
    "label": "Fakt yetib borgan sana"
   },
   {
+   "fieldname": "tannarx_je",
+   "fieldtype": "Link",
+   "options": "Journal Entry",
+   "label": "Xarajatlar Journal Entry",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "yetkazish_je",
+   "fieldtype": "Link",
+   "options": "Journal Entry",
+   "label": "Tannarx (COGS) Journal Entry",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "options": "Sales Invoice",
+   "label": "Sales Invoice",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
    "fieldname": "kliyent_oldi_hujjat",
    "fieldtype": "Attach",
-   "label": "Kliyent oldi \u2014 hujjat"
+   "label": "Kliyent oldi — hujjat"
   },
   {
    "fieldname": "sec_chat",
@@ -183,7 +231,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-12 08:34:53.432971",
+ "modified": "2026-11-18 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "KZ Transit",

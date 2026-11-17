@@ -11,6 +11,7 @@
 import frappe
 from frappe.utils import flt
 
+from logistika.erp_for_logistics.doctype.ichki_deklaratsiya.ichki_deklaratsiya import get_pekin_rows
 from logistika.erp_for_logistics.pipeline_status import advance_order_detail_status
 
 TARGET_STATUS = "Товар погружен КЗ"
@@ -33,12 +34,14 @@ def _lock_clause(for_update):
 
 
 def _planned_qty(order_detail, part_names, for_update=False):
-	"""Reja miqdori — Order Detail pekin list'i (mahsulot bo'yicha yig'indi)."""
+	"""Reja miqdori — Order Detail'ning Ichki Deklaratsiya pekin list'i (mahsulot bo'yicha)."""
 	rows = frappe.db.sql(
 		f"""
 		select part_name, sum(quantity) as qty
 		from `tabInternal Logistics Item`
-		where parenttype = 'Order Detail' and parent = %(od)s and part_name in %(parts)s
+		where parenttype = 'Ichki Deklaratsiya' and parent = (
+			select name from `tabIchki Deklaratsiya` where order_detail = %(od)s
+		) and part_name in %(parts)s
 		group by part_name {_lock_clause(for_update)}
 		""",
 		{"od": order_detail, "parts": tuple(part_names)},
@@ -98,7 +101,7 @@ def pull_for_peregruz(china_truck, order=None, peregruz=None):
 	qatorlarga reja ulushiga mutanosib taqsimlanadi."""
 	result = []
 	for order_detail in _order_details_for_truck(china_truck, order):
-		rows = [row for row in frappe.get_doc("Order Detail", order_detail).pekin_list if flt(row.quantity) > 0]
+		rows = [row for row in get_pekin_rows(order_detail) if flt(row.quantity) > 0]
 		if not rows:
 			continue
 		planned_by_part = {}

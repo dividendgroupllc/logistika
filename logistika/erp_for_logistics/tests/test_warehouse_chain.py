@@ -154,3 +154,33 @@ class TestWarehouseChain(FrappeTestCase):
 		self.assertIn(PLATE, china_plates_on_road())
 		frappe.db.set_value("Order Detail", self.od.name, "status", "Таможния склад")
 		self.assertNotIn(PLATE, china_plates_on_road())
+
+	def test_intake_farq_and_holati(self):
+		doc = self._intake(fakt_qty=7, submit=False)
+		self.assertEqual(doc.items[0].farq, -3)
+		self.assertEqual(doc.holati, "Nedostatka")
+		doc.items[0].fakt_qty = 10
+		doc.save()
+		self.assertEqual(doc.items[0].farq, 0)
+		self.assertEqual(doc.holati, "To'liq")
+
+	def test_pull_sets_fakt_equal_plan(self):
+		from logistika.erp_for_logistics.ombor_ledger import pull_for_warehouse_intake
+
+		rows = pull_for_warehouse_intake(PLATE)
+		self.assertEqual(rows[0]["fakt_qty"], rows[0]["quantity"])
+		self.assertEqual(rows[0]["farq"], 0)
+
+	def test_truck_dispatch_driver_group(self):
+		from logistika.erp_for_logistics.tests.utils import ensure_supplier, ensure_supplier_group
+
+		group = ensure_supplier_group("_T KZ haydovchi")
+		frappe.db.set_single_value("Logistika Settings", "kz_haydovchi_supplier_group", group)
+		driver = ensure_supplier("_T KZ Driver", group)
+		other = ensure_supplier("_T Not driver", ensure_supplier_group("_T Boshqa"))
+		td = frappe.get_doc({"doctype": "Truck Dispatch", "hujjat_sanasi": today(), "order": self.od.name, "haydovchi_ismi": other})
+		with self.assertRaises(frappe.ValidationError):
+			td.insert(ignore_permissions=True)
+		td.haydovchi_ismi = driver
+		td.insert(ignore_permissions=True)
+

@@ -161,3 +161,11 @@ function compute_totals(frm) {
 	frm.set_value("jami_kub", Math.round(kub * 1000) / 1000);
 	frm.set_value("jami_tonna", Math.round(tonna * 1000) / 1000);
 }
+
+frappe.ui.form.on("Peregruz", {
+	setup(frm) {
+		frm.set_query("tolov_hisobi", () => ({
+			filters: { account_type: ["in", ["Cash", "Bank"]], is_group: 0 },
+		}));
+	},
+});

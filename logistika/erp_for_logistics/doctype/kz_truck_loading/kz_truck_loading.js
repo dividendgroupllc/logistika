@@ -160,3 +160,11 @@ function pull_loads(frm) {
 		},
 	});
 }
+
+frappe.ui.form.on("KZ Truck Loading", {
+	setup(frm) {
+		frm.set_query("tolov_hisobi", () => ({
+			filters: { account_type: ["in", ["Cash", "Bank"]], is_group: 0 },
+		}));
+	},
+});

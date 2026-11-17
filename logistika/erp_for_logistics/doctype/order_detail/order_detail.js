@@ -22,7 +22,15 @@ frappe.ui.form.on("Order Detail", {
 
 	refresh(frm) {
 		logistika.quick_create.attach(frm, "xitoy_haydovchi", "haydovchi");
-		logistika.pekin_import.render(frm, "pekin_import_html", "pekin_list");
+		if (!frm.is_new()) {
+			frm.add_custom_button(__("Ichki Deklaratsiya (pekin list)"), () => {
+				if (frm.doc.ichki_deklaratsiya) {
+					frappe.set_route("Form", "Ichki Deklaratsiya", frm.doc.ichki_deklaratsiya);
+				} else {
+					frappe.new_doc("Ichki Deklaratsiya", { order_detail: frm.doc.name });
+				}
+			});
+		}
 		apply_tracking_row_states(frm);
 		setTimeout(() => apply_tracking_row_states(frm), 200);
 		bind_tracking_row_clicks();

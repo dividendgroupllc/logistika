@@ -4,7 +4,7 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from logistika.erp_for_logistics import ombor_xarajatlari, order_insurance
+from logistika.erp_for_logistics import ombor_xarajatlari
 from logistika.erp_for_logistics.doctype.logistika_settings import logistika_settings
 from logistika.erp_for_logistics.doctype.logistika_settings.logistika_settings import get_settings_account
 from logistika.patches.v1_0 import prefill_logistika_settings
@@ -146,18 +146,6 @@ class TestLogistikaSettings(FrappeTestCase):
 	def test_query_throws_when_group_not_set(self):
 		with self.assertRaises(frappe.ValidationError):
 			ombor_xarajatlari.get_ombor_xarajati_accounts("Account", "", "name", 0, 50, {})
-
-	# --- Task 3: insurance accounts ---
-
-	def test_insurance_resolve_accounts_from_settings(self):
-		self._settings(sugurta_xarajat_hisobi=self.leaf, sugurta_tolov_hisobi=self.cash).save()
-		self.assertEqual(order_insurance._resolve_accounts(), (self.leaf, self.cash, self.company))
-
-	def test_insurance_resolve_accounts_throws_when_not_set(self):
-		with self.assertRaises(frappe.ValidationError):
-			order_insurance._resolve_accounts()
-
-	# --- Task 4: patch ---
 
 	def test_patch_fills_from_legacy_names(self):
 		expenses = _root_group(self.company, "Expense")

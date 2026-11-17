@@ -4,8 +4,9 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import flt
 
-from logistika.erp_for_logistics import ombor_ledger
+from logistika.erp_for_logistics import ombor_ledger, tannarx
 from logistika.erp_for_logistics.api import china_plates_on_road
 
 
@@ -18,6 +19,7 @@ class WarehouseIntake(Document):
 					self.fura
 				)
 			)
+		self.compute_farq()
 		for row in self.items:
 			if row.order and frappe.db.get_value("Order Detail", row.order, "xitoy_mashina_nomeri") != self.fura:
 				frappe.throw(
@@ -26,11 +28,20 @@ class WarehouseIntake(Document):
 					)
 				)
 
+	def compute_farq(self):
+		"""Farq = fakt − reja; birorta qatorda kam kelgan bo'lsa holati "Nedostatka"."""
+		for row in self.items:
+			row.farq = flt(row.fakt_qty) - flt(row.quantity)
+		if self.items:
+			self.holati = "Nedostatka" if any(flt(row.farq) < 0 for row in self.items) else "To'liq"
+
 	def on_submit(self):
 		ombor_ledger.sync_warehouse_intake_ledger(self)
 		ombor_ledger.advance_warehouse_intake_status(self)
+		tannarx.on_warehouse_intake_submit(self)
 
 	def on_cancel(self):
+		tannarx.on_source_cancel(self)
 		ombor_ledger.delete_ledger_for_document(self.doctype, self.name)
 
 	def on_trash(self):

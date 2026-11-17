@@ -100,12 +100,14 @@ def _order_details_with_pekin_list(order):
 	details = _order_details_of(order) if order else []
 	if not details:
 		return []
+	with_rows = frappe.get_all(
+		"Internal Logistics Item", filters={"parenttype": "Ichki Deklaratsiya"}, pluck="parent", distinct=True
+	)
 	return frappe.get_all(
-		"Internal Logistics Item",
-		filters={"parenttype": "Order Detail", "parent": ["in", details]},
-		pluck="parent",
-		distinct=True,
-		order_by="parent asc",
+		"Ichki Deklaratsiya",
+		filters={"order_detail": ["in", details], "name": ["in", with_rows or [""]]},
+		pluck="order_detail",
+		order_by="order_detail asc",
 	)
 
 

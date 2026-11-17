@@ -111,7 +111,10 @@ def _resolve_box_dimensions(part_name, order_detail=None):
 	conditions = ["part_name = %(part_name)s", "uzunlik > 0", "kenglik > 0", "balandlik > 0", "total_boxes > 0"]
 	values = {"part_name": part_name}
 	if order_detail:
-		conditions.append("parenttype = 'Order Detail' and parent = %(order_detail)s")
+		conditions.append(
+			"parenttype = 'Ichki Deklaratsiya' and parent = "
+			"(select name from `tabIchki Deklaratsiya` where order_detail = %(order_detail)s)"
+		)
 		values["order_detail"] = order_detail
 	where_clause = " and ".join(conditions)
 	rows = frappe.db.sql(

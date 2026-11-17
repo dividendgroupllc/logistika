@@ -11,11 +11,22 @@ from frappe.model.document import Document
 
 GROUP_FIELDS = ("ichki_logistika_xarajat_guruhi", "yuklash_xarajat_guruhi")
 PAYMENT_ACCOUNT_TYPES = ("Cash", "Bank")
+# Tannarx hisoblari: maydon -> talab qilinadigan root_type (oddiy, papka emas).
+TANNARX_ACCOUNT_FIELDS = {
+	"wip_sugurta_hisobi": "Asset",
+	"wip_fura_hisobi": "Asset",
+	"wip_ichki_hisobi": "Asset",
+	"wip_ombor_hisobi": "Asset",
+	"wip_kz_hisobi": "Asset",
+	"fura_xarajat_hisobi": "Expense",
+	"kz_xarajat_hisobi": "Expense",
+	"daromad_hisobi": "Income",
+}
 LEAF_GROUP_FIELDS = {
 	"mijoz_customer_group": "Customer Group",
 	"postavshik_customer_group": "Customer Group",
 	"haydovchi_supplier_group": "Supplier Group",
-	"order_item_group": "Item Group",
+	"kz_haydovchi_supplier_group": "Supplier Group",
 }
 
 
@@ -48,6 +59,14 @@ class LogistikaSettings(Document):
 
 		if expense_info and payment_info and expense_info.company != payment_info.company:
 			frappe.throw(_("Sug'urta xarajati va to'lanadigan hisob bir kompaniyaga tegishli bo'lishi kerak"))
+
+		for fieldname, root_type in TANNARX_ACCOUNT_FIELDS.items():
+			account = self.get(fieldname)
+			if not account:
+				continue
+			info = _get_account(account)
+			if info.root_type != root_type or info.is_group:
+				self._throw(fieldname, _("{0} turidagi oddiy (papka bo'lmagan) hisob bo'lishi kerak").format(root_type))
 
 		for fieldname, doctype in LEAF_GROUP_FIELDS.items():
 			value = self.get(fieldname)

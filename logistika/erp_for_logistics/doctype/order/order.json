@@ -82,7 +82,9 @@
    "fieldtype": "Data",
    "options": "Phone",
    "label": "Xitoy zavod raqami",
-   "description": "+86 bilan"
+   "description": "Tanlangan Xitoy postavshikning telefonidan olinadi (+86)",
+   "fetch_from": "xitoy_postavshik.mobile_no",
+   "fetch_if_empty": 1
   },
   {
    "allow_on_submit": 1,
@@ -121,7 +123,7 @@
    "fieldtype": "Currency",
    "options": "valyuta",
    "label": "Narx (1 tonna / 1 kub uchun)",
-   "reqd": 1,
+   "reqd": 0,
    "non_negative": 1
   },
   {
@@ -183,7 +185,7 @@
    "group": "Mijoz"
   }
  ],
- "modified": "2026-11-18 11:00:00.000000",
+ "modified": "2026-11-18 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Order",

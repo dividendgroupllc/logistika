@@ -19,6 +19,7 @@
   "status",
   "sec_fura",
   "mahsulot_nomi",
+  "taxminiy_tonna",
   "xitoy_haydovchi",
   "xitoy_fura_telefon",
   "xitoy_mashina_nomeri",
@@ -31,7 +32,6 @@
   "container",
   "container_raqami",
   "container_zavodi",
-  "item",
   "sec_kuzatuv",
   "jonatish_xabari_yuborildi",
   "kunlik_kuzatuv",
@@ -40,15 +40,15 @@
   "xitoy_fura_summasi",
   "sugurta",
   "sugurta_hujjat",
-  "sugurta_je",
+  "tannarx_je",
+  "fura_pi",
   "konteyner_summasi",
   "cb_xarajat",
   "harajat_turi",
   "summa",
   "izoh",
   "sec_pekin",
-  "pekin_import_html",
-  "pekin_list",
+  "ichki_deklaratsiya",
   "jami_tonna",
   "cb_pekin",
   "jami_kub"
@@ -149,6 +149,15 @@
    "in_list_view": 1
   },
   {
+   "fieldname": "taxminiy_tonna",
+   "fieldtype": "Float",
+   "label": "Yuk tonnaji (taxminiy)",
+   "precision": "3",
+   "non_negative": 1,
+   "in_list_view": 1,
+   "description": "Ma'lumot uchun. Hisob-kitobda haqiqiy tonna pekin list'dan olinadi (\"Jami tonna\")"
+  },
+  {
    "fieldname": "xitoy_haydovchi",
    "fieldtype": "Link",
    "options": "Supplier",
@@ -223,14 +232,6 @@
    "label": "Konteyner zavodi"
   },
   {
-   "fieldname": "item",
-   "fieldtype": "Link",
-   "options": "Item",
-   "label": "Item",
-   "read_only": 1,
-   "no_copy": 1
-  },
-  {
    "fieldname": "sec_kuzatuv",
    "fieldtype": "Section Break",
    "label": "Kunlik kuzatuv (omborga yetib kelguncha)",
@@ -282,10 +283,18 @@
    "label": "Sug'urta hujjati"
   },
   {
-   "fieldname": "sugurta_je",
+   "fieldname": "tannarx_je",
    "fieldtype": "Link",
    "options": "Journal Entry",
-   "label": "Sug'urta Journal Entry",
+   "label": "Xarajatlar Journal Entry",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "fura_pi",
+   "fieldtype": "Link",
+   "options": "Purchase Invoice",
+   "label": "Fura Purchase Invoice",
    "read_only": 1,
    "no_copy": 1
   },
@@ -322,25 +331,23 @@
   {
    "fieldname": "sec_pekin",
    "fieldtype": "Section Break",
-   "label": "Pekin list"
+   "label": "Pekin list (Ichki Deklaratsiya)"
   },
   {
-   "fieldname": "pekin_import_html",
-   "fieldtype": "HTML",
-   "label": "Pekin list import"
-  },
-  {
-   "fieldname": "pekin_list",
-   "fieldtype": "Table",
-   "options": "Internal Logistics Item",
-   "label": "Pekin list"
+   "fieldname": "ichki_deklaratsiya",
+   "fieldtype": "Link",
+   "options": "Ichki Deklaratsiya",
+   "label": "Ichki Deklaratsiya",
+   "read_only": 1,
+   "no_copy": 1
   },
   {
    "fieldname": "jami_tonna",
    "fieldtype": "Float",
    "label": "Jami tonna",
    "read_only": 1,
-   "precision": "3"
+   "precision": "3",
+   "description": "Ichki Deklaratsiya'dagi pekin list'dan"
   },
   {
    "fieldname": "cb_pekin",
@@ -351,10 +358,16 @@
    "fieldtype": "Float",
    "label": "Jami kub",
    "read_only": 1,
-   "precision": "3"
+   "precision": "3",
+   "description": "Ichki Deklaratsiya'dagi pekin list'dan"
   }
  ],
  "links": [
+  {
+   "link_doctype": "Ichki Deklaratsiya",
+   "link_fieldname": "order_detail",
+   "group": "Fura"
+  },
   {
    "link_doctype": "Truck Dispatch",
    "link_fieldname": "order",
@@ -393,9 +406,14 @@
    "link_doctype": "Order Item Status Log",
    "link_fieldname": "order",
    "group": "Tarix"
+  },
+  {
+   "link_doctype": "Tannarx Harakati",
+   "link_fieldname": "order_detail",
+   "group": "Tannarx"
   }
  ],
- "modified": "2026-11-18 11:00:00.000000",
+ "modified": "2026-11-18 19:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Order Detail",

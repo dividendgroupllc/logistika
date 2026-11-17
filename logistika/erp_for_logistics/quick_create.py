@@ -8,7 +8,7 @@
 import frappe
 from frappe import _
 
-from logistika.erp_for_logistics.cn_validators import validate_cn_phone, validate_cn_plate
+from logistika.erp_for_logistics.cn_validators import validate_cn_phone
 from logistika.erp_for_logistics.doctype.logistika_settings.logistika_settings import get_required_setting
 
 SUPPLIER_GROUP_FIELDS = {
@@ -87,10 +87,9 @@ def create_cn_supplier(supplier_name, phone, kind, plate=None):
 		frappe.throw(_("Ismni kiriting"))
 
 	phone = validate_cn_phone(phone, "Xitoy telefon")
-	if kind == "haydovchi":
-		plate = validate_cn_plate(plate, "Xitoy mashina nomeri")
-	else:
-		plate = None
+	plate = (plate or "").strip() if kind == "haydovchi" else None
+	if kind == "haydovchi" and not plate:
+		frappe.throw(_("Xitoy mashina nomerini kiriting"))
 
 	doc = frappe.get_doc(
 		{
@@ -108,8 +107,8 @@ def create_cn_supplier(supplier_name, phone, kind, plate=None):
 
 
 def validate_supplier(doc, method=None):
-	"""Supplier doc_event: haydovchi guruhidagi supplier'ning Xitoy
-	telefoni va davlat raqami Supplier formasidan tahrirlanganda ham tekshiriladi."""
+	"""Supplier doc_event: haydovchi guruhidagi supplier'ning Xitoy telefoni Supplier
+	formasidan tahrirlanganda ham tekshiriladi."""
 	groups = {
 		frappe.db.get_single_value("Logistika Settings", field) for field in SUPPLIER_GROUP_FIELDS.values()
 	}
@@ -118,5 +117,3 @@ def validate_supplier(doc, method=None):
 		return
 	if doc.xitoy_telefon and (doc.is_new() or doc.has_value_changed("xitoy_telefon")):
 		doc.xitoy_telefon = validate_cn_phone(doc.xitoy_telefon, "Xitoy telefon")
-	if doc.xitoy_mashina_nomeri and (doc.is_new() or doc.has_value_changed("xitoy_mashina_nomeri")):
-		doc.xitoy_mashina_nomeri = validate_cn_plate(doc.xitoy_mashina_nomeri, "Xitoy mashina nomeri")

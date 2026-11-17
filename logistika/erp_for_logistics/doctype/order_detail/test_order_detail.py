@@ -29,9 +29,15 @@ def make_order_detail(order, save=True, **overrides):
 		"kelish_sanasi": add_days(today(), 10),
 	}
 	data.update(overrides)
+	pekin_list = data.pop("pekin_list", None)
 	doc = frappe.get_doc(data)
 	if save:
 		doc.insert(ignore_permissions=True)
+		if pekin_list:
+			frappe.get_doc(
+				{"doctype": "Ichki Deklaratsiya", "order_detail": doc.name, "pekin_list": pekin_list}
+			).insert(ignore_permissions=True)
+			doc.reload()
 	return doc
 
 
@@ -63,14 +69,6 @@ class TestOrderDetail(FrappeTestCase):
 		with self.assertRaises(frappe.ValidationError):
 			make_order_detail(draft.name)
 
-	def test_item_created(self):
-		doc = make_order_detail(self.order.name)
-		self.assertEqual(doc.item, doc.name)
-		item = frappe.get_doc("Item", doc.item)
-		self.assertEqual(item.is_stock_item, 0)
-		self.assertEqual(item.item_group, self.settings.order_item_group)
-		self.assertEqual(item.stock_uom, "Tonne")
-
 	def test_departure_not_in_past(self):
 		with self.assertRaises(frappe.ValidationError):
 			make_order_detail(self.order.name, zavoddan_chiqish_sanasi=add_days(today(), -1))
@@ -89,11 +87,9 @@ class TestOrderDetail(FrappeTestCase):
 	def test_phone_and_plate_validated(self):
 		with self.assertRaises(frappe.ValidationError):
 			make_order_detail(self.order.name, xitoy_fura_telefon="+998901234567")
-		with self.assertRaises(frappe.ValidationError):
-			make_order_detail(self.order.name, xitoy_mashina_nomeri="01A123BC")
-		doc = make_order_detail(self.order.name, xitoy_fura_telefon="+86 138 0013 8000", xitoy_mashina_nomeri="粤b 12345")
+		doc = make_order_detail(self.order.name, xitoy_fura_telefon="+86 138 0013 8000", xitoy_mashina_nomeri="AB 1234")
 		self.assertEqual(doc.xitoy_fura_telefon, "+8613800138000")
-		self.assertEqual(doc.xitoy_mashina_nomeri, "粤B12345")
+		self.assertEqual(doc.xitoy_mashina_nomeri, "AB 1234")
 
 	def test_manual_phone_override_validated(self):
 		driver = ensure_supplier(
@@ -115,7 +111,11 @@ class TestOrderDetail(FrappeTestCase):
 		doc = make_order_detail(self.order.name, pekin_list=pekin_rows((1000, 2), (500, 3)))
 		self.assertAlmostEqual(doc.jami_tonna, 1.5)
 		self.assertAlmostEqual(doc.jami_kub, 5)
-		self.assertAlmostEqual(doc.pekin_list[0].bir_dona_ogirlik, 500)
+		deklaratsiya = frappe.get_doc("Ichki Deklaratsiya", doc.ichki_deklaratsiya)
+		self.assertEqual(deklaratsiya.name, f"ID-{doc.name}")
+		self.assertAlmostEqual(deklaratsiya.pekin_list[0].bir_dona_ogirlik, 500)
+		deklaratsiya.delete()
+		self.assertEqual(frappe.db.get_value("Order Detail", doc.name, "jami_tonna"), 0)
 
 	def test_capacity_across_order_details(self):
 		truck = ensure_truck_type(tonna=33, kub=90)
@@ -125,42 +125,6 @@ class TestOrderDetail(FrappeTestCase):
 			make_order_detail(other_order.name, truck_type=truck, pekin_list=pekin_rows((14000, 10)))
 		frappe.db.set_value("Order Detail", first.name, "status", "Таможния склад")
 		make_order_detail(other_order.name, truck_type=truck, pekin_list=pekin_rows((14000, 10)))
-
-	def test_insurance_je_created_and_replaced(self):
-		company = frappe.get_all("Company", pluck="name", limit=1)[0]
-		expenses = _root_group(company, "Expense")
-		cash = make_account("_T OD Kassa", _root_group(company, "Asset", "Cash"), account_type="Cash")
-		expense = make_account("_T OD Sugurta xarajati", expenses)
-		frappe.db.set_single_value("Logistika Settings", {"sugurta_xarajat_hisobi": expense, "sugurta_tolov_hisobi": cash})
-		company_currency = frappe.get_cached_value("Company", company, "default_currency")
-		if company_currency != "CNY" and not frappe.db.exists(
-			"Currency Exchange", {"from_currency": "CNY", "to_currency": company_currency}
-		):
-			frappe.get_doc(
-				{
-					"doctype": "Currency Exchange",
-					"date": add_days(today(), -1),
-					"from_currency": "CNY",
-					"to_currency": company_currency,
-					"exchange_rate": 0.14,
-				}
-			).insert(ignore_permissions=True)
-
-		doc = make_order_detail(self.order.name, sugurta=100)
-		first_je = doc.sugurta_je
-		self.assertTrue(first_je)
-		self.assertEqual(frappe.db.get_value("Journal Entry", first_je, "docstatus"), 1)
-
-		doc.reload()
-		doc.sugurta = 150
-		doc.save()
-		self.assertEqual(frappe.db.get_value("Journal Entry", first_je, "docstatus"), 2)
-		self.assertNotEqual(doc.sugurta_je, first_je)
-
-		doc.reload()
-		doc.sugurta = 0
-		doc.save()
-		self.assertFalse(doc.sugurta_je)
 
 	def test_status_change_logged(self):
 		doc = make_order_detail(self.order.name)
@@ -189,13 +153,13 @@ class TestOrderDetail(FrappeTestCase):
 		first.status = "Товар погружен КЗ"
 		first.save()
 
-	def test_recreated_item_reenabled(self):
-		doc = make_order_detail(self.order.name, mahsulot_nomi="Eski")
-		name = doc.name
-		doc.delete()
-		self.assertEqual(frappe.db.get_value("Item", name, "disabled"), 1)
-		again = make_order_detail(self.order.name, mahsulot_nomi="Yangi")
-		self.assertEqual(again.name, name)
-		item = frappe.get_doc("Item", again.item)
-		self.assertEqual(item.disabled, 0)
-		self.assertIn("Yangi", item.item_name)
+	def test_estimated_tonnage_is_informational(self):
+		doc = make_order_detail(self.order.name, taxminiy_tonna=25, pekin_list=pekin_rows((1000, 2)))
+		self.assertEqual(doc.taxminiy_tonna, 25)
+		self.assertAlmostEqual(doc.jami_tonna, 1)
+
+	def test_one_declaration_per_order_detail(self):
+		doc = make_order_detail(self.order.name, pekin_list=pekin_rows((1000, 2)))
+		with self.assertRaises(frappe.exceptions.DuplicateEntryError):
+			frappe.get_doc({"doctype": "Ichki Deklaratsiya", "order_detail": doc.name}).insert(ignore_permissions=True)
+

@@ -39,3 +39,23 @@ function pull_from_order_details(frm) {
 		},
 	});
 }
+
+// Fakt soni pekin list'dan (reja) tortiladi; xodim faqat farqli qatorni o'zgartiradi.
+frappe.ui.form.on("Warehouse Intake Item", {
+	fakt_qty(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		frappe.model.set_value(cdt, cdn, "farq", flt(row.fakt_qty) - flt(row.quantity));
+	},
+	quantity(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		frappe.model.set_value(cdt, cdn, "farq", flt(row.fakt_qty) - flt(row.quantity));
+	},
+});
+
+frappe.ui.form.on("Warehouse Intake", {
+	setup(frm) {
+		frm.set_query("tolov_hisobi", () => ({
+			filters: { account_type: ["in", ["Cash", "Bank"]], is_group: 0 },
+		}));
+	},
+});

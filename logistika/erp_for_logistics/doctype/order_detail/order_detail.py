@@ -3,22 +3,19 @@
 
 # Order Detail — bitta mijozning bitta Xitoy furasidagi (yoki bitta mahsulot) yuki.
 # Pipeline holati (status), fura ma'lumotlari, CNY'dagi xarajatlar va pekin list
-# shu hujjatda. Har bir Order Detail uchun bir xil nomli Item yaratiladi (keyingi
-# bosqichda Purchase/Sales Invoice qatorlari va tannarx shu Item/Order Detail
-# bo'yicha yuritiladi).
+# shu hujjatda. Tannarx shu Order Detail bo'yicha "Tannarx Harakati" jurnalida va
+# "Order Detail" accounting dimension'i bilan yuritiladi (tannarx.py).
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, getdate, today
 
-from logistika.erp_for_logistics import order_insurance, order_status_log
-from logistika.erp_for_logistics.cn_validators import validate_cn_phone, validate_cn_plate
+from logistika.erp_for_logistics import order_status_log, tannarx
+from logistika.erp_for_logistics.cn_validators import validate_cn_phone
 from logistika.erp_for_logistics.doctype.internal_logistics_item.internal_logistics_item import dims_to_cm
-from logistika.erp_for_logistics.doctype.logistika_settings.logistika_settings import get_required_setting
 from logistika.erp_for_logistics.pipeline_status import PIPELINE_STAGES
 
-UOM_BY_SERVICE_MEASURE = {"Tonna": "Tonne", "Kub": "Cubic Meter"}
 # Fura hali Xitoy furasida (omborga kirmagan) bo'lgan bosqichlar — sig'im tekshiruvi
 # faqat shu bosqichdagi Order Detail'lar o'rtasida.
 ON_CHINA_TRUCK_STAGES = PIPELINE_STAGES[: PIPELINE_STAGES.index("Таможния склад")]
@@ -31,22 +28,15 @@ class OrderDetail(Document):
 		self.validate_driver_group()
 		self.validate_cn_fields()
 		self.validate_dates()
-		compute_pekin_totals(self)
 		validate_capacity(self)
 		order_status_log.capture_status_changes(self)
-		order_insurance.capture_insurance_changes(self)
-
-	def after_insert(self):
-		self.db_set("item", create_item(self), update_modified=False)
 
 	def on_update(self):
 		order_status_log.log_status_changes(self)
-		order_insurance.process_insurance_changes(self)
+		tannarx.sync_order_detail(self)
 
 	def on_trash(self):
-		order_insurance.cancel_insurance_entry(self)
-		if self.item and frappe.db.exists("Item", self.item):
-			frappe.db.set_value("Item", self.item, "disabled", 1)
+		tannarx.cancel_source_costs(self.doctype, self.name)
 
 	def _changed(self, fieldname):
 		return self.get(fieldname) and (self.is_new() or self.has_value_changed(fieldname))
@@ -66,7 +56,7 @@ class OrderDetail(Document):
 		if self._changed("xitoy_fura_telefon"):
 			self.xitoy_fura_telefon = validate_cn_phone(self.xitoy_fura_telefon, "Xitoy fura telefon")
 		if self._changed("xitoy_mashina_nomeri"):
-			self.xitoy_mashina_nomeri = validate_cn_plate(self.xitoy_mashina_nomeri, "Xitoy mashina nomeri")
+			self.xitoy_mashina_nomeri = self.xitoy_mashina_nomeri.strip()
 
 	def validate_dates(self):
 		if self._changed("zavoddan_chiqish_sanasi") and getdate(self.zavoddan_chiqish_sanasi) < getdate(today()):
@@ -142,44 +132,6 @@ def validate_capacity(doc):
 				doc.xitoy_mashina_nomeri, round(total_kub, 3), capacity.kub
 			)
 		)
-
-
-def _ensure_uom(uom):
-	if not frappe.db.exists("UOM", uom):
-		frappe.get_doc({"doctype": "UOM", "uom_name": uom}).insert(ignore_permissions=True)
-	return uom
-
-
-def create_item(doc):
-	"""Order Detail nomi bilan xizmat Item'ini yaratadi (ombor mahsuloti emas)."""
-	if frappe.db.exists("Item", doc.name):
-		# O'chirilgan oxirgi Order Detail nomi qayta ishlatilganda (series qaytariladi)
-		# eski Item yangi ma'lumot bilan qayta yoqiladi.
-		frappe.db.set_value(
-			"Item",
-			doc.name,
-			{
-				"disabled": 0,
-				"item_name": f"{doc.name} — {doc.mahsulot_nomi}"[:140],
-				"description": f"{doc.kliyent} / {doc.xitoy_mashina_nomeri or doc.mahsulot_nomi}",
-			},
-		)
-		return doc.name
-	uom = _ensure_uom(UOM_BY_SERVICE_MEASURE.get(doc.xizmat_olchovi, "Tonne"))
-	item = frappe.get_doc(
-		{
-			"doctype": "Item",
-			"item_code": doc.name,
-			"item_name": f"{doc.name} — {doc.mahsulot_nomi}"[:140],
-			"item_group": get_required_setting("order_item_group"),
-			"stock_uom": uom,
-			"is_stock_item": 0,
-			"include_item_in_manufacturing": 0,
-			"description": f"{doc.kliyent} / {doc.xitoy_mashina_nomeri or doc.mahsulot_nomi}",
-		}
-	)
-	item.insert(ignore_permissions=True)
-	return item.name
 
 
 @frappe.whitelist()
