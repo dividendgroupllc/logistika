@@ -14,7 +14,7 @@
   "sugurta_tolov_hisobi",
   "guruhlar_section",
   "mijoz_customer_group",
-  "postavshik_supplier_group",
+  "postavshik_customer_group",
   "haydovchi_supplier_group",
   "column_break_guruh",
   "order_item_group",
@@ -81,11 +81,11 @@
    "description": "Order'dagi \"Kliyent\" shu guruhdan tanlanadi va yangi mijoz shu guruhda yaratiladi"
   },
   {
-   "fieldname": "postavshik_supplier_group",
+   "fieldname": "postavshik_customer_group",
    "fieldtype": "Link",
-   "options": "Supplier Group",
+   "options": "Customer Group",
    "label": "Xitoy postavshiklar guruhi",
-   "description": "Order'dagi \"Xitoy postavshik\" shu guruhdan tanlanadi va yangisi shu guruhda yaratiladi"
+   "description": "Order'dagi \"Xitoy postavshik\" (Customer) shu guruhdan tanlanadi va yangisi shu guruhda yaratiladi"
   },
   {
    "fieldname": "haydovchi_supplier_group",
@@ -120,7 +120,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-11-18 10:00:00.000000",
+ "modified": "2026-11-18 11:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Logistika Settings",

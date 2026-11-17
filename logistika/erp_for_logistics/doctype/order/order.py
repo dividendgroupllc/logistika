@@ -41,6 +41,6 @@ class Order(Document):
 	def validate_postavshik_group(self):
 		if not self.xitoy_postavshik:
 			return
-		group = frappe.db.get_single_value("Logistika Settings", "postavshik_supplier_group")
-		if group and frappe.db.get_value("Supplier", self.xitoy_postavshik, "supplier_group") != group:
+		group = frappe.db.get_single_value("Logistika Settings", "postavshik_customer_group")
+		if group and frappe.db.get_value("Customer", self.xitoy_postavshik, "customer_group") != group:
 			frappe.throw(_('"Xitoy postavshik" "{0}" guruhidan bo\'lishi kerak').format(group))

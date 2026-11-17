@@ -2,8 +2,8 @@
 # For license information, please see license.txt
 
 # Order / Order Detail formalaridagi "yangi yaratish" oynalari uchun server
-# metodlari: mijoz (telefon majburiy), Xitoy postavshik va Xitoy haydovchi
-# (Supplier, guruhi Logistika Settings'dan, telefon +86 va davlat raqami tekshiriladi).
+# metodlari: mijoz (telefon majburiy), Xitoy postavshik (Customer, +86) va Xitoy
+# haydovchi (Supplier, +86 va davlat raqami). Guruhlar Logistika Settings'dan.
 
 import frappe
 from frappe import _
@@ -12,7 +12,6 @@ from logistika.erp_for_logistics.cn_validators import validate_cn_phone, validat
 from logistika.erp_for_logistics.doctype.logistika_settings.logistika_settings import get_required_setting
 
 SUPPLIER_GROUP_FIELDS = {
-	"postavshik": "postavshik_supplier_group",
 	"haydovchi": "haydovchi_supplier_group",
 }
 
@@ -58,6 +57,27 @@ def create_customer_with_phone(customer_name, phone):
 
 
 @frappe.whitelist()
+def create_cn_postavshik(customer_name, phone):
+	"""Xitoy postavshik — Customer sifatida, Logistika Settings'dagi "Xitoy postavshiklar
+	guruhi"da; telefon +86 tekshiriladi va asosiy Contact'ga yoziladi."""
+	frappe.has_permission("Customer", "create", throw=True)
+	customer_name = (customer_name or "").strip()
+	if not customer_name:
+		frappe.throw(_("Nomini kiriting"))
+	phone = validate_cn_phone(phone, "Xitoy telefon")
+	doc = frappe.get_doc(
+		{
+			"doctype": "Customer",
+			"customer_name": customer_name,
+			"customer_type": "Company",
+			"customer_group": get_required_setting("postavshik_customer_group"),
+			"mobile_no": phone,
+		}
+	).insert()
+	return doc.name
+
+
+@frappe.whitelist()
 def create_cn_supplier(supplier_name, phone, kind, plate=None):
 	frappe.has_permission("Supplier", "create", throw=True)
 	if kind not in SUPPLIER_GROUP_FIELDS:
@@ -88,7 +108,7 @@ def create_cn_supplier(supplier_name, phone, kind, plate=None):
 
 
 def validate_supplier(doc, method=None):
-	"""Supplier doc_event: postavshik/haydovchi guruhidagi supplier'ning Xitoy
+	"""Supplier doc_event: haydovchi guruhidagi supplier'ning Xitoy
 	telefoni va davlat raqami Supplier formasidan tahrirlanganda ham tekshiriladi."""
 	groups = {
 		frappe.db.get_single_value("Logistika Settings", field) for field in SUPPLIER_GROUP_FIELDS.values()

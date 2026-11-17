@@ -6,8 +6,8 @@ from frappe.tests.utils import FrappeTestCase
 
 from logistika.erp_for_logistics import quick_create
 from logistika.erp_for_logistics.tests.utils import (
-	ensure_supplier,
-	ensure_supplier_group,
+	ensure_customer,
+	ensure_customer_group,
 	make_order,
 	setup_logistika_settings,
 )
@@ -29,7 +29,7 @@ class TestOrder(FrappeTestCase):
 		self.assertEqual(first.docstatus, 1)
 
 	def test_postavshik_must_be_in_settings_group(self):
-		other = ensure_supplier("_T Boshqa supplier", ensure_supplier_group("_T Boshqa guruh"))
+		other = ensure_customer("_T Boshqa postavshik", group=ensure_customer_group("_T Boshqa guruh"))
 		with self.assertRaises(frappe.ValidationError):
 			make_order(xitoy_postavshik=other)
 
@@ -51,11 +51,11 @@ class TestOrder(FrappeTestCase):
 
 	def test_create_postavshik(self):
 		with self.assertRaises(frappe.ValidationError):
-			quick_create.create_cn_supplier("_T Yangi postavshik", "+998901234567", "postavshik")
-		name = quick_create.create_cn_supplier("_T Yangi postavshik", "+86 138 0013 8000", "postavshik")
-		supplier = frappe.get_doc("Supplier", name)
-		self.assertEqual(supplier.supplier_group, self.settings.postavshik_supplier_group)
-		self.assertEqual(supplier.xitoy_telefon, "+8613800138000")
+			quick_create.create_cn_postavshik("_T Yangi postavshik", "+998901234567")
+		name = quick_create.create_cn_postavshik("_T Yangi postavshik", "+86 138 0013 8000")
+		customer = frappe.get_doc("Customer", name)
+		self.assertEqual(customer.customer_group, self.settings.postavshik_customer_group)
+		self.assertEqual(frappe.db.get_value("Contact", customer.customer_primary_contact, "mobile_no"), "+8613800138000")
 
 	def test_create_haydovchi_requires_plate(self):
 		with self.assertRaises(frappe.ValidationError):

@@ -12,7 +12,7 @@ frappe.ui.form.on("Logistika Settings", {
 		frm.set_query("sugurta_tolov_hisobi", () => ({
 			filters: { account_type: ["in", ["Cash", "Bank"]], is_group: 0 },
 		}));
-		["mijoz_customer_group", "postavshik_supplier_group", "haydovchi_supplier_group", "order_item_group"].forEach((field) => {
+		["mijoz_customer_group", "postavshik_customer_group", "haydovchi_supplier_group", "order_item_group"].forEach((field) => {
 			frm.set_query(field, () => ({ filters: { is_group: 0 } }));
 		});
 	},

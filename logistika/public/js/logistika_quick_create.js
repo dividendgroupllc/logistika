@@ -27,9 +27,9 @@ logistika.quick_create.open = function (kind, typed, on_created) {
 		},
 		postavshik: {
 			title: __("Yangi Xitoy postavshik"),
-			method: "logistika.erp_for_logistics.quick_create.create_cn_supplier",
+			method: "logistika.erp_for_logistics.quick_create.create_cn_postavshik",
 			fields: [
-				{ fieldname: "supplier_name", label: __("Nomi"), fieldtype: "Data", reqd: 1 },
+				{ fieldname: "customer_name", label: __("Nomi"), fieldtype: "Data", reqd: 1 },
 				{
 					fieldname: "phone",
 					label: __("Xitoy telefon"),
@@ -38,8 +38,8 @@ logistika.quick_create.open = function (kind, typed, on_created) {
 					description: "+86 138 0013 8000",
 				},
 			],
-			args: (v) => ({ supplier_name: v.supplier_name, phone: v.phone, kind: "postavshik" }),
-			name_field: "supplier_name",
+			args: (v) => ({ customer_name: v.customer_name, phone: v.phone }),
+			name_field: "customer_name",
 		},
 		haydovchi: {
 			title: __("Yangi Xitoy haydovchi"),

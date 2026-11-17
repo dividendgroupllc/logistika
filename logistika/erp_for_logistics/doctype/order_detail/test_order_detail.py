@@ -11,6 +11,7 @@ from logistika.erp_for_logistics.doctype.logistika_settings.test_logistika_setti
 )
 from logistika.erp_for_logistics.tests.utils import (
 	ensure_supplier,
+	ensure_supplier_group,
 	ensure_truck_type,
 	make_order,
 	setup_logistika_settings,
@@ -106,7 +107,7 @@ class TestOrderDetail(FrappeTestCase):
 			doc.save()
 
 	def test_driver_must_be_in_driver_group(self):
-		other = ensure_supplier("_T OD Postavshik", self.settings.postavshik_supplier_group)
+		other = ensure_supplier("_T OD Boshqa supplier", ensure_supplier_group("_T OD Boshqa guruh"))
 		with self.assertRaises(frappe.ValidationError):
 			make_order_detail(self.order.name, xitoy_haydovchi=other)
 

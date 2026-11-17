@@ -21,14 +21,22 @@ def ensure_item_group(name):
 	return name
 
 
-def ensure_customer(name, phone="+998901234567"):
+def ensure_customer_group(name):
+	if not frappe.db.exists("Customer Group", name):
+		frappe.get_doc(
+			{"doctype": "Customer Group", "customer_group_name": name, "parent_customer_group": "All Customer Groups"}
+		).insert(ignore_permissions=True)
+	return name
+
+
+def ensure_customer(name, phone="+998901234567", group=None):
 	if not frappe.db.exists("Customer", name):
 		frappe.get_doc(
 			{
 				"doctype": "Customer",
 				"customer_name": name,
 				"customer_type": "Company",
-				"customer_group": _leaf_customer_group(),
+				"customer_group": group or _leaf_customer_group(),
 				"mobile_no": phone,
 			}
 		).insert(ignore_permissions=True)
@@ -60,7 +68,7 @@ def ensure_truck_type(name="_T China 33t", tonna=33, kub=90):
 def setup_logistika_settings():
 	"""Order / Order Detail testlari uchun minimal sozlama."""
 	settings = frappe.get_single("Logistika Settings")
-	settings.postavshik_supplier_group = ensure_supplier_group("_T Xitoy postavshik")
+	settings.postavshik_customer_group = ensure_customer_group("_T Xitoy postavshik")
 	settings.haydovchi_supplier_group = ensure_supplier_group("_T Xitoy haydovchi")
 	settings.order_item_group = ensure_item_group("_T Logistika xizmat")
 	settings.save(ignore_permissions=True)
@@ -74,7 +82,7 @@ def make_order(kliyent="_T Mijoz", submit=True, **overrides):
 		"doctype": "Order",
 		"zakaz_sanasi": frappe.utils.today(),
 		"kliyent": kliyent,
-		"xitoy_postavshik": ensure_supplier("_T Postavshik", settings.postavshik_supplier_group),
+		"xitoy_postavshik": ensure_customer("_T Postavshik", "+8613800138000", settings.postavshik_customer_group),
 		"xizmat_olchovi": "Tonna",
 		"narx": 100,
 	}

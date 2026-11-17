@@ -74,7 +74,7 @@
   {
    "fieldname": "xitoy_postavshik",
    "fieldtype": "Link",
-   "options": "Supplier",
+   "options": "Customer",
    "label": "Xitoy postavshik"
   },
   {
@@ -183,7 +183,7 @@
    "group": "Mijoz"
   }
  ],
- "modified": "2026-11-17 18:00:00.000000",
+ "modified": "2026-11-18 11:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Order",

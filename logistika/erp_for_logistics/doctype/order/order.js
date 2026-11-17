@@ -9,15 +9,15 @@ frappe.ui.form.on("Order", {
 		});
 		frm.set_query("xitoy_postavshik", () => {
 			const group = frm._postavshik_group;
-			return group ? { filters: { supplier_group: group } } : {};
+			return group ? { filters: { customer_group: group } } : {};
 		});
 	},
 
 	onload(frm) {
 		frappe.db
-			.get_value("Logistika Settings", "Logistika Settings", ["postavshik_supplier_group", "mijoz_customer_group"])
+			.get_value("Logistika Settings", "Logistika Settings", ["postavshik_customer_group", "mijoz_customer_group"])
 			.then(({ message }) => {
-				frm._postavshik_group = message && message.postavshik_supplier_group;
+				frm._postavshik_group = message && message.postavshik_customer_group;
 				frm._mijoz_group = message && message.mijoz_customer_group;
 			});
 	},
