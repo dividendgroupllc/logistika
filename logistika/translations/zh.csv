@@ -590,6 +590,7 @@ Zavoddan chiqish sanasi (reja),出厂日期（计划）
 {0} ta mahsulot qatori hisoblashga qo'shilmadi (o'lcham topilmadi yoki miqdor juda kichik) — pastdagi ro'yxatga qarang.,{0} 个商品行未纳入计算（未找到尺寸或数量太小）——见下方列表。
 {0} ta mahsulot turi furaga sig'madi — pastdagi ro'yxatga qarang.,{0} 种商品装不下货车——见下方列表。
 {0} turidagi oddiy (papka bo'lmagan) hisob bo'lishi kerak,必须是 {0} 类型的普通（非文件夹）科目
+{0} {1} xarajatlari hali ochiq ({2}) — avval hujjatni bekor qiling.,{0} {1} 的费用仍未结清（{2}）——请先取消该单据。
 {0} — KZ fura: {1} — Truck: {2} ({3}×{4}×{5} sm) — {6},{0} — 哈萨克斯坦货车：{1} — 车型：{2}（{3}×{4}×{5} 厘米）— {6}
 {0} — status tarixi,{0} — 状态历史
 {0}-qator,第{0}行

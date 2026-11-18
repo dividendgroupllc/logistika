@@ -18,6 +18,9 @@ class Peregruz(Document):
 		peregruz.advance_status(self)
 		tannarx.on_peregruz_submit(self)
 
+	def on_trash(self):
+		tannarx.release_source_ledger(self)
+
 	def on_cancel(self):
 		for plate, order_details in tannarx.peregruz_trucks(self).items():
 			furalar.unmark_arrived(order_details, plate, self.sana, self)

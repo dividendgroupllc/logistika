@@ -25,3 +25,4 @@ class KZTruckLoading(Document):
 
 	def on_trash(self):
 		ombor_ledger.delete_ledger_for_document(self.doctype, self.name)
+		tannarx.release_source_ledger(self)

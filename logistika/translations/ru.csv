@@ -590,6 +590,7 @@ Zavoddan chiqish sanasi (reja),Дата выезда с завода (план)
 {0} ta mahsulot qatori hisoblashga qo'shilmadi (o'lcham topilmadi yoki miqdor juda kichik) — pastdagi ro'yxatga qarang.,Строк товаров не включено в расчёт: {0} (размер не найден или количество слишком мало) — см. список ниже.
 {0} ta mahsulot turi furaga sig'madi — pastdagi ro'yxatga qarang.,Видов товаров не поместилось в фуру: {0} — см. список ниже.
 {0} turidagi oddiy (papka bo'lmagan) hisob bo'lishi kerak,Должен быть обычный (не групповой) счёт типа {0}
+{0} {1} xarajatlari hali ochiq ({2}) — avval hujjatni bekor qiling.,Расходы {0} {1} ещё открыты ({2}) — сначала отмените документ.
 {0} — KZ fura: {1} — Truck: {2} ({3}×{4}×{5} sm) — {6},{0} — KZ фура: {1} — Фура: {2} ({3}×{4}×{5} см) — {6}
 {0} — status tarixi,{0} — история статусов
 {0}-qator,Строка {0}

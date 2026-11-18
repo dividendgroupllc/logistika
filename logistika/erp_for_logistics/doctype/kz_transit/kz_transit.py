@@ -28,3 +28,4 @@ class KZTransit(Document):
 	def on_trash(self):
 		tannarx.undo_delivery(self)
 		tannarx.cancel_source_costs(self.doctype, self.name)
+		tannarx.release_source_ledger(self)

@@ -396,3 +396,35 @@ class TestTannarx(FrappeTestCase):
 			frappe.delete_doc("Order Detail", od.name)
 		self.assertIn("Warehouse Intake", str(ctx.exception))
 		self.assertTrue(frappe.db.exists("Order Detail", od.name))
+
+	def test_order_detail_can_be_deleted_after_intake_cancelled(self):
+		od = self._od(20, xitoy_fura_summasi=1400, sugurta=700)
+		wi = self._intake([(od, 100)], costs=300)
+		pi = fura(od.reload()).fura_pi
+		wi.cancel()
+		wi.delete()  # bekor qilingan hujjat ham havola — Frappe'da avval o'chiriladi
+		frappe.get_doc("Ichki Deklaratsiya", fura(od.reload()).ichki_deklaratsiya).delete()
+		frappe.delete_doc("Order Detail", od.name)
+		self.assertFalse(frappe.db.exists("Order Detail", od.name))
+		self.assertEqual(frappe.db.get_value("Purchase Invoice", pi, "docstatus"), 2)
+		self.assertFalse(frappe.db.exists("GL Entry", {"order_detail": od.name}))
+
+	def test_active_accounting_document_blocks_delete_with_clear_message(self):
+		od = self._od(20)
+		je = frappe.get_doc(
+			{
+				"doctype": "Journal Entry",
+				"company": tannarx.get_company(),
+				"posting_date": today(),
+				"accounts": [
+					{"account": self.acc.wip_sugurta_hisobi, "debit_in_account_currency": 10, "order_detail": od.name},
+					{"account": frappe.db.get_single_value("Logistika Settings", "sugurta_tolov_hisobi"), "credit_in_account_currency": 10},
+				],
+			}
+		).insert(ignore_permissions=True)
+		je.submit()
+		frappe.get_doc("Ichki Deklaratsiya", fura(od.reload()).ichki_deklaratsiya).delete()
+		with self.assertRaises(frappe.ValidationError) as ctx:
+			frappe.delete_doc("Order Detail", od.name)
+		self.assertIn(je.name, str(ctx.exception))
+		self.assertNotIn("GL Entry", str(ctx.exception))

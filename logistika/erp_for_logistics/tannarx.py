@@ -408,42 +408,145 @@ def sync_order_detail(od):
 		cancel_source_costs(furalar.CHILD, name, source_deleted=True)
 
 
+def _dimension_doctypes():
+	""""Order Detail" accounting dimension maydoni (order_detail) bor doctype'lar."""
+	doctypes = frappe.get_all(
+		"Custom Field", filters={"fieldname": "order_detail", "fieldtype": "Link", "options": "Order Detail"}, pluck="dt"
+	)
+	return [
+		dt
+		for dt in doctypes
+		if not frappe.get_meta(dt).issingle and not frappe.get_meta(dt).is_virtual and frappe.db.table_exists(dt)
+	]
+
+
+def _source_is_active(doctype, name):
+	if doctype in ("Order Detail", furalar.CHILD):
+		return False
+	if not frappe.db.exists(doctype, name):
+		return False
+	return not frappe.get_meta(doctype).is_submittable or frappe.db.get_value(doctype, name, "docstatus") == 1
+
+
 def delete_order_detail_costs(od):
-	"""Order Detail o'chirilmoqda. Faqat uning o'z xarajatlari (Konteyner, furalar
-	Sug'urtasi) bo'lsa — ularning JE'lari bekor qilinadi va "Tannarx Harakati" yozuvlari
-	o'chiriladi. Yuk omborga kelgan / yuklangan / yetkazilgan bo'lsa (boshqa hujjatlarning
-	yozuvlari) — avval o'sha hujjatlarni bekor qilish kerak."""
+	"""Order Detail o'chirilmoqda — unga bog'langan buxgalteriya izlarini bo'shatadi.
+
+	- O'z xarajatlari (Konteyner, furalar Sug'urtasi): JE'lar bekor qilinadi.
+	- Bekor qilingan manba hujjatlar (masalan bekor qilingan Warehouse Intake) — ularning
+	  yozuvlari shu Order Detail bo'yicha nolga teng; hujjatlari shu Order Detail'dan uziladi.
+	- Faol (submit qilingan) manba hujjat bo'lsa yoki nolga teng bo'lmasa — o'chirilmaydi.
+	Keyin barcha bekor qilingan hujjatlardagi "Order Detail" dimension belgisi tozalanadi;
+	hali faol buxgalteriya hujjati qolsa — qaysi ekanini aytib to'xtatiladi."""
 	rows = frappe.get_all(
-		LEDGER, filters={"order_detail": od.name}, fields=["name", "manba_doctype", "manba_name", "voucher_type", "voucher_no"]
+		LEDGER,
+		filters={"order_detail": od.name},
+		fields=["name", "manba_doctype", "manba_name", "voucher_type", "voucher_no", "summa", "turi"],
 	)
 	own = {od.doctype, furalar.CHILD}
-	foreign = sorted({(r.manba_doctype, r.manba_name) for r in rows if r.manba_doctype not in own})
-	if foreign:
+	by_source = {}
+	for r in rows:
+		by_source.setdefault((r.manba_doctype, r.manba_name), []).append(r)
+	blocked, detach = [], set()
+	for (dt, name), source_rows in by_source.items():
+		if dt in own:
+			continue
+		balance = sum(flt(r.summa) * (-1 if r.turi == "Chiqim" else 1) for r in source_rows)
+		if _source_is_active(dt, name) or abs(balance) > 0.01:
+			blocked.append(f"{_(dt)} {name}")
+		else:
+			detach.update(r.voucher_no for r in source_rows if r.voucher_no)
+	if blocked:
 		frappe.throw(
-			_("Order Detail'ni o'chirib bo'lmaydi — avval quyidagi hujjatlarni bekor qiling: {0}").format(
-				", ".join(f"{_(dt)} {name}" for dt, name in foreign)
-			)
+			_("Order Detail'ni o'chirib bo'lmaydi — avval quyidagi hujjatlarni bekor qiling: {0}").format(", ".join(sorted(blocked)))
 		)
-	vouchers = {(r.voucher_type, r.voucher_no) for r in rows if r.voucher_no}
-	for voucher in vouchers:
-		_cancel_voucher(*voucher)
-	if vouchers:
-		# Bekor qilingan JE va GL yozuvlari hisobotlarga kirmaydi, lekin ulardagi "Order
-		# Detail" dimension havolasi o'chirishni to'sadi (Frappe bekor qilingan hujjatdagi
-		# havolani ham hisobga oladi) — faqat shu bekor qilingan yozuvlarda tozalanadi.
-		values = {"od": od.name, "vouchers": tuple(v[1] for v in vouchers)}
-		frappe.db.sql(
-			"""update `tabJournal Entry Account` set order_detail = null
-			where docstatus = 2 and order_detail = %(od)s and parent in %(vouchers)s""",
-			values,
-		)
-		frappe.db.sql(
-			"""update `tabGL Entry` set order_detail = null
-			where is_cancelled = 1 and order_detail = %(od)s and voucher_no in %(vouchers)s""",
-			values,
-		)
+
+	for r in rows:
+		if r.manba_doctype in own and r.voucher_no:
+			_cancel_voucher(r.voucher_type, r.voucher_no)
+	_release_dimension(od.name, detach)
 	for r in rows:
 		frappe.delete_doc(LEDGER, r.name, ignore_permissions=True, force=True)
+	_assert_no_active_accounting(od.name)
+
+
+def release_source_ledger(doc):
+	"""Bekor qilingan (yoki o'chirilayotgan, xarajatlari teskari yozilgan) manba hujjat
+	o'chirilmoqda: uning "Tannarx Harakati" yozuvlari (har bir Order Detail bo'yicha nolga
+	teng) o'chiriladi va JE'laridagi "Order Detail" belgisi tozalanadi — aks holda bu
+	yozuvlar hujjatni ham, Order Detail'ni ham o'chirishga to'sqinlik qiladi."""
+	rows = frappe.get_all(
+		LEDGER,
+		filters={"manba_doctype": doc.doctype, "manba_name": doc.name},
+		fields=["name", "order_detail", "voucher_no", "summa", "turi"],
+	)
+	if not rows:
+		return
+	balance = {}
+	for r in rows:
+		balance[r.order_detail] = balance.get(r.order_detail, 0) + flt(r.summa) * (-1 if r.turi == "Chiqim" else 1)
+	open_ods = [od for od, value in balance.items() if abs(value) > 0.01]
+	if open_ods:
+		frappe.throw(
+			_("{0} {1} xarajatlari hali ochiq ({2}) — avval hujjatni bekor qiling.").format(
+				_(doc.doctype), doc.name, ", ".join(open_ods)
+			)
+		)
+	vouchers = {r.voucher_no for r in rows if r.voucher_no}
+	for order_detail in balance:
+		_release_dimension(order_detail, vouchers, cancelled=False)
+	for r in rows:
+		frappe.delete_doc(LEDGER, r.name, ignore_permissions=True, force=True)
+
+
+def _release_dimension(order_detail, detach_vouchers, cancelled=True):
+	"""Bekor qilingan hujjatlardagi (va `detach_vouchers` — nolga teng bekor qilingan
+	manbalarning yozuvlaridagi) "Order Detail" belgisini tozalaydi: ular hisobotlarga
+	ta'sir qilmaydi, lekin Frappe havolani (bekor qilingan bo'lsa ham) o'chirishga to'siq
+	deb hisoblaydi."""
+	vouchers = tuple(detach_vouchers) or ("",)
+	for dt in _dimension_doctypes():
+		meta = frappe.get_meta(dt)
+		table = f"`tab{dt}`"
+		values = {"od": order_detail, "vouchers": vouchers}
+		if dt == "GL Entry":
+			field, cancelled_condition = "voucher_no", "is_cancelled = 1"
+		elif dt == "Payment Ledger Entry":
+			field, cancelled_condition = "voucher_no", "delinked = 1"
+		elif meta.istable:
+			field, cancelled_condition = "parent", "docstatus = 2"
+		elif meta.is_submittable:
+			field, cancelled_condition = "name", "docstatus = 2"
+		else:
+			continue
+		condition = f"({cancelled_condition} or {field} in %(vouchers)s)" if cancelled else f"{field} in %(vouchers)s"
+		frappe.db.sql(f"update {table} set order_detail = null where order_detail = %(od)s and {condition}", values)
+
+
+def _assert_no_active_accounting(order_detail):
+	active = []
+	for dt in _dimension_doctypes():
+		meta = frappe.get_meta(dt)
+		if dt in ("GL Entry", "Payment Ledger Entry"):
+			found = frappe.db.sql(
+				f"select distinct voucher_type, voucher_no from `tab{dt}` where order_detail = %s", order_detail
+			)
+		elif meta.istable:
+			found = frappe.db.sql(
+				f"select distinct parenttype, parent from `tab{dt}` where order_detail = %s and docstatus < 2", order_detail
+			)
+		elif meta.is_submittable:
+			found = [(dt, n) for n in frappe.db.sql_list(
+				f"select name from `tab{dt}` where order_detail = %s and docstatus < 2", order_detail
+			)]
+		else:
+			continue
+		active.extend(found)
+	if active:
+		frappe.throw(
+			_("Order Detail'ni o'chirib bo'lmaydi — avval quyidagi hujjatlarni bekor qiling: {0}").format(
+				", ".join(sorted({f"{_(dt)} {name}" for dt, name in active}))
+			)
+		)
 
 
 def _require_wip_settings():
