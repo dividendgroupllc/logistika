@@ -28,8 +28,19 @@ logistika.order_chat.render_bubbles = function ($log, messages) {
 			// asl matni + ruscha tarjima kichik harflarda.
 			let main_text = m.matn;
 			let sub = "";
-			if (mine && m.tarjima) {
-				sub = `<div style="font-size:11px; color:#6b7280; margin-top:2px;">(${frappe.utils.escape_html(m.tarjima)})</div>`;
+			if (mine) {
+				const status =
+					m.holat === "Navbatda"
+						? `⏳ ${__("yuborilmoqda...")}`
+						: m.holat === "Yuborilmadi"
+						? `<span style="color:#dc2626;">⚠️ ${__("yuborilmadi")}</span>`
+						: m.tarjima_xato
+						? `<span style="color:#d97706;">⚠️ ${__("tarjimasiz yuborildi")}</span>`
+						: "";
+				const translation = m.tarjima && m.tarjima !== m.matn ? `(${frappe.utils.escape_html(m.tarjima)})` : "";
+				if (status || translation) {
+					sub = `<div style="font-size:11px; color:#6b7280; margin-top:2px;">${translation} ${status}</div>`;
+				}
 			} else if (!mine) {
 				main_text = m.tarjima_xitoycha || m.matn;
 				const parts = [`🇺🇿 ${frappe.utils.escape_html(m.matn)}`];
@@ -48,22 +59,6 @@ logistika.order_chat.render_bubbles = function ($log, messages) {
 	$log.scrollTop($log[0].scrollHeight);
 };
 
-// send_staff_reply() muvaffaqiyatli qaytsa ham, xabar mijozga YETIB BORMAGAN yoki
-// TARJIMASIZ ketgan bo'lishi mumkin — bu holatlarda xodim jimgina "yuborildi" deb
-// o'ylab qolmasligi uchun ogohlantiramiz.
-logistika.order_chat.warn_on_send_result = function (result) {
-	if (!result) return;
-	if (result.sent_to === 0) {
-		frappe.msgprint(
-			__("Xabar saqlandi, lekin mijozning ro'yxatdan o'tgan Telegram kontakti topilmadi — hech kimga yuborilmadi.")
-		);
-	} else if (result.translated_ok === false) {
-		frappe.msgprint(
-			__("Tarjima ishlamadi (Kimi xatosi) — xabar ASL (tarjimasiz) matnda mijozga yuborildi.")
-		);
-	}
-};
-
 // Ombor/order sahifasida bitta hujjatni tahrirlash paytida (masalan bitta maydonni
 // o'zgartirish) butun jadval-ko'rinishi ko'p marta qayta chiziladi (render_orders_summary
 // ~15 xil hodisadan chaqiriladi) — shu chizishlarning HAR birida chat logini qaytadan
@@ -78,7 +73,9 @@ const ORDER_CHAT_PENDING_POLL_MS = 3000;
 const ORDER_CHAT_PENDING_POLL_MAX_TRIES = 8; // ~24s, background job odatda shundan oldinroq tugaydi
 
 function _order_chat_has_pending_translation(messages) {
-	return messages.some((m) => m.sender === "Mijoz" && !m.tarjima_xitoycha && !m.tarjima_ruscha);
+	return messages.some(
+		(m) => (m.sender === "Mijoz" && !m.tarjima_xitoycha && !m.tarjima_ruscha) || m.holat === "Navbatda"
+	);
 }
 
 // Bitta order uchun: log'ni (kesh yangi bo'lmasa yoki force=true bo'lsa serverdan) olib,
@@ -122,9 +119,10 @@ logistika.order_chat.send_reply = function (order_name, $input, $log, $btn) {
 	frappe.call({
 		method: "logistika.erp_for_logistics.order_chat.send_staff_reply",
 		args: { order: order_name, message },
-		callback: (r) => {
+		callback: () => {
+			// Tarjima va Telegram'ga yuborish fonda — xabar "⏳ yuborilmoqda" bo'lib chiqadi,
+			// natija realtime orqali keladi.
 			$input.val("");
-			logistika.order_chat.warn_on_send_result(r.message);
 			logistika.order_chat.load_and_render($log, order_name, true);
 		},
 		always: () => $btn.prop("disabled", false),
@@ -240,3 +238,18 @@ frappe.realtime.on("logistika_chat_message", (data) => {
 	}
 	if (cur_list && cur_list.doctype === "Order") cur_list.refresh();
 });
+
+// Fonda yuborilgan xodim javobi mijozga yetmasa yoki tarjimasiz ketsa — yuborgan xodimga.
+frappe.realtime.on("logistika_chat_reply_status", (data) => {
+	if (!data) return;
+	if (!data.sent_to) {
+		frappe.msgprint(
+			__("{0}: javob saqlandi, lekin mijozga yuborilmadi — ro'yxatdan o'tgan Telegram kontakti yo'q yoki Telegram xatosi.", [data.order])
+		);
+	} else if (data.translated_ok === false) {
+		frappe.show_alert({ message: __("{0}: tarjima ishlamadi — javob asl matnda yuborildi.", [data.order]), indicator: "orange" });
+	}
+	const $log = logistika.order_chat._panels && logistika.order_chat._panels[data.order];
+	if ($log) logistika.order_chat.load_and_render($log, data.order, true);
+});
+

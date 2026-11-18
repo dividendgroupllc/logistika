@@ -10,6 +10,8 @@
   "cb_top",
   "xodim",
   "telegram_chat_id",
+  "holat",
+  "tarjima_xato",
   "sec_matn",
   "matn",
   "tarjima",
@@ -53,6 +55,21 @@
    "read_only": 1
   },
   {
+   "fieldname": "holat",
+   "fieldtype": "Select",
+   "options": "\nNavbatda\nYuborildi\nYuborilmadi",
+   "label": "Holat",
+   "read_only": 1,
+   "in_list_view": 1,
+   "description": "Xodim javobi: fonda tarjima qilinib Telegram'ga yuborilishi holati"
+  },
+  {
+   "fieldname": "tarjima_xato",
+   "fieldtype": "Check",
+   "label": "Tarjima ishlamadi (asl matn yuborildi)",
+   "read_only": 1
+  },
+  {
    "fieldname": "sec_matn",
    "fieldtype": "Section Break"
   },
@@ -88,7 +105,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-17 00:00:00.000000",
+ "modified": "2026-11-18 23:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Order Chat Message",

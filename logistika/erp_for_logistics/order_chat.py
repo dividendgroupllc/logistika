@@ -233,15 +233,17 @@ def get_order_chat_log(order):
 	return frappe.get_all(
 		"Order Chat Message",
 		filters={"order": order},
-		fields=["name", "sender", "matn", "tarjima", "tarjima_xitoycha", "tarjima_ruscha", "creation", "xodim"],
+		fields=["name", "sender", "matn", "tarjima", "tarjima_xitoycha", "tarjima_ruscha", "creation", "xodim", "holat", "tarjima_xato"],
 		order_by="creation asc",
 	)
 
 
 @frappe.whitelist()
 def send_staff_reply(order, message):
-	"""Xodim ERP'dan yozgan javobni saqlaydi, mijozning oxirgi xabari qaysi tilda
-	bo'lsa o'sha tilga tarjima qilib, Telegram orqali mijozga yuboradi."""
+	"""Xodim javobini darhol saqlaydi va fon vazifasini navbatga qo'yadi: mijozning oxirgi
+	xabari tilini aniqlash, tarjima (Kimi) va Telegram'ga yuborish — sekin Kimi so'rovi
+	xodimning brauzer so'rovini ushlab turmasligi uchun. Natija Order Chat Message.holat'ga
+	yoziladi va xodimga realtime xabar qilinadi."""
 	frappe.has_permission("Order Chat Message", "write", throw=True)
 	frappe.has_permission("Order", "read", doc=order, throw=True)
 	message = (message or "").strip()
@@ -250,29 +252,6 @@ def send_staff_reply(order, message):
 	if not frappe.db.exists("Order", order):
 		frappe.throw(f'"{order}" nomli Order topilmadi')
 
-	last_customer = frappe.db.get_value(
-		"Order Chat Message",
-		{"order": order, "sender": "Mijoz"},
-		["matn", "telegram_chat_id"],
-		order_by="creation desc",
-		as_dict=True,
-	) or frappe._dict()
-	last_customer_msg = last_customer.matn
-
-	translated = message
-	translated_ok = True
-	if last_customer_msg:
-		target_language = _detect_language(last_customer_msg)
-		result = _translate(message, target_language) if target_language else None
-		if result:
-			translated = result
-		else:
-			# Til aniqlanmadi yoki tarjima ishlamadi — asl (tarjimasiz) matn yuboriladi,
-			# chunki jim qolgandan ko'ra tushunarsiz bo'lsa ham xabar yetib borgani ma'qul.
-			# Lekin xodim buni bilishi kerak (translated_ok=False), aks holda mijoz o'qiy
-			# olmaydigan tilda javob ketganini sezmay qoladi.
-			translated_ok = False
-
 	doc = frappe.get_doc(
 		{
 			"doctype": "Order Chat Message",
@@ -280,23 +259,70 @@ def send_staff_reply(order, message):
 			"sender": "Xodim",
 			"xodim": frappe.session.user,
 			"matn": message,
-			"tarjima": translated,
+			"holat": "Navbatda",
 		}
 	)
 	doc.insert(ignore_permissions=True)
+	frappe.db.commit()
+	frappe.enqueue(
+		"logistika.erp_for_logistics.order_chat.deliver_staff_reply",
+		queue="short",
+		doc_name=doc.name,
+		enqueue_after_commit=True,
+	)
+	return {"name": doc.name, "holat": doc.holat}
 
-	# Javob savol bergan chatga boradi (u hali shu mijozga ulangan bo'lsa); aks holda
-	# mijozning barcha ulangan chatlariga. Matn oddiy (parse_mode yo'q) — xodim yoki
-	# tarjima matnidagi "<", "&" xabarni buzmasligi uchun.
-	chat_ids = get_order_chat_ids(order)
+
+def deliver_staff_reply(doc_name):
+	"""Fon vazifasi: xodim javobini mijoz tiliga tarjima qilib, savol bergan chatga (yoki
+	mijozning barcha ulangan chatlariga) oddiy matn sifatida yuboradi."""
+	doc = frappe.get_doc("Order Chat Message", doc_name)
+	if doc.holat != "Navbatda":
+		return
+
+	last_customer = frappe.db.get_value(
+		"Order Chat Message",
+		{"order": doc.order, "sender": "Mijoz"},
+		["matn", "telegram_chat_id"],
+		order_by="creation desc",
+		as_dict=True,
+	) or frappe._dict()
+
+	translated, translated_ok = doc.matn, True
+	if last_customer.matn:
+		try:
+			target_language = _detect_language(last_customer.matn)
+			result = _translate(doc.matn, target_language) if target_language else None
+		except Exception:
+			result = None
+			frappe.log_error(title=f"Chat tarjima xatosi: {doc_name}", message=frappe.get_traceback())
+		if result:
+			translated = result
+		else:
+			translated_ok = False
+
+	# Javob savol bergan chatga (u hali shu mijozga ulangan bo'lsa), aks holda mijozning
+	# barcha ulangan chatlariga. parse_mode yo'q — "<", "&" xabarni buzmasligi uchun.
+	chat_ids = get_order_chat_ids(doc.order)
 	if last_customer.telegram_chat_id in chat_ids:
 		chat_ids = [last_customer.telegram_chat_id]
-	sent = 0
-	for chat_id in chat_ids:
-		if send_message(chat_id, translated, parse_mode=None):
-			sent += 1
-	if sent:
-		frappe.db.set_value("Order", order, "javob_kutilmoqda", 0, update_modified=False)
+	sent = sum(1 for chat_id in chat_ids if send_message(chat_id, translated, parse_mode=None))
 
+	holat = "Yuborildi" if sent else "Yuborilmadi"
+	frappe.db.set_value(
+		"Order Chat Message",
+		doc_name,
+		{"tarjima": translated, "holat": holat, "tarjima_xato": int(not translated_ok)},
+		update_modified=False,
+	)
+	if sent:
+		frappe.db.set_value("Order", doc.order, "javob_kutilmoqda", 0, update_modified=False)
 	frappe.db.commit()
-	return {"name": doc.name, "tarjima": translated, "sent_to": sent, "translated_ok": translated_ok}
+
+	frappe.publish_realtime("logistika_chat_message", {"order": doc.order})
+	if not sent or not translated_ok:
+		frappe.publish_realtime(
+			"logistika_chat_reply_status",
+			{"order": doc.order, "holat": holat, "sent_to": sent, "translated_ok": translated_ok},
+			user=doc.xodim or doc.owner,
+		)

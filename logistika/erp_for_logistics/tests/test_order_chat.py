@@ -25,11 +25,34 @@ class TestOrderChat(FrappeTestCase):
 		with patch("frappe.db.commit"), patch("frappe.enqueue"), patch("frappe.publish_realtime"):
 			self.assertTrue(order_chat.save_customer_message(self.order.name, "1", "Salom"))
 		self.assertEqual(self._flag(), 1)
-		with patch("frappe.db.commit"), patch.object(order_chat, "_detect_language", return_value=None), patch.object(
+		with patch("frappe.db.commit"), patch("frappe.enqueue") as enqueue, patch("frappe.publish_realtime"):
+			result = order_chat.send_staff_reply(self.order.name, "Assalomu alaykum")
+		self.assertEqual(frappe.db.get_value("Order Chat Message", result["name"], "holat"), "Navbatda")
+		self.assertEqual(self._flag(), 1)  # hali yetkazilmagan
+		self.assertEqual(enqueue.call_args.kwargs["doc_name"], result["name"])
+
+		with patch("frappe.db.commit"), patch("frappe.publish_realtime"), patch.object(
+			order_chat, "_detect_language", return_value="uz"
+		), patch.object(order_chat, "_translate", return_value="Tarjima"), patch.object(
 			order_chat, "get_order_chat_ids", return_value=["1"]
-		), patch.object(order_chat, "send_message", return_value=True), patch("frappe.publish_realtime"):
-			order_chat.send_staff_reply(self.order.name, "Assalomu alaykum")
+		), patch.object(order_chat, "send_message", return_value=True):
+			order_chat.deliver_staff_reply(result["name"])
+		msg = frappe.db.get_value("Order Chat Message", result["name"], ["holat", "tarjima"], as_dict=True)
+		self.assertEqual((msg.holat, msg.tarjima), ("Yuborildi", "Tarjima"))
 		self.assertEqual(self._flag(), 0)
+
+	def test_delivery_failure_is_reported(self):
+		with patch("frappe.db.commit"), patch("frappe.enqueue"), patch("frappe.publish_realtime"):
+			name = order_chat.send_staff_reply(self.order.name, "Javob")["name"]
+		frappe.db.set_value("Order", self.order.name, "javob_kutilmoqda", 1)
+		with patch("frappe.db.commit"), patch("frappe.publish_realtime") as realtime, patch.object(
+			order_chat, "get_order_chat_ids", return_value=[]
+		):
+			order_chat.deliver_staff_reply(name)
+		self.assertEqual(frappe.db.get_value("Order Chat Message", name, "holat"), "Yuborilmadi")
+		self.assertEqual(self._flag(), 1)
+		events = [c.args[0] for c in realtime.call_args_list]
+		self.assertIn("logistika_chat_reply_status", events)
 
 	def test_owner_notified_via_order_detail(self):
 		with patch("frappe.db.commit"), patch("frappe.enqueue"), patch("frappe.publish_realtime"), patch(

@@ -202,10 +202,14 @@ class TestStaffReply(FrappeTestCase):
 		from logistika.erp_for_logistics import order_chat
 
 		frappe.db.set_value("Order", self.order.name, "javob_kutilmoqda", 1)
-		with patch("frappe.db.commit"), patch.object(order_chat, "_detect_language", return_value=None), patch.object(
-			order_chat, "get_order_chat_ids", return_value=["1"]
-		), patch.object(order_chat, "send_message", return_value=False) as send:
-			result = order_chat.send_staff_reply(self.order.name, "<5 t & ok")
-		self.assertEqual(result["sent_to"], 0)
+		with patch("frappe.db.commit"), patch("frappe.enqueue"), patch("frappe.publish_realtime"):
+			name = order_chat.send_staff_reply(self.order.name, "<5 t & ok")["name"]
+		with patch("frappe.db.commit"), patch("frappe.publish_realtime"), patch.object(
+			order_chat, "_detect_language", return_value=None
+		), patch.object(order_chat, "get_order_chat_ids", return_value=["1"]), patch.object(
+			order_chat, "send_message", return_value=False
+		) as send:
+			order_chat.deliver_staff_reply(name)
 		self.assertEqual(send.call_args.kwargs.get("parse_mode"), None)
+		self.assertEqual(send.call_args.args[1], "<5 t & ok")
 		self.assertEqual(frappe.db.get_value("Order", self.order.name, "javob_kutilmoqda"), 1)
