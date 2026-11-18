@@ -6,7 +6,8 @@ from frappe.tests.utils import FrappeTestCase
 from logistika.api import telegram_webhook as wh
 from logistika.erp_for_logistics.doctype.order_detail.test_order_detail import make_order_detail
 from logistika.erp_for_logistics.tests.utils import make_order, setup_logistika_settings
-from logistika.telegram.messages import render
+from logistika.telegram.keyboards import MENU_LANG, MENU_QA, MENU_UPLOAD
+from logistika.telegram.messages import ALREADY_LINKED, ASK_PHONE, LANGUAGE_SET, render
 
 SECRET = "test-secret-123"
 
@@ -98,7 +99,7 @@ class TestTelegramWebhook(FrappeTestCase):
 		with patch(SEND) as send:
 			self._share_phone(111, "+998907654321", 40)
 		self.assertEqual(frappe.db.get_value("Contact", self.contact, "telegram_chat_id"), "111")
-		self.assertIn("_T TG Mijoz", send.call_args.args[1])
+		self.assertTrue(any("_T TG Mijoz" in c.args[1] for c in send.call_args_list))
 
 	def test_same_phone_two_customers_not_linked(self):
 		self._contact("_T TG Begona", "+998 90 765 43 21", make_order(kliyent="_T TG Boshqa").kliyent)
@@ -126,9 +127,90 @@ class TestTelegramWebhook(FrappeTestCase):
 		self.assertEqual(frappe.db.get_value("Contact", other, "telegram_chat_id"), "333")
 		self.assertIn("111", [str(c.args[0]) for c in send.call_args_list])
 
+	# ---------- til ----------
+	def test_language_keyboard_after_registration(self):
+		with patch(SEND) as send:
+			self._share_phone(121, "+998907654321", 100)
+		markups = [c.kwargs.get("reply_markup") or {} for c in send.call_args_list]
+		callbacks = [b["callback_data"] for m in markups for row in m.get("inline_keyboard", []) for b in row]
+		self.assertEqual(sorted(callbacks), ["lang:en", "lang:ru", "lang:uz"])
+
+	def _callback(self, chat_id, update_id, data):
+		return wh.process_update(
+			{
+				"update_id": update_id,
+				"callback_query": {
+					"id": "cb",
+					"data": data,
+					"from": {"id": chat_id},
+					"message": {"chat": {"id": chat_id, "type": "private"}},
+				},
+			},
+			SECRET,
+		)
+
+	def test_language_callback_saves_and_is_used(self):
+		frappe.db.set_value("Contact", self.contact, "telegram_chat_id", "131")
+		with patch(SEND) as send, patch.object(wh, "answer_callback_query"):
+			self._callback(131, 110, "lang:ru")
+		self.assertEqual(frappe.db.get_value("Contact", self.contact, "telegram_til"), "ru")
+		self.assertEqual(send.call_args.args[1], LANGUAGE_SET["ru"])
+		with patch(SEND) as send:
+			wh.process_update(private_message(131, 111, text="/start"), SECRET)
+		self.assertEqual(send.call_args.args[1], ALREADY_LINKED["ru"])
+		self.assertEqual(send.call_args.kwargs["reply_markup"]["keyboard"][0][0]["text"], MENU_UPLOAD["ru"])
+
+	def test_language_callback_rejects_unknown_and_unlinked(self):
+		frappe.db.set_value("Contact", self.contact, "telegram_chat_id", "141")
+		with patch(SEND), patch.object(wh, "answer_callback_query"):
+			self._callback(141, 120, "lang:xx")
+			self._callback(999141, 121, "lang:ru")
+		self.assertFalse(frappe.db.get_value("Contact", self.contact, "telegram_til"))
+
+	def test_old_customer_without_language_gets_uzbek(self):
+		frappe.db.set_value("Contact", self.contact, "telegram_chat_id", "151")
+		with patch(SEND) as send:
+			wh.process_update(private_message(151, 130, text="/start"), SECRET)
+		self.assertEqual(send.call_args.args[1], ALREADY_LINKED["uz"])
+
+	def test_unlinked_user_sees_all_languages(self):
+		with patch(SEND) as send:
+			wh.process_update(private_message(161, 140, text="/start"), SECRET)
+		text = send.call_args.args[1]
+		for lang in ("uz", "ru", "en"):
+			self.assertIn(ASK_PHONE[lang], text)
+
+	def test_menu_buttons_recognized_in_any_language(self):
+		frappe.db.set_value("Contact", self.contact, "telegram_chat_id", "171")
+		with patch.object(wh, "_cmd_qa_start") as qa:
+			wh.process_update(private_message(171, 150, text=MENU_QA["en"]), SECRET)
+		qa.assert_called_once()
+		with patch.object(wh, "_send_language_choice") as choose:
+			wh.process_update(private_message(171, 151, text=MENU_LANG), SECRET)
+			wh.process_update(private_message(171, 152, text="/til"), SECRET)
+		self.assertEqual(choose.call_count, 2)
+
+	def test_all_templates_have_three_languages_with_same_placeholders(self):
+		import string
+
+		from logistika.telegram import messages
+
+		for name, value in vars(messages).items():
+			if name.isupper() and isinstance(value, dict):
+				self.assertEqual(set(value), {"uz", "ru", "en"}, name)
+				fields = {lang: {f[1] for f in string.Formatter().parse(t) if f[1]} for lang, t in value.items()}
+				self.assertEqual(fields["uz"], fields["ru"], name)
+				self.assertEqual(fields["uz"], fields["en"], name)
+
 	# ---------- escaping ----------
 	def test_render_escapes_html(self):
 		self.assertEqual(render("<b>{order}</b>", order="A&B <1>"), "<b>A&amp;B &lt;1&gt;</b>")
+
+	def test_render_picks_language_with_uz_fallback(self):
+		template = {"uz": "Salom {x}", "ru": "Привет {x}", "en": "Hi {x}"}
+		self.assertEqual(render(template, "ru", x="<a>"), "Привет &lt;a&gt;")
+		self.assertEqual(render(template, "xx", x="a"), "Salom a")
+		self.assertEqual(render(template, None, x="a"), "Salom a\n\nПривет a\n\nHi a")
 
 	# ---------- upload ----------
 	def _ld_with_pending_upload(self, chat_id):
@@ -213,3 +295,155 @@ class TestStaffReply(FrappeTestCase):
 		self.assertEqual(send.call_args.kwargs.get("parse_mode"), None)
 		self.assertEqual(send.call_args.args[1], "<5 t & ok")
 		self.assertEqual(frappe.db.get_value("Order", self.order.name, "javob_kutilmoqda"), 1)
+
+	def test_staff_reply_translated_to_chosen_language(self):
+		from logistika.erp_for_logistics import order_chat
+
+		contact = frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": "_T TG Til",
+				"telegram_chat_id": "5151",
+				"telegram_til": "en",
+				"links": [{"link_doctype": "Customer", "link_name": self.order.kliyent}],
+			}
+		).insert(ignore_permissions=True)
+		with patch("frappe.db.commit"), patch("frappe.enqueue"), patch("frappe.publish_realtime"):
+			name = order_chat.send_staff_reply(self.order.name, "Yukingiz yo'lda")["name"]
+		with patch("frappe.db.commit"), patch("frappe.publish_realtime"), patch.object(
+			order_chat, "_detect_language"
+		) as detect, patch.object(order_chat, "_translate", return_value="Your cargo is on the way") as tr, patch.object(
+			order_chat, "send_message", return_value=True
+		) as send:
+			order_chat.deliver_staff_reply(name)
+		detect.assert_not_called()
+		self.assertEqual(tr.call_args.args[1], "ingliz")
+		self.assertEqual(send.call_args.args, (contact.telegram_chat_id, "Your cargo is on the way"))
+
+
+class TestStaffReplyFailures(FrappeTestCase):
+	def setUp(self):
+		frappe.db.savepoint("tg_fail_test")
+		setup_logistika_settings()
+		self.order = make_order(kliyent="_T TG Xato")
+		self.contact = frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": "_T TG Xato",
+				"telegram_chat_id": "6161",
+				"telegram_til": "ru",
+				"links": [{"link_doctype": "Customer", "link_name": self.order.kliyent}],
+			}
+		).insert(ignore_permissions=True)
+		frappe.db.set_value("Order", self.order.name, "javob_kutilmoqda", 1)
+		self.patches = [patch("frappe.db.commit"), patch("frappe.publish_realtime"), patch("frappe.enqueue")]
+		for p in self.patches:
+			p.start()
+
+	def tearDown(self):
+		for p in self.patches:
+			p.stop()
+		frappe.db.rollback(save_point="tg_fail_test")
+
+	def _photo(self):
+		from io import BytesIO
+
+		from PIL import Image
+
+		buffer = BytesIO()
+		Image.new("RGB", (2, 2)).save(buffer, format="JPEG")
+		file = frappe.get_doc(
+			{
+				"doctype": "File",
+				"file_name": "yuk.jpg",
+				"is_private": 1,
+				"content": buffer.getvalue(),
+				"attached_to_doctype": "Order",
+				"attached_to_name": self.order.name,
+			}
+		).insert(ignore_permissions=True)
+		return file.file_url
+
+	def _deliver(self, name, translation, **kwargs):
+		from logistika.erp_for_logistics import order_chat
+
+		with patch.object(order_chat, "_translate", return_value=translation), patch.object(
+			order_chat, "send_message", return_value=True
+		) as send, patch.object(order_chat, "send_photo", return_value=True) as photo:
+			order_chat.deliver_staff_reply(name, **kwargs)
+		return send, photo
+
+	def test_translation_failure_not_sent(self):
+		from logistika.erp_for_logistics import order_chat
+
+		name = order_chat.send_staff_reply(self.order.name, "Yuk ertaga keladi")["name"]
+		send, _ = self._deliver(name, None)
+		send.assert_not_called()
+		self.assertEqual(frappe.db.get_value("Order Chat Message", name, "holat"), "Tarjima xato")
+		self.assertEqual(frappe.db.get_value("Order", self.order.name, "javob_kutilmoqda"), 1)
+
+	def test_resend_original_after_failure(self):
+		from logistika.erp_for_logistics import order_chat
+
+		name = order_chat.send_staff_reply(self.order.name, "Yuk ertaga keladi")["name"]
+		self._deliver(name, None)
+		order_chat.resend_original(name)
+		self.assertEqual(frappe.db.get_value("Order Chat Message", name, "holat"), "Navbatda")
+		send, _ = self._deliver(name, None, force_original=True)
+		self.assertEqual(send.call_args.args[:2], ("6161", "Yuk ertaga keladi"))
+		self.assertEqual(frappe.db.get_value("Order Chat Message", name, "holat"), "Yuborildi")
+
+	def test_resend_original_only_once(self):
+		from logistika.erp_for_logistics import order_chat
+
+		name = order_chat.send_staff_reply(self.order.name, "Yuk ertaga keladi")["name"]
+		self._deliver(name, None)
+		stale = frappe.get_doc("Order Chat Message", name)  # ikkinchi so'rov o'qigan eski holat
+		frappe.enqueue.reset_mock()
+		order_chat.resend_original(name)
+		with patch.object(order_chat, "_get_own_failed_message", return_value=stale):
+			with self.assertRaises(frappe.ValidationError):
+				order_chat.resend_original(name)
+		self.assertEqual(frappe.enqueue.call_count, 1)
+
+	def test_cancel_failed_message(self):
+		from logistika.erp_for_logistics import order_chat
+
+		name = order_chat.send_staff_reply(self.order.name, "Yuk ertaga keladi")["name"]
+		self._deliver(name, None)
+		order_chat.cancel_message(name)
+		self.assertEqual(frappe.db.get_value("Order Chat Message", name, "holat"), "Bekor qilindi")
+		with self.assertRaises(frappe.ValidationError):
+			order_chat.resend_original(name)
+
+	def test_photo_reply_uses_send_photo_with_translated_caption(self):
+		from logistika.erp_for_logistics import order_chat
+
+		url = self._photo()
+		name = order_chat.send_staff_reply(self.order.name, "Mana rasm", rasm=url)["name"]
+		send, photo = self._deliver(name, "Вот фото")
+		send.assert_not_called()
+		self.assertEqual(photo.call_args.args, ("6161", url))
+		self.assertEqual(photo.call_args.kwargs.get("caption"), "Вот фото")
+
+	def test_photo_without_caption(self):
+		from logistika.erp_for_logistics import order_chat
+
+		name = order_chat.send_staff_reply(self.order.name, "", rasm=self._photo())["name"]
+		_, photo = self._deliver(name, None)
+		self.assertEqual(photo.call_args.kwargs.get("caption"), None)
+		self.assertEqual(frappe.db.get_value("Order Chat Message", name, "holat"), "Yuborildi")
+
+	def test_photo_from_other_document_rejected(self):
+		from logistika.erp_for_logistics import order_chat
+
+		url = self._photo()
+		frappe.db.set_value("File", {"file_url": url}, "attached_to_name", "BOSHQA")
+		with self.assertRaises(frappe.ValidationError):
+			order_chat.send_staff_reply(self.order.name, "x", rasm=url)
+
+	def test_empty_reply_without_photo_rejected(self):
+		from logistika.erp_for_logistics import order_chat
+
+		with self.assertRaises(frappe.ValidationError):
+			order_chat.send_staff_reply(self.order.name, "  ")

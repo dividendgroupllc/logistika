@@ -15,7 +15,8 @@ import frappe
 
 from logistika.erp_for_logistics.kimi_client import chat as kimi_chat
 from logistika.erp_for_logistics.ld_telegram import get_order_chat_ids
-from logistika.telegram.sender import send_message
+from logistika.telegram.i18n import LANGUAGE_NAMES, chosen_language
+from logistika.telegram.sender import send_message, send_photo
 
 
 def _translate(text, target_language, timeout=60):
@@ -233,13 +234,27 @@ def get_order_chat_log(order):
 	return frappe.get_all(
 		"Order Chat Message",
 		filters={"order": order},
-		fields=["name", "sender", "matn", "tarjima", "tarjima_xitoycha", "tarjima_ruscha", "creation", "xodim", "holat", "tarjima_xato"],
+		fields=["name", "sender", "matn", "tarjima", "tarjima_xitoycha", "tarjima_ruscha", "creation", "xodim", "holat", "tarjima_xato", "rasm"],
 		order_by="creation asc",
 	)
 
 
+def _validate_reply_photo(order, rasm):
+	"""Rasm faqat shu Order'ga biriktirilgan fayl bo'lishi mumkin — xodim tizimdagi boshqa
+	shaxsiy fayllarni mijozga yubora olmasligi uchun."""
+	if not rasm:
+		return None
+	if not frappe.db.exists(
+		"File", {"file_url": rasm, "attached_to_doctype": "Order", "attached_to_name": order}
+	):
+		frappe.throw("Rasm shu Order'ga yuklangan bo'lishi kerak")
+	if rasm.rsplit(".", 1)[-1].lower() not in ("jpg", "jpeg", "png", "webp"):
+		frappe.throw("Faqat rasm (JPG, PNG, WEBP) yuborish mumkin")
+	return rasm
+
+
 @frappe.whitelist()
-def send_staff_reply(order, message):
+def send_staff_reply(order, message, rasm=None):
 	"""Xodim javobini darhol saqlaydi va fon vazifasini navbatga qo'yadi: mijozning oxirgi
 	xabari tilini aniqlash, tarjima (Kimi) va Telegram'ga yuborish — sekin Kimi so'rovi
 	xodimning brauzer so'rovini ushlab turmasligi uchun. Natija Order Chat Message.holat'ga
@@ -247,10 +262,11 @@ def send_staff_reply(order, message):
 	frappe.has_permission("Order Chat Message", "write", throw=True)
 	frappe.has_permission("Order", "read", doc=order, throw=True)
 	message = (message or "").strip()
-	if not message:
-		frappe.throw("Xabar bo'sh")
 	if not frappe.db.exists("Order", order):
 		frappe.throw(f'"{order}" nomli Order topilmadi')
+	rasm = _validate_reply_photo(order, rasm)
+	if not message and not rasm:
+		frappe.throw("Xabar bo'sh")
 
 	doc = frappe.get_doc(
 		{
@@ -259,6 +275,7 @@ def send_staff_reply(order, message):
 			"sender": "Xodim",
 			"xodim": frappe.session.user,
 			"matn": message,
+			"rasm": rasm,
 			"holat": "Navbatda",
 		}
 	)
@@ -273,9 +290,12 @@ def send_staff_reply(order, message):
 	return {"name": doc.name, "holat": doc.holat}
 
 
-def deliver_staff_reply(doc_name):
-	"""Fon vazifasi: xodim javobini mijoz tiliga tarjima qilib, savol bergan chatga (yoki
-	mijozning barcha ulangan chatlariga) oddiy matn sifatida yuboradi."""
+def deliver_staff_reply(doc_name, force_original=False):
+	"""Fon vazifasi: xodim javobini (va rasmini) mijoz tiliga tarjima qilib, savol bergan
+	chatga (yoki mijozning barcha ulangan chatlariga) oddiy matn sifatida yuboradi.
+
+	Tarjima ishlamasa javob YUBORILMAYDI — holat "Tarjima xato", xodimdan aniqroq qilib
+	qayta yozish so'raladi (yoki u "Asl matnda yuborish"ni tanlaydi — force_original)."""
 	doc = frappe.get_doc("Order Chat Message", doc_name)
 	if doc.holat != "Navbatda":
 		return
@@ -288,31 +308,33 @@ def deliver_staff_reply(doc_name):
 		as_dict=True,
 	) or frappe._dict()
 
-	translated, translated_ok = doc.matn, True
-	if last_customer.matn:
-		try:
-			target_language = _detect_language(last_customer.matn)
-			result = _translate(doc.matn, target_language) if target_language else None
-		except Exception:
-			result = None
-			frappe.log_error(title=f"Chat tarjima xatosi: {doc_name}", message=frappe.get_traceback())
-		if result:
-			translated = result
-		else:
-			translated_ok = False
-
 	# Javob savol bergan chatga (u hali shu mijozga ulangan bo'lsa), aks holda mijozning
 	# barcha ulangan chatlariga. parse_mode yo'q — "<", "&" xabarni buzmasligi uchun.
 	chat_ids = get_order_chat_ids(doc.order)
 	if last_customer.telegram_chat_id in chat_ids:
 		chat_ids = [last_customer.telegram_chat_id]
-	sent = sum(1 for chat_id in chat_ids if send_message(chat_id, translated, parse_mode=None))
+
+	texts, translated_ok = _texts_for_chats(doc, chat_ids, last_customer, force_original)
+	if not translated_ok and not force_original:
+		frappe.db.set_value(
+			"Order Chat Message", doc_name, {"holat": "Tarjima xato", "tarjima_xato": 1}, update_modified=False
+		)
+		frappe.db.commit()
+		_publish_reply_status(doc, "Tarjima xato", 0, False)
+		return
+
+	sent = 0
+	for chat_id in chat_ids:
+		text = texts.get(chat_id) or None
+		ok = send_photo(chat_id, doc.rasm, caption=text) if doc.rasm else send_message(chat_id, text, parse_mode=None)
+		sent += 1 if ok else 0
 
 	holat = "Yuborildi" if sent else "Yuborilmadi"
+	translated = next((t for t in texts.values() if t), doc.matn)
 	frappe.db.set_value(
 		"Order Chat Message",
 		doc_name,
-		{"tarjima": translated, "holat": holat, "tarjima_xato": int(not translated_ok)},
+		{"tarjima": translated, "holat": holat, "tarjima_xato": int(bool(force_original and not translated_ok))},
 		update_modified=False,
 	)
 	if sent:
@@ -320,9 +342,86 @@ def deliver_staff_reply(doc_name):
 	frappe.db.commit()
 
 	frappe.publish_realtime("logistika_chat_message", {"order": doc.order})
-	if not sent or not translated_ok:
-		frappe.publish_realtime(
-			"logistika_chat_reply_status",
-			{"order": doc.order, "holat": holat, "sent_to": sent, "translated_ok": translated_ok},
-			user=doc.xodim or doc.owner,
-		)
+	if not sent:
+		_publish_reply_status(doc, holat, sent, True)
+
+
+def _texts_for_chats(doc, chat_ids, last_customer, force_original):
+	"""{chat_id: matn} va tarjima muvaffaqiyatli bo'ldimi. Maqsad til: mijoz botda tanlagan
+	til; tanlamagan bo'lsa — oxirgi xabari tili (Kimi aniqlaydi); mijoz hali yozmagan
+	bo'lsa — tarjimasiz. Matn bo'sh (faqat rasm) bo'lsa tarjima kerak emas."""
+	if not doc.matn or force_original:
+		return {chat_id: doc.matn for chat_id in chat_ids}, not force_original
+
+	translations, detected, ok = {}, [], True
+	texts = {}
+	for chat_id in chat_ids:
+		chosen = chosen_language(chat_id)
+		if chosen:
+			language = LANGUAGE_NAMES[chosen]
+		elif last_customer.matn:
+			if not detected:
+				detected.append(_detect_language(last_customer.matn))
+			language = detected[0]
+			if not language:
+				ok = False
+				continue
+		else:
+			texts[chat_id] = doc.matn
+			continue
+		if language not in translations:
+			translations[language] = _translate(doc.matn, language)
+		if not translations[language]:
+			ok = False
+			continue
+		texts[chat_id] = translations[language]
+	return texts, ok
+
+
+def _publish_reply_status(doc, holat, sent, translated_ok):
+	frappe.publish_realtime("logistika_chat_message", {"order": doc.order})
+	frappe.publish_realtime(
+		"logistika_chat_reply_status",
+		{"order": doc.order, "holat": holat, "sent_to": sent, "translated_ok": translated_ok},
+		user=doc.xodim or doc.owner,
+	)
+
+
+def _get_own_failed_message(name, allowed_states):
+	frappe.has_permission("Order Chat Message", "write", throw=True)
+	doc = frappe.get_doc("Order Chat Message", name)
+	frappe.has_permission("Order", "read", doc=doc.order, throw=True)
+	if doc.sender != "Xodim" or doc.holat not in allowed_states:
+		frappe.throw("Bu xabar uchun amal bajarib bo'lmaydi")
+	return doc
+
+
+@frappe.whitelist()
+def resend_original(name):
+	"""Tarjima ishlamagan javobni asl matnda (tarjimasiz) yuborish."""
+	doc = _get_own_failed_message(name, ("Tarjima xato",))
+	# Shartli yangilash: ikki marta bosilganda ikkinchi so'rov hech narsani o'zgartirmaydi
+	# va xabar mijozga ikki marta ketmaydi.
+	frappe.db.sql(
+		"update `tabOrder Chat Message` set holat = 'Navbatda' where name = %s and holat = 'Tarjima xato'",
+		doc.name,
+	)
+	if not frappe.db._cursor.rowcount:
+		frappe.throw("Bu xabar allaqachon qayta yuborilmoqda")
+	frappe.db.commit()
+	frappe.enqueue(
+		"logistika.erp_for_logistics.order_chat.deliver_staff_reply",
+		queue="short",
+		doc_name=doc.name,
+		force_original=True,
+		enqueue_after_commit=True,
+	)
+
+
+@frappe.whitelist()
+def cancel_message(name):
+	"""Tarjima ishlamagan yoki yuborilmagan javobni bekor qilish (xodim qayta yozadi)."""
+	doc = _get_own_failed_message(name, ("Tarjima xato", "Yuborilmadi"))
+	frappe.db.set_value("Order Chat Message", doc.name, "holat", "Bekor qilindi", update_modified=False)
+	frappe.db.commit()
+	frappe.publish_realtime("logistika_chat_message", {"order": doc.order})

@@ -80,6 +80,15 @@ class TestChinaTracking(FrappeTestCase):
 			self.assertEqual(send_dispatched(self.od_a.name), 0)
 		self.assertEqual(send.call_count, 1)
 
+	def test_dispatched_message_identifies_cargo(self):
+		with patch(CHAT_IDS, return_value=["1"]), patch(SEND, return_value=True) as send, patch(
+			"logistika.erp_for_logistics.tracking.chat_language", return_value="ru"
+		):
+			send_dispatched(self.od_a.name)
+		text = send.call_args.args[1]
+		for expected in (self.od_a.name, PLATE, "Profil", "Ваш груз выехал с завода"):
+			self.assertIn(expected, text)
+
 
 class TestKzTracking(FrappeTestCase):
 	def setUp(self):

@@ -36,3 +36,4 @@ common_site_config.json
 *debug.log
 *.sqlite3
 *.db
+.superpowers/

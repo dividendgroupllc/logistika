@@ -15,6 +15,7 @@ fixtures = [
 				"in",
 				[
 					"Contact-telegram_chat_id",
+					"Contact-telegram_til",
 					"Account-account_name_zh",
 					"Customer-brand",
 					"Supplier-xitoy_telefon",
@@ -57,7 +58,7 @@ app_include_css = "/assets/logistika/css/internal_logistics.css"
 # kiritilganda shu raqamni oshirish kerak — URL o'zgarishi barcha keshlarni majburan
 # chetlab o'tadi.
 app_include_js = [
-	"/assets/logistika/js/order_chat_widget.js?v=8",
+	"/assets/logistika/js/order_chat_widget.js?v=10",
 	"/assets/logistika/js/duplicate_warning.js?v=2",
 	"/assets/logistika/js/logistika_quick_create.js?v=2",
 	"/assets/logistika/js/pekin_list_import.js?v=1",

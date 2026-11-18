@@ -107,6 +107,34 @@ def send_document(chat_id, file_url: str, caption: Optional[str] = None) -> bool
 		return False
 
 
+TELEGRAM_CAPTION_LIMIT = 1024
+
+
+def send_photo(chat_id, file_url: str, caption: Optional[str] = None) -> bool:
+	"""Frappe'dagi (shaxsiy bo'lishi mumkin) rasm faylini Telegram'ga rasm sifatida yuboradi.
+	Izoh oddiy matn (parse_mode yo'q); 1024 belgidan uzun bo'lsa alohida xabar bo'lib ketadi."""
+	if not is_bot_active():
+		return False
+
+	long_caption = caption if caption and len(caption) > TELEGRAM_CAPTION_LIMIT else None
+	try:
+		file_doc = frappe.get_doc("File", {"file_url": file_url})
+		with open(file_doc.get_full_path(), "rb") as f:
+			data = {"chat_id": chat_id}
+			if caption and not long_caption:
+				data["caption"] = caption
+			r = requests.post(_url("sendPhoto"), data=data, files={"photo": (file_doc.file_name, f)}, timeout=30)
+		if not r.ok:
+			frappe.log_error(title=f"Telegram sendPhoto Error (chat_id={chat_id})", message=r.text)
+			return False
+	except Exception as e:
+		frappe.log_error(title=f"Telegram sendPhoto Exception (chat_id={chat_id})", message=_redact(e))
+		return False
+	if long_caption:
+		send_message(chat_id, long_caption, parse_mode=None)
+	return True
+
+
 def answer_callback_query(callback_query_id: str, text: Optional[str] = None) -> bool:
 	"""Stop the loading spinner on an inline-keyboard button after it's tapped."""
 	payload = {"callback_query_id": callback_query_id}

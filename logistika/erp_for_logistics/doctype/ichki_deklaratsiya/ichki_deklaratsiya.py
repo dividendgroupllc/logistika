@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 # Ichki Deklaratsiya — har bir Order Detail uchun bitta: pekin list (yukning haqiqiy
-# tonna/kubi shundan) va ichki deklaratsiya (hujjat, summa, kim to'ladi). Jami tonna va
+# tonna/kubi shundan) va ichki deklaratsiya (hujjat, kim to'ladi; summa — Logistika Settings'da). Jami tonna va
 # kub Order Detail'ga yoziladi — sig'im, ombor, Peregruz, Load Optimizer va tannarx shu
 # qiymatlardan foydalanadi. "Kim to'ladi" — shu Order'ning mijozi yoki Xitoy postavshigi;
 # deklaratsiyani o'sha tomon o'zi to'laydi, shuning uchun bizda buxgalteriya yozuvi yo'q.

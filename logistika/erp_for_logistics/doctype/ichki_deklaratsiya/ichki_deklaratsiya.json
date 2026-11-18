@@ -22,10 +22,8 @@
   "jami_kub",
   "sec_deklaratsiya",
   "ichki_deklaratsiya",
-  "ichki_deklaratsiya_summa",
   "ichki_deklaratsiya_tolovchi",
-  "cb_deklaratsiya",
-  "valyuta"
+  "cb_deklaratsiya"
  ],
  "fields": [
   {
@@ -131,13 +129,6 @@
    "label": "Ichki deklaratsiya hujjati"
   },
   {
-   "fieldname": "ichki_deklaratsiya_summa",
-   "fieldtype": "Currency",
-   "options": "valyuta",
-   "label": "Summa",
-   "non_negative": 1
-  },
-  {
    "fieldname": "ichki_deklaratsiya_tolovchi",
    "fieldtype": "Link",
    "options": "Customer",
@@ -147,18 +138,10 @@
   {
    "fieldname": "cb_deklaratsiya",
    "fieldtype": "Column Break"
-  },
-  {
-   "default": "CNY",
-   "fieldname": "valyuta",
-   "fieldtype": "Link",
-   "options": "Currency",
-   "label": "Valyuta",
-   "reqd": 1
   }
  ],
  "links": [],
- "modified": "2026-11-18 21:00:00.000000",
+ "modified": "2026-11-19 00:20:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Ichki Deklaratsiya",

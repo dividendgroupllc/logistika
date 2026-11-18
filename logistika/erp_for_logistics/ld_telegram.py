@@ -9,6 +9,7 @@
 import frappe
 
 from logistika.erp_for_logistics.pipeline_status import advance_order_detail_status, resolve_order_details_for_kz_truck
+from logistika.telegram.i18n import chat_language
 from logistika.telegram.messages import PEKIN_LIST_GUIDANCE, render
 from logistika.telegram.sender import send_document, send_message
 
@@ -70,7 +71,7 @@ def send_ld_document(ld_name, fieldname):
 			# (Xitoydan kelgan invoys/qadoqlash varag'i)ni /upload orqali yuborish
 			# haqida qo'shimcha yo'riqnoma yuboriladi.
 			for chat_id in chat_ids:
-				send_message(chat_id, render(PEKIN_LIST_GUIDANCE, order=doc.order))
+				send_message(chat_id, render(PEKIN_LIST_GUIDANCE, chat_language(chat_id), order=doc.order))
 
 	return sent
 

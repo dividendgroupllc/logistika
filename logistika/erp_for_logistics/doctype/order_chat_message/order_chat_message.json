@@ -14,6 +14,7 @@
   "tarjima_xato",
   "sec_matn",
   "matn",
+  "rasm",
   "tarjima",
   "cb_tarjima",
   "tarjima_xitoycha",
@@ -57,7 +58,7 @@
   {
    "fieldname": "holat",
    "fieldtype": "Select",
-   "options": "\nNavbatda\nYuborildi\nYuborilmadi",
+   "options": "\nNavbatda\nYuborildi\nYuborilmadi\nTarjima xato\nBekor qilindi",
    "label": "Holat",
    "read_only": 1,
    "in_list_view": 1,
@@ -77,8 +78,13 @@
    "fieldname": "matn",
    "fieldtype": "Text",
    "in_list_view": 1,
-   "label": "Matn (asl tilida)",
-   "reqd": 1
+   "label": "Matn (asl tilida)"
+  },
+  {
+   "fieldname": "rasm",
+   "fieldtype": "Attach Image",
+   "label": "Rasm",
+   "read_only": 1
   },
   {
    "description": "Faqat \"Xodim\" xabarlari uchun — mijozga yuborilgan tarjima (mijoz tiliga).",
@@ -105,7 +111,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-18 23:00:00.000000",
+ "modified": "2026-11-19 00:10:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Order Chat Message",

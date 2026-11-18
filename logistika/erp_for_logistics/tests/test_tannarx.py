@@ -258,7 +258,6 @@ class TestTannarx(FrappeTestCase):
 	def test_declaration_payer_is_order_party(self):
 		od = self._od(20)
 		deklaratsiya = frappe.get_doc("Ichki Deklaratsiya", od.ichki_deklaratsiya)
-		deklaratsiya.ichki_deklaratsiya_summa = 500
 		deklaratsiya.ichki_deklaratsiya_tolovchi = deklaratsiya.xitoy_postavshik
 		deklaratsiya.save()
 		deklaratsiya.ichki_deklaratsiya_tolovchi = deklaratsiya.kliyent

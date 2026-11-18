@@ -17,6 +17,7 @@ from frappe.utils import cstr, flt, nowtime, today
 from logistika.erp_for_logistics import kz_gps_tracking, traccar_client
 from logistika.erp_for_logistics.doctype.order_detail.order_detail import ON_CHINA_TRUCK_STAGES
 from logistika.erp_for_logistics.ld_telegram import get_order_chat_ids
+from logistika.telegram.i18n import chat_language
 from logistika.telegram.messages import SHIPMENT_UPDATE, render
 from logistika.telegram.sender import send_message
 
@@ -24,8 +25,7 @@ from logistika.telegram.sender import send_message
 def send_china_update(doc, row):
 	"""Order Detail mijoziga shu kuzatuv qatori haqida xabar yuboradi; kamida bitta
 	chatga ketsa `row.yuborilgan` = 1. Hujjatni saqlash chaqiruvchining ishi."""
-	message = render(
-		SHIPMENT_UPDATE,
+	values = dict(
 		brand=doc.brand or doc.kliyent or "",
 		sana_vaqt=traccar_client.format_sana_vaqt(row.sana, row.vaqt),
 		address=row.qayerdaligi or "",
@@ -33,7 +33,11 @@ def send_china_update(doc, row):
 		jami_kub=flt(doc.jami_kub, 3),
 		jami_tonna=flt(doc.jami_tonna, 3),
 	)
-	sent = sum(1 for chat_id in get_order_chat_ids(doc.order) if send_message(chat_id, message))
+	sent = sum(
+		1
+		for chat_id in get_order_chat_ids(doc.order)
+		if send_message(chat_id, render(SHIPMENT_UPDATE, chat_language(chat_id), **values))
+	)
 	if sent:
 		row.yuborilgan = 1
 	return sent

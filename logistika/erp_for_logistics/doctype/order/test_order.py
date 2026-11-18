@@ -52,10 +52,10 @@ class TestOrder(FrappeTestCase):
 	def test_create_postavshik(self):
 		with self.assertRaises(frappe.ValidationError):
 			quick_create.create_cn_postavshik("_T Yangi postavshik", "+998901234567")
-		name = quick_create.create_cn_postavshik("_T Yangi postavshik", "+86 138 0013 8000")
+		name = quick_create.create_cn_postavshik("_T Yangi postavshik", "+86 137 2468 1357")
 		customer = frappe.get_doc("Customer", name)
 		self.assertEqual(customer.customer_group, self.settings.postavshik_customer_group)
-		self.assertEqual(frappe.db.get_value("Contact", customer.customer_primary_contact, "mobile_no"), "+8613800138000")
+		self.assertEqual(frappe.db.get_value("Contact", customer.customer_primary_contact, "mobile_no"), "+8613724681357")
 
 	def test_create_haydovchi_requires_plate(self):
 		with self.assertRaises(frappe.ValidationError):
@@ -72,7 +72,7 @@ class TestOrder(FrappeTestCase):
 				{"doctype": "Customer Group", "customer_group_name": group, "parent_customer_group": "All Customer Groups"}
 			).insert(ignore_permissions=True)
 		frappe.db.set_single_value("Logistika Settings", "mijoz_customer_group", group)
-		name = quick_create.create_customer_with_phone("_T Guruhli mijoz", "+998901112233")
+		name = quick_create.create_customer_with_phone("_T Guruhli mijoz", "+998972468013")
 		self.assertEqual(frappe.db.get_value("Customer", name, "customer_group"), group)
 		other_group = frappe.get_all(
 			"Customer Group", filters={"is_group": 0, "name": ["!=", group]}, pluck="name", limit=1

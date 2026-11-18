@@ -20,6 +20,38 @@ def _normalize_phone(phone):
 	return "".join(ch for ch in (phone or "") if ch.isdigit() or ch == "+")
 
 
+PHONE_MATCH_DIGITS = 9  # mamlakat kodisiz yozilgan raqam ham topilishi uchun oxirgi 9 raqam
+
+
+def find_customer_by_phone(phone):
+	"""Raqamlar bo'yicha (bo'shliq, "+", chiziqlarsiz) oxirgi 9 raqami mos keladigan
+	mijozni qaytaradi: Customer.mobile_no yoki Customer'ga bog'langan Contact telefoni."""
+	digits = "".join(ch for ch in (phone or "") if ch.isdigit())
+	if len(digits) < PHONE_MATCH_DIGITS:
+		return None
+	pattern = "%" + digits[-PHONE_MATCH_DIGITS:]
+	found = frappe.db.sql(
+		"""
+		select name from `tabCustomer`
+		where regexp_replace(ifnull(mobile_no, ''), '[^0-9]', '') like %(p)s
+		union
+		select dl.link_name from `tabContact Phone` cp
+		join `tabDynamic Link` dl on dl.parenttype = 'Contact' and dl.parent = cp.parent
+			and dl.link_doctype = 'Customer'
+		where regexp_replace(ifnull(cp.phone, ''), '[^0-9]', '') like %(p)s
+		limit 1
+		""",
+		{"p": pattern},
+	)
+	return found[0][0] if found else None
+
+
+def _ensure_phone_free(phone):
+	existing = find_customer_by_phone(phone)
+	if existing:
+		frappe.throw(_("Bu raqam «{0}» mijozida allaqachon bor").format(existing))
+
+
 def _leaf_customer_group():
 	"""Logistika Settings'dagi "Mijozlar guruhi"; bo'lmasa Selling Settings'dagi standart
 	guruh; u papka (is_group) bo'lsa — birinchi oddiy guruh (ERPNext Customer'ga papka
@@ -43,6 +75,7 @@ def create_customer_with_phone(customer_name, phone):
 		frappe.throw(_("Mijoz nomini kiriting"))
 	if not phone:
 		frappe.throw(_("Telefon raqamini kiriting"))
+	_ensure_phone_free(phone)
 
 	doc = frappe.get_doc(
 		{
@@ -65,6 +98,7 @@ def create_cn_postavshik(customer_name, phone):
 	if not customer_name:
 		frappe.throw(_("Nomini kiriting"))
 	phone = validate_cn_phone(phone, "Xitoy telefon")
+	_ensure_phone_free(phone)
 	doc = frappe.get_doc(
 		{
 			"doctype": "Customer",

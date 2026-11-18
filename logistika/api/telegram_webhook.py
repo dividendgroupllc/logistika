@@ -27,10 +27,20 @@ import frappe
 from frappe.utils import cint
 
 from logistika.telegram.config import get_webhook_secret, is_bot_active
-from logistika.telegram.keyboards import MENU_QA, MENU_UPLOAD, main_menu_keyboard, phone_request_keyboard
+from logistika.telegram.i18n import chat_language, chosen_language, set_chat_language
+from logistika.telegram.keyboards import (
+	MENU_LANG,
+	MENU_QA,
+	MENU_UPLOAD,
+	language_keyboard,
+	main_menu_keyboard,
+	phone_request_keyboard,
+)
 from logistika.telegram.messages import (
 	ALREADY_LINKED,
 	ASK_PHONE,
+	CHOOSE_LANGUAGE,
+	LANGUAGE_SET,
 	PHONE_NOT_FOUND,
 	QA_NO_ORDERS,
 	QA_ORDER_DELIVERED,
@@ -134,6 +144,27 @@ def _short_hash(value) -> str:
 # ---------------------------------------------------------------- xabarlar -------------
 
 
+def _say(chat_id, template, reply_markup=None, **values) -> bool:
+	"""Shablonni shu chatning tilida (ro'yxatdan o'tmagan bo'lsa — uchala tilda) yuboradi."""
+	return send_message(chat_id, render(template, chat_language(chat_id), **values), reply_markup=reply_markup)
+
+
+def _send_language_choice(chat_id) -> None:
+	if not _is_linked(chat_id):
+		_say(chat_id, ASK_PHONE, reply_markup=phone_request_keyboard(None))
+		return
+	send_message(chat_id, render(CHOOSE_LANGUAGE, None), reply_markup=language_keyboard())
+
+
+def _handle_language_callback(callback_id, chat_id, data) -> None:
+	answer_callback_query(callback_id)
+	lang = data.split(":", 1)[1]
+	if not _is_linked(chat_id) or not set_chat_language(chat_id, lang):
+		return
+	frappe.db.commit()
+	_say(chat_id, LANGUAGE_SET, reply_markup=main_menu_keyboard(lang))
+
+
 def _on_message(message: dict) -> None:
 	chat_id = message["chat"]["id"]
 
@@ -149,11 +180,15 @@ def _on_message(message: dict) -> None:
 	if text.startswith("/start"):
 		_cmd_start(chat_id)
 		return
-	if text.startswith("/upload") or text == MENU_UPLOAD:
+	if text.startswith("/til") or text == MENU_LANG:
+		_clear_pending_qa(chat_id)
+		_send_language_choice(chat_id)
+		return
+	if text.startswith("/upload") or text in MENU_UPLOAD.values():
 		_clear_pending_qa(chat_id)
 		_cmd_upload(chat_id)
 		return
-	if text.startswith("/savol") or text == MENU_QA:
+	if text.startswith("/savol") or text in MENU_QA.values():
 		_cmd_qa_start(chat_id)
 		return
 
@@ -163,9 +198,9 @@ def _on_message(message: dict) -> None:
 		return
 
 	if _is_linked(chat_id):
-		send_message(chat_id, ALREADY_LINKED, reply_markup=main_menu_keyboard())
+		_say(chat_id, ALREADY_LINKED, reply_markup=main_menu_keyboard(chat_language(chat_id)))
 	else:
-		send_message(chat_id, ASK_PHONE, reply_markup=phone_request_keyboard())
+		_say(chat_id, ASK_PHONE, reply_markup=phone_request_keyboard(chat_language(chat_id)))
 
 
 def _on_callback_query(callback_query: dict) -> None:
@@ -178,6 +213,9 @@ def _on_callback_query(callback_query: dict) -> None:
 		return
 	if data.startswith("qa_order:"):
 		_handle_qa_order_callback(callback_id, chat_id, data)
+		return
+	if data.startswith("lang:"):
+		_handle_language_callback(callback_id, chat_id, data)
 		return
 
 	answer_callback_query(callback_id)
@@ -195,12 +233,12 @@ def _handle_upload_ld_callback(callback_id, chat_id, data) -> None:
 
 	answer_callback_query(callback_id)
 	if not valid:
-		send_message(chat_id, UPLOAD_ORDER_EXPIRED)
+		_say(chat_id, UPLOAD_ORDER_EXPIRED)
 		return
 
 	_clear_pending_qa(chat_id)
 	_set_pending_upload(chat_id, ld_name)
-	send_message(chat_id, render(UPLOAD_ORDER_PICKED, order=ld.order))
+	_say(chat_id, UPLOAD_ORDER_PICKED, order=ld.order)
 
 
 def _handle_qa_order_callback(callback_id, chat_id, data) -> None:
@@ -228,27 +266,27 @@ def _handle_qa_order_callback(callback_id, chat_id, data) -> None:
 
 	answer_callback_query(callback_id)
 	if not valid:
-		send_message(chat_id, QA_ORDER_EXPIRED)
+		_say(chat_id, QA_ORDER_EXPIRED)
 		return
 
 	_clear_pending_upload(chat_id)
 	_set_pending_qa(chat_id, order_name)
-	send_message(chat_id, render(QA_ORDER_PICKED, order=order_name))
+	_say(chat_id, QA_ORDER_PICKED, order=order_name)
 
 
 def _cmd_upload(chat_id) -> None:
 	contact_name = _get_contact_by_chat_id(chat_id)
 	if not contact_name:
-		send_message(chat_id, UPLOAD_NOT_LINKED)
+		_say(chat_id, UPLOAD_NOT_LINKED)
 		return
 
 	candidates = _get_pending_ld_candidates(contact_name)
 	if not candidates:
-		send_message(chat_id, UPLOAD_NO_ORDERS)
+		_say(chat_id, UPLOAD_NO_ORDERS)
 		return
 
 	buttons = [[{"text": c.order, "callback_data": f"upload_ld:{c.name}"}] for c in candidates]
-	send_message(chat_id, UPLOAD_PICK_ORDER, reply_markup={"inline_keyboard": buttons})
+	_say(chat_id, UPLOAD_PICK_ORDER, reply_markup={"inline_keyboard": buttons})
 
 
 def _cmd_qa_start(chat_id) -> None:
@@ -256,12 +294,12 @@ def _cmd_qa_start(chat_id) -> None:
 
 	contact_name = _get_contact_by_chat_id(chat_id)
 	if not contact_name:
-		send_message(chat_id, UPLOAD_NOT_LINKED)
+		_say(chat_id, UPLOAD_NOT_LINKED)
 		return
 
 	candidates = _get_qa_order_candidates(contact_name)
 	if not candidates:
-		send_message(chat_id, QA_NO_ORDERS)
+		_say(chat_id, QA_NO_ORDERS)
 		return
 
 	# Order nomi uzun bo'lishi mumkin — callback_data 64 baytdan oshmasligi uchun indeks +
@@ -272,7 +310,7 @@ def _cmd_qa_start(chat_id) -> None:
 		[{"text": name, "callback_data": f"qa_order:{idx}:{_short_hash(name)}"}]
 		for idx, name in enumerate(order_names)
 	]
-	send_message(chat_id, QA_PICK_ORDER, reply_markup={"inline_keyboard": buttons})
+	_say(chat_id, QA_PICK_ORDER, reply_markup={"inline_keyboard": buttons})
 
 
 def _get_qa_order_candidates(contact_name):
@@ -298,11 +336,11 @@ def _handle_qa_message(chat_id, order_name, text) -> None:
 	contact_name = _get_contact_by_chat_id(chat_id)
 	if not (contact_name and _contact_owns_order(contact_name, order_name)):
 		_clear_pending_qa(chat_id)
-		send_message(chat_id, QA_ORDER_EXPIRED)
+		_say(chat_id, QA_ORDER_EXPIRED)
 		return
 
 	if not _within_rate_limit(chat_id):
-		send_message(chat_id, QA_RATE_LIMITED)
+		_say(chat_id, QA_RATE_LIMITED)
 		return
 
 	from logistika.erp_for_logistics.order_chat import save_customer_message
@@ -310,11 +348,11 @@ def _handle_qa_message(chat_id, order_name, text) -> None:
 	doc_name = save_customer_message(order_name, chat_id, text[:4000])
 	if not doc_name:
 		_clear_pending_qa(chat_id)
-		send_message(chat_id, QA_ORDER_DELIVERED)
+		_say(chat_id, QA_ORDER_DELIVERED)
 		return
 
 	_set_pending_qa(chat_id, order_name)  # sliding TTL
-	send_message(chat_id, QA_RECEIVED)
+	_say(chat_id, QA_RECEIVED)
 
 
 # ---------------------------------------------------------------- fayl yuklash ---------
@@ -331,7 +369,7 @@ def _extension(name):
 def _handle_uploaded_file(chat_id, message: dict) -> None:
 	ld_name = _get_pending_upload(chat_id)
 	if not ld_name:
-		send_message(chat_id, UPLOAD_WAITING_FOR_FILE)
+		_say(chat_id, UPLOAD_WAITING_FOR_FILE)
 		return
 
 	if "document" in message:
@@ -346,13 +384,10 @@ def _handle_uploaded_file(chat_id, message: dict) -> None:
 		size = cint(photo.get("file_size"))
 
 	if extension not in ALLOWED_UPLOAD_EXTENSIONS:
-		send_message(chat_id, UPLOAD_BAD_FILE)
+		_say(chat_id, UPLOAD_BAD_FILE)
 		return
 	if size > _max_upload_bytes():
-		send_message(
-			chat_id,
-			render(UPLOAD_TOO_LARGE, size_mb=round(size / 1048576, 1), max_mb=round(_max_upload_bytes() / 1048576)),
-		)
+		_say(chat_id, UPLOAD_TOO_LARGE, size_mb=round(size / 1048576, 1), max_mb=round(_max_upload_bytes() / 1048576))
 		return
 
 	ld = frappe.db.get_value(
@@ -362,12 +397,12 @@ def _handle_uploaded_file(chat_id, message: dict) -> None:
 	if not ld or ld.pekin_invoice or not contact_name or not _contact_owns_order(contact_name, ld.order):
 		# allaqachon to'ldirilgan, o'chirilgan yoki chat endi bu buyurtmaga egalik qilmaydi
 		_clear_pending_upload(chat_id)
-		send_message(chat_id, UPLOAD_ORDER_EXPIRED)
+		_say(chat_id, UPLOAD_ORDER_EXPIRED)
 		return
 
 	downloaded = download_incoming_file(file_id)
 	if not downloaded:
-		send_message(chat_id, UPLOAD_SAVE_FAILED)
+		_say(chat_id, UPLOAD_SAVE_FAILED)
 		return
 	content, _telegram_name = downloaded
 
@@ -387,7 +422,7 @@ def _handle_uploaded_file(chat_id, message: dict) -> None:
 		frappe.db.rollback()
 		frappe.log_error(title=f"Pekin invoice status xatosi: {ld_name}", message=frappe.get_traceback())
 
-	send_message(chat_id, render(UPLOAD_RECEIVED, order=ld.order))
+	_say(chat_id, UPLOAD_RECEIVED, order=ld.order)
 
 
 def _advance_status_for_pekin_invoice(ld) -> None:
@@ -478,26 +513,26 @@ def _clear_pending_qa(chat_id) -> None:
 
 def _cmd_start(chat_id) -> None:
 	if _is_linked(chat_id):
-		send_message(chat_id, ALREADY_LINKED, reply_markup=main_menu_keyboard())
+		_say(chat_id, ALREADY_LINKED, reply_markup=main_menu_keyboard(chat_language(chat_id)))
 		return
 
-	send_message(chat_id, ASK_PHONE, reply_markup=phone_request_keyboard())
+	_say(chat_id, ASK_PHONE, reply_markup=phone_request_keyboard(chat_language(chat_id)))
 
 
 def _handle_shared_contact(chat_id, sender_user_id, contact: dict) -> None:
 	"""Faqat foydalanuvchining O'Z raqamini qabul qiladi (Telegram tugmasi orqali)."""
 	if contact.get("user_id") != sender_user_id:
-		send_message(chat_id, ASK_PHONE, reply_markup=phone_request_keyboard())
+		_say(chat_id, ASK_PHONE, reply_markup=phone_request_keyboard(chat_language(chat_id)))
 		return
 
 	phone = _normalize_phone(contact.get("phone_number", ""))
 	if not phone:
-		send_message(chat_id, ASK_PHONE, reply_markup=phone_request_keyboard())
+		_say(chat_id, ASK_PHONE, reply_markup=phone_request_keyboard(chat_language(chat_id)))
 		return
 
 	contact_name = _find_contact_by_phone(phone)
 	if not contact_name:
-		send_message(chat_id, PHONE_NOT_FOUND)
+		_say(chat_id, PHONE_NOT_FOUND)
 		return
 
 	chat = str(chat_id)
@@ -509,12 +544,16 @@ def _handle_shared_contact(chat_id, sender_user_id, contact: dict) -> None:
 	frappe.db.commit()
 
 	if previous_chat and previous_chat != chat:
-		send_message(previous_chat, RELINKED_ELSEWHERE)
+		_say(previous_chat, RELINKED_ELSEWHERE)
 
 	customer_names = _get_linked_customers(contact_name)
+	lang = chosen_language(chat_id)
 	send_message(
-		chat_id, render(WELCOME_CUSTOMER, customer=", ".join(customer_names)), reply_markup=main_menu_keyboard()
+		chat_id,
+		render(WELCOME_CUSTOMER, lang, customer=", ".join(customer_names)),
+		reply_markup=main_menu_keyboard(lang),
 	)
+	_send_language_choice(chat_id)
 
 
 def _normalize_phone(raw: str) -> str:

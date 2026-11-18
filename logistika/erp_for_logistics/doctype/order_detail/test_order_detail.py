@@ -5,6 +5,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, today
 
+from logistika.erp_for_logistics.doctype.order_detail import order_detail as od_module
 from logistika.erp_for_logistics.doctype.logistika_settings.test_logistika_settings import (
 	_root_group,
 	make_account,
@@ -163,3 +164,80 @@ class TestOrderDetail(FrappeTestCase):
 		with self.assertRaises(frappe.exceptions.DuplicateEntryError):
 			frappe.get_doc({"doctype": "Ichki Deklaratsiya", "order_detail": doc.name}).insert(ignore_permissions=True)
 
+
+
+class TestOnRoadTruck(FrappeTestCase):
+	PLATE = "_T 冀A00001"
+
+	def setUp(self):
+		frappe.db.savepoint("on_road_test")
+		self.settings = setup_logistika_settings()
+		self.order = make_order(kliyent="_T OR Mijoz")
+		self.truck = ensure_truck_type(name="_T China 10t", tonna=10, kub=50)
+
+	def tearDown(self):
+		frappe.db.rollback(save_point="on_road_test")
+
+	def _od(self, **kw):
+		kw.setdefault("xitoy_mashina_nomeri", self.PLATE)
+		kw.setdefault("truck_type", self.truck)
+		return make_order_detail(self.order.name, **kw)
+
+	def test_estimated_tonnage_counts_for_capacity(self):
+		self._od(taxminiy_tonna=6)
+		with self.assertRaises(frappe.ValidationError):
+			self._od(taxminiy_tonna=5)
+		self._od(taxminiy_tonna=4)
+
+	def test_estimated_kub_counts_for_capacity(self):
+		self._od(taxminiy_kub=30)
+		with self.assertRaises(frappe.ValidationError):
+			self._od(taxminiy_kub=25)
+
+	def test_resave_does_not_double_count(self):
+		doc = self._od(taxminiy_tonna=9)
+		doc.reload()
+		doc.mahsulot_nomi = "Boshqa"
+		doc.save()
+
+	def test_pekin_overrides_estimate(self):
+		self._od(taxminiy_tonna=9, pekin_list=pekin_rows((2000, 5)))
+		self._od(taxminiy_tonna=7)  # birinchisi fakt 2 t, 2 + 7 <= 10
+
+	def test_open_trucks_lists_free_space(self):
+		self._od(taxminiy_tonna=6, taxminiy_kub=10)
+		trucks = {t["fura"]: t for t in od_module.get_open_trucks()}
+		self.assertAlmostEqual(trucks[self.PLATE]["bosh_tonna"], 4)
+		self.assertAlmostEqual(trucks[self.PLATE]["bosh_kub"], 40)
+		self.assertEqual(trucks[self.PLATE]["truck_type"], self.truck)
+		self._od(taxminiy_tonna=4)
+		self.assertNotIn(self.PLATE, [t["fura"] for t in od_module.get_open_trucks()])
+
+	def test_driver_on_road_hidden(self):
+		group = self.settings.haydovchi_supplier_group
+		on_road = ensure_supplier("_T OR Haydovchi 1", group)
+		free = ensure_supplier("_T OR Haydovchi 2", group)
+		doc = self._od(xitoy_haydovchi=on_road, taxminiy_tonna=1)
+		names = [r[0] for r in od_module.driver_query("Supplier", "_T OR", "name", 0, 20, {})]
+		self.assertIn(free, names)
+		self.assertNotIn(on_road, names)
+		frappe.db.set_value("Order Detail", doc.name, "status", "Таможния склад")
+		names = [r[0] for r in od_module.driver_query("Supplier", "_T OR", "name", 0, 20, {})]
+		self.assertIn(on_road, names)
+
+	def test_actual_pekin_not_blocked_by_others_estimates(self):
+		other = self._od(taxminiy_tonna=6)
+		# Birinchi furaning haqiqiy yuki (pekin) 5 t: 5 + boshqaning taxminiy 6 t > 10 t — ogohlantirish, xato emas.
+		self._od(taxminiy_tonna=4, pekin_list=pekin_rows((5000, 5)))
+		# Haqiqiy yuklar o'zi sig'imdan oshsa — baribir xato.
+		frappe.db.set_value("Order Detail", other.name, "jami_tonna", 6)
+		with self.assertRaises(frappe.ValidationError):
+			self._od(taxminiy_tonna=1, pekin_list=pekin_rows((5000, 5)))
+
+	def test_driver_query_requires_permission(self):
+		frappe.set_user("Guest")
+		try:
+			with self.assertRaises(frappe.PermissionError):
+				od_module.driver_query("Supplier", "", "name", 0, 20, {})
+		finally:
+			frappe.set_user("Administrator")

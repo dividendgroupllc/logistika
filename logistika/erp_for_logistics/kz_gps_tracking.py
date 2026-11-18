@@ -90,6 +90,7 @@ def send_row(kz_transit_name, row_name):
 def _send_row_to_client(doc, row):
 	"""`send_row` (qo'lda) va kunlik avtomatik yuborish IKKALASI ham shu funksiyani
 	chaqiradi — Telegram'ga yuborish mantig'i bitta joyda."""
+	from logistika.telegram.i18n import chat_language
 	from logistika.telegram.messages import KZ_SHIPMENT_UPDATE, render
 	from logistika.telegram.sender import send_location, send_message
 
@@ -115,15 +116,14 @@ def _send_row_to_client(doc, row):
 
 	sent = 0
 	if chat_ids:
-		message = render(
-			KZ_SHIPMENT_UPDATE,
+		values = dict(
 			brand=order.brand or "",
 			sana_vaqt=traccar_client.format_sana_vaqt(row.sana, row.vaqt),
 			address=row.joylashuv or "",
 			kz_fura=doc.kz_truck or "-",
 		)
 		for chat_id in chat_ids:
-			if send_message(chat_id, message):
+			if send_message(chat_id, render(KZ_SHIPMENT_UPDATE, chat_language(chat_id), **values)):
 				sent += 1
 				if row.latitude and row.longitude:
 					send_location(chat_id, row.latitude, row.longitude)

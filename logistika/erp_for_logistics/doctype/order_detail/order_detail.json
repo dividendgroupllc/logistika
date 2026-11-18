@@ -20,7 +20,10 @@
   "sec_fura",
   "mahsulot_nomi",
   "taxminiy_tonna",
+  "taxminiy_kub",
   "xitoy_haydovchi",
+  "yoldagi_furaga",
+  "yoldagi_fura",
   "xitoy_fura_telefon",
   "xitoy_mashina_nomeri",
   "truck_type",
@@ -158,10 +161,30 @@
    "description": "Ma'lumot uchun. Hisob-kitobda haqiqiy tonna pekin list'dan olinadi (\"Jami tonna\")"
   },
   {
+   "fieldname": "taxminiy_kub",
+   "fieldtype": "Float",
+   "label": "Taxminiy kub",
+   "description": "Pekin list kelguncha fura sig'imini tekshirish uchun"
+  },
+  {
    "fieldname": "xitoy_haydovchi",
    "fieldtype": "Link",
    "options": "Supplier",
    "label": "Xitoy haydovchi ismi"
+  },
+  {
+   "fieldname": "yoldagi_furaga",
+   "fieldtype": "Check",
+   "label": "Yo'ldagi to'lmagan furaga qo'shish",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "yoldagi_fura",
+   "fieldtype": "Autocomplete",
+   "label": "Yo'ldagi fura",
+   "depends_on": "yoldagi_furaga",
+   "no_copy": 1,
+   "description": "Faqat bo'sh joyi qolgan, hali omborga kelmagan furalar"
   },
   {
    "fetch_from": "xitoy_haydovchi.xitoy_telefon",
@@ -413,7 +436,7 @@
    "group": "Tannarx"
   }
  ],
- "modified": "2026-11-18 19:00:00.000000",
+ "modified": "2026-11-18 20:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Order Detail",
