@@ -1,0 +1,659 @@
+ (boshqa buyurtmalarning taxminiy yuki hisobiga — ularni tekshiring), （计入了其他订单的预估货物——请检查这些订单）
+"""Haydovchi"" ""{0}"" guruhidan bo'lishi kerak",“司机”必须属于“{0}”组
+"""Kelish sanasi"" ""Zavoddan chiqish sanasi""dan keyin bo'lishi kerak",“到达日期”必须晚于“出厂日期”
+"""Kim to'ladi"" shu Order'ning mijozi yoki Xitoy postavshigi bo'lishi kerak: {0}",“付款方”必须是该订单的客户或中国供应商：{0}
+"""Kliyent"" ""{0}"" guruhidan bo'lishi kerak",“客户”必须属于“{0}”组
+"""Sana dan"" majburiy",“开始日期”为必填项
+"""Webhook'ni o'rnatish"" bosilganda avtomatik yaratiladi",点击“设置 Webhook”时自动生成
+"""Xitoy haydovchi"" ""{0}"" guruhidan bo'lishi kerak",“中国司机”必须属于“{0}”组
+"""Xitoy postavshik"" ""{0}"" guruhidan bo'lishi kerak",“中国供应商”必须属于“{0}”组
+"""Yo'lga chiqdi"" xabari yuborilgan",已发送“已出发”消息
+"""Yuklarni tortish"" bosilgan paytdagi Ombor Harakati ledger'idan hisoblangan JONLI qoldiq (avvalgi bir martalik statik nusxadan farqli)",点击“拉取货物”时根据库存变动台账计算的实时余额（不同于之前的一次性静态副本）
+"""Zavoddan chiqish sanasi"" bugundan oldin bo'lishi mumkin emas",“出厂日期”不能早于今天
+"""{0}"" furasi to'liq o'tkazildi deb belgilandi",货车“{0}”已标记为全部转运
+"""{0}"" furasi to'liq yuklandi deb belgilandi",货车“{0}”已标记为全部装载
+"""{0}"" furasidagi jami yuk {1} {2} — Truck Type sig'imi {3} {2} dan oshib ketdi",货车“{0}”的货物总计 {1} {2}——超出车型容量 {3} {2}
+"""{0}"" furasining barcha mahsulotlari mavjud (qolgan) miqdor bo'yicha TO'LIQ o'tkazildi deb belgilanadi — sanab chiqilmagan bo'lsa ham (yopiq konteyner uchun). Davom etasizmi?",货车“{0}”的所有商品将按可用（剩余）数量标记为全部转运——即使未清点（适用于封闭集装箱）。是否继续？
+"""{0}"" furasining barcha mahsulotlari mavjud ombor qoldig'i bo'yicha TO'LIQ yuklandi deb belgilanadi — sanab chiqilmagan bo'lsa ham (yopiq konteyner uchun). Davom etasizmi?",货车“{0}”的所有商品将按现有库存余额标记为全部装载——即使未清点（适用于封闭集装箱）。是否继续？
+"""{0}"" Order Detail'da fura olib kelish summasi bor, lekin ""Xitoy haydovchi"" tanlanmagan — Purchase Invoice kimga yozilishini bilib bo'lmaydi.",订单明细“{0}”有货车运费金额，但未选择“中国司机”——无法确定采购发票开给谁。
+"""{0}"" Order hali submit qilinmagan",订单“{0}”尚未提交
+"""{0}"" xarajati uchun xarajat hisobi (Harajat turi) tanlanmagan",费用“{0}”未选择费用科目（费用类型）
+"""{0}"" — yo'ldagi Order Detail'larda bunday fura yo'q (yoki u allaqachon omborga kelgan).",“{0}”——在途订单明细中没有该货车（或已到达仓库）。
+"""{0}"": Xitoy telefon raqami +86 bilan boshlanishi kerak (masalan +86 138 0013 8000)",“{0}”：中国电话号码必须以 +86 开头（例如 +86 138 0013 8000）
+1 t tannarxi,每吨成本
+2D chizma,2D 图
+3D ko'rinish,3D 视图
+= Net vazn / Karobka soni (avtomatik hisoblanadi),= 净重 / 箱数（自动计算）
+Account Expense turiga tegishli bo'lishi kerak,科目必须属于费用（Expense）类型
+Account Name (Chinese),科目名称（中文）
+Account {0} topilmadi,未找到科目 {0}
+Aktiv hisob,资产科目
+Aktivda qolgan,资产中剩余
+"Andoza mos kelmadi, Kimi orqali o'qilmoqda...",模板不匹配，正在通过 Kimi 读取...
+API manzili (base URL),API 地址（base URL）
+Asl matnda yuborish,以原文发送
+Asosiy,基本信息
+Avtomatik: shu Order'ning pekin list'i bor Order Detail'lari soni × $100 — kerak bo'lsa qo'lda o'zgartiring,自动：该订单中有装箱单的订单明细数量 × $100——如需要可手动修改
+"Avval ""Fura"" tanlang.",请先选择“货车”。
+"Avval ""Manba Xitoy fura"" tanlang va ""Yuklarni tortish"" bilan tortib oling.",请先选择“来源中国货车”，并用“拉取货物”拉取。
+"Avval ""Manba Xitoy fura"" tanlang.",请先选择“来源中国货车”。
+"Avval ""Obnovit"" orqali GPS bilan tasdiqlang, yoki manzilni qo'lda yozib kiriting.",请先通过“刷新”用 GPS 确认，或手动输入地址。
+"Avval ""Ombor"" tanlang.",请先选择“仓库”。
+"Avval ""Yuklarni tortish"" bilan shu fura uchun mahsulotlarni tortib oling.",请先用“拉取货物”拉取该货车的商品。
+"Avval hujjatni saqlang, keyin yuboring.",请先保存单据，然后再发送。
+Avval Order tanlang,请先选择订单
+Avval Order va KZ fura tanlang,请先选择订单和哈萨克斯坦货车
+Avval tokenni saqlang (Save).,请先保存令牌（Save）。
+Barcha buyurtmalar,全部订单
+Barcha Ichki Deklaratsiya'lar uchun bitta summa,所有国内报关单统一金额
+Barcha kutilar to'liq joylashtirildi.,所有箱子已全部放置。
+Barcha omborlar,全部仓库
+Barcha statuslar,全部状态
+Bekor qilindi,已取消
+bekor qilindi,已取消
+biriktirilmagan,未附加
+Bitta karobka balandligi,单箱高度
+Bitta karobka bo'yi,单箱长度
+Bitta karobka eni,单箱宽度
+Bitta karobka og'irligi,单箱重量
+Bitta karobkaning balandligi (Load Optimizer uchun),单箱高度（用于装载优化器）
+Bitta karobkaning bo'yi (Load Optimizer uchun),单箱长度（用于装载优化器）
+Bitta karobkaning eni (Load Optimizer uchun),单箱宽度（用于装载优化器）
+Bo'lishi kerak,应为
+bo'sh,空
+Bo'sh bo'lsa — Logistika Settings'dagi standart hisob,为空时使用物流设置中的默认科目
+Bo'sh joyi qolgan yo'ldagi fura yo'q,没有尚有空位的在途货车
+Bo'sh — GPS joylashuvi,留空则使用 GPS 位置
+Boshqa,其他
+Boshqa harajatlar,其他费用
+Bosqich raqami,阶段编号
+Bot faol,机器人已启用
+Bot Token,机器人令牌
+BotFather dan olingan token: 123456:ABC-DEF...,从 BotFather 获取的令牌：123456:ABC-DEF...
+Bu Order'ga Order Detail'lar bog'langan ({0}) — avval ularni o'chiring.,该订单已关联订单明细（{0}）——请先删除它们。
+Bu raqam «{0}» mijozida allaqachon bor,该号码已存在于客户“{0}”中
+Bu uchun allaqachon hujjat mavjud,已存在此对象的单据
+Bu uchun hujjat,此对象的单据
+Bugungi joylashuv — KZ furalari,今日位置——哈萨克斯坦货车
+Bugungi joylashuv — Xitoy furalari,今日位置——中国货车
+Buxgalteriya hujjati,会计凭证
+Buxgalteriya hujjati turi,会计凭证类型
+Buyurtma,订单
+Buyurtma / Fura / Mahsulot kesimida qoldiq,按订单 / 货车 / 商品维度的余额
+Buyurtma qaysi furada va qaysi bosqichda ekanini tezkor ko'rish,快速查看订单在哪辆货车上、处于哪个阶段
+Buyurtma yoki fura bo'yicha qidirish...,按订单或货车搜索...
+Buyurtmalar bo'yicha holat,按订单查看状态
+Cash Account,现金账户
+Cash Account To,转入现金账户
+Cash Account To Currency,转入现金账户货币
+Cash yoki Bank turidagi oddiy hisob bo'lishi kerak,必须是现金或银行类型的普通（非组）科目
+CBM,CBM
+"Chart of Accounts'dagi ""Ombor xarajati"" guruhi ichidagi hisoblardan tanlanadi (masalan: kran, kara, gruzchik)",从科目表中“仓库费用”组下的科目中选择（例如：吊车、叉车、装卸工）
+Chat oynasida bitta bosish bilan qo'yiladigan matnlar,聊天窗口中一键插入的文本
+China,中国
+China truck kub / tonna,中国货车 立方米 / 吨
+Chiqim,出库
+CMR,CMR
+CMR (Transit bo'limidan),CMR（来自运输部分）
+CMR ko'rib tasdiqlandi ✓,CMR 已审核确认 ✓
+COGS'ga o'tgan,已结转销货成本
+Container raqami,集装箱号
+Davlat / fura mamlakati,国家 / 货车所属国
+Davomiyligi,持续时间
+"Diqqat: ichki o'lchamlardan hisoblangan hajm ({0} m³) ""Kubi"" maydonidagi qiymatdan ({1} m³) sezilarli farq qilyapti — birlik (sm/m) to'g'ri kiritilganini tekshiring.",注意：根据内部尺寸计算的体积（{0} m³）与“立方数”字段的值（{1} m³）差异较大——请检查单位（厘米/米）是否输入正确。
+"Diqqat: quyidagi mahsulot(lar)ning o'lchamlaridan hisoblangan hajm ""Hajm/CBM""dan sezilarli farq qiladi — o'lcham birligi (sm/m) yoki o'lchamlarni tekshiring: {0}",注意：以下商品按尺寸计算的体积与“体积/CBM”差异较大——请检查尺寸单位（厘米/米）或尺寸：{0}
+Diqqat: {0} uchun mavjud miqdor 0 edi (allaqachon ombordan yoki boshqa Peregruz hujjatida ishlatilgan bo'lishi mumkin) — bu qator(lar) 0 deb belgilandi.,注意：{0} 的可用数量为 0（可能已从仓库或在其他换装单据中使用）——这些行已标记为 0。
+Diqqat: {0} uchun ombor qoldig'i 0 edi (allaqachon boshqa joyda ishlatilgan bo'lishi mumkin) — bu mahsulot(lar) 0 deb belgilandi.,注意：{0} 的库存余额为 0（可能已在其他地方使用）——这些商品已标记为 0。
+Eksport deklaratsiya,出口报关单
+Eksport deklaratsiya (ED/CO),出口报关单（ED/CO）
+Eksport deklaratsiya summasi,出口报关单金额
+Erp for logistics,物流 ERP
+Eski status,旧状态
+Expense Cost Center,费用成本中心
+Expense ichidagi oddiy (papka bo'lmagan) hisob bo'lishi kerak,必须是费用（Expense）下的普通（非文件夹）科目
+Expense ichidagi papka (guruh hisob) bo'lishi kerak,必须是费用（Expense）下的文件夹（组科目）
+Fakt soni,实际数量
+Fakt yetib borgan sana,实际到达日期
+Faol,启用
+"Faqat ""Mijoz"" xabarlari uchun — xodim o'qishi uchun ruscha tarjima",仅用于“客户”消息——供员工阅读的俄语翻译
+"Faqat ""Mijoz"" xabarlari uchun — xodim o'qishi uchun xitoycha tarjima",仅用于“客户”消息——供员工阅读的中文翻译
+"Faqat ""Xodim"" xabarlari uchun — javobni kim yozgani",仅用于“员工”消息——回复人
+"Faqat ""Xodim"" xabarlari uchun — mijozga yuborilgan tarjima (mijoz tiliga).",仅用于“员工”消息——发送给客户的翻译（客户语言）。
+Faqat aktivda qoldig'i borlar,仅显示资产中有余额的
+"Faqat bo'sh joyi qolgan, hali omborga kelmagan furalar",仅限尚有空位、尚未到达仓库的货车
+Faqat hozir omborda turganlar,仅显示当前在库的
+Faqat yo'ldagi (hali omborga kelmagan) Order Detail'larning fura raqamlari,仅限在途（尚未到达仓库）订单明细的货车号
+Farq,差异
+Fayl bo'sh,文件为空
+"Faylda qo'shimcha, andozaga sig'magan ma'lumot bor",文件中有模板无法容纳的额外数据
+Fura,货车
+Fura (mashina),货车（车辆）
+Fura olib kelish,货车运费
+Fura olib kelish summasi,货车运费金额
+Fura olib kelish va konteyner (aktiv),货车运费和集装箱（资产）
+Fura olib kelish xarajati (Expense),货车运费费用（Expense）
+Fura olib kelish xizmati (Item),货车运输服务（Item）
+Fura olib kelish: {0} ({1}) — {2} {3},货车运费：{0}（{1}）——{2} {3}
+Fura Purchase Invoice,货车采购发票
+Fura raqami...,货车号...
+Furalar bo'yicha holat,按货车查看状态
+GPS,GPS
+GPS Device ID (Traccar),GPS 设备 ID（Traccar）
+GPS Offline,GPS 离线
+GPS tekshirilmoqda...,正在检查 GPS...
+"GPS: {0} ta yangilandi, {1} ta offline",GPS：已更新 {0} 辆，{1} 辆离线
+Guruh account tanlab bo'lmaydi,不能选择组科目
+Guruhlar,组
+Hajm / CBM — jami,体积 / CBM——合计
+Hajm ishlatilgan,已用体积
+Hali tarix yo'q,暂无历史记录
+Hali xabar yo'q,暂无消息
+Har bir furaning Order dan Kliyentgacha bo'lgan joriy holati,每辆货车从订单到客户的当前状态
+Harajat nomi,费用名称
+Harajat turi,费用类型
+Harakat,变动
+Harakat turi,变动类型
+Haydovchi,司机
+Haydovchi / mashina,司机 / 车辆
+Haydovchi ismi,司机姓名
+Haydovchi kunlik,司机日补贴
+Haydovchi tel.,司机电话
+Haydovchi telefon raqami,司机电话号码
+Haydovchidan Purchase Invoice qatori uchun,用于司机采购发票行
+Haydovchiga oldindan to'lov,司机预付款
+Haydovchining Xitoy davlat raqami,司机的中国车牌号
+Hech bir fura belgilanmagan.,未选择任何货车。
+Hech bir furaga joylashuv yozilmagan.,没有任何货车记录了位置。
+Hech kimga yuborilmadi — mijozning Telegram akkaunti topilmadi,未发送给任何人——未找到客户的 Telegram 账号
+Hisoblangan hajm — m³,计算体积——m³
+Hisoblanmoqda...,计算中...
+Hisoblashga qo'shilmagan mahsulotlar,未纳入计算的商品
+Holat,状态
+Holati,状态
+Holati (pipeline),状态（流程）
+Holatini tekshirish,检查状态
+Hozircha yo'q,暂无
+Hozirgi webhook,当前 webhook
+https://api.moonshot.ai/v1/models orqali shu kalitga ruxsat berilgan modellar ro'yxatini ko'rish mumkin,可通过 https://api.moonshot.ai/v1/models 查看该密钥可用的模型列表
+Hujjat,单据
+Hujjat sanasi,单据日期
+Hujjat tanlanmagan,未选择单据
+"Hujjat tanlanmagan — ""KZ Truck Loading"" yoki ""Peregruz"" hujjatidan ""Yuklash sxemasi (3D)"" tugmasini bosing.",未选择单据——请在“哈萨克斯坦货车装载”或“换装”单据中点击“装载方案（3D）”按钮。
+Hujjat turi,单据类型
+Ichki balandligi — sm,内部高度——厘米
+Ichki Deklaratsiya,国内报关单
+Ichki deklaratsiya,国内报关单
+Ichki Deklaratsiya (pekin list),国内报关单（装箱单）
+Ichki deklaratsiya hujjati,国内报关单文件
+Ichki deklaratsiya summasi,国内报关单金额
+Ichki Deklaratsiya'dagi pekin list'dan,来自国内报关单中的装箱单
+Ichki eni — sm,内部宽度——厘米
+Ichki logistika xarajatlari papkasi,国内物流费用文件夹
+Ichki o'lchamlari — Load Optimizer uchun,内部尺寸——用于装载优化器
+Ichki uzunligi — sm,内部长度——厘米
+"ichki_uzunlik × ichki_kenglik × ichki_balandlik asosida avtomatik hisoblanadi — yuqoridagi ""Kubi"" maydoni bilan solishtirish uchun",根据 内部长度 × 内部宽度 × 内部高度 自动计算——用于与上方“立方数”字段对比
+Internal Logistics Item,内部物流明细
+Internal Logistics Tracking,内部物流跟踪
+Ismni kiriting,请输入姓名
+Izoh,备注
+Jami,合计
+Jami boshqa harajat,其他费用合计
+Jami chiqim,出库合计
+Jami kirim,入库合计
+Jami kub,总立方数
+Jami kub — m³,总立方数——m³
+Jami qoldiq — dona,余额合计——件
+"Jami qoldiq — kub, m³",余额合计——立方米，m³
+Jami qoldiq — tonna,余额合计——吨
+Jami quti,箱子总数
+Jami tannarx,总成本
+Jami tonna,总吨数
+Javob kutilmoqda,等待回复
+Javob yozing...,输入回复...
+"Javob yozing... (Enter — yuborish, Shift+Enter — yangi qator)",输入回复...（Enter——发送，Shift+Enter——换行）
+joriy,当前
+Joriy bosqichda: {0},当前阶段：{0}
+Journal Entry {0} для дивидендов создан,已创建用于分红的日记账分录 {0}
+Journal Entry {0} для расходов создан,已创建用于费用的日记账分录 {0}
+Journal Entry {0} отменен,日记账分录 {0} 已取消
+Joylashtirilgan,已放置
+Joylashuv,位置
+Joylashuv (qo'lda),位置（手动）
+Kamar soni,绑带数量
+Karobka,箱
+Karobka soni,箱数
+"karobka soni taxminiy, Order Detail pekin list'idagi o'lchamlar asosida hisoblangan",箱数为预估值，根据订单明细装箱单中的尺寸计算
+Kassa,出纳
+KASSA-.YYYY.-,KASSA-.YYYY.-
+Kategoriya,类别
+Kelish sanasi,到达日期
+Kim buyurtma qildi,下单人
+Kim orqali (vositachi),经由（中间人）
+Kim to'ladi,付款方
+Kim yozdi,撰写人
+Kim yukladi,装载人
+Kimi API kaliti,Kimi API 密钥
+Kimi orqali o'qib bo'lmadi — tafsilot yuqoridagi xabarda,无法通过 Kimi 读取——详情见上方消息
+Kimi orqali o'qilmoqda...,正在通过 Kimi 读取...
+Kimi Settings,Kimi 设置
+Kirim,入库
+kiritilmagan,未录入
+Kliyent,客户
+Kliyent hujjatlari,客户单证
+Kliyent oldi — hujjat,到达客户——单据
+Kliyent zavodi / O'zbekiston,客户工厂 / 乌兹别克斯坦
+Kliyentga yuborilgan ✓,已发送给客户 ✓
+ko'rish,查看
+Konteyner,集装箱
+Konteyner summasi,集装箱金额
+Konteyner zavodi,集装箱供应厂
+Kredit (to'lov) hisobi,贷方（付款）科目
+Kub,立方米
+Kubi — m³,立方数——m³
+Kunlik GPS yangilanishi muvaffaqiyatsiz bo'lsa (qurilma offline) avtomatik belgilanadi,每日 GPS 更新失败时（设备离线）自动勾选
+"Kunlik GPS yangilanishi shu holat ""Yo'lda"" bo'lgan hujjatlar uchungina ishlaydi",每日 GPS 更新仅对状态为“在途”的单据生效
+Kunlik kirim / chiqim dinamikasi,每日入库 / 出库动态
+Kunlik kuzatuv,每日跟踪
+Kunlik kuzatuv (omborga yetib kelguncha),每日跟踪（至到达仓库）
+Kunlik oziq-ovqat puli (jami),每日伙食费（合计）
+Kunlik slijeniya,每日跟踪
+Kutilayotgan xabarlar,待发送消息
+KZ,哈萨克斯坦
+KZ fura,哈萨克斯坦货车
+KZ fura raqami,哈萨克斯坦货车号
+KZ haydovchilar guruhi,哈萨克斯坦司机组
+KZ Load Item,哈萨克斯坦装载明细
+KZ Other Expense,哈萨克斯坦其他费用
+KZ Route Point,哈萨克斯坦路线点
+KZ tashish xarajati (Expense),哈萨克斯坦运输费用（Expense）
+KZ tashish xarajatlari (aktiv),哈萨克斯坦运输费用（资产）
+KZ Transit,哈萨克斯坦运输
+KZ Transit xarajatlari hali tannarxga yozilmadi: shu KZ furaga submit qilingan yuklash topilmadi.,哈萨克斯坦运输费用尚未计入成本：未找到该哈萨克斯坦货车已提交的装载单。
+KZ truck kub / tonna,哈萨克斯坦货车 立方米 / 吨
+KZ Truck Loading,哈萨克斯坦货车装载
+KZ truck yetib kelish sanasi,哈萨克斯坦货车到达日期
+Load Optimizer,装载优化器
+Logistic Documentation,物流单证
+Logistika Dashboard,物流仪表板
+Logistika Settings,物流设置
+"Logistika Settings'da ""{0}"" tanlanmagan",物流设置中未选择“{0}”
+Logistika xizmati (Item),物流服务（Item）
+Logistika xizmati daromadi (Income),物流服务收入（Income）
+"Logistika xizmati: {0}, KZ fura {1}",物流服务：{0}，哈萨克斯坦货车 {1}
+m,米
+Ma'lumot topilmadi,未找到数据
+"Ma'lumot uchun. Hisob-kitobda haqiqiy tonna pekin list'dan olinadi (""Jami tonna"")",仅供参考。核算时实际吨数取自装箱单（“总吨数”）
+Mahsulot,商品
+Mahsulot bo'yicha qidirish...,按商品搜索...
+Mahsulot nomi,商品名称
+Mahsulot qaysi (Xitoy) fura orqali kelgani bo'yicha filtr,按商品所经由的（中国）货车筛选
+Mahsulotlar,商品列表
+Manba,来源
+Manba turi,来源类型
+Manba Xitoy fura,来源中国货车
+"Manba Xitoy fura — tanlab ""Yuklarni tortish""",来源中国货车——选择后点击“拉取货物”
+Manual Credit Amount,手动贷方金额
+Manzil,地址
+Manzil yangilandi,地址已更新
+Mashina raqami,车牌号
+Mashina raqami / Fura,车牌号 / 货车
+Matn,文本
+Matn (asl tilida),文本（原文）
+Mavjud,可用
+Mijoz,客户
+Mijoz bilan suhbat,与客户对话
+Mijoz botda tanlagan til (uz/ru/en),客户在机器人中选择的语言（uz/ru/en）
+Mijoz nomi,客户名称
+Mijoz nomini kiriting,请输入客户名称
+Mijoz(lar),客户
+Mijozga Sales Invoice qatori uchun,用于客户销售发票行
+Mijozga yuborildi,已发送给客户
+Mijozga yuborildi ({0} kishi),已发送给客户（{0} 人）
+Mijozlar guruhi,客户组
+Miqdor,数量
+Miqdor juda kichik (1 karobkaga yetmadi),数量太小（不足 1 箱）
+Mos o'lcham topilmadi,未找到合适的尺寸
+Mustahkamlash,加固
+Narx (1 tonna / 1 kub uchun),价格（每吨 / 每立方米）
+Navbatda,排队中
+Nedostatka,短缺
+Net vazn,净重
+Net vazn — jami,净重——合计
+Nol qoldiqlarni ham ko'rsatish,显示零余额
+Noma'lum,未知
+Noma'lum status,未知状态
+Noma'lum supplier turi: {0},未知供应商类型：{0}
+Nomi,名称
+Nomini kiriting,请输入名称
+O'lcham birligi,尺寸单位
+"O'lcham, sm",尺寸，厘米
+O'rnatildi: {0}. Endi botga /start yuboring.,已设置：{0}。现在请向机器人发送 /start。
+O'rnatilmadi: {0},设置失败：{0}
+o'rnatilmagan,未设置
+O'tkazilgan,已转运
+O'tkazilgan yuklar,已转运货物
+O'zbekiston,乌兹别克斯坦
+O'zgargan vaqt,变更时间
+O'zgarish,变化
+Obnovit,刷新
+Ochilish qoldig'i,期初余额
+Og'irlik ishlatilgan,已用重量
+Ombor,仓库
+Ombor Balance,仓库余额
+Ombor Harakati,库存变动
+Ombor Harakatini ko'rish,查看库存变动
+Ombor Holati,仓库状态
+Ombor nomi,仓库名称
+Ombor qoldiq,库存余额
+Ombor Xarajati Item,仓库费用明细
+Ombor yuklash-tushirish (aktiv),仓库装卸（资产）
+Omborda qoldiq,在库余额
+"Ombordan o'tmasdan, to'g'ridan shu KZ furaga o'tkazilayotgan Xitoy fura",不经过仓库、直接转运到该哈萨克斯坦货车的中国货车
+Omborga kirish sanasi,入库日期
+Omborga yetib kelish sanasi,到达仓库日期
+Order / Zakaz,订单
+Order Chat Message,订单聊天消息
+Order Dashboard,订单仪表板
+Order Detail,订单明细
+"Order Detail xarajatlari (sug'urta, qo'shimcha rasxod, konteyner) va boshqa hujjatlar uchun standart Cash/Bank hisobi (JE krediti)",订单明细费用（保险、额外费用、集装箱）及其他单据的默认现金/银行科目（日记账分录贷方）
+"Order Detail'dagi ""Xitoy haydovchi"" shu guruhdan tanlanadi va yangisi shu guruhda yaratiladi",订单明细中的“中国司机”从此组中选择，新建的也在此组中创建
+Order Item Status Log,订单商品状态日志
+Order Tannarxi,订单成本
+"Order → mahsulotlar jadvalidagi ""Qo'shimcha rasxod turi"" shu papka ichidagi hisoblardan tanlanadi",订单 → 商品表中的“额外费用类型”从此文件夹下的科目中选择
+"Order'dagi ""Kliyent"" shu guruhdan tanlanadi va yangi mijoz shu guruhda yaratiladi",订单中的“客户”从此组中选择，新客户也在此组中创建
+"Order'dagi ""Xitoy postavshik"" (Customer) shu guruhdan tanlanadi va yangisi shu guruhda yaratiladi",订单中的“中国供应商”（Customer）从此组中选择，新建的也在此组中创建
+"Order'lardagi ""Xitoy mashina nomeri""dan tanlang — qo'lda yozib xato/mos kelmaslikning oldini olish uchun. Ro'yxatda yo'q yangi raqamni ham yozish mumkin.",从订单中的“中国车牌号”中选择——以避免手动输入导致错误或不一致。也可输入列表中没有的新号码。
+"Order, fura yoki mahsulot bo'yicha qidirish...",按订单、货车或商品搜索...
+Ortilgan,已装载
+Ortilgan yuklar,已装载货物
+Oxirgi joy,最后位置
+Oxirgi xato,最近错误
+Paddon soni,托盘数量
+"papka emas, oddiy guruh tanlang",请选择普通项，不能选择分组（文件夹）
+Payment Entry {0} для конвертации создан,已创建用于货币兑换的付款凭证 {0}
+Payment Entry {0} для перемещения создан,已创建用于资金调拨的付款凭证 {0}
+Payment Entry {0} отменен,付款凭证 {0} 已取消
+Payment Entry {0} создан,已创建付款凭证 {0}
+PDF бўш қайтди. Error Log ни текширинг.,PDF 返回为空。请检查错误日志。
+PDF генерация қилишда хато. Error Log ни текширинг.,生成 PDF 时出错。请检查错误日志。
+PDF тайёрланмоқда... Илтимос кутинг,正在生成 PDF……请稍候
+PDF юклаш,下载 PDF
+PDF юклашда браузер хатоси: ,下载 PDF 时浏览器出错： 
+Pekin invoice,装箱发票
+Pekin invoice (kliyentdan),装箱发票（来自客户）
+"Pekin invoice, TTN и Pekin list (Order Detail) проверены",装箱发票、TTN 和装箱单（订单明细）已核对
+Pekin list,装箱单
+Pekin list (Ichki Deklaratsiya),装箱单（国内报关单）
+Pekin list / Fakt qabul,装箱单 / 实收
+Pekin list import,装箱单导入
+Pekin list kelguncha fura sig'imini tekshirish uchun,用于在装箱单到达前检查货车容量
+Pekin list qidirilmoqda...,正在查找装箱单...
+Pekin list — Order Detail'larda pekin list kiritilmagan,装箱单——订单明细中未录入装箱单
+Peregruz,换装
+Peregruz Item,换装明细
+Prava / guvohnoma,驾照 / 证件
+"Qabul qilingan, t",已接收，吨
+Qator (idn),行（idn）
+Qator topilmadi — sahifani yangilang (Ctrl+Shift+R).,未找到行——请刷新页面（Ctrl+Shift+R）。
+Qayerdaligi,所在位置
+"Qaysi ombordan yuk chiqarilayotgani — ""Yuklarni tortish"" shu ombor qoldig'idan hisoblaydi",从哪个仓库出货——“拉取货物”按该仓库余额计算
+Qayta hisoblash,重新计算
+Qayta yuklash,重新加载
+Qo'shimcha rasxod,额外费用
+Qo'shimcha rasxod (aktiv),额外费用（资产）
+Qo'shimcha rasxod summasi,额外费用金额
+Qo'shimcha rasxod turi,额外费用类型
+"Qo'shimcha rasxod va yuklash xarajatlari o'z qatoridagi ""Harajat turi"" hisobiga o'tadi",额外费用和装载费用计入各自行中的“费用类型”科目
+Qoldiq,余额
+"Qoldiq — kub, m³",余额——立方米，m³
+Qoldiq — tonna,余额——吨
+"Qurilma offline — haydovchiga qo'ng'iroq qilib, GPS'ni yangilashini so'rang, keyin qayta urinib ko'ring.",设备离线——请致电司机让其更新 GPS，然后重试。
+Rasm,图片
+Rasm yuborish (izoh — yozilgan matn),发送图片（说明——已输入的文本）
+Rasxod izohi,费用说明
+Real vaqtda ombor qoldig'i va yetkazib berish holati,实时库存余额与配送状态
+Reja soni,计划数量
+Reja − ombordan o'tgan − boshqa Peregruz hujjatida o'tkazilgan qoldiq,计划 − 已经仓库转出 − 其他换装单据中已转运 后的剩余量
+Sababi,原因
+Sales Invoice {0} allaqachon submit qilingan — avval uni bekor qiling.,销售发票 {0} 已提交——请先取消它。
+Sana,日期
+Sana dan,开始日期
+Sana gacha,结束日期
+"Saqlandi, lekin hech kimga yuborilmadi — mijozlar Telegram botiga ro'yxatdan o'tmagan bo'lishi mumkin.",已保存，但未发送给任何人——客户可能尚未在 Telegram 机器人中注册。
+"Saqlandi: {0}, mijozlarga yuborildi: {1}",已保存：{0}，已发送给客户：{1}
+Saqlash,保存
+"saqlash bloklanadi, avval o'sha hujjatni oching",保存将被阻止，请先打开该单据
+Saqlash va yuborish,保存并发送
+Sarlavha (part_name...) qatori topilmadi.,未找到表头（part_name...）行。
+Shu Order'ning mijozi yoki Xitoy postavshigi — deklaratsiyani o'zi to'laydi (bizda buxgalteriya yozuvi yo'q),该订单的客户或中国供应商——自行支付报关费用（我方无会计记录）
+Sig'magan,未装下
+Sig'magan mahsulotlar,未装下的商品
+sm,厘米
+Soni,数量
+Status o'zgarishi,状态变更
+Sug'urta,保险
+Sug'urta (aktiv),保险（资产）
+Sug'urta harajati,保险费用
+Sug'urta hujjati,保险单据
+Sug'urta va to'lov,保险与付款
+Sug'urta xarajati hisobi,保险费用科目
+Sug'urta xarajati va to'lanadigan hisob bir kompaniyaga tegishli bo'lishi kerak,保险费用科目和应付科目必须属于同一公司
+Summa,金额
+Summa (hujjat valyutasida),金额（单据货币）
+Summa (kompaniya valyutasida),金额（公司货币）
+t,吨
+Tanlangan Xitoy postavshikning telefonidan olinadi (+86),取自所选中国供应商的电话（+86）
+Tannarx (COGS) Journal Entry,成本（COGS）日记账分录
+Tannarx (yetkazildi): {0} {1},成本（已交付）：{0} {1}
+Tannarx Harakati,成本流水
+Tannarx — yo'ldagi buyurtmalar (aktiv) hisoblari,成本——在途订单（资产）科目
+Tannarx: {0} {1},成本：{0} {1}
+Target Amount Currency,目标金额货币
+Tarix,历史
+Tarjima (mijozga yuborilgan),翻译（已发送给客户）
+Tarjima ishlamadi (asl matn yuborildi),翻译失败（已发送原文）
+Tarjima qilinmadi — aniqroq qilib qayta yozing,未能翻译——请写得更清楚后重试
+Tarjima xato,翻译错误
+Tarjima — ruscha,翻译——俄语
+Tarjima — xitoycha,翻译——中文
+tarjimasiz yuborildi,未翻译直接发送
+Tasdiqlangan,已确认
+Taxminiy kub,预估立方数
+Tayyor Javob,快捷回复
+Tayyor javoblar,快捷回复
+Telefon raqami,电话号码
+Telefon raqamini kiriting,请输入电话号码
+Telegram Bot Settings,Telegram 机器人设置
+Telegram Chat ID,Telegram 聊天 ID
+Telegram chat_id,Telegram chat_id
+Telegram tili,Telegram 语言
+Telegram webhook holati,Telegram webhook 状态
+Telegram'ga ulanib bo'lmadi: {0},无法连接 Telegram：{0}
+Tepadan ko'rinish (uzunlik × kenglik),俯视图（长 × 宽）
+Tex passport,行驶证
+To'liq,完整
+To'lov hisobi,付款科目
+Tonna,吨
+Tonnaji,吨位
+Tonnaji — tonna,吨位——吨
+Tortilmoqda...,正在拉取...
+Traccar'da shu qurilma uchun sozlangan Identifier / Device ID (masalan Traccar Client ilovasida kiritilgan ID),Traccar 中为该设备配置的标识符 / 设备 ID（例如在 Traccar Client 应用中输入的 ID）
+"Transit bo'limida biriktirilgan CMR hujjatini ko'rib, to'g'riligini tasdiqlash",查看运输部分附加的 CMR 单据并确认其正确性
+Transport Vositasi,运输工具
+Truck Dispatch,货车发运
+Truck Dispatch hujjati topilmadi,未找到货车发运单据
+"Truck Dispatch'dagi ""Haydovchi"" shu guruhdagi supplier'lardan tanlanadi",货车发运中的“司机”从此组的供应商中选择
+Truck Type,车型
+Truck type / turi,车型 / 类型
+TTN,TTN
+TTN hujjati,TTN 单据
+Turi,类型
+Valyuta,货币
+Vaqt,时间
+Vaqti,时间
+Warehouse Intake,仓库入库
+Warehouse Intake Item,仓库入库明细
+"Warehouse Intake, KZ Truck Loading va Peregruz'dagi ""Yuklash xarajatlari"" shu papka ichidagi hisoblardan tanlanadi",仓库入库、哈萨克斯坦货车装载和换装中的“装载费用”从此文件夹下的科目中选择
+"Webhook boshqa manzilda — ""Webhook'ni o'rnatish"" tugmasini bosing.",Webhook 指向其他地址——请点击“设置 Webhook”按钮。
+Webhook maxfiy kaliti,Webhook 密钥
+Webhook'ni o'rnatish,设置 Webhook
+Xarajat,费用
+Xarajat hisobi,费用科目
+Xarajat papkalari,费用文件夹
+Xarajatlar (CNY),费用（CNY）
+Xarajatlar Journal Entry,费用日记账分录
+Xarajatlar to'lanadigan hisob,费用应付科目
+Xarajatlar valyutasi,费用货币
+Xarajatlar yuk mijozga yetib borguncha shu aktiv hisoblarda turadi,货物送达客户之前，费用记在这些资产科目中
+Xatolik yuz berdi. Qayta urinib ko'ring.,发生错误。请重试。
+Xitoy fura,中国货车
+Xitoy fura raqami,中国货车号
+Xitoy fura telefon,中国货车电话
+Xitoy haydovchi ismi,中国司机姓名
+Xitoy haydovchilar guruhi,中国司机组
+Xitoy mashina nomeri,中国车牌号
+Xitoy mashina nomerini kiriting,请输入中国车牌号
+Xitoy postavshik,中国供应商
+Xitoy postavshiklar guruhi,中国供应商组
+Xitoy telefon,中国电话
+Xitoy telefon raqami (+86),中国电话号码（+86）
+Xitoy zavod raqami,中国工厂编号
+Xitoycha tarjima (Kimi orqali avtomatik to'ldiriladi) — Translation yozuvlarini yaratish uchun manba.,中文翻译（通过 Kimi 自动填写）——用于创建 Translation 记录的来源。
+Xizmat,服务
+Xizmat o'lchovi,服务计量单位
+Xodim,员工
+Xodim javobi: fonda tarjima qilinib Telegram'ga yuborilishi holati,员工回复：后台翻译并发送到 Telegram 的状态
+Yakun,完成
+Yakunlangan,已完成
+Yangi,新建
+Yangi mijoz,新建客户
+Yangi status,新状态
+Yangi Xitoy haydovchi,新建中国司机
+Yangi Xitoy postavshik,新建中国供应商
+Yangilash,刷新
+Yetib kelish sanasi,到达日期
+Yetkazilgan tonna,已交付吨数
+"Yetkazilgan, t",已交付，吨
+Yetkazilganda — xarajat va daromad,交付时——费用与收入
+Yo'lda,在途
+Yo'lda fura yo'q,没有在途货车
+Yo'ldagi fura,在途货车
+Yo'ldagi to'lmagan furaga qo'shish,添加到在途未满货车
+Yondan ko'rinish (uzunlik × balandlik),侧视图（长 × 高）
+Yuborildi,已发送
+Yuborilgan,已发送
+Yuborilmadi,未发送
+yuborilmadi,未发送
+Yuborilmadi — mijozning ro'yxatdan o'tgan Telegram kontakti topilmadi yoki xatolik yuz berdi.,未发送——未找到客户已注册的 Telegram 联系人，或发生错误。
+Yuborilmadi — mijozning Telegram kontakti topilmadi.,未发送——未找到客户的 Telegram 联系人。
+Yuborilmoqda...,正在发送...
+yuborilmoqda...,正在发送...
+Yuborish,发送
+Yuk bo'linmasining ichki balandligi — santimetrda,货厢内部高度——厘米
+Yuk bo'linmasining ichki bo'yi — santimetrda,货厢内部长度——厘米
+Yuk bo'linmasining ichki eni — santimetrda,货厢内部宽度——厘米
+Yuk tonnaji (taxminiy),货物吨位（预估）
+Yuk yetkazilganda sug'urta tannarxi shu xarajat hisobiga o'tadi,货物交付时，保险成本转入此费用科目
+Yuklar,货物
+Yuklash sxemasi (3D),装载方案（3D）
+Yuklash sxemasi (JSON keshi),装载方案（JSON 缓存）
+Yuklash sxemasi hisoblangan vaqti,装载方案计算时间
+Yuklash xarajatlari,装载费用
+Yuklash xarajatlari (kran/kara/gruzchik),装载费用（吊车/叉车/装卸工）
+Yuklash xarajatlari papkasi,装载费用文件夹
+Zakaz sanasi,订单日期
+Zanjir soni,链条数量
+Zavoddan chiqish sanasi,出厂日期
+{0} (davom etmoqda),{0}（进行中）
+{0} allaqachon mavjud: {1}. Yangisini yaratish o'rniga o'sha hujjatni oching/tahrirlang.,{0} 已存在：{1}。请打开/编辑该单据，而不是新建。
+{0} bilan suhbat,与 {0} 的对话
+{0} mahsulot qo'shildi ({1}),已添加 {0} 个商品（{1}）
+{0} qator qo'shildi,已添加 {0} 行
+{0} qator qo'shildi. Endi Save bosing.,已添加 {0} 行。现在请点击保存。
+{0} ta kontaktga yuborildi,已发送给 {0} 个联系人
+{0} ta mahsulot qatori hisoblashga qo'shilmadi (o'lcham topilmadi yoki miqdor juda kichik) — pastdagi ro'yxatga qarang.,{0} 个商品行未纳入计算（未找到尺寸或数量太小）——见下方列表。
+{0} ta mahsulot turi furaga sig'madi — pastdagi ro'yxatga qarang.,{0} 种商品装不下货车——见下方列表。
+{0} turidagi oddiy (papka bo'lmagan) hisob bo'lishi kerak,必须是 {0} 类型的普通（非文件夹）科目
+{0} — KZ fura: {1} — Truck: {2} ({3}×{4}×{5} sm) — {6},{0} — 哈萨克斯坦货车：{1} — 车型：{2}（{3}×{4}×{5} 厘米）— {6}
+{0} — status tarixi,{0} — 状态历史
+"{0}-qator: ""{1}"" Order Detail ""{2}"" furasiga tegishli emas.",第 {0} 行：订单明细“{1}”不属于货车“{2}”。
+"{0}: javob saqlandi, lekin mijozga yuborilmadi — ro'yxatdan o'tgan Telegram kontakti yo'q yoki Telegram xatosi.",{0}：回复已保存，但未发送给客户——没有已注册的 Telegram 联系人或 Telegram 出错。
+{0}: tarjima ishlamadi — javob asl matnda yuborildi.,{0}：翻译失败——回复已以原文发送。
+"{0}: tarjima qilinmadi, javob yuborilmadi — aniqroq qilib qayta yozing.",{0}：未能翻译，回复未发送——请写得更清楚后重试。
+{0}: {1} {2},{0}：{1} {2}
+Будет создан мультивалютный Payment Entry: сумма кассы и сумма контрагента будут рассчитаны по курсу.,将创建多币种付款凭证：现金金额和往来单位金额将按汇率计算。
+Валюта,货币
+Внимание: Сумма расхода ({0}) превышает остаток кассы ({1}),注意：支出金额（{0}）超过现金余额（{1}）
+Выбранный заказ не относится к контрагенту {0},所选订单不属于往来单位 {0}
+Выбранный счет должен быть счетом расходов (Expense) компании {0},所选科目必须是公司 {0} 的费用（Expense）科目
+Для данного способа оплаты не настроен счет кассы для компании {0},此付款方式未为公司 {0} 设置现金科目
+"Для конвертации выберите источник, назначение и курс.",货币兑换请选择来源、目标和汇率。
+Для конвертации выберите способ оплаты в {0}.,货币兑换请选择 {0} 的付款方式。
+Для конвертации выберите счета в {0},货币兑换请选择 {0} 的科目
+Для конвертации выбраны счета с разной валютой. Проверьте курс и суммы.,货币兑换所选科目币种不同。请检查汇率和金额。
+Для конвертации нужно выбрать счета с разной валютой.,货币兑换需要选择不同币种的科目。
+Для конвертации способы оплаты должны иметь разные валюты,货币兑换的付款方式必须为不同币种
+Для конвертации способы оплаты должны иметь разные валюты.,货币兑换的付款方式必须为不同币种。
+Для перемещения способы оплаты должны иметь одинаковую валюту,资金调拨的付款方式必须为相同币种
+Для перемещения способы оплаты должны иметь одинаковую валюту.,资金调拨的付款方式必须为相同币种。
+Для платежа будет использован реальный ledger-счет контрагента из ERPNext.,付款将使用 ERPNext 中往来单位的实际总账科目。
+Документ,单据
+Документация ED CO для клиента,给客户的 ED CO 单证
+Изоҳ,备注
+Источник,来源
+Касса счёт,现金科目
+Категория,类别
+Кирим,收入
+Контрагент,往来单位
+Контрагент Отчётга Қайтиш,返回往来单位报表
+Контрагент тури,往来单位类型
+Контрагентни танланг,请选择往来单位
+Курс,汇率
+Курс {0} к {1},{0} 兑 {1} 汇率
+Маҳсулотлар,商品
+Назначение,目标
+Не найден курс {0} к {1} на дату {2},未找到 {0} 兑 {1} 在 {2} 的汇率
+Не найден курс {0} к валюте компании {1},未找到 {0} 兑公司货币 {1} 的汇率
+Не найден курс {0} к валюте компании {1} на дату {2} — добавьте Currency Exchange,未找到 {0} 兑公司货币 {1} 在 {2} 的汇率——请添加货币汇率（Currency Exchange）
+Не удалось определить валюту счетов для конвертации,无法确定货币兑换科目的币种
+Не удалось определить валюту счетов для перемещения,无法确定资金调拨科目的币种
+Не удалось определить счет контрагента для {0},无法确定 {0} 的往来单位科目
+Не удалось рассчитать сумму в валюте контрагента,无法计算往来单位货币金额
+Операция,操作
+Ошибка валюты,货币错误
+Перегруз данный — hujjat,换装数据——单据
+Перемещение должно быть между счетами одной валюты.,资金调拨必须在相同币种的科目之间进行。
+Подсказка,提示
+"Пожалуйста, выберите контрагента",请选择往来单位
+"Пожалуйста, выберите способ оплаты (куда)",请选择付款方式（转入）
+"Пожалуйста, выберите счет расходов",请选择费用科目
+"Пожалуйста, выберите тип контрагента",请选择往来单位类型
+"Пожалуйста, укажите курс обмена",请填写汇率
+"Пожалуйста, укажите сумму прихода",请填写收入金额
+"Пожалуйста, укажите сумму расхода",请填写支出金额
+"Пожалуйста, установите компанию по умолчанию в настройках",请在设置中设置默认公司
+Сана,日期
+Сана гача,结束日期
+Сана дан,开始日期
+Санани кўрсатинг,请指定日期
+Сервер хатоси,服务器错误
+Способ оплаты,付款方式
+Способ оплаты источника и назначения должны отличаться,来源和目标的付款方式必须不同
+Сумма в валюте контрагента,往来单位货币金额
+Сумма в валюте контрагента ({0}),往来单位货币金额（{0}）
+Сумма должна быть больше нуля,金额必须大于零
+Счет дивидендов (Equity) не найден для компании {0},未找到公司 {0} 的分红（Equity）科目
+Тип,类型
+Хато,错误
+Чиқим,支出
+Ёпиш,关闭
+→ Transit bo'limiga o'tish,→ 前往运输部分
+✏️ Qayta yozish,✏️ 重写
+📍 Bugungi joylashuv,📍 今日位置
+📤 Kliyentga yuborish (Telegram),📤 发送给客户（Telegram）
+📤 Yuborildi,📤 已发送
+📥 Pekin list faylini shu yerga tashlang yoki bosing (Excel / CSV / PDF),📥 将装箱单文件拖到此处或点击上传（Excel / CSV / PDF）
+📥 Pekin list'dan tortish,📥 从装箱单拉取
+🔄 Qayta hisoblash,🔄 重新计算
+🚚 Zavoddan chiqdi (mijozga xabar),🚚 已出厂（通知客户）
+🛰 GPS yangilash (hammasi),🛰 GPS 更新（全部）
