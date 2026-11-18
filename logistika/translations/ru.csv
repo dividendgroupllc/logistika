@@ -52,6 +52,7 @@ Barcha statuslar,Все статусы
 Bekor qilindi,Отменено
 bekor qilindi,отменено
 biriktirilmagan,не прикреплено
+Birlik,Единица
 Bitta karobka balandligi,Высота одной коробки
 Bitta karobka bo'yi,Длина одной коробки
 Bitta karobka eni,Ширина одной коробки
@@ -304,7 +305,7 @@ Mashina raqami / Fura,Номер машины / Фура
 Matn,Текст
 Matn (asl tilida),Текст (на языке оригинала)
 Mavjud,Доступно
-Max narx (1 truck),Макс. цена (1 фура)
+Max narx,Макс. цена
 Mijoz,Клиент
 Mijoz bilan suhbat,Чат с клиентом
 Mijoz botda tanlagan til (uz/ru/en),"Язык, выбранный клиентом в боте (uz/ru/en)"
@@ -315,14 +316,16 @@ Mijozga Sales Invoice qatori uchun,Для строки Счёта-фактуры
 Mijozga yuborildi,Отправлено клиенту
 Mijozga yuborildi ({0} kishi),Отправлено клиенту ({0} чел.)
 Mijozlar guruhi,Группа клиентов
-Min narx (1 truck),Мин. цена (1 фура)
+Min narx,Мин. цена
 Miqdor,Количество
 Miqdor juda kichik (1 karobkaga yetmadi),Количество слишком мало (меньше 1 коробки)
 Mos o'lcham topilmadi,Подходящий размер не найден
 Mustahkamlash,Крепление
-"Narxlar (Truck Type bo'yicha, taxminiy)","Цены (по Truck Type, ориентировочно)"
+"Narx nimaga: bitta truck, 1 kub yoki 1 tonna","За что цена: одна фура, 1 м³ или 1 тонна"
+"Narxlar (taxminiy: truck, kub yoki tonna uchun)","Цены (ориентировочно: за фуру, м³ или тонну)"
 "Narxlar, {0}-qator: min narx ({1}) max narxdan ({2}) katta","Цены, строка {0}: мин. цена ({1}) больше макс. цены ({2})"
-"Narxlar: ""{0}"" Truck Type ikki marta",Цены: Truck Type «{0}» указан дважды
+"Narxlar, {0}-qator: Truck Type tanlang","Цены, строка {0}: выберите Truck Type"
+"Narxlar: ""{0}"" narxi ikki marta",Цены: цена «{0}» указана дважды
 Navbatda,В очереди
 Nedostatka,Недостача
 Net vazn,Вес нетто
@@ -493,6 +496,7 @@ Tortilmoqda...,Подтягивание...
 Traccar'da shu qurilma uchun sozlangan Identifier / Device ID (masalan Traccar Client ilovasida kiritilgan ID),"Identifier / Device ID, настроенный в Traccar для этого устройства (например, ID, введённый в приложении Traccar Client)"
 "Transit bo'limida biriktirilgan CMR hujjatini ko'rib, to'g'riligini tasdiqlash","Проверить CMR-документ, прикреплённый в разделе Транзит, и подтвердить его правильность"
 Transport Vositasi,Транспортное средство
+Truck,Фура
 Truck Dispatch,Truck Dispatch
 Truck Dispatch hujjati topilmadi,Документ Truck Dispatch не найден
 "Truck Dispatch'dagi ""Haydovchi"" shu guruhdagi supplier'lardan tanlanadi","""Водитель"" в Truck Dispatch выбирается из поставщиков этой группы"

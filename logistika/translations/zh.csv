@@ -52,6 +52,7 @@ Barcha statuslar,全部状态
 Bekor qilindi,已取消
 bekor qilindi,已取消
 biriktirilmagan,未附加
+Birlik,单位
 Bitta karobka balandligi,单箱高度
 Bitta karobka bo'yi,单箱长度
 Bitta karobka eni,单箱宽度
@@ -304,7 +305,7 @@ Mashina raqami / Fura,车牌号 / 货车
 Matn,文本
 Matn (asl tilida),文本（原文）
 Mavjud,可用
-Max narx (1 truck),最高价格（每车）
+Max narx,最高价格
 Mijoz,客户
 Mijoz bilan suhbat,与客户对话
 Mijoz botda tanlagan til (uz/ru/en),客户在机器人中选择的语言（uz/ru/en）
@@ -315,14 +316,16 @@ Mijozga Sales Invoice qatori uchun,用于客户销售发票行
 Mijozga yuborildi,已发送给客户
 Mijozga yuborildi ({0} kishi),已发送给客户（{0} 人）
 Mijozlar guruhi,客户组
-Min narx (1 truck),最低价格（每车）
+Min narx,最低价格
 Miqdor,数量
 Miqdor juda kichik (1 karobkaga yetmadi),数量太小（不足 1 箱）
 Mos o'lcham topilmadi,未找到合适的尺寸
 Mustahkamlash,加固
-"Narxlar (Truck Type bo'yicha, taxminiy)",价格（按车型，预估）
+"Narx nimaga: bitta truck, 1 kub yoki 1 tonna",价格单位：每车、每立方米或每吨
+"Narxlar (taxminiy: truck, kub yoki tonna uchun)",价格（预估：按车、立方米或吨）
 "Narxlar, {0}-qator: min narx ({1}) max narxdan ({2}) katta",价格第{0}行：最低价格（{1}）大于最高价格（{2}）
-"Narxlar: ""{0}"" Truck Type ikki marta",价格：车型“{0}”重复
+"Narxlar, {0}-qator: Truck Type tanlang",价格第{0}行：请选择车型
+"Narxlar: ""{0}"" narxi ikki marta",价格：“{0}”的价格重复
 Navbatda,排队中
 Nedostatka,短缺
 Net vazn,净重
@@ -493,6 +496,7 @@ Tortilmoqda...,正在拉取...
 Traccar'da shu qurilma uchun sozlangan Identifier / Device ID (masalan Traccar Client ilovasida kiritilgan ID),Traccar 中为该设备配置的标识符 / 设备 ID（例如在 Traccar Client 应用中输入的 ID）
 "Transit bo'limida biriktirilgan CMR hujjatini ko'rib, to'g'riligini tasdiqlash",查看运输部分附加的 CMR 单据并确认其正确性
 Transport Vositasi,运输工具
+Truck,整车
 Truck Dispatch,货车发运
 Truck Dispatch hujjati topilmadi,未找到货车发运单据
 "Truck Dispatch'dagi ""Haydovchi"" shu guruhdagi supplier'lardan tanlanadi",货车发运中的“司机”从此组的供应商中选择

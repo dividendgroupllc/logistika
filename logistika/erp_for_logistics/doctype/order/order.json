@@ -170,7 +170,7 @@
    "fieldname": "narxlar",
    "fieldtype": "Table",
    "options": "Order Narx",
-   "label": "Narxlar (Truck Type bo'yicha, taxminiy)",
+   "label": "Narxlar (taxminiy: truck, kub yoki tonna uchun)",
    "allow_on_submit": 1
   },
   {
@@ -232,7 +232,7 @@
    "group": "Mijoz"
   }
  ],
- "modified": "2026-11-19 10:00:00.000000",
+ "modified": "2026-11-19 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Order",
