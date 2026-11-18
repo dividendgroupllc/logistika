@@ -83,7 +83,6 @@ def make_order(kliyent="_T Mijoz", submit=True, **overrides):
 		"kliyent": kliyent,
 		"xitoy_postavshik": ensure_customer("_T Postavshik", "+8613800138000", settings.postavshik_customer_group),
 		"xizmat_olchovi": "Tonna",
-		"narx": 100,
 	}
 	data.update(overrides)
 	doc = frappe.get_doc(data).insert(ignore_permissions=True)
@@ -154,7 +153,6 @@ def setup_tannarx_settings():
 	accounts = {
 		"wip_sugurta_hisobi": ensure_account("_T WIP Sugurta", wip),
 		"wip_fura_hisobi": ensure_account("_T WIP Fura", wip),
-		"wip_ichki_hisobi": ensure_account("_T WIP Ichki", wip),
 		"wip_ombor_hisobi": ensure_account("_T WIP Ombor", wip),
 		"wip_kz_hisobi": ensure_account("_T WIP KZ", wip),
 		"sugurta_xarajat_hisobi": ensure_account("_T Sugurta xarajati", exp),

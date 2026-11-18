@@ -71,23 +71,36 @@ def get_pipeline_rows(order=None, status=None):
 		select
 			od.name as order_detail,
 			od.`order` as mijoz_order,
-			od.mahsulot_nomi as mahsulotlar,
-			od.xitoy_mashina_nomeri as china_fura,
-			od.truck_kub as china_truck_kub,
-			od.truck_tonna as china_truck_tonna,
-			od.jami_kub as il_kub,
-			od.jami_tonna as il_tonna,
+			o.mahsulot_nomi as mahsulotlar,
+			fu.china_fura,
+			fu.china_truck_kub,
+			fu.china_truck_tonna,
+			fu.il_kub,
+			fu.il_tonna,
 			od.status,
 			td.mashina_raqami as td_kz_fura,
 			td.kub as kz_truck_kub,
 			td.tonna as kz_truck_tonna,
 			td.haydovchi_ismi,
-			coalesce(td.china_arrival, od.kelish_sanasi) as yetib_kelish_sanasi,
+			coalesce(td.china_arrival, fu.kelish_sanasi) as yetib_kelish_sanasi,
 			kzl.kz_truck as kzl_kz_fura,
 			kzl.sana as kzl_sana,
 			prg.kz_truck as prg_kz_fura,
 			prg.sana as prg_sana
 		from `tabOrder Detail` od
+		left join `tabOrder` o on o.name = od.`order`
+		left join (
+			select f.parent,
+				group_concat(f.xitoy_mashina_nomeri order by f.idx separator ', ') as china_fura,
+				sum(f.truck_kub) as china_truck_kub,
+				sum(f.truck_tonna) as china_truck_tonna,
+				sum(f.fakt_kub) as il_kub,
+				sum(f.fakt_tonna) as il_tonna,
+				max(coalesce(f.fakt_kelish_sanasi, f.kelish_sanasi)) as kelish_sanasi
+			from `tabOrder Detail Fura` f
+			where f.parenttype = 'Order Detail'
+			group by f.parent
+		) fu on fu.parent = od.name
 		left join `tabTruck Dispatch` td on td.name = (
 			select td2.name from `tabTruck Dispatch` td2
 			where td2.`order` = od.name order by td2.creation desc limit 1

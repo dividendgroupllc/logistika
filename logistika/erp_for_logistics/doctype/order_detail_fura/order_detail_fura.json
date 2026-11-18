@@ -1,0 +1,223 @@
+{
+ "actions": [],
+ "creation": "2026-11-19 10:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "xitoy_mashina_nomeri",
+  "xitoy_haydovchi",
+  "xitoy_fura_telefon",
+  "truck_type",
+  "truck_kub",
+  "truck_tonna",
+  "taxminiy_tonna",
+  "taxminiy_kub",
+  "cb_sana",
+  "zavoddan_chiqish_sanasi",
+  "kelish_sanasi",
+  "fakt_chiqish_sanasi",
+  "fakt_kelish_sanasi",
+  "jonatish_xabari_yuborildi",
+  "cb_xarajat",
+  "xitoy_fura_summasi",
+  "sugurta",
+  "sugurta_hujjat",
+  "fura_pi",
+  "tannarx_je",
+  "sec_fakt",
+  "ichki_deklaratsiya",
+  "cb_fakt",
+  "fakt_tonna",
+  "fakt_kub"
+ ],
+ "fields": [
+  {
+   "fetch_from": "xitoy_haydovchi.xitoy_mashina_nomeri",
+   "fieldname": "xitoy_mashina_nomeri",
+   "fieldtype": "Data",
+   "label": "Xitoy mashina nomeri",
+   "in_list_view": 1,
+   "search_index": 1,
+   "fetch_if_empty": 1,
+   "reqd": 1,
+   "columns": 2
+  },
+  {
+   "fieldname": "xitoy_haydovchi",
+   "fieldtype": "Link",
+   "options": "Supplier",
+   "label": "Xitoy haydovchi ismi",
+   "in_list_view": 1,
+   "columns": 2
+  },
+  {
+   "fetch_from": "xitoy_haydovchi.xitoy_telefon",
+   "fieldname": "xitoy_fura_telefon",
+   "fieldtype": "Data",
+   "label": "Xitoy fura telefon",
+   "fetch_if_empty": 1
+  },
+  {
+   "fieldname": "truck_type",
+   "fieldtype": "Link",
+   "options": "Truck Type",
+   "label": "Truck Type",
+   "in_list_view": 1,
+   "columns": 1
+  },
+  {
+   "fetch_from": "truck_type.kub",
+   "fieldname": "truck_kub",
+   "fieldtype": "Float",
+   "label": "Kubi — m³",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "truck_type.tonna",
+   "fieldname": "truck_tonna",
+   "fieldtype": "Float",
+   "label": "Tonnaji",
+   "read_only": 1
+  },
+  {
+   "fieldname": "taxminiy_tonna",
+   "fieldtype": "Float",
+   "label": "Taxminiy tonna",
+   "precision": "3",
+   "non_negative": 1,
+   "in_list_view": 1,
+   "columns": 1,
+   "description": "Pekin list kelguncha fura sig'imini tekshirish uchun"
+  },
+  {
+   "fieldname": "taxminiy_kub",
+   "fieldtype": "Float",
+   "label": "Taxminiy kub",
+   "description": "Pekin list kelguncha fura sig'imini tekshirish uchun",
+   "precision": "3",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "cb_sana",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "zavoddan_chiqish_sanasi",
+   "fieldtype": "Date",
+   "label": "Zavoddan chiqish sanasi (reja)",
+   "in_list_view": 1,
+   "columns": 1
+  },
+  {
+   "fieldname": "kelish_sanasi",
+   "fieldtype": "Date",
+   "label": "Kelish sanasi (reja)"
+  },
+  {
+   "fieldname": "fakt_chiqish_sanasi",
+   "fieldtype": "Date",
+   "label": "Fakt chiqqan sana"
+  },
+  {
+   "fieldname": "fakt_kelish_sanasi",
+   "fieldtype": "Date",
+   "label": "Fakt kelgan sana",
+   "in_list_view": 1,
+   "columns": 1,
+   "description": "Omborga qabul (Warehouse Intake) yoki Peregruz submit bo'lganda avtomatik"
+  },
+  {
+   "fieldname": "jonatish_xabari_yuborildi",
+   "fieldtype": "Check",
+   "label": "\"Yo'lga chiqdi\" xabari yuborilgan",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "cb_xarajat",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "xitoy_fura_summasi",
+   "fieldtype": "Currency",
+   "options": "valyuta",
+   "label": "Fura olib kelish summasi",
+   "non_negative": 1,
+   "in_list_view": 1,
+   "columns": 1
+  },
+  {
+   "fieldname": "sugurta",
+   "fieldtype": "Currency",
+   "options": "valyuta",
+   "label": "Sug'urta",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "sugurta_hujjat",
+   "fieldtype": "Attach",
+   "label": "Sug'urta hujjati"
+  },
+  {
+   "fieldname": "fura_pi",
+   "fieldtype": "Link",
+   "options": "Purchase Invoice",
+   "label": "Fura Purchase Invoice",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "tannarx_je",
+   "fieldtype": "Link",
+   "options": "Journal Entry",
+   "label": "Sug'urta Journal Entry",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "sec_fakt",
+   "fieldtype": "Section Break",
+   "label": "Pekin list (fakt)"
+  },
+  {
+   "fieldname": "ichki_deklaratsiya",
+   "fieldtype": "Link",
+   "options": "Ichki Deklaratsiya",
+   "label": "Ichki Deklaratsiya",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "cb_fakt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "fakt_tonna",
+   "fieldtype": "Float",
+   "label": "Fakt tonna",
+   "precision": "3",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "fakt_kub",
+   "fieldtype": "Float",
+   "label": "Fakt kub",
+   "precision": "3",
+   "read_only": 1,
+   "no_copy": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-11-19 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "Order Detail Fura",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

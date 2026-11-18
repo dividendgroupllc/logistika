@@ -191,21 +191,16 @@ def get_balances_for_parts(ombor, part_names, exclude_reference_doctype=None, ex
 def pull_for_warehouse_intake(fura):
 	"""Warehouse Intake'dagi "Pekin list'dan tortish" tugmasi uchun — shu Xitoy fura
 	raqamidagi, hali omborga kirmagan barcha Order Detail'larning pekin list qatorlari."""
+	from logistika.erp_for_logistics import furalar
 	from logistika.erp_for_logistics.doctype.ichki_deklaratsiya.ichki_deklaratsiya import get_pekin_rows
-	from logistika.erp_for_logistics.doctype.order_detail.order_detail import ON_CHINA_TRUCK_STAGES
 
 	frappe.has_permission("Order Detail", "read", throw=True)
 	if not fura:
 		frappe.throw("Fura tanlanmagan")
-	order_details = frappe.get_all(
-		"Order Detail",
-		filters={"xitoy_mashina_nomeri": fura, "status": ["in", ON_CHINA_TRUCK_STAGES]},
-		pluck="name",
-		order_by="name asc",
-	)
+	order_details = furalar.order_details_on_plate(fura, on_road=True)
 	result = []
 	for name in order_details:
-		for row in get_pekin_rows(name):
+		for row in get_pekin_rows(name, fura):
 			result.append(
 				{
 					"order": name,
@@ -231,11 +226,9 @@ def pull_for_kz_loading(china_truck, order=None, kz_truck_loading=None):
 
 	allowed = None
 	if order:
-		allowed = set(
-			frappe.get_all(
-				"Order Detail", filters={"order": order, "xitoy_mashina_nomeri": china_truck}, pluck="name"
-			)
-		)
+		from logistika.erp_for_logistics import furalar
+
+		allowed = set(furalar.order_details_on_plate(china_truck, order=order))
 		if not allowed:
 			frappe.throw(f'"{order}" buyurtmasida "{china_truck}" furasi yo\'q.')
 

@@ -130,7 +130,7 @@ class TestWarehouseChain(FrappeTestCase):
 		)
 		with self.assertRaises(frappe.ValidationError):
 			doc.insert(ignore_permissions=True)
-		frappe.db.set_value("Order Detail", self.od.name, "status", "Таможния склад")
+		frappe.db.set_value("Order Detail Fura", self.od.furalar[0].name, "fakt_kelish_sanasi", today())
 		with self.assertRaises(frappe.ValidationError):
 			self._intake(submit=False)
 
@@ -152,8 +152,14 @@ class TestWarehouseChain(FrappeTestCase):
 		from logistika.erp_for_logistics.api import china_plates_on_road
 
 		self.assertIn(PLATE, china_plates_on_road())
-		frappe.db.set_value("Order Detail", self.od.name, "status", "Таможния склад")
+		frappe.db.set_value("Order Detail Fura", self.od.furalar[0].name, "fakt_kelish_sanasi", today())
 		self.assertNotIn(PLATE, china_plates_on_road())
+
+	def test_intake_submit_marks_truck_arrived(self):
+		self._intake()
+		self.assertEqual(
+			str(frappe.db.get_value("Order Detail Fura", self.od.furalar[0].name, "fakt_kelish_sanasi")), today()
+		)
 
 	def test_intake_farq_and_holati(self):
 		doc = self._intake(fakt_qty=7, submit=False)

@@ -55,7 +55,10 @@ def get_data(filters):
 		values["order_detail"] = filters.order_detail
 	rows = frappe.db.sql(
 		f"""
-		select th.order_detail, od.kliyent, od.xitoy_mashina_nomeri as fura, th.kategoriya, th.turi,
+		select th.order_detail, od.kliyent,
+			(select group_concat(f.xitoy_mashina_nomeri order by f.idx separator ', ')
+				from `tabOrder Detail Fura` f where f.parent = od.name and f.parenttype = 'Order Detail') as fura,
+			th.kategoriya, th.turi,
 			sum(th.summa) as summa
 		from `tabTannarx Harakati` th
 		inner join `tabOrder Detail` od on od.name = th.order_detail

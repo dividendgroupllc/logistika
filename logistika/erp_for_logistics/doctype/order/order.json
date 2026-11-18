@@ -16,11 +16,18 @@
   "xitoy_postavshik",
   "xitoy_zavod_raqami",
   "izoh",
+  "sec_yuk",
+  "mahsulot_nomi",
+  "jami_tonna",
+  "cb_yuk",
+  "jami_kub",
+  "yuk_fayli",
   "sec_xizmat",
   "xizmat_olchovi",
   "cb2",
   "valyuta",
-  "narx",
+  "sec_narx",
+  "narxlar",
   "amended_from",
   "sec_chat",
   "javob_kutilmoqda",
@@ -93,6 +100,44 @@
    "label": "Izoh"
   },
   {
+   "fieldname": "sec_yuk",
+   "fieldtype": "Section Break",
+   "label": "Yuk"
+  },
+  {
+   "fieldname": "mahsulot_nomi",
+   "fieldtype": "Data",
+   "label": "Mahsulot nomi",
+   "allow_on_submit": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "jami_tonna",
+   "fieldtype": "Float",
+   "label": "Jami tonna",
+   "precision": "3",
+   "non_negative": 1,
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "cb_yuk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "jami_kub",
+   "fieldtype": "Float",
+   "label": "Jami kub",
+   "precision": "3",
+   "non_negative": 1,
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "yuk_fayli",
+   "fieldtype": "Attach",
+   "label": "Yuk fayli (Excel / PDF / rasm)",
+   "allow_on_submit": 1
+  },
+  {
    "fieldname": "sec_xizmat",
    "fieldtype": "Section Break",
    "label": "Xizmat"
@@ -118,13 +163,15 @@
    "label": "Valyuta"
   },
   {
-   "allow_on_submit": 1,
-   "fieldname": "narx",
-   "fieldtype": "Currency",
-   "options": "valyuta",
-   "label": "Narx (1 tonna / 1 kub uchun)",
-   "reqd": 0,
-   "non_negative": 1
+   "fieldname": "sec_narx",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "narxlar",
+   "fieldtype": "Table",
+   "options": "Order Narx",
+   "label": "Narxlar (Truck Type bo'yicha, taxminiy)",
+   "allow_on_submit": 1
   },
   {
    "fieldname": "amended_from",
@@ -185,7 +232,7 @@
    "group": "Mijoz"
   }
  ],
- "modified": "2026-11-18 12:00:00.000000",
+ "modified": "2026-11-19 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Order",

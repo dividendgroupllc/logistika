@@ -1,13 +1,15 @@
 # Copyright (c) 2026, sardorbek qamchibekov  and contributors
 # For license information, please see license.txt
 
-# Order — mijoz bilan kelishuv (kim, qaysi Xitoy postavshik, xizmat o'lchovi va
-# narxi). Har bir fura bo'yicha yuk, xarajat va pipeline holati alohida
-# "Order Detail" hujjatlarida yuritiladi.
+# Order — mijoz bilan kelishuv: kim, qaysi Xitoy postavshik, yuk (mahsulot, jami tonna/kub,
+# fayl), xizmat o'lchovi (xarajatlarni bo'lish shu bo'yicha) va Truck Type bo'yicha taxminiy
+# narx oralig'i (min–max, bitta truck uchun; aniq narx yuk yetib borgach qo'lda). Yuk,
+# furalar, xarajat va pipeline holati "Order Detail" hujjatlarida yuritiladi.
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import flt
 
 from logistika.erp_for_logistics.cn_validators import validate_cn_phone
 
@@ -18,6 +20,20 @@ class Order(Document):
 			self.xitoy_zavod_raqami = validate_cn_phone(self.xitoy_zavod_raqami, "Xitoy zavod raqami")
 		self.validate_postavshik_group()
 		self.validate_kliyent_group()
+		self.validate_narxlar()
+
+	def validate_narxlar(self):
+		seen = set()
+		for row in self.narxlar:
+			if row.truck_type in seen:
+				frappe.throw(_('Narxlar: "{0}" Truck Type ikki marta').format(row.truck_type))
+			seen.add(row.truck_type)
+			if flt(row.min_narx) and flt(row.max_narx) and flt(row.min_narx) > flt(row.max_narx):
+				frappe.throw(
+					_('Narxlar, {0}-qator: min narx ({1}) max narxdan ({2}) katta').format(
+						row.idx, flt(row.min_narx), flt(row.max_narx)
+					)
+				)
 
 	def before_cancel(self):
 		# Order Detail submittable emas — Frappe'ning standart link tekshiruvi uni

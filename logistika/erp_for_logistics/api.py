@@ -37,26 +37,18 @@ def assert_no_duplicate_document(doc, key_fields, label=None, extra_filters=None
 def truck_plate_autocomplete(txt=None, **kwargs):
 	"""Order Detail'lardagi "Xitoy mashina nomeri"dan takrorlanmas fura raqamlari —
 	Transport Vositasi / Warehouse Intake'da avtomatik tavsiya uchun."""
-	filters = {"xitoy_mashina_nomeri": ["is", "set"]}
-	if txt:
-		filters["xitoy_mashina_nomeri"] = ["like", f"%{txt}%"]
-	plates = frappe.get_all(
-		"Order Detail", filters=filters, pluck="xitoy_mashina_nomeri", distinct=True, limit_page_length=20
-	)
-	return sorted({p for p in plates if p})
+	from logistika.erp_for_logistics import furalar
+
+	return sorted(furalar.plates(txt=txt))[:20]
 
 
 @frappe.whitelist()
 def china_plates_on_road(txt=None, **kwargs):
 	"""Yo'ldagi (hali omborga yetib kelmagan) Order Detail'larning Xitoy fura raqamlari —
 	Warehouse Intake'da faqat shu furalarni tanlash uchun."""
-	from logistika.erp_for_logistics.doctype.order_detail.order_detail import ON_CHINA_TRUCK_STAGES
+	from logistika.erp_for_logistics import furalar
 
-	filters = {"status": ["in", ON_CHINA_TRUCK_STAGES], "xitoy_mashina_nomeri": ["is", "set"]}
-	if txt:
-		filters["xitoy_mashina_nomeri"] = ["like", f"%{txt}%"]
-	plates = frappe.get_all("Order Detail", filters=filters, pluck="xitoy_mashina_nomeri", distinct=True)
-	return sorted({p for p in plates if p})
+	return sorted(furalar.plates(on_road=True, txt=txt))
 
 
 @frappe.whitelist()
@@ -64,7 +56,9 @@ def orders_for_truck(fura=None):
 	"""Berilgan Xitoy fura raqamidagi Order Detail'lar."""
 	if not fura:
 		return []
-	return frappe.get_all("Order Detail", filters={"xitoy_mashina_nomeri": fura}, pluck="name")
+	from logistika.erp_for_logistics import furalar
+
+	return furalar.order_details_on_plate(fura)
 
 
 def _order_details_of(order):
@@ -79,19 +73,19 @@ def truck_options_for_order(order):
 	if not order:
 		return {"china_trucks": [], "kz_trucks": []}
 	frappe.has_permission("Order", "read", doc=order, throw=True)
-	details = frappe.get_all(
-		"Order Detail", filters={"order": order}, fields=["name", "xitoy_mashina_nomeri"], order_by="name asc"
-	)
+	from logistika.erp_for_logistics import furalar
+
+	details = frappe.get_all("Order Detail", filters={"order": order}, pluck="name", order_by="name asc")
 	kz = []
 	if details:
 		kz = frappe.get_all(
 			"Truck Dispatch",
-			filters={"order": ["in", [d.name for d in details]], "mashina_raqami": ["is", "set"]},
+			filters={"order": ["in", details], "mashina_raqami": ["is", "set"]},
 			pluck="mashina_raqami",
 			order_by="creation asc",
 		)
 	return {
-		"china_trucks": list(dict.fromkeys(d.xitoy_mashina_nomeri for d in details if d.xitoy_mashina_nomeri)),
+		"china_trucks": furalar.plates(order=order),
 		"kz_trucks": list(dict.fromkeys(kz)),
 	}
 
@@ -202,3 +196,14 @@ def telegram_registration_status(order_names):
 		)
 		result[order_name] = registered
 	return result
+
+
+@frappe.whitelist()
+def order_detail_plates(order_detail):
+	"""Order Detail'ning Furalar jadvalidagi raqamlar — Ichki Deklaratsiya'da fura tanlash uchun."""
+	from logistika.erp_for_logistics import furalar
+
+	if not order_detail:
+		return []
+	frappe.has_permission("Order Detail", "read", doc=order_detail, throw=True)
+	return furalar.plates_of(order_detail)

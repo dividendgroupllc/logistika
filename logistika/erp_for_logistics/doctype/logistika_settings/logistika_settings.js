@@ -18,7 +18,6 @@ frappe.ui.form.on("Logistika Settings", {
 		const tannarx = {
 			wip_sugurta_hisobi: "Asset",
 			wip_fura_hisobi: "Asset",
-			wip_ichki_hisobi: "Asset",
 			wip_ombor_hisobi: "Asset",
 			wip_kz_hisobi: "Asset",
 			fura_xarajat_hisobi: "Expense",

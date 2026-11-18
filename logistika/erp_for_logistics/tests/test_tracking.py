@@ -18,7 +18,7 @@ class TestChinaTracking(FrappeTestCase):
 	def setUp(self):
 		frappe.db.savepoint("tracking_test")
 		setup_logistika_settings()
-		self.order_a = make_order(kliyent="_T Track A")
+		self.order_a = make_order(kliyent="_T Track A", mahsulot_nomi="Profil")
 		self.order_b = make_order(kliyent="_T Track B")
 		self.od_a = make_order_detail(self.order_a.name, xitoy_mashina_nomeri=PLATE)
 		self.od_b = make_order_detail(self.order_b.name, xitoy_mashina_nomeri=PLATE)
@@ -37,7 +37,7 @@ class TestChinaTracking(FrappeTestCase):
 		self.assertEqual(set(row["kliyentlar"]), {"_T Track A", "_T Track B"})
 
 	def test_warehouse_order_detail_excluded(self):
-		frappe.db.set_value("Order Detail", self.od_a.name, "status", "Таможния склад")
+		frappe.db.set_value("Order Detail Fura", self.od_a.furalar[0].name, "fakt_kelish_sanasi", today())
 		self.assertEqual(self._row_for_plate()["order_details"], [self.od_b.name])
 
 	def test_bulk_saves_and_sends_each_client(self):
@@ -79,6 +79,26 @@ class TestChinaTracking(FrappeTestCase):
 			self.assertEqual(send_dispatched(self.od_a.name), 1)
 			self.assertEqual(send_dispatched(self.od_a.name), 0)
 		self.assertEqual(send.call_count, 1)
+		row = frappe.get_doc("Order Detail Fura", self.od_a.furalar[0].name)
+		self.assertEqual(row.jonatish_xabari_yuborildi, 1)
+		self.assertEqual(str(row.fakt_chiqish_sanasi), today())
+
+	def test_send_dispatched_needs_truck_choice_when_several(self):
+		doc = make_order_detail(
+			self.order_a.name, furalar=[{"xitoy_mashina_nomeri": "_T X1"}, {"xitoy_mashina_nomeri": "_T X2"}]
+		)
+		with patch(CHAT_IDS, return_value=["1"]), patch(SEND, return_value=True) as send:
+			with self.assertRaises(frappe.ValidationError):
+				send_dispatched(doc.name)
+			self.assertEqual(send_dispatched(doc.name, doc.furalar[1].name), 1)
+		self.assertIn("_T X2", send.call_args.args[1])
+		self.assertEqual(frappe.db.get_value("Order Detail Fura", doc.furalar[0].name, "jonatish_xabari_yuborildi"), 0)
+
+	def test_bulk_update_tags_truck_row(self):
+		with patch(CHAT_IDS, return_value=[]):
+			tracking.save_and_send_china([{"fura": PLATE, "qayerdaligi": "Turpan"}])
+		self.od_a.reload()
+		self.assertEqual(self.od_a.kunlik_kuzatuv[0].fura, PLATE)
 
 	def test_dispatched_message_identifies_cargo(self):
 		with patch(CHAT_IDS, return_value=["1"]), patch(SEND, return_value=True) as send, patch(

@@ -27,7 +27,6 @@
   "tannarx_section",
   "wip_sugurta_hisobi",
   "wip_fura_hisobi",
-  "wip_ichki_hisobi",
   "cb_tannarx",
   "wip_ombor_hisobi",
   "wip_kz_hisobi",
@@ -176,12 +175,6 @@
    "label": "Fura olib kelish va konteyner (aktiv)"
   },
   {
-   "fieldname": "wip_ichki_hisobi",
-   "fieldtype": "Link",
-   "options": "Account",
-   "label": "Qo'shimcha rasxod (aktiv)"
-  },
-  {
    "fieldname": "cb_tannarx",
    "fieldtype": "Column Break"
   },
@@ -242,7 +235,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-11-19 00:20:00.000000",
+ "modified": "2026-11-19 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Logistika Settings",

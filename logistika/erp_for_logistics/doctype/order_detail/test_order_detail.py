@@ -19,27 +19,61 @@ from logistika.erp_for_logistics.tests.utils import (
 )
 
 
+FURA_FIELDS = (
+	"xitoy_haydovchi",
+	"xitoy_fura_telefon",
+	"xitoy_mashina_nomeri",
+	"truck_type",
+	"taxminiy_tonna",
+	"taxminiy_kub",
+	"zavoddan_chiqish_sanasi",
+	"kelish_sanasi",
+	"fakt_chiqish_sanasi",
+	"fakt_kelish_sanasi",
+	"xitoy_fura_summasi",
+	"sugurta",
+)
+
+
 def make_order_detail(order, save=True, **overrides):
-	data = {
-		"doctype": "Order Detail",
-		"order": order,
-		"mahsulot_nomi": "Profil",
+	"""Bitta furali Order Detail: fura maydonlari (FURA_FIELDS) "Furalar" jadvalining bitta
+	qatoriga yoziladi; `furalar` berilsa — o'sha qatorlar. `pekin_list` — shu fura uchun
+	Ichki Deklaratsiya."""
+	row = {
 		"xitoy_fura_telefon": "+8613800138000",
 		"xitoy_mashina_nomeri": "粤B12345",
 		"zavoddan_chiqish_sanasi": today(),
 		"kelish_sanasi": add_days(today(), 10),
 	}
+	for field in FURA_FIELDS:
+		if field in overrides:
+			row[field] = overrides.pop(field)
+	data = {"doctype": "Order Detail", "order": order}
 	data.update(overrides)
+	data.setdefault("furalar", [row])
 	pekin_list = data.pop("pekin_list", None)
 	doc = frappe.get_doc(data)
 	if save:
 		doc.insert(ignore_permissions=True)
 		if pekin_list:
-			frappe.get_doc(
-				{"doctype": "Ichki Deklaratsiya", "order_detail": doc.name, "pekin_list": pekin_list}
-			).insert(ignore_permissions=True)
+			make_declaration(doc, pekin_list)
 			doc.reload()
 	return doc
+
+
+def make_declaration(doc, pekin_list, plate=None):
+	return frappe.get_doc(
+		{
+			"doctype": "Ichki Deklaratsiya",
+			"order_detail": doc.name,
+			"xitoy_mashina_nomeri": plate or doc.furalar[0].xitoy_mashina_nomeri,
+			"pekin_list": pekin_list,
+		}
+	).insert(ignore_permissions=True)
+
+
+def fura(doc, idx=0):
+	return doc.furalar[idx]
 
 
 def pekin_rows(*weights_and_cbm):
@@ -76,9 +110,9 @@ class TestOrderDetail(FrappeTestCase):
 
 	def test_past_date_unchanged_resaves(self):
 		doc = make_order_detail(self.order.name)
-		frappe.db.set_value("Order Detail", doc.name, "zavoddan_chiqish_sanasi", add_days(today(), -5))
+		frappe.db.set_value("Order Detail Fura", fura(doc).name, "zavoddan_chiqish_sanasi", add_days(today(), -5))
 		doc.reload()
-		doc.mahsulot_nomi = "Profil 2"
+		fura(doc).taxminiy_tonna = 3
 		doc.save()
 
 	def test_arrival_after_departure(self):
@@ -88,18 +122,18 @@ class TestOrderDetail(FrappeTestCase):
 	def test_phone_and_plate_validated(self):
 		with self.assertRaises(frappe.ValidationError):
 			make_order_detail(self.order.name, xitoy_fura_telefon="+998901234567")
-		doc = make_order_detail(self.order.name, xitoy_fura_telefon="+86 138 0013 8000", xitoy_mashina_nomeri="AB 1234")
-		self.assertEqual(doc.xitoy_fura_telefon, "+8613800138000")
-		self.assertEqual(doc.xitoy_mashina_nomeri, "AB 1234")
+		doc = make_order_detail(self.order.name, xitoy_fura_telefon="+86 138 0013 8000", xitoy_mashina_nomeri=" AB 1234 ")
+		self.assertEqual(fura(doc).xitoy_fura_telefon, "+8613800138000")
+		self.assertEqual(fura(doc).xitoy_mashina_nomeri, "AB 1234")
 
 	def test_manual_phone_override_validated(self):
 		driver = ensure_supplier(
 			"_T OD Haydovchi", self.settings.haydovchi_supplier_group, "+8613800138000", "粤B12345"
 		)
 		doc = make_order_detail(self.order.name, xitoy_haydovchi=driver, xitoy_fura_telefon="+8613900139000")
-		self.assertEqual(doc.xitoy_fura_telefon, "+8613900139000")
+		self.assertEqual(fura(doc).xitoy_fura_telefon, "+8613900139000")
 		self.assertEqual(frappe.db.get_value("Supplier", driver, "xitoy_telefon"), "+8613800138000")
-		doc.xitoy_fura_telefon = "12345"
+		fura(doc).xitoy_fura_telefon = "12345"
 		with self.assertRaises(frappe.ValidationError):
 			doc.save()
 
@@ -110,13 +144,13 @@ class TestOrderDetail(FrappeTestCase):
 
 	def test_pekin_totals(self):
 		doc = make_order_detail(self.order.name, pekin_list=pekin_rows((1000, 2), (500, 3)))
-		self.assertAlmostEqual(doc.jami_tonna, 1.5)
-		self.assertAlmostEqual(doc.jami_kub, 5)
-		deklaratsiya = frappe.get_doc("Ichki Deklaratsiya", doc.ichki_deklaratsiya)
-		self.assertEqual(deklaratsiya.name, f"ID-{doc.name}")
+		self.assertAlmostEqual(fura(doc).fakt_tonna, 1.5)
+		self.assertAlmostEqual(fura(doc).fakt_kub, 5)
+		deklaratsiya = frappe.get_doc("Ichki Deklaratsiya", fura(doc).ichki_deklaratsiya)
+		self.assertEqual(deklaratsiya.name, f"ID-{doc.name}-01")
 		self.assertAlmostEqual(deklaratsiya.pekin_list[0].bir_dona_ogirlik, 500)
 		deklaratsiya.delete()
-		self.assertEqual(frappe.db.get_value("Order Detail", doc.name, "jami_tonna"), 0)
+		self.assertEqual(frappe.db.get_value("Order Detail Fura", fura(doc).name, "fakt_tonna"), 0)
 
 	def test_capacity_across_order_details(self):
 		truck = ensure_truck_type(tonna=33, kub=90)
@@ -124,7 +158,7 @@ class TestOrderDetail(FrappeTestCase):
 		other_order = make_order(kliyent="_T OD Mijoz 2")
 		with self.assertRaises(frappe.ValidationError):
 			make_order_detail(other_order.name, truck_type=truck, pekin_list=pekin_rows((14000, 10)))
-		frappe.db.set_value("Order Detail", first.name, "status", "Таможния склад")
+		frappe.db.set_value("Order Detail Fura", fura(first).name, "fakt_kelish_sanasi", today())
 		make_order_detail(other_order.name, truck_type=truck, pekin_list=pekin_rows((14000, 10)))
 
 	def test_status_change_logged(self):
@@ -147,7 +181,7 @@ class TestOrderDetail(FrappeTestCase):
 	def test_capacity_ignored_after_warehouse(self):
 		truck = ensure_truck_type(tonna=33, kub=90)
 		first = make_order_detail(self.order.name, truck_type=truck, pekin_list=pekin_rows((20000, 10)))
-		frappe.db.set_value("Order Detail", first.name, "status", "Таможния склад")
+		frappe.db.set_value("Order Detail Fura", fura(first).name, "fakt_kelish_sanasi", today())
 		other_order = make_order(kliyent="_T OD Mijoz 2")
 		make_order_detail(other_order.name, truck_type=truck, pekin_list=pekin_rows((14000, 10)))
 		first.reload()
@@ -156,13 +190,90 @@ class TestOrderDetail(FrappeTestCase):
 
 	def test_estimated_tonnage_is_informational(self):
 		doc = make_order_detail(self.order.name, taxminiy_tonna=25, pekin_list=pekin_rows((1000, 2)))
-		self.assertEqual(doc.taxminiy_tonna, 25)
-		self.assertAlmostEqual(doc.jami_tonna, 1)
+		self.assertEqual(fura(doc).taxminiy_tonna, 25)
+		self.assertAlmostEqual(fura(doc).fakt_tonna, 1)
 
-	def test_one_declaration_per_order_detail(self):
+	def test_one_declaration_per_truck(self):
 		doc = make_order_detail(self.order.name, pekin_list=pekin_rows((1000, 2)))
 		with self.assertRaises(frappe.exceptions.DuplicateEntryError):
-			frappe.get_doc({"doctype": "Ichki Deklaratsiya", "order_detail": doc.name}).insert(ignore_permissions=True)
+			make_declaration(doc, pekin_rows((500, 1)))
+
+	def test_declaration_must_name_truck_of_order_detail(self):
+		doc = make_order_detail(self.order.name)
+		with self.assertRaises(frappe.ValidationError):
+			make_declaration(doc, pekin_rows((500, 1)), plate="粤X00000")
+
+	def test_same_plate_twice_rejected(self):
+		with self.assertRaises(frappe.ValidationError):
+			make_order_detail(
+				self.order.name,
+				furalar=[{"xitoy_mashina_nomeri": "粤B1"}, {"xitoy_mashina_nomeri": "粤B1"}],
+			)
+
+
+class TestMultipleTrucks(FrappeTestCase):
+	"""Bitta yuk bir nechta furada: har bir qator alohida pekin, sig'im va kelish."""
+
+	def setUp(self):
+		frappe.db.savepoint("multi_truck_test")
+		setup_logistika_settings()
+		self.order = make_order(kliyent="_T MT Mijoz")
+		self.truck = ensure_truck_type(name="_T China 10t", tonna=10, kub=50)
+		self.doc = make_order_detail(
+			self.order.name,
+			furalar=[
+				{"xitoy_mashina_nomeri": "_T 冀M1", "truck_type": self.truck, "taxminiy_tonna": 8},
+				{"xitoy_mashina_nomeri": "_T 冀M2", "truck_type": self.truck, "taxminiy_tonna": 9},
+			],
+		)
+
+	def tearDown(self):
+		frappe.db.rollback(save_point="multi_truck_test")
+
+	def test_each_truck_gets_own_declaration_totals(self):
+		make_declaration(self.doc, pekin_rows((2000, 4)), plate="_T 冀M1")
+		make_declaration(self.doc, pekin_rows((3000, 6)), plate="_T 冀M2")
+		self.doc.reload()
+		self.assertAlmostEqual(fura(self.doc, 0).fakt_tonna, 2)
+		self.assertAlmostEqual(fura(self.doc, 1).fakt_tonna, 3)
+		self.assertAlmostEqual(fura(self.doc, 1).fakt_kub, 6)
+
+	def test_capacity_checked_per_truck(self):
+		other = make_order(kliyent="_T MT Mijoz 2")
+		make_order_detail(other.name, xitoy_mashina_nomeri="_T 冀M1", truck_type=self.truck, taxminiy_tonna=2)
+		with self.assertRaises(frappe.ValidationError):
+			make_order_detail(other.name, xitoy_mashina_nomeri="_T 冀M2", truck_type=self.truck, taxminiy_tonna=2)
+
+	def test_arrived_truck_leaves_road(self):
+		from logistika.erp_for_logistics import furalar
+
+		furalar.mark_arrived([self.doc.name], "_T 冀M1", today())
+		self.assertNotIn("_T 冀M1", furalar.plates(on_road=True))
+		self.assertIn("_T 冀M2", furalar.plates(on_road=True))
+		furalar.unmark_arrived([self.doc.name], "_T 冀M1", today(), frappe._dict(name="_T none"))
+		self.assertIn("_T 冀M1", furalar.plates(on_road=True))
+
+	def test_plate_locked_after_declaration(self):
+		make_declaration(self.doc, pekin_rows((2000, 4)), plate="_T 冀M1")
+		self.doc.reload()
+		fura(self.doc).xitoy_mashina_nomeri = "_T 冀M9"
+		with self.assertRaises(frappe.ValidationError):
+			self.doc.save()
+
+	def test_row_with_declaration_cannot_be_removed(self):
+		make_declaration(self.doc, pekin_rows((2000, 4)), plate="_T 冀M1")
+		self.doc.reload()
+		self.doc.furalar = [self.doc.furalar[1]]
+		with self.assertRaises(frappe.ValidationError):
+			self.doc.save()
+
+	def test_open_truck_with_past_departure_can_be_joined(self):
+		frappe.db.set_value("Order Detail Fura", fura(self.doc).name, "zavoddan_chiqish_sanasi", add_days(today(), -3))
+		other = make_order(kliyent="_T MT Mijoz 3")
+		make_order_detail(
+			other.name, xitoy_mashina_nomeri="_T 冀M1", truck_type=self.truck, taxminiy_tonna=1,
+			zavoddan_chiqish_sanasi=add_days(today(), -3),
+		)
 
 
 
@@ -197,7 +308,7 @@ class TestOnRoadTruck(FrappeTestCase):
 	def test_resave_does_not_double_count(self):
 		doc = self._od(taxminiy_tonna=9)
 		doc.reload()
-		doc.mahsulot_nomi = "Boshqa"
+		doc.brand = "Boshqa"
 		doc.save()
 
 	def test_pekin_overrides_estimate(self):
@@ -221,7 +332,9 @@ class TestOnRoadTruck(FrappeTestCase):
 		names = [r[0] for r in od_module.driver_query("Supplier", "_T OR", "name", 0, 20, {})]
 		self.assertIn(free, names)
 		self.assertNotIn(on_road, names)
-		frappe.db.set_value("Order Detail", doc.name, "status", "Таможния склад")
+		names = [r[0] for r in od_module.driver_query("Supplier", "_T OR", "name", 0, 20, {"order_detail": doc.name})]
+		self.assertIn(on_road, names)
+		frappe.db.set_value("Order Detail Fura", fura(doc).name, "fakt_kelish_sanasi", today())
 		names = [r[0] for r in od_module.driver_query("Supplier", "_T OR", "name", 0, 20, {})]
 		self.assertIn(on_road, names)
 
@@ -230,7 +343,7 @@ class TestOnRoadTruck(FrappeTestCase):
 		# Birinchi furaning haqiqiy yuki (pekin) 5 t: 5 + boshqaning taxminiy 6 t > 10 t — ogohlantirish, xato emas.
 		self._od(taxminiy_tonna=4, pekin_list=pekin_rows((5000, 5)))
 		# Haqiqiy yuklar o'zi sig'imdan oshsa — baribir xato.
-		frappe.db.set_value("Order Detail", other.name, "jami_tonna", 6)
+		frappe.db.set_value("Order Detail Fura", fura(other).name, "fakt_tonna", 6)
 		with self.assertRaises(frappe.ValidationError):
 			self._od(taxminiy_tonna=1, pekin_list=pekin_rows((5000, 5)))
 

@@ -18,43 +18,17 @@
   "xizmat_olchovi",
   "status",
   "sec_fura",
-  "mahsulot_nomi",
-  "taxminiy_tonna",
-  "taxminiy_kub",
-  "xitoy_haydovchi",
-  "yoldagi_furaga",
-  "yoldagi_fura",
-  "xitoy_fura_telefon",
-  "xitoy_mashina_nomeri",
-  "truck_type",
-  "truck_kub",
-  "truck_tonna",
-  "cb_fura",
-  "zavoddan_chiqish_sanasi",
-  "kelish_sanasi",
+  "furalar",
+  "sec_container",
   "container",
   "container_raqami",
   "container_zavodi",
   "sec_kuzatuv",
-  "jonatish_xabari_yuborildi",
   "kunlik_kuzatuv",
   "sec_xarajat",
   "valyuta",
-  "xitoy_fura_summasi",
-  "sugurta",
-  "sugurta_hujjat",
   "tannarx_je",
-  "fura_pi",
-  "konteyner_summasi",
-  "cb_xarajat",
-  "harajat_turi",
-  "summa",
-  "izoh",
-  "sec_pekin",
-  "ichki_deklaratsiya",
-  "jami_tonna",
-  "cb_pekin",
-  "jami_kub"
+  "konteyner_summasi"
  ],
  "fields": [
   {
@@ -142,100 +116,18 @@
   {
    "fieldname": "sec_fura",
    "fieldtype": "Section Break",
-   "label": "Fura"
+   "label": "Furalar"
   },
   {
-   "fieldname": "mahsulot_nomi",
-   "fieldtype": "Data",
-   "label": "Mahsulot nomi",
-   "reqd": 1,
-   "in_list_view": 1
+   "fieldname": "furalar",
+   "fieldtype": "Table",
+   "options": "Order Detail Fura",
+   "label": "Furalar"
   },
   {
-   "fieldname": "taxminiy_tonna",
-   "fieldtype": "Float",
-   "label": "Yuk tonnaji (taxminiy)",
-   "precision": "3",
-   "non_negative": 1,
-   "in_list_view": 1,
-   "description": "Ma'lumot uchun. Hisob-kitobda haqiqiy tonna pekin list'dan olinadi (\"Jami tonna\")"
-  },
-  {
-   "fieldname": "taxminiy_kub",
-   "fieldtype": "Float",
-   "label": "Taxminiy kub",
-   "description": "Pekin list kelguncha fura sig'imini tekshirish uchun"
-  },
-  {
-   "fieldname": "xitoy_haydovchi",
-   "fieldtype": "Link",
-   "options": "Supplier",
-   "label": "Xitoy haydovchi ismi"
-  },
-  {
-   "fieldname": "yoldagi_furaga",
-   "fieldtype": "Check",
-   "label": "Yo'ldagi to'lmagan furaga qo'shish",
-   "no_copy": 1
-  },
-  {
-   "fieldname": "yoldagi_fura",
-   "fieldtype": "Autocomplete",
-   "label": "Yo'ldagi fura",
-   "depends_on": "yoldagi_furaga",
-   "no_copy": 1,
-   "description": "Faqat bo'sh joyi qolgan, hali omborga kelmagan furalar"
-  },
-  {
-   "fetch_from": "xitoy_haydovchi.xitoy_telefon",
-   "fieldname": "xitoy_fura_telefon",
-   "fieldtype": "Data",
-   "label": "Xitoy fura telefon",
-   "fetch_if_empty": 1
-  },
-  {
-   "fetch_from": "xitoy_haydovchi.xitoy_mashina_nomeri",
-   "fieldname": "xitoy_mashina_nomeri",
-   "fieldtype": "Data",
-   "label": "Xitoy mashina nomeri",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "search_index": 1,
-   "fetch_if_empty": 1
-  },
-  {
-   "fieldname": "truck_type",
-   "fieldtype": "Link",
-   "options": "Truck Type",
-   "label": "Truck Type"
-  },
-  {
-   "fetch_from": "truck_type.kub",
-   "fieldname": "truck_kub",
-   "fieldtype": "Float",
-   "label": "Kubi — m³",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "truck_type.tonna",
-   "fieldname": "truck_tonna",
-   "fieldtype": "Float",
-   "label": "Tonnaji",
-   "read_only": 1
-  },
-  {
-   "fieldname": "cb_fura",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "zavoddan_chiqish_sanasi",
-   "fieldtype": "Date",
-   "label": "Zavoddan chiqish sanasi"
-  },
-  {
-   "fieldname": "kelish_sanasi",
-   "fieldtype": "Date",
-   "label": "Kelish sanasi"
+   "fieldname": "sec_container",
+   "fieldtype": "Section Break",
+   "label": "Container"
   },
   {
    "fieldname": "container",
@@ -261,13 +153,6 @@
    "collapsible": 1
   },
   {
-   "fieldname": "jonatish_xabari_yuborildi",
-   "fieldtype": "Check",
-   "label": "\"Yo'lga chiqdi\" xabari yuborilgan",
-   "read_only": 1,
-   "no_copy": 1
-  },
-  {
    "fieldname": "kunlik_kuzatuv",
    "fieldtype": "Table",
    "options": "Internal Logistics Tracking",
@@ -287,37 +172,10 @@
    "read_only": 1
   },
   {
-   "fieldname": "xitoy_fura_summasi",
-   "fieldtype": "Currency",
-   "options": "valyuta",
-   "label": "Fura olib kelish summasi",
-   "non_negative": 1
-  },
-  {
-   "fieldname": "sugurta",
-   "fieldtype": "Currency",
-   "options": "valyuta",
-   "label": "Sug'urta",
-   "non_negative": 1
-  },
-  {
-   "fieldname": "sugurta_hujjat",
-   "fieldtype": "Attach",
-   "label": "Sug'urta hujjati"
-  },
-  {
    "fieldname": "tannarx_je",
    "fieldtype": "Link",
    "options": "Journal Entry",
    "label": "Xarajatlar Journal Entry",
-   "read_only": 1,
-   "no_copy": 1
-  },
-  {
-   "fieldname": "fura_pi",
-   "fieldtype": "Link",
-   "options": "Purchase Invoice",
-   "label": "Fura Purchase Invoice",
    "read_only": 1,
    "no_copy": 1
   },
@@ -328,61 +186,6 @@
    "options": "valyuta",
    "label": "Konteyner summasi",
    "non_negative": 1
-  },
-  {
-   "fieldname": "cb_xarajat",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "harajat_turi",
-   "fieldtype": "Link",
-   "options": "Account",
-   "label": "Qo'shimcha rasxod turi"
-  },
-  {
-   "fieldname": "summa",
-   "fieldtype": "Currency",
-   "options": "valyuta",
-   "label": "Qo'shimcha rasxod summasi",
-   "non_negative": 1
-  },
-  {
-   "fieldname": "izoh",
-   "fieldtype": "Data",
-   "label": "Rasxod izohi"
-  },
-  {
-   "fieldname": "sec_pekin",
-   "fieldtype": "Section Break",
-   "label": "Pekin list (Ichki Deklaratsiya)"
-  },
-  {
-   "fieldname": "ichki_deklaratsiya",
-   "fieldtype": "Link",
-   "options": "Ichki Deklaratsiya",
-   "label": "Ichki Deklaratsiya",
-   "read_only": 1,
-   "no_copy": 1
-  },
-  {
-   "fieldname": "jami_tonna",
-   "fieldtype": "Float",
-   "label": "Jami tonna",
-   "read_only": 1,
-   "precision": "3",
-   "description": "Ichki Deklaratsiya'dagi pekin list'dan"
-  },
-  {
-   "fieldname": "cb_pekin",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "jami_kub",
-   "fieldtype": "Float",
-   "label": "Jami kub",
-   "read_only": 1,
-   "precision": "3",
-   "description": "Ichki Deklaratsiya'dagi pekin list'dan"
   }
  ],
  "links": [
@@ -436,7 +239,7 @@
    "group": "Tannarx"
   }
  ],
- "modified": "2026-11-18 20:00:00.000000",
+ "modified": "2026-11-19 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Order Detail",
@@ -455,7 +258,7 @@
    "write": 1
   }
  ],
- "search_fields": "xitoy_mashina_nomeri,mahsulot_nomi,kliyent",
+ "search_fields": "kliyent,brand",
  "show_title_field_in_link": 0,
  "sort_field": "modified",
  "sort_order": "DESC",

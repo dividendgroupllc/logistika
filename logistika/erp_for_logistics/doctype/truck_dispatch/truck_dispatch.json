@@ -53,16 +53,13 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Xitoy fura raqami",
-   "fetch_from": "order.xitoy_mashina_nomeri",
    "read_only": 1
   },
   {
    "fieldname": "china_arrival",
    "fieldtype": "Date",
    "label": "Omborga yetib kelish sanasi",
-   "read_only": 1,
-   "fetch_from": "order.kelish_sanasi",
-   "fetch_if_empty": 1
+   "read_only": 1
   },
   {
    "fieldname": "cb_top",
@@ -139,7 +136,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-18 12:00:00.000000",
+ "modified": "2026-11-19 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Truck Dispatch",

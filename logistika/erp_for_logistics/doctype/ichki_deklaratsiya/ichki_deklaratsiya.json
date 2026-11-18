@@ -1,6 +1,6 @@
 {
  "actions": [],
- "autoname": "format:ID-{order_detail}",
+ "autoname": "format:ID-{order_detail}-{##}",
  "naming_rule": "Expression",
  "creation": "2026-11-18 19:00:00.000000",
  "doctype": "DocType",
@@ -37,7 +37,6 @@
    "options": "Order Detail",
    "label": "Order Detail",
    "reqd": 1,
-   "unique": 1,
    "in_list_view": 1,
    "in_standard_filter": 1
   },
@@ -72,12 +71,11 @@
    "read_only": 1
   },
   {
-   "fetch_from": "order_detail.xitoy_mashina_nomeri",
    "fieldname": "xitoy_mashina_nomeri",
-   "fieldtype": "Data",
-   "label": "Xitoy mashina nomeri",
-   "read_only": 1,
-   "in_list_view": 1
+   "fieldtype": "Select",
+   "label": "Xitoy fura (Order Detail qatori)",
+   "in_list_view": 1,
+   "reqd": 1
   },
   {
    "fieldname": "sec_pekin",
@@ -141,7 +139,7 @@
   }
  ],
  "links": [],
- "modified": "2026-11-19 00:20:00.000000",
+ "modified": "2026-11-19 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Ichki Deklaratsiya",

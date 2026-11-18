@@ -6,7 +6,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
-from logistika.erp_for_logistics import ombor_ledger, tannarx
+from logistika.erp_for_logistics import furalar, ombor_ledger, tannarx
 from logistika.erp_for_logistics.api import china_plates_on_road
 
 
@@ -21,7 +21,7 @@ class WarehouseIntake(Document):
 			)
 		self.compute_farq()
 		for row in self.items:
-			if row.order and frappe.db.get_value("Order Detail", row.order, "xitoy_mashina_nomeri") != self.fura:
+			if row.order and not furalar.find_row(row.order, self.fura):
 				frappe.throw(
 					_("{0}-qator: \"{1}\" Order Detail \"{2}\" furasiga tegishli emas.").format(
 						row.idx, row.order, self.fura
@@ -35,12 +35,17 @@ class WarehouseIntake(Document):
 		if self.items:
 			self.holati = "Nedostatka" if any(flt(row.farq) < 0 for row in self.items) else "To'liq"
 
+	def _order_details(self):
+		return list({row.order for row in self.items if row.order})
+
 	def on_submit(self):
+		furalar.mark_arrived(self._order_details(), self.fura, self.sana)
 		ombor_ledger.sync_warehouse_intake_ledger(self)
 		ombor_ledger.advance_warehouse_intake_status(self)
 		tannarx.on_warehouse_intake_submit(self)
 
 	def on_cancel(self):
+		furalar.unmark_arrived(self._order_details(), self.fura, self.sana, self)
 		tannarx.on_source_cancel(self)
 		ombor_ledger.delete_ledger_for_document(self.doctype, self.name)
 

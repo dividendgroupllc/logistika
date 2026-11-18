@@ -10,7 +10,7 @@ frappe.ui.form.on("Warehouse Intake", {
 			return { query: "logistika.erp_for_logistics.ombor_xarajatlari.get_ombor_xarajati_accounts" };
 		});
 		frm.set_query("order", "items", () => {
-			return frm.doc.fura ? { filters: { xitoy_mashina_nomeri: frm.doc.fura } } : {};
+			return frm.doc.fura ? { filters: [["Order Detail Fura", "xitoy_mashina_nomeri", "=", frm.doc.fura]] } : {};
 		});
 	},
 	refresh(frm) {

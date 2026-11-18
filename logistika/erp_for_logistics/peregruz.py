@@ -20,10 +20,9 @@ TARGET_STATUS = "Товар погружен КЗ"
 def _order_details_for_truck(china_truck, order=None):
 	if not china_truck:
 		frappe.throw("Xitoy fura tanlanmagan")
-	filters = {"xitoy_mashina_nomeri": china_truck}
-	if order:
-		filters["order"] = order
-	names = frappe.get_all("Order Detail", filters=filters, pluck="name", order_by="name asc")
+	from logistika.erp_for_logistics import furalar
+
+	names = furalar.order_details_on_plate(china_truck, order=order)
 	if not names:
 		frappe.throw(f'"{china_truck}" furasi uchun Order Detail topilmadi.')
 	return names
@@ -39,7 +38,7 @@ def _planned_qty(order_detail, part_names, for_update=False):
 		f"""
 		select part_name, sum(quantity) as qty
 		from `tabInternal Logistics Item`
-		where parenttype = 'Ichki Deklaratsiya' and parent = (
+		where parenttype = 'Ichki Deklaratsiya' and parent in (
 			select name from `tabIchki Deklaratsiya` where order_detail = %(od)s
 		) and part_name in %(parts)s
 		group by part_name {_lock_clause(for_update)}
@@ -101,7 +100,7 @@ def pull_for_peregruz(china_truck, order=None, peregruz=None):
 	qatorlarga reja ulushiga mutanosib taqsimlanadi."""
 	result = []
 	for order_detail in _order_details_for_truck(china_truck, order):
-		rows = [row for row in get_pekin_rows(order_detail) if flt(row.quantity) > 0]
+		rows = [row for row in get_pekin_rows(order_detail, china_truck) if flt(row.quantity) > 0]
 		if not rows:
 			continue
 		planned_by_part = {}
@@ -111,6 +110,8 @@ def pull_for_peregruz(china_truck, order=None, peregruz=None):
 		for row in rows:
 			planned = planned_by_part[row.part_name]
 			share = flt(row.quantity) / planned * max(available[row.part_name], 0.0) if planned else 0.0
+			# Mavjud qoldiq Order Detail bo'yicha (barcha furalar) — shu fura rejasidan oshmaydi.
+			share = min(share, flt(row.quantity))
 			result.append(
 				{
 					"china_truck": china_truck,

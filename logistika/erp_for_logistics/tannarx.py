@@ -22,6 +22,7 @@ from frappe import _
 from erpnext.accounts.party import get_party_account_currency
 from frappe.utils import flt, today
 
+from logistika.erp_for_logistics import furalar
 from logistika.erp_for_logistics.doctype.kassa.kassa import get_account_currency_amount, get_exchange_rate
 from logistika.erp_for_logistics.doctype.logistika_settings.logistika_settings import get_required_setting
 from logistika.erp_for_logistics.ombor_ledger import _prorate_kub_tonna
@@ -52,8 +53,23 @@ def to_company_amount(amount, currency, posting_date):
 	return flt(flt(amount) * flt(rate), 2)
 
 
+def allocation_weights(measures_by_od):
+	"""{od: (tonna, kub)} -> {od: og'irlik}. Xarajat Order'dagi "Xizmat o'lchovi" bo'yicha
+	bo'linadi: hamma Order Detail'lar Order'i "Kub" bo'lsa kub ulushi, aks holda tonna
+	(bitta yig'indida tonna va kubni aralashtirib bo'lmaydi)."""
+	if not measures_by_od:
+		return {}
+	orders = frappe.get_all("Order Detail", filters={"name": ["in", list(measures_by_od)]}, pluck="order")
+	units = set(frappe.get_all("Order", filters={"name": ["in", orders]}, pluck="xizmat_olchovi")) if orders else set()
+	index = 1 if units == {"Kub"} else 0
+	if index == 1 and not any(flt(m[1]) > 0 for m in measures_by_od.values()):
+		index = 0  # pekin list'da hajm yo'q — xarajat yo'qolmasin, tonna bo'yicha
+	return {od: flt(m[index]) for od, m in measures_by_od.items()}
+
+
 def allocate_by_tonnage(total, tonnage_by_key):
-	"""Summani kalitlar o'rtasida tonna ulushiga bo'ladi; yaxlitlash qoldig'i oxirgisiga."""
+	"""Summani kalitlar o'rtasida og'irlik (tonna yoki kub) ulushiga bo'ladi; yaxlitlash
+	qoldig'i oxirgisiga."""
 	weights = {k: flt(v) for k, v in tonnage_by_key.items() if flt(v) > 0}
 	if not weights or not flt(total):
 		return {}
@@ -167,9 +183,20 @@ def delivered_tonnage(order_detail, exclude_kz_transit=None):
 	return sum(flt(r[1]) for r in rows)
 
 
+def expected_tonnage(order_detail):
+	"""Order Detail'ning kutilayotgan jami tonnasi: kelgan furalar — haqiqatda qabul
+	qilingani, hali yo'ldagi furalar — pekin (bo'lmasa taxminiy) tonnasi."""
+	on_road = frappe.get_all(
+		furalar.CHILD,
+		filters={"parent": order_detail, "parenttype": "Order Detail", "fakt_kelish_sanasi": ["is", "not set"]},
+		fields=["fakt_tonna", "taxminiy_tonna", "fakt_kub", "taxminiy_kub"],
+	)
+	return received_tonnage(order_detail) + sum(furalar.row_load(r)[0] for r in on_road)
+
+
 def is_fully_delivered(order_detail):
-	received = received_tonnage(order_detail)
-	return received > EPSILON and delivered_tonnage(order_detail) >= received - EPSILON
+	expected = expected_tonnage(order_detail)
+	return expected > EPSILON and delivered_tonnage(order_detail) >= expected - EPSILON
 
 
 # ---------------------------------------------------------------- xarajat yozish -------
@@ -208,14 +235,15 @@ def _wip_balance_for(key):
 	)
 
 
-def cancel_source_costs(doctype, name):
+def cancel_source_costs(doctype, name, source_deleted=False):
 	"""Manba bekor qilindi/o'chirildi — yozilgan xarajatlar teskari yozuv bilan nolga
-	tushiriladi (tarix saqlanadi)."""
+	tushiriladi (tarix saqlanadi). source_deleted — manba (masalan jadvaldan olib
+	tashlangan fura qatori) bazada yo'q, teskari yozuvning "Manba" havolasi tekshirilmaydi."""
 	rows = _source_rows(doctype, name)
 	if not rows:
 		return None
 	doc = frappe._dict(doctype=doctype, name=name)
-	return _post_deltas(doc, {}, {_line_key(r): r for r in rows}, rows, today())
+	return _post_deltas(doc, {}, {_line_key(r): r for r in rows}, rows, today(), ignore_links=source_deleted)
 
 
 def sync_source_costs(doc, lines, currency, credit_account=None, posting_date=None):
@@ -250,7 +278,7 @@ def sync_source_costs(doc, lines, currency, credit_account=None, posting_date=No
 	return je or (existing[-1].voucher_no if existing else None)
 
 
-def _post_deltas(doc, wanted, existing_keys, existing_rows, posting_date):
+def _post_deltas(doc, wanted, existing_keys, existing_rows, posting_date, ignore_links=False):
 	posted = {}
 	for r in existing_rows:
 		key = _line_key(r)
@@ -296,11 +324,11 @@ def _post_deltas(doc, wanted, existing_keys, existing_rows, posting_date):
 		return None
 	je = _make_je(je_rows, posting_date, _("Tannarx: {0} {1}").format(_(doc.doctype), doc.name))
 	for row in ledger:
-		_insert_ledger(row, doc.doctype, doc.name, "Journal Entry", je, posting_date)
+		_insert_ledger(row, doc.doctype, doc.name, "Journal Entry", je, posting_date, ignore_links=ignore_links)
 	return je
 
 
-def _insert_ledger(row, manba_doctype, manba_name, voucher_type, voucher_no, posting_date):
+def _insert_ledger(row, manba_doctype, manba_name, voucher_type, voucher_no, posting_date, ignore_links=False):
 	frappe.get_doc(
 		{
 			"doctype": LEDGER,
@@ -311,7 +339,7 @@ def _insert_ledger(row, manba_doctype, manba_name, voucher_type, voucher_no, pos
 			"voucher_no": voucher_no,
 			**row,
 		}
-	).insert(ignore_permissions=True)
+	).insert(ignore_permissions=True, ignore_links=ignore_links)
 
 
 # ---------------------------------------------------------------- manbalar -------------
@@ -322,20 +350,6 @@ def order_detail_lines(od):
 	return [
 		{
 			"order_detail": od.name,
-			"kategoriya": "Sug'urta",
-			"wip_account": settings.wip_sugurta_hisobi,
-			"expense_account": settings.sugurta_xarajat_hisobi,
-			"amount": od.sugurta,
-		},
-		{
-			"order_detail": od.name,
-			"kategoriya": "Qo'shimcha rasxod",
-			"wip_account": settings.wip_ichki_hisobi,
-			"expense_account": od.harajat_turi,
-			"amount": od.summa,
-		},
-		{
-			"order_detail": od.name,
 			"kategoriya": "Konteyner",
 			"wip_account": settings.wip_fura_hisobi,
 			"expense_account": settings.fura_xarajat_hisobi,
@@ -344,26 +358,107 @@ def order_detail_lines(od):
 	]
 
 
+def fura_row_lines(od, row):
+	settings = frappe.get_single("Logistika Settings")
+	return [
+		{
+			"order_detail": od.name,
+			"kategoriya": "Sug'urta",
+			"wip_account": settings.wip_sugurta_hisobi,
+			"expense_account": settings.sugurta_xarajat_hisobi,
+			"amount": row.sugurta,
+		},
+	]
+
+
+def _row_source(row):
+	return frappe._dict(doctype=furalar.CHILD, name=row.name)
+
+
+def _posted_row_sources(order_detail):
+	return set(
+		frappe.get_all(
+			LEDGER, filters={"manba_doctype": furalar.CHILD, "order_detail": order_detail}, pluck="manba_name", distinct=True
+		)
+	)
+
+
 def sync_order_detail(od):
-	if not any(flt(line["amount"]) for line in order_detail_lines(od)) and not _source_rows(od.doctype, od.name):
-		return
-	_require_wip_settings()
-	je = sync_source_costs(od, order_detail_lines(od), od.valyuta or "CNY")
-	if je != od.tannarx_je:
-		od.db_set("tannarx_je", je, update_modified=False)
+	"""Order Detail'ning o'z xarajati (Konteyner) va har bir fura qatorining Sug'urtasi
+	(qator — alohida manba, alohida JE). Jadvaldan o'chirilgan qatorning xarajati teskari
+	yoziladi."""
+	currency = od.valyuta or "CNY"
+	if any(flt(line["amount"]) for line in order_detail_lines(od)) or _source_rows(od.doctype, od.name):
+		_require_wip_settings()
+		je = sync_source_costs(od, order_detail_lines(od), currency)
+		if je != od.tannarx_je:
+			od.db_set("tannarx_je", je, update_modified=False)
+
+	current = {row.name for row in od.furalar}
+	for row in od.furalar:
+		lines = fura_row_lines(od, row)
+		if not any(flt(line["amount"]) for line in lines) and not _source_rows(furalar.CHILD, row.name):
+			continue
+		_require_wip_settings()
+		je = sync_source_costs(_row_source(row), lines, currency)
+		if je != row.tannarx_je:
+			frappe.db.set_value(furalar.CHILD, row.name, "tannarx_je", je, update_modified=False)
+			row.tannarx_je = je
+	for name in _posted_row_sources(od.name) - current:
+		cancel_source_costs(furalar.CHILD, name, source_deleted=True)
+
+
+def delete_order_detail_costs(od):
+	"""Order Detail o'chirilmoqda. Faqat uning o'z xarajatlari (Konteyner, furalar
+	Sug'urtasi) bo'lsa — ularning JE'lari bekor qilinadi va "Tannarx Harakati" yozuvlari
+	o'chiriladi. Yuk omborga kelgan / yuklangan / yetkazilgan bo'lsa (boshqa hujjatlarning
+	yozuvlari) — avval o'sha hujjatlarni bekor qilish kerak."""
+	rows = frappe.get_all(
+		LEDGER, filters={"order_detail": od.name}, fields=["name", "manba_doctype", "manba_name", "voucher_type", "voucher_no"]
+	)
+	own = {od.doctype, furalar.CHILD}
+	foreign = sorted({(r.manba_doctype, r.manba_name) for r in rows if r.manba_doctype not in own})
+	if foreign:
+		frappe.throw(
+			_("Order Detail'ni o'chirib bo'lmaydi — avval quyidagi hujjatlarni bekor qiling: {0}").format(
+				", ".join(f"{_(dt)} {name}" for dt, name in foreign)
+			)
+		)
+	vouchers = {(r.voucher_type, r.voucher_no) for r in rows if r.voucher_no}
+	for voucher in vouchers:
+		_cancel_voucher(*voucher)
+	if vouchers:
+		# Bekor qilingan JE va GL yozuvlari hisobotlarga kirmaydi, lekin ulardagi "Order
+		# Detail" dimension havolasi o'chirishni to'sadi (Frappe bekor qilingan hujjatdagi
+		# havolani ham hisobga oladi) — faqat shu bekor qilingan yozuvlarda tozalanadi.
+		values = {"od": od.name, "vouchers": tuple(v[1] for v in vouchers)}
+		frappe.db.sql(
+			"""update `tabJournal Entry Account` set order_detail = null
+			where docstatus = 2 and order_detail = %(od)s and parent in %(vouchers)s""",
+			values,
+		)
+		frappe.db.sql(
+			"""update `tabGL Entry` set order_detail = null
+			where is_cancelled = 1 and order_detail = %(od)s and voucher_no in %(vouchers)s""",
+			values,
+		)
+	for r in rows:
+		frappe.delete_doc(LEDGER, r.name, ignore_permissions=True, force=True)
 
 
 def _require_wip_settings():
-	for field in ("wip_sugurta_hisobi", "wip_fura_hisobi", "wip_ichki_hisobi", "wip_ombor_hisobi", "wip_kz_hisobi"):
+	for field in ("wip_sugurta_hisobi", "wip_fura_hisobi", "wip_ombor_hisobi", "wip_kz_hisobi"):
 		get_required_setting(field)
 
 
-def _loading_cost_lines(doc, tonnage_by_od, kategoriya, wip_field, kz_fura=None):
-	"""Hujjatdagi har bir yuklash xarajati qatorini Order Detail'larga tonna bo'yicha bo'ladi."""
+def _loading_cost_lines(doc, measures_by_od, kategoriya, wip_field, kz_fura=None):
+	"""Hujjatdagi har bir yuklash xarajati qatorini Order Detail'larga Xizmat o'lchovi
+	(tonna yoki kub) bo'yicha bo'ladi."""
 	wip = get_required_setting(wip_field)
+	weights = allocation_weights(measures_by_od)
 	lines = []
 	for cost in doc.yuklash_xarajatlari:
-		for od, amount in allocate_by_tonnage(cost.summa, tonnage_by_od).items():
+		for od, amount in allocate_by_tonnage(cost.summa, weights).items():
 			lines.append(
 				{
 					"order_detail": od,
@@ -377,42 +472,55 @@ def _loading_cost_lines(doc, tonnage_by_od, kategoriya, wip_field, kz_fura=None)
 	return lines
 
 
-def _ledger_tonnage(reference_doctype, reference_name, harakat_turi):
+def _ledger_measures(reference_doctype, reference_name, harakat_turi):
+	"""{od: (tonna, kub)} — hujjatning Ombor Harakati yozuvlaridan."""
 	rows = frappe.db.sql(
-		"""select `order`, sum(tonna) from `tabOmbor Harakati`
+		"""select `order`, sum(tonna), sum(kub) from `tabOmbor Harakati`
 		where reference_doctype = %s and reference_name = %s and harakat_turi = %s and `order` is not null
 		group by `order`""",
 		(reference_doctype, reference_name, harakat_turi),
 	)
-	return {r[0]: flt(r[1]) for r in rows}
+	return {r[0]: (flt(r[1]), flt(r[2])) for r in rows}
 
 
 def on_warehouse_intake_submit(doc):
-	tonnage = _ledger_tonnage("Warehouse Intake", doc.name, "Kirim")
-	create_fura_purchase_invoices(doc, list(tonnage))
+	measures = _ledger_measures("Warehouse Intake", doc.name, "Kirim")
+	create_fura_purchase_invoices(doc, list(measures), doc.fura)
 	if doc.yuklash_xarajatlari:
-		je = sync_source_costs(doc, _loading_cost_lines(doc, tonnage, "Ombor", "wip_ombor_hisobi"), doc.valyuta, doc.tolov_hisobi, doc.sana)
+		je = sync_source_costs(doc, _loading_cost_lines(doc, measures, "Ombor", "wip_ombor_hisobi"), doc.valyuta, doc.tolov_hisobi, doc.sana)
 		doc.db_set("tannarx_je", je, update_modified=False)
 
 
 def on_peregruz_submit(doc):
-	tonnage = {}
+	measures = {}
 	for row in doc.yuklar:
 		if row.order and flt(row.fakt_transload) > 0:
-			tonnage[row.order] = tonnage.get(row.order, 0) + _prorate_kub_tonna(
-				row.fakt_transload, row.quantity, row.volume_cbm, row.net_weight
-			)[1]
-	create_fura_purchase_invoices(doc, list(tonnage))
+			kub, tonna = _prorate_kub_tonna(row.fakt_transload, row.quantity, row.volume_cbm, row.net_weight)
+			old_tonna, old_kub = measures.get(row.order, (0, 0))
+			measures[row.order] = (old_tonna + tonna, old_kub + kub)
+	for plate, order_details in peregruz_trucks(doc).items():
+		create_fura_purchase_invoices(doc, order_details, plate)
 	if doc.yuklash_xarajatlari:
-		je = sync_source_costs(doc, _loading_cost_lines(doc, tonnage, "Ombor", "wip_ombor_hisobi"), doc.valyuta, doc.tolov_hisobi, doc.sana)
+		je = sync_source_costs(doc, _loading_cost_lines(doc, measures, "Ombor", "wip_ombor_hisobi"), doc.valyuta, doc.tolov_hisobi, doc.sana)
 		doc.db_set("tannarx_je", je, update_modified=False)
+
+
+def peregruz_trucks(doc):
+	"""Peregruz'dagi Xitoy furalari (qator furasi, bo'lmasa sarlavhadagi manba fura) ->
+	ularning Order Detail'lari."""
+	trucks = {}
+	for row in doc.yuklar:
+		plate = row.china_truck or doc.manba_china_truck
+		if row.order and plate and flt(row.fakt_transload) > 0 and row.order not in trucks.setdefault(plate, []):
+			trucks[plate].append(row.order)
+	return trucks
 
 
 def on_kz_truck_loading_submit(doc):
 	if not doc.yuklash_xarajatlari:
 		return
-	tonnage = _ledger_tonnage("KZ Truck Loading", doc.name, "Chiqim")
-	lines = _loading_cost_lines(doc, tonnage, "KZ", "wip_kz_hisobi", kz_fura=doc.kz_truck)
+	measures = _ledger_measures("KZ Truck Loading", doc.name, "Chiqim")
+	lines = _loading_cost_lines(doc, measures, "KZ", "wip_kz_hisobi", kz_fura=doc.kz_truck)
 	je = sync_source_costs(doc, lines, doc.valyuta, doc.tolov_hisobi, doc.sana)
 	doc.db_set("tannarx_je", je, update_modified=False)
 
@@ -427,39 +535,42 @@ def on_source_cancel(doc):
 # ---------------------------------------------------------------- fura PI --------------
 
 
-def create_fura_purchase_invoices(source_doc, order_details):
-	"""Fura omborga (yoki Peregruz orqali KZ furaga) kelganda — har bir Order Detail'ning
-	"fura olib kelish summasi" uchun haydovchidan Purchase Invoice (debet: aktiv)."""
+def create_fura_purchase_invoices(source_doc, order_details, plate):
+	"""Fura omborga (yoki Peregruz orqali KZ furaga) kelganda — shu raqamdagi har bir
+	Order Detail fura qatorining "fura olib kelish summasi" uchun haydovchidan Purchase
+	Invoice (debet: aktiv)."""
+	if not plate:
+		return
 	settings = frappe.get_single("Logistika Settings")
 	for name in order_details:
-		od = frappe.get_doc("Order Detail", name)
-		if flt(od.xitoy_fura_summasi) <= 0:
+		row = furalar.find_row(name, plate)
+		if not row or flt(row.xitoy_fura_summasi) <= 0:
 			continue
-		if od.fura_pi and frappe.db.get_value("Purchase Invoice", od.fura_pi, "docstatus") == 1:
+		if row.fura_pi and frappe.db.get_value("Purchase Invoice", row.fura_pi, "docstatus") == 1:
 			continue
-		if not od.xitoy_haydovchi:
+		if not row.xitoy_haydovchi:
 			frappe.throw(
-				_('"{0}" Order Detail\'da fura olib kelish summasi bor, lekin "Xitoy haydovchi" tanlanmagan — Purchase Invoice kimga yozilishini bilib bo\'lmaydi.').format(od.name)
+				_('"{0}" Order Detail\'dagi "{1}" furasida fura olib kelish summasi bor, lekin "Xitoy haydovchi" tanlanmagan — Purchase Invoice kimga yozilishini bilib bo\'lmaydi.').format(name, plate)
 			)
 		_require_wip_settings()
 		posting_date = source_doc.get("sana") or today()
-		source_currency = od.valyuta or "CNY"
+		source_currency = frappe.db.get_value("Order Detail", name, "valyuta") or "CNY"
 		# Invoice valyutasi — haydovchining kreditor hisobi valyutasi (ERPNext boshqasini
 		# qabul qilmaydi); CNY summa kurs bo'yicha aylantiriladi.
-		currency = get_party_account_currency("Supplier", od.xitoy_haydovchi, get_company())
-		company_amount = to_company_amount(od.xitoy_fura_summasi, source_currency, posting_date)
+		currency = get_party_account_currency("Supplier", row.xitoy_haydovchi, get_company())
+		company_amount = to_company_amount(row.xitoy_fura_summasi, source_currency, posting_date)
 		rate_to_company = to_company_amount(1, currency, posting_date) if currency != company_currency() else 1
-		amount = flt(company_amount / rate_to_company, 2) if currency != source_currency else flt(od.xitoy_fura_summasi)
+		amount = flt(company_amount / rate_to_company, 2) if currency != source_currency else flt(row.xitoy_fura_summasi)
 		pi = frappe.new_doc("Purchase Invoice")
-		pi.supplier = od.xitoy_haydovchi
+		pi.supplier = row.xitoy_haydovchi
 		pi.company = get_company()
 		pi.posting_date = posting_date
 		pi.set_posting_time = 1
-		pi.bill_no = od.name
+		pi.bill_no = name
 		pi.currency = currency
 		pi.conversion_rate = rate_to_company
 		pi.remarks = _("Fura olib kelish: {0} ({1}) — {2} {3}").format(
-			od.name, od.xitoy_mashina_nomeri or "", flt(od.xitoy_fura_summasi), source_currency
+			name, plate, flt(row.xitoy_fura_summasi), source_currency
 		)
 		pi.append(
 			"items",
@@ -468,23 +579,23 @@ def create_fura_purchase_invoices(source_doc, order_details):
 				"qty": 1,
 				"rate": amount,
 				"expense_account": settings.wip_fura_hisobi,
-				"order_detail": od.name,
+				"order_detail": name,
 				"description": pi.remarks,
 			},
 		)
 		pi.flags.ignore_permissions = True
 		pi.insert()
 		pi.submit()
-		od.db_set("fura_pi", pi.name, update_modified=False)
-		direct = is_fully_delivered(od.name)
+		frappe.db.set_value(furalar.CHILD, row.name, "fura_pi", pi.name, update_modified=False)
+		direct = is_fully_delivered(name)
 		_insert_ledger(
 			{
-				"order_detail": od.name,
+				"order_detail": name,
 				"kategoriya": "Fura olib kelish",
 				"wip_hisob": settings.wip_fura_hisobi,
 				"xarajat_hisob": settings.fura_xarajat_hisobi,
 				"summa": flt(pi.base_grand_total, 2),
-				"summa_valyutada": flt(od.xitoy_fura_summasi, 2),
+				"summa_valyutada": flt(row.xitoy_fura_summasi, 2),
 				"valyuta": source_currency,
 				"turi": "Xarajat" if direct else "Kirim",
 			},
@@ -500,7 +611,9 @@ def cancel_fura_purchase_invoices(source_doc):
 	rows = _source_rows(source_doc.doctype, source_doc.name, voucher_type="Purchase Invoice")
 	for r in rows:
 		_cancel_voucher("Purchase Invoice", r.voucher_no)
-		frappe.db.set_value("Order Detail", r.order_detail, "fura_pi", None, update_modified=False)
+		frappe.db.sql(
+			f"update `tab{furalar.CHILD}` set fura_pi = null where fura_pi = %s", r.voucher_no
+		)
 		frappe.delete_doc(LEDGER, r.name, ignore_permissions=True, force=True)
 
 
@@ -524,8 +637,9 @@ def sync_kz_transit_costs(doc):
 	total = sum(flt(v) for v in amounts.values())
 	if not total and not _source_rows(doc.doctype, doc.name):
 		return
-	tonnage = {od: m[0] for od, m in kz_transit_order_details(doc).items()}
-	if total and not tonnage:
+	measures = kz_transit_order_details(doc)
+	weights = allocation_weights(measures)
+	if total and not any(flt(w) > 0 for w in weights.values()):
 		frappe.msgprint(
 			_("KZ Transit xarajatlari hali tannarxga yozilmadi: shu KZ furaga submit qilingan yuklash topilmadi."),
 			indicator="orange",
@@ -543,7 +657,7 @@ def sync_kz_transit_costs(doc):
 			"amount": amount,
 			"kz_fura": doc.kz_truck,
 		}
-		for od, amount in allocate_by_tonnage(total, tonnage).items()
+		for od, amount in allocate_by_tonnage(total, weights).items()
 	]
 	je = sync_source_costs(doc, lines, doc.valyuta or company_currency(), doc.tolov_hisobi)
 	if je != doc.tannarx_je:
@@ -576,7 +690,7 @@ def deliver_kz_transit(doc):
 	for od, (tonna, kub) in measures.items():
 		if tonna <= EPSILON:
 			continue
-		remaining = received_tonnage(od) - delivered_tonnage(od, exclude_kz_transit=doc.name)
+		remaining = expected_tonnage(od) - delivered_tonnage(od, exclude_kz_transit=doc.name)
 		share = 1 if remaining <= tonna + EPSILON else tonna / remaining
 		parts = [(b, share, None) for b in _balances(od, None)] + [
 			(b, 1, doc.kz_truck) for b in _balances(od, doc.kz_truck)
@@ -639,7 +753,9 @@ def _make_sales_invoice(doc, si_rows, posting_date):
 			{
 				"item_code": get_required_setting("logistika_xizmat_item"),
 				"qty": flt(qty, 3),
-				"rate": flt(order.narx),
+				# Aniq narx yuk Toshkentga yetgach qo'lda yoziladi (Order'da faqat taxminiy
+				# min/max narx Truck Type bo'yicha).
+				"rate": 0,
 				"income_account": get_required_setting("daromad_hisobi"),
 				"order_detail": od,
 				"description": _("{0}: {1} {2}").format(od, flt(qty, 3), _("t") if order.xizmat_olchovi != "Kub" else "m³"),

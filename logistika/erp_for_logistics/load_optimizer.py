@@ -112,7 +112,7 @@ def _resolve_box_dimensions(part_name, order_detail=None):
 	values = {"part_name": part_name}
 	if order_detail:
 		conditions.append(
-			"parenttype = 'Ichki Deklaratsiya' and parent = "
+			"parenttype = 'Ichki Deklaratsiya' and parent in "
 			"(select name from `tabIchki Deklaratsiya` where order_detail = %(order_detail)s)"
 		)
 		values["order_detail"] = order_detail

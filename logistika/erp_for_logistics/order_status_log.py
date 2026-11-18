@@ -36,7 +36,8 @@ def log_status_changes(doc):
 		{
 			"doctype": "Order Item Status Log",
 			"order": doc.name,
-			"fura": doc.xitoy_mashina_nomeri or doc.mahsulot_nomi,
+			"fura": ", ".join(r.xitoy_mashina_nomeri for r in doc.get("furalar") or [] if r.xitoy_mashina_nomeri)
+			or frappe.db.get_value("Order", doc.order, "mahsulot_nomi"),
 			"old_status": change["old_status"],
 			"new_status": new_status,
 			"stage_index": PIPELINE_STAGES.index(new_status) if new_status in PIPELINE_STAGES else -1,

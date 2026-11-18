@@ -1,21 +1,21 @@
  (boshqa buyurtmalarning taxminiy yuki hisobiga — ularni tekshiring), （计入了其他订单的预估货物——请检查这些订单）
 """Haydovchi"" ""{0}"" guruhidan bo'lishi kerak",“司机”必须属于“{0}”组
-"""Kelish sanasi"" ""Zavoddan chiqish sanasi""dan keyin bo'lishi kerak",“到达日期”必须晚于“出厂日期”
 """Kim to'ladi"" shu Order'ning mijozi yoki Xitoy postavshigi bo'lishi kerak: {0}",“付款方”必须是该订单的客户或中国供应商：{0}
 """Kliyent"" ""{0}"" guruhidan bo'lishi kerak",“客户”必须属于“{0}”组
 """Sana dan"" majburiy",“开始日期”为必填项
 """Webhook'ni o'rnatish"" bosilganda avtomatik yaratiladi",点击“设置 Webhook”时自动生成
-"""Xitoy haydovchi"" ""{0}"" guruhidan bo'lishi kerak",“中国司机”必须属于“{0}”组
 """Xitoy postavshik"" ""{0}"" guruhidan bo'lishi kerak",“中国供应商”必须属于“{0}”组
 """Yo'lga chiqdi"" xabari yuborilgan",已发送“已出发”消息
 """Yuklarni tortish"" bosilgan paytdagi Ombor Harakati ledger'idan hisoblangan JONLI qoldiq (avvalgi bir martalik statik nusxadan farqli)",点击“拉取货物”时根据库存变动台账计算的实时余额（不同于之前的一次性静态副本）
-"""Zavoddan chiqish sanasi"" bugundan oldin bo'lishi mumkin emas",“出厂日期”不能早于今天
 """{0}"" furasi to'liq o'tkazildi deb belgilandi",货车“{0}”已标记为全部转运
 """{0}"" furasi to'liq yuklandi deb belgilandi",货车“{0}”已标记为全部装载
+"""{0}"" furasi uchun Ichki Deklaratsiya allaqachon bor: {1}",货车“{0}”已有国内报关单：{1}
 """{0}"" furasidagi jami yuk {1} {2} — Truck Type sig'imi {3} {2} dan oshib ketdi",货车“{0}”的货物总计 {1} {2}——超出车型容量 {3} {2}
+"""{0}"" furasini o'chirib bo'lmaydi — unga Ichki Deklaratsiya, Purchase Invoice yoki kelish sanasi bog'langan",无法删除货车“{0}”——它已关联国内报关单、采购发票或到达日期
 """{0}"" furasining barcha mahsulotlari mavjud (qolgan) miqdor bo'yicha TO'LIQ o'tkazildi deb belgilanadi — sanab chiqilmagan bo'lsa ham (yopiq konteyner uchun). Davom etasizmi?",货车“{0}”的所有商品将按可用（剩余）数量标记为全部转运——即使未清点（适用于封闭集装箱）。是否继续？
 """{0}"" furasining barcha mahsulotlari mavjud ombor qoldig'i bo'yicha TO'LIQ yuklandi deb belgilanadi — sanab chiqilmagan bo'lsa ham (yopiq konteyner uchun). Davom etasizmi?",货车“{0}”的所有商品将按现有库存余额标记为全部装载——即使未清点（适用于封闭集装箱）。是否继续？
-"""{0}"" Order Detail'da fura olib kelish summasi bor, lekin ""Xitoy haydovchi"" tanlanmagan — Purchase Invoice kimga yozilishini bilib bo'lmaydi.",订单明细“{0}”有货车运费金额，但未选择“中国司机”——无法确定采购发票开给谁。
+"""{0}"" Order Detail'dagi ""{1}"" furasida fura olib kelish summasi bor, lekin ""Xitoy haydovchi"" tanlanmagan — Purchase Invoice kimga yozilishini bilib bo'lmaydi.",订单明细“{0}”中的货车“{1}”填写了货车运费，但未选择“中国司机”——无法确定采购发票开给谁。
+"""{0}"" Order Detail'ning Furalar jadvalida ""{1}"" furasi yo'q",订单明细“{0}”的货车表中没有货车“{1}”
 """{0}"" Order hali submit qilinmagan",订单“{0}”尚未提交
 """{0}"" xarajati uchun xarajat hisobi (Harajat turi) tanlanmagan",费用“{0}”未选择费用科目（费用类型）
 """{0}"" — yo'ldagi Order Detail'larda bunday fura yo'q (yoki u allaqachon omborga kelgan).",“{0}”——在途订单明细中没有该货车（或已到达仓库）。
@@ -112,7 +112,11 @@ Eski status,旧状态
 Expense Cost Center,费用成本中心
 Expense ichidagi oddiy (papka bo'lmagan) hisob bo'lishi kerak,必须是费用（Expense）下的普通（非文件夹）科目
 Expense ichidagi papka (guruh hisob) bo'lishi kerak,必须是费用（Expense）下的文件夹（组科目）
+Fakt chiqqan sana,实际出发日期
+Fakt kelgan sana,实际到达日期
+Fakt kub,实际立方米
 Fakt soni,实际数量
+Fakt tonna,实际吨数
 Fakt yetib borgan sana,实际到达日期
 Faol,启用
 "Faqat ""Mijoz"" xabarlari uchun — xodim o'qishi uchun ruscha tarjima",仅用于“客户”消息——供员工阅读的俄语翻译
@@ -120,7 +124,6 @@ Faol,启用
 "Faqat ""Xodim"" xabarlari uchun — javobni kim yozgani",仅用于“员工”消息——回复人
 "Faqat ""Xodim"" xabarlari uchun — mijozga yuborilgan tarjima (mijoz tiliga).",仅用于“员工”消息——发送给客户的翻译（客户语言）。
 Faqat aktivda qoldig'i borlar,仅显示资产中有余额的
-"Faqat bo'sh joyi qolgan, hali omborga kelmagan furalar",仅限尚有空位、尚未到达仓库的货车
 Faqat hozir omborda turganlar,仅显示当前在库的
 Faqat yo'ldagi (hali omborga kelmagan) Order Detail'larning fura raqamlari,仅限在途（尚未到达仓库）订单明细的货车号
 Farq,差异
@@ -135,8 +138,11 @@ Fura olib kelish xarajati (Expense),货车运费费用（Expense）
 Fura olib kelish xizmati (Item),货车运输服务（Item）
 Fura olib kelish: {0} ({1}) — {2} {3},货车运费：{0}（{1}）——{2} {3}
 Fura Purchase Invoice,货车采购发票
+Fura qatori topilmadi,未找到货车行
 Fura raqami...,货车号...
+Furalar,货车
 Furalar bo'yicha holat,按货车查看状态
+Furani tanlang,请选择货车
 GPS,GPS
 GPS Device ID (Traccar),GPS 设备 ID（Traccar）
 GPS Offline,GPS 离线
@@ -186,7 +192,6 @@ Ichki deklaratsiya,国内报关单
 Ichki Deklaratsiya (pekin list),国内报关单（装箱单）
 Ichki deklaratsiya hujjati,国内报关单文件
 Ichki deklaratsiya summasi,国内报关单金额
-Ichki Deklaratsiya'dagi pekin list'dan,来自国内报关单中的装箱单
 Ichki eni — sm,内部宽度——厘米
 Ichki logistika xarajatlari papkasi,国内物流费用文件夹
 Ichki o'lchamlari — Load Optimizer uchun,内部尺寸——用于装载优化器
@@ -226,7 +231,7 @@ Karobka soni,箱数
 Kassa,出纳
 KASSA-.YYYY.-,KASSA-.YYYY.-
 Kategoriya,类别
-Kelish sanasi,到达日期
+Kelish sanasi (reja),到达日期（计划）
 Kim buyurtma qildi,下单人
 Kim orqali (vositachi),经由（中间人）
 Kim to'ladi,付款方
@@ -282,7 +287,6 @@ Logistika xizmati daromadi (Income),物流服务收入（Income）
 "Logistika xizmati: {0}, KZ fura {1}",物流服务：{0}，哈萨克斯坦货车 {1}
 m,米
 Ma'lumot topilmadi,未找到数据
-"Ma'lumot uchun. Hisob-kitobda haqiqiy tonna pekin list'dan olinadi (""Jami tonna"")",仅供参考。核算时实际吨数取自装箱单（“总吨数”）
 Mahsulot,商品
 Mahsulot bo'yicha qidirish...,按商品搜索...
 Mahsulot nomi,商品名称
@@ -300,6 +304,7 @@ Mashina raqami / Fura,车牌号 / 货车
 Matn,文本
 Matn (asl tilida),文本（原文）
 Mavjud,可用
+Max narx (1 truck),最高价格（每车）
 Mijoz,客户
 Mijoz bilan suhbat,与客户对话
 Mijoz botda tanlagan til (uz/ru/en),客户在机器人中选择的语言（uz/ru/en）
@@ -310,11 +315,14 @@ Mijozga Sales Invoice qatori uchun,用于客户销售发票行
 Mijozga yuborildi,已发送给客户
 Mijozga yuborildi ({0} kishi),已发送给客户（{0} 人）
 Mijozlar guruhi,客户组
+Min narx (1 truck),最低价格（每车）
 Miqdor,数量
 Miqdor juda kichik (1 karobkaga yetmadi),数量太小（不足 1 箱）
 Mos o'lcham topilmadi,未找到合适的尺寸
 Mustahkamlash,加固
-Narx (1 tonna / 1 kub uchun),价格（每吨 / 每立方米）
+"Narxlar (Truck Type bo'yicha, taxminiy)",价格（按车型，预估）
+"Narxlar, {0}-qator: min narx ({1}) max narxdan ({2}) katta",价格第{0}行：最低价格（{1}）大于最高价格（{2}）
+"Narxlar: ""{0}"" Truck Type ikki marta",价格：车型“{0}”重复
 Navbatda,排队中
 Nedostatka,短缺
 Net vazn,净重
@@ -350,14 +358,18 @@ Ombor yuklash-tushirish (aktiv),仓库装卸（资产）
 Omborda qoldiq,在库余额
 "Ombordan o'tmasdan, to'g'ridan shu KZ furaga o'tkazilayotgan Xitoy fura",不经过仓库、直接转运到该哈萨克斯坦货车的中国货车
 Omborga kirish sanasi,入库日期
+Omborga qabul (Warehouse Intake) yoki Peregruz submit bo'lganda avtomatik,仓库入库或换装提交时自动填写
 Omborga yetib kelish sanasi,到达仓库日期
 Order / Zakaz,订单
 Order Chat Message,订单聊天消息
 Order Dashboard,订单仪表板
 Order Detail,订单明细
+Order Detail Fura,订单明细货车
 "Order Detail xarajatlari (sug'urta, qo'shimcha rasxod, konteyner) va boshqa hujjatlar uchun standart Cash/Bank hisobi (JE krediti)",订单明细费用（保险、额外费用、集装箱）及其他单据的默认现金/银行科目（日记账分录贷方）
 "Order Detail'dagi ""Xitoy haydovchi"" shu guruhdan tanlanadi va yangisi shu guruhda yaratiladi",订单明细中的“中国司机”从此组中选择，新建的也在此组中创建
+Order Detail'ni o'chirib bo'lmaydi — avval quyidagi hujjatlarni bekor qiling: {0},无法删除订单明细——请先取消以下单据：{0}
 Order Item Status Log,订单商品状态日志
+Order Narx,订单价格
 Order Tannarxi,订单成本
 "Order → mahsulotlar jadvalidagi ""Qo'shimcha rasxod turi"" shu papka ichidagi hisoblardan tanlanadi",订单 → 商品表中的“额外费用类型”从此文件夹下的科目中选择
 "Order'dagi ""Kliyent"" shu guruhdan tanlanadi va yangi mijoz shu guruhda yaratiladi",订单中的“客户”从此组中选择，新客户也在此组中创建
@@ -383,7 +395,7 @@ Pekin invoice,装箱发票
 Pekin invoice (kliyentdan),装箱发票（来自客户）
 "Pekin invoice, TTN и Pekin list (Order Detail) проверены",装箱发票、TTN 和装箱单（订单明细）已核对
 Pekin list,装箱单
-Pekin list (Ichki Deklaratsiya),装箱单（国内报关单）
+Pekin list (fakt),装箱单（实际）
 Pekin list / Fakt qabul,装箱单 / 实收
 Pekin list import,装箱单导入
 Pekin list kelguncha fura sig'imini tekshirish uchun,用于在装箱单到达前检查货车容量
@@ -396,21 +408,19 @@ Prava / guvohnoma,驾照 / 证件
 Qator (idn),行（idn）
 Qator topilmadi — sahifani yangilang (Ctrl+Shift+R).,未找到行——请刷新页面（Ctrl+Shift+R）。
 Qayerdaligi,所在位置
+Qaysi fura yo'lga chiqqanini tanlang,请选择已出发的货车
 "Qaysi ombordan yuk chiqarilayotgani — ""Yuklarni tortish"" shu ombor qoldig'idan hisoblaydi",从哪个仓库出货——“拉取货物”按该仓库余额计算
 Qayta hisoblash,重新计算
 Qayta yuklash,重新加载
 Qo'shimcha rasxod,额外费用
-Qo'shimcha rasxod (aktiv),额外费用（资产）
-Qo'shimcha rasxod summasi,额外费用金额
-Qo'shimcha rasxod turi,额外费用类型
 "Qo'shimcha rasxod va yuklash xarajatlari o'z qatoridagi ""Harajat turi"" hisobiga o'tadi",额外费用和装载费用计入各自行中的“费用类型”科目
+Qo'shish,添加
 Qoldiq,余额
 "Qoldiq — kub, m³",余额——立方米，m³
 Qoldiq — tonna,余额——吨
 "Qurilma offline — haydovchiga qo'ng'iroq qilib, GPS'ni yangilashini so'rang, keyin qayta urinib ko'ring.",设备离线——请致电司机让其更新 GPS，然后重试。
 Rasm,图片
 Rasm yuborish (izoh — yozilgan matn),发送图片（说明——已输入的文本）
-Rasxod izohi,费用说明
 Real vaqtda ombor qoldig'i va yetkazib berish holati,实时库存余额与配送状态
 Reja soni,计划数量
 Reja − ombordan o'tgan − boshqa Peregruz hujjatida o'tkazilgan qoldiq,计划 − 已经仓库转出 − 其他换装单据中已转运 后的剩余量
@@ -435,6 +445,7 @@ Sug'urta,保险
 Sug'urta (aktiv),保险（资产）
 Sug'urta harajati,保险费用
 Sug'urta hujjati,保险单据
+Sug'urta Journal Entry,保险日记账分录
 Sug'urta va to'lov,保险与付款
 Sug'urta xarajati hisobi,保险费用科目
 Sug'urta xarajati va to'lanadigan hisob bir kompaniyaga tegishli bo'lishi kerak,保险费用科目和应付科目必须属于同一公司
@@ -443,6 +454,7 @@ Summa (hujjat valyutasida),金额（单据货币）
 Summa (kompaniya valyutasida),金额（公司货币）
 t,吨
 Tanlangan Xitoy postavshikning telefonidan olinadi (+86),取自所选中国供应商的电话（+86）
+Tanlash,选择
 Tannarx (COGS) Journal Entry,成本（COGS）日记账分录
 Tannarx (yetkazildi): {0} {1},成本（已交付）：{0} {1}
 Tannarx Harakati,成本流水
@@ -459,6 +471,7 @@ Tarjima — xitoycha,翻译——中文
 tarjimasiz yuborildi,未翻译直接发送
 Tasdiqlangan,已确认
 Taxminiy kub,预估立方数
+Taxminiy tonna,预估吨数
 Tayyor Javob,快捷回复
 Tayyor javoblar,快捷回复
 Telefon raqami,电话号码
@@ -507,6 +520,7 @@ Xarajatlar valyutasi,费用货币
 Xarajatlar yuk mijozga yetib borguncha shu aktiv hisoblarda turadi,货物送达客户之前，费用记在这些资产科目中
 Xatolik yuz berdi. Qayta urinib ko'ring.,发生错误。请重试。
 Xitoy fura,中国货车
+Xitoy fura (Order Detail qatori),中国货车（订单明细行）
 Xitoy fura raqami,中国货车号
 Xitoy fura telefon,中国货车电话
 Xitoy haydovchi ismi,中国司机姓名
@@ -526,6 +540,7 @@ Xodim javobi: fonda tarjima qilinib Telegram'ga yuborilishi holati,员工回复�
 Yakun,完成
 Yakunlangan,已完成
 Yangi,新建
+Yangi haydovchi,新司机
 Yangi mijoz,新建客户
 Yangi status,新状态
 Yangi Xitoy haydovchi,新建中国司机
@@ -538,7 +553,7 @@ Yetkazilganda — xarajat va daromad,交付时——费用与收入
 Yo'lda,在途
 Yo'lda fura yo'q,没有在途货车
 Yo'ldagi fura,在途货车
-Yo'ldagi to'lmagan furaga qo'shish,添加到在途未满货车
+Yo'ldagi furaga qo'shish,添加到在途货车
 Yondan ko'rinish (uzunlik × balandlik),侧视图（长 × 高）
 Yuborildi,已发送
 Yuborilgan,已发送
@@ -549,10 +564,11 @@ Yuborilmadi — mijozning Telegram kontakti topilmadi.,未发送——未找到�
 Yuborilmoqda...,正在发送...
 yuborilmoqda...,正在发送...
 Yuborish,发送
+Yuk,货物
 Yuk bo'linmasining ichki balandligi — santimetrda,货厢内部高度——厘米
 Yuk bo'linmasining ichki bo'yi — santimetrda,货厢内部长度——厘米
 Yuk bo'linmasining ichki eni — santimetrda,货厢内部宽度——厘米
-Yuk tonnaji (taxminiy),货物吨位（预估）
+Yuk fayli (Excel / PDF / rasm),货物文件（Excel / PDF / 图片）
 Yuk yetkazilganda sug'urta tannarxi shu xarajat hisobiga o'tadi,货物交付时，保险成本转入此费用科目
 Yuklar,货物
 Yuklash sxemasi (3D),装载方案（3D）
@@ -563,7 +579,7 @@ Yuklash xarajatlari (kran/kara/gruzchik),装载费用（吊车/叉车/装卸工�
 Yuklash xarajatlari papkasi,装载费用文件夹
 Zakaz sanasi,订单日期
 Zanjir soni,链条数量
-Zavoddan chiqish sanasi,出厂日期
+Zavoddan chiqish sanasi (reja),出厂日期（计划）
 {0} (davom etmoqda),{0}（进行中）
 {0} allaqachon mavjud: {1}. Yangisini yaratish o'rniga o'sha hujjatni oching/tahrirlang.,{0} 已存在：{1}。请打开/编辑该单据，而不是新建。
 {0} bilan suhbat,与 {0} 的对话
@@ -576,7 +592,14 @@ Zavoddan chiqish sanasi,出厂日期
 {0} turidagi oddiy (papka bo'lmagan) hisob bo'lishi kerak,必须是 {0} 类型的普通（非文件夹）科目
 {0} — KZ fura: {1} — Truck: {2} ({3}×{4}×{5} sm) — {6},{0} — 哈萨克斯坦货车：{1} — 车型：{2}（{3}×{4}×{5} 厘米）— {6}
 {0} — status tarixi,{0} — 状态历史
+{0}-qator,第{0}行
 "{0}-qator: ""{1}"" Order Detail ""{2}"" furasiga tegishli emas.",第 {0} 行：订单明细“{1}”不属于货车“{2}”。
+"{0}: ""Fakt kelgan sana"" ""Fakt chiqqan sana""dan oldin bo'lishi mumkin emas",{0}：“实际到达日期”不能早于“实际出发日期”
+"{0}: ""Kelish sanasi"" ""Zavoddan chiqish sanasi""dan keyin bo'lishi kerak",{0}：“到达日期”必须晚于“出厂日期”
+"{0}: ""Xitoy haydovchi"" ""{1}"" guruhidan bo'lishi kerak",{0}：“中国司机”必须属于“{1}”组
+"{0}: ""Zavoddan chiqish sanasi"" bugundan oldin bo'lishi mumkin emas",{0}：“出厂日期”不能早于今天
+"{0}: ""{1}"" furasi jadvalda ikki marta",{0}：货车“{1}”在表中重复
+"{0}: ""{1}"" furasining raqamini o'zgartirib bo'lmaydi — unga Ichki Deklaratsiya, Purchase Invoice yoki kelish sanasi bog'langan",{0}：无法修改货车“{1}”的车牌——它已关联国内报关单、采购发票或到达日期
 "{0}: javob saqlandi, lekin mijozga yuborilmadi — ro'yxatdan o'tgan Telegram kontakti yo'q yoki Telegram xatosi.",{0}：回复已保存，但未发送给客户——没有已注册的 Telegram 联系人或 Telegram 出错。
 {0}: tarjima ishlamadi — javob asl matnda yuborildi.,{0}：翻译失败——回复已以原文发送。
 "{0}: tarjima qilinmadi, javob yuborilmadi — aniqroq qilib qayta yozing.",{0}：未能翻译，回复未发送——请写得更清楚后重试。

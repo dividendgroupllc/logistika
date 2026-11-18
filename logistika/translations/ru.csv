@@ -1,21 +1,21 @@
  (boshqa buyurtmalarning taxminiy yuki hisobiga — ularni tekshiring), (за счёт ориентировочного груза других заказов — проверьте их)
 """Haydovchi"" ""{0}"" guruhidan bo'lishi kerak","""Водитель"" должен быть из группы ""{0}"""
-"""Kelish sanasi"" ""Zavoddan chiqish sanasi""dan keyin bo'lishi kerak","""Дата прибытия"" должна быть позже ""Даты выезда с завода"""
 """Kim to'ladi"" shu Order'ning mijozi yoki Xitoy postavshigi bo'lishi kerak: {0}","""Кто оплатил"" должен быть клиентом или китайским поставщиком этого заказа: {0}"
 """Kliyent"" ""{0}"" guruhidan bo'lishi kerak","""Клиент"" должен быть из группы ""{0}"""
 """Sana dan"" majburiy","""Дата с"" обязательна"
 """Webhook'ni o'rnatish"" bosilganda avtomatik yaratiladi","Создаётся автоматически при нажатии ""Установить вебхук"""
-"""Xitoy haydovchi"" ""{0}"" guruhidan bo'lishi kerak","""Китайский водитель"" должен быть из группы ""{0}"""
 """Xitoy postavshik"" ""{0}"" guruhidan bo'lishi kerak","""Китайский поставщик"" должен быть из группы ""{0}"""
 """Yo'lga chiqdi"" xabari yuborilgan","Сообщение ""Выехал в путь"" отправлено"
 """Yuklarni tortish"" bosilgan paytdagi Ombor Harakati ledger'idan hisoblangan JONLI qoldiq (avvalgi bir martalik statik nusxadan farqli)","ЖИВОЙ остаток, рассчитанный по журналу Движения склада на момент нажатия ""Подтянуть грузы"" (в отличие от прежней одноразовой статической копии)"
-"""Zavoddan chiqish sanasi"" bugundan oldin bo'lishi mumkin emas","""Дата выезда с завода"" не может быть раньше сегодняшнего дня"
 """{0}"" furasi to'liq o'tkazildi deb belgilandi","Фура ""{0}"" отмечена как полностью перегруженная"
 """{0}"" furasi to'liq yuklandi deb belgilandi","Фура ""{0}"" отмечена как полностью загруженная"
+"""{0}"" furasi uchun Ichki Deklaratsiya allaqachon bor: {1}",Для фуры «{0}» внутренняя декларация уже существует: {1}
 """{0}"" furasidagi jami yuk {1} {2} — Truck Type sig'imi {3} {2} dan oshib ketdi","Общий груз фуры ""{0}"" {1} {2} — превышена вместимость Truck Type {3} {2}"
+"""{0}"" furasini o'chirib bo'lmaydi — unga Ichki Deklaratsiya, Purchase Invoice yoki kelish sanasi bog'langan","Фуру «{0}» нельзя удалить — к ней привязаны внутренняя декларация, Purchase Invoice или дата прибытия"
 """{0}"" furasining barcha mahsulotlari mavjud (qolgan) miqdor bo'yicha TO'LIQ o'tkazildi deb belgilanadi — sanab chiqilmagan bo'lsa ham (yopiq konteyner uchun). Davom etasizmi?","Все товары фуры ""{0}"" будут отмечены как ПОЛНОСТЬЮ перегруженные по доступному (оставшемуся) количеству — даже если не пересчитаны (для закрытого контейнера). Продолжить?"
 """{0}"" furasining barcha mahsulotlari mavjud ombor qoldig'i bo'yicha TO'LIQ yuklandi deb belgilanadi — sanab chiqilmagan bo'lsa ham (yopiq konteyner uchun). Davom etasizmi?","Все товары фуры ""{0}"" будут отмечены как ПОЛНОСТЬЮ загруженные по имеющемуся складскому остатку — даже если не пересчитаны (для закрытого контейнера). Продолжить?"
-"""{0}"" Order Detail'da fura olib kelish summasi bor, lekin ""Xitoy haydovchi"" tanlanmagan — Purchase Invoice kimga yozilishini bilib bo'lmaydi.","В Order Detail ""{0}"" указана сумма доставки фурой, но не выбран ""Китайский водитель"" — невозможно определить, на кого выписать Счёт-фактуру покупки."
+"""{0}"" Order Detail'dagi ""{1}"" furasida fura olib kelish summasi bor, lekin ""Xitoy haydovchi"" tanlanmagan — Purchase Invoice kimga yozilishini bilib bo'lmaydi.","В Order Detail «{0}» у фуры «{1}» указана сумма доставки, но не выбран «Китайский водитель» — непонятно, на кого выставлять Purchase Invoice."
+"""{0}"" Order Detail'ning Furalar jadvalida ""{1}"" furasi yo'q",В таблице «Фуры» Order Detail «{0}» нет фуры «{1}»
 """{0}"" Order hali submit qilinmagan","Заказ ""{0}"" ещё не проведён"
 """{0}"" xarajati uchun xarajat hisobi (Harajat turi) tanlanmagan","Для расхода ""{0}"" не выбран счёт расходов (Вид расхода)"
 """{0}"" — yo'ldagi Order Detail'larda bunday fura yo'q (yoki u allaqachon omborga kelgan).","""{0}"" — среди Order Detail в пути нет такой фуры (или она уже прибыла на склад)."
@@ -112,7 +112,11 @@ Eski status,Старый статус
 Expense Cost Center,Expense Cost Center
 Expense ichidagi oddiy (papka bo'lmagan) hisob bo'lishi kerak,Должен быть обычный (не групповой) счёт внутри Expense
 Expense ichidagi papka (guruh hisob) bo'lishi kerak,Должна быть папка (групповой счёт) внутри Expense
+Fakt chiqqan sana,Фактическая дата выезда
+Fakt kelgan sana,Фактическая дата прибытия
+Fakt kub,Факт. объём (м³)
 Fakt soni,Фактическое кол-во
+Fakt tonna,Факт. тоннаж
 Fakt yetib borgan sana,Фактическая дата прибытия
 Faol,Активно
 "Faqat ""Mijoz"" xabarlari uchun — xodim o'qishi uchun ruscha tarjima","Только для сообщений ""Клиент"" — русский перевод для сотрудника"
@@ -120,7 +124,6 @@ Faol,Активно
 "Faqat ""Xodim"" xabarlari uchun — javobni kim yozgani","Только для сообщений ""Сотрудник"" — кто написал ответ"
 "Faqat ""Xodim"" xabarlari uchun — mijozga yuborilgan tarjima (mijoz tiliga).","Только для сообщений ""Сотрудник"" — перевод, отправленный клиенту (на языке клиента)."
 Faqat aktivda qoldig'i borlar,Только с остатком в активе
-"Faqat bo'sh joyi qolgan, hali omborga kelmagan furalar","Только фуры со свободным местом, ещё не прибывшие на склад"
 Faqat hozir omborda turganlar,Только находящиеся сейчас на складе
 Faqat yo'ldagi (hali omborga kelmagan) Order Detail'larning fura raqamlari,"Номера фур только тех Order Detail, что в пути (ещё не прибыли на склад)"
 Farq,Разница
@@ -135,8 +138,11 @@ Fura olib kelish xarajati (Expense),Расходы на доставку фур�
 Fura olib kelish xizmati (Item),Услуга доставки фурой (Item)
 Fura olib kelish: {0} ({1}) — {2} {3},Доставка фурой: {0} ({1}) — {2} {3}
 Fura Purchase Invoice,Счёт-фактура покупки за фуру
+Fura qatori topilmadi,Строка фуры не найдена
 Fura raqami...,Номер фуры...
+Furalar,Фуры
 Furalar bo'yicha holat,Статус по фурам
+Furani tanlang,Выберите фуру
 GPS,GPS
 GPS Device ID (Traccar),ID GPS-устройства (Traccar)
 GPS Offline,GPS офлайн
@@ -186,7 +192,6 @@ Ichki deklaratsiya,Внутренняя декларация
 Ichki Deklaratsiya (pekin list),Внутренняя декларация (пакинг-лист)
 Ichki deklaratsiya hujjati,Документ внутренней декларации
 Ichki deklaratsiya summasi,Сумма внутренней декларации
-Ichki Deklaratsiya'dagi pekin list'dan,Из пакинг-листа во Внутренней декларации
 Ichki eni — sm,Внутренняя ширина — см
 Ichki logistika xarajatlari papkasi,Папка расходов внутренней логистики
 Ichki o'lchamlari — Load Optimizer uchun,Внутренние размеры — для Оптимизатора загрузки
@@ -226,7 +231,7 @@ Karobka soni,Количество коробок
 Kassa,Касса
 KASSA-.YYYY.-,KASSA-.YYYY.-
 Kategoriya,Категория
-Kelish sanasi,Дата прибытия
+Kelish sanasi (reja),Дата прибытия (план)
 Kim buyurtma qildi,Кто заказал
 Kim orqali (vositachi),Через кого (посредник)
 Kim to'ladi,Кто оплатил
@@ -282,7 +287,6 @@ Logistika xizmati daromadi (Income),Доход от логистических �
 "Logistika xizmati: {0}, KZ fura {1}","Логистическая услуга: {0}, KZ фура {1}"
 m,м
 Ma'lumot topilmadi,Данные не найдены
-"Ma'lumot uchun. Hisob-kitobda haqiqiy tonna pekin list'dan olinadi (""Jami tonna"")","Для справки. В расчётах фактический тоннаж берётся из пакинг-листа (""Итого тонн"")"
 Mahsulot,Товар
 Mahsulot bo'yicha qidirish...,Поиск по товару...
 Mahsulot nomi,Наименование товара
@@ -300,6 +304,7 @@ Mashina raqami / Fura,Номер машины / Фура
 Matn,Текст
 Matn (asl tilida),Текст (на языке оригинала)
 Mavjud,Доступно
+Max narx (1 truck),Макс. цена (1 фура)
 Mijoz,Клиент
 Mijoz bilan suhbat,Чат с клиентом
 Mijoz botda tanlagan til (uz/ru/en),"Язык, выбранный клиентом в боте (uz/ru/en)"
@@ -310,11 +315,14 @@ Mijozga Sales Invoice qatori uchun,Для строки Счёта-фактуры
 Mijozga yuborildi,Отправлено клиенту
 Mijozga yuborildi ({0} kishi),Отправлено клиенту ({0} чел.)
 Mijozlar guruhi,Группа клиентов
+Min narx (1 truck),Мин. цена (1 фура)
 Miqdor,Количество
 Miqdor juda kichik (1 karobkaga yetmadi),Количество слишком мало (меньше 1 коробки)
 Mos o'lcham topilmadi,Подходящий размер не найден
 Mustahkamlash,Крепление
-Narx (1 tonna / 1 kub uchun),Цена (за 1 тонну / 1 м³)
+"Narxlar (Truck Type bo'yicha, taxminiy)","Цены (по Truck Type, ориентировочно)"
+"Narxlar, {0}-qator: min narx ({1}) max narxdan ({2}) katta","Цены, строка {0}: мин. цена ({1}) больше макс. цены ({2})"
+"Narxlar: ""{0}"" Truck Type ikki marta",Цены: Truck Type «{0}» указан дважды
 Navbatda,В очереди
 Nedostatka,Недостача
 Net vazn,Вес нетто
@@ -350,14 +358,18 @@ Ombor yuklash-tushirish (aktiv),Погрузка-разгрузка на скл�
 Omborda qoldiq,Остаток на складе
 "Ombordan o'tmasdan, to'g'ridan shu KZ furaga o'tkazilayotgan Xitoy fura","Китайская фура, перегружаемая напрямую в эту KZ фуру, минуя склад"
 Omborga kirish sanasi,Дата поступления на склад
+Omborga qabul (Warehouse Intake) yoki Peregruz submit bo'lganda avtomatik,Заполняется автоматически при проведении приёмки на склад (Warehouse Intake) или Перегруза
 Omborga yetib kelish sanasi,Дата прибытия на склад
 Order / Zakaz,Заказ
 Order Chat Message,Order Chat Message
 Order Dashboard,Панель заказов
 Order Detail,Order Detail
+Order Detail Fura,Фура Order Detail
 "Order Detail xarajatlari (sug'urta, qo'shimcha rasxod, konteyner) va boshqa hujjatlar uchun standart Cash/Bank hisobi (JE krediti)","Стандартный счёт Cash/Bank (кредит JE) для расходов Order Detail (страхование, доп. расходы, контейнер) и других документов"
 "Order Detail'dagi ""Xitoy haydovchi"" shu guruhdan tanlanadi va yangisi shu guruhda yaratiladi","""Китайский водитель"" в Order Detail выбирается из этой группы, и новые создаются в этой группе"
+Order Detail'ni o'chirib bo'lmaydi — avval quyidagi hujjatlarni bekor qiling: {0},Order Detail нельзя удалить — сначала отмените следующие документы: {0}
 Order Item Status Log,Order Item Status Log
+Order Narx,Цена заказа
 Order Tannarxi,Себестоимость заказа
 "Order → mahsulotlar jadvalidagi ""Qo'shimcha rasxod turi"" shu papka ichidagi hisoblardan tanlanadi","Заказ → ""Вид дополнительного расхода"" в таблице товаров выбирается из счетов внутри этой папки"
 "Order'dagi ""Kliyent"" shu guruhdan tanlanadi va yangi mijoz shu guruhda yaratiladi","""Клиент"" в заказе выбирается из этой группы, и новые клиенты создаются в этой группе"
@@ -383,7 +395,7 @@ Pekin invoice,Pekin invoice
 Pekin invoice (kliyentdan),Pekin invoice (от клиента)
 "Pekin invoice, TTN и Pekin list (Order Detail) проверены","Pekin invoice, TTN и Pekin list (Order Detail) проверены"
 Pekin list,Пакинг-лист
-Pekin list (Ichki Deklaratsiya),Пакинг-лист (Внутренняя декларация)
+Pekin list (fakt),Пакинг-лист (факт)
 Pekin list / Fakt qabul,Пакинг-лист / Фактическая приёмка
 Pekin list import,Импорт пакинг-листа
 Pekin list kelguncha fura sig'imini tekshirish uchun,Для проверки вместимости фуры до поступления пакинг-листа
@@ -396,21 +408,19 @@ Prava / guvohnoma,Права / удостоверение
 Qator (idn),Строка (idn)
 Qator topilmadi — sahifani yangilang (Ctrl+Shift+R).,Строка не найдена — обновите страницу (Ctrl+Shift+R).
 Qayerdaligi,Местонахождение
+Qaysi fura yo'lga chiqqanini tanlang,"Выберите, какая фура выехала"
 "Qaysi ombordan yuk chiqarilayotgani — ""Yuklarni tortish"" shu ombor qoldig'idan hisoblaydi","Склад, с которого отгружается груз — ""Подтянуть грузы"" рассчитывает по остатку этого склада"
 Qayta hisoblash,Пересчитать
 Qayta yuklash,Перезагрузить
 Qo'shimcha rasxod,Дополнительный расход
-Qo'shimcha rasxod (aktiv),Дополнительный расход (актив)
-Qo'shimcha rasxod summasi,Сумма дополнительного расхода
-Qo'shimcha rasxod turi,Вид дополнительного расхода
 "Qo'shimcha rasxod va yuklash xarajatlari o'z qatoridagi ""Harajat turi"" hisobiga o'tadi","Дополнительные расходы и расходы на погрузку относятся на счёт из поля ""Вид расхода"" своей строки"
+Qo'shish,Добавить
 Qoldiq,Остаток
 "Qoldiq — kub, m³","Остаток — объём, м³"
 Qoldiq — tonna,Остаток — тонн
 "Qurilma offline — haydovchiga qo'ng'iroq qilib, GPS'ni yangilashini so'rang, keyin qayta urinib ko'ring.","Устройство офлайн — позвоните водителю, попросите обновить GPS, затем повторите попытку."
 Rasm,Изображение
 Rasm yuborish (izoh — yozilgan matn),Отправить изображение (подпись — введённый текст)
-Rasxod izohi,Примечание к расходу
 Real vaqtda ombor qoldig'i va yetkazib berish holati,Складские остатки и статус доставки в реальном времени
 Reja soni,Плановое кол-во
 Reja − ombordan o'tgan − boshqa Peregruz hujjatida o'tkazilgan qoldiq,Остаток: план − прошло через склад − перегружено в других документах Перегруз
@@ -435,6 +445,7 @@ Sug'urta,Страхование
 Sug'urta (aktiv),Страхование (актив)
 Sug'urta harajati,Расход на страхование
 Sug'urta hujjati,Страховой документ
+Sug'urta Journal Entry,Запись в журнале (страховка)
 Sug'urta va to'lov,Страхование и оплата
 Sug'urta xarajati hisobi,Счёт расходов на страхование
 Sug'urta xarajati va to'lanadigan hisob bir kompaniyaga tegishli bo'lishi kerak,Счёт расходов на страхование и счёт к оплате должны принадлежать одной компании
@@ -443,6 +454,7 @@ Summa (hujjat valyutasida),Сумма (в валюте документа)
 Summa (kompaniya valyutasida),Сумма (в валюте компании)
 t,т
 Tanlangan Xitoy postavshikning telefonidan olinadi (+86),Берётся из телефона выбранного китайского поставщика (+86)
+Tanlash,Выбрать
 Tannarx (COGS) Journal Entry,Запись в журнале себестоимости (COGS)
 Tannarx (yetkazildi): {0} {1},Себестоимость (доставлено): {0} {1}
 Tannarx Harakati,Движение себестоимости
@@ -459,6 +471,7 @@ Tarjima — xitoycha,Перевод — китайский
 tarjimasiz yuborildi,отправлено без перевода
 Tasdiqlangan,Подтверждено
 Taxminiy kub,Ориентировочный объём
+Taxminiy tonna,Ориентировочный тоннаж
 Tayyor Javob,Готовый ответ
 Tayyor javoblar,Готовые ответы
 Telefon raqami,Номер телефона
@@ -507,6 +520,7 @@ Xarajatlar valyutasi,Валюта расходов
 Xarajatlar yuk mijozga yetib borguncha shu aktiv hisoblarda turadi,"Расходы находятся на этих счетах актива, пока груз не доставлен клиенту"
 Xatolik yuz berdi. Qayta urinib ko'ring.,Произошла ошибка. Повторите попытку.
 Xitoy fura,Китайская фура
+Xitoy fura (Order Detail qatori),Китайская фура (строка Order Detail)
 Xitoy fura raqami,Номер китайской фуры
 Xitoy fura telefon,Телефон китайской фуры
 Xitoy haydovchi ismi,Имя китайского водителя
@@ -526,6 +540,7 @@ Xodim javobi: fonda tarjima qilinib Telegram'ga yuborilishi holati,Ответ с
 Yakun,Итог
 Yakunlangan,Завершено
 Yangi,Новый
+Yangi haydovchi,Новый водитель
 Yangi mijoz,Новый клиент
 Yangi status,Новый статус
 Yangi Xitoy haydovchi,Новый китайский водитель
@@ -538,7 +553,7 @@ Yetkazilganda — xarajat va daromad,При доставке — расходы 
 Yo'lda,В пути
 Yo'lda fura yo'q,Нет фур в пути
 Yo'ldagi fura,Фура в пути
-Yo'ldagi to'lmagan furaga qo'shish,Добавить в незаполненную фуру в пути
+Yo'ldagi furaga qo'shish,Добавить в фуру в пути
 Yondan ko'rinish (uzunlik × balandlik),Вид сбоку (длина × высота)
 Yuborildi,Отправлено
 Yuborilgan,Отправлено
@@ -549,10 +564,11 @@ Yuborilmadi — mijozning Telegram kontakti topilmadi.,Не отправлено
 Yuborilmoqda...,Отправка...
 yuborilmoqda...,отправка...
 Yuborish,Отправить
+Yuk,Груз
 Yuk bo'linmasining ichki balandligi — santimetrda,Внутренняя высота грузового отсека — в сантиметрах
 Yuk bo'linmasining ichki bo'yi — santimetrda,Внутренняя длина грузового отсека — в сантиметрах
 Yuk bo'linmasining ichki eni — santimetrda,Внутренняя ширина грузового отсека — в сантиметрах
-Yuk tonnaji (taxminiy),Тоннаж груза (ориентировочный)
+Yuk fayli (Excel / PDF / rasm),Файл груза (Excel / PDF / фото)
 Yuk yetkazilganda sug'urta tannarxi shu xarajat hisobiga o'tadi,При доставке груза себестоимость страхования относится на этот счёт расходов
 Yuklar,Грузы
 Yuklash sxemasi (3D),Схема загрузки (3D)
@@ -563,7 +579,7 @@ Yuklash xarajatlari (kran/kara/gruzchik),Расходы на погрузку (�
 Yuklash xarajatlari papkasi,Папка расходов на погрузку
 Zakaz sanasi,Дата заказа
 Zanjir soni,Количество цепей
-Zavoddan chiqish sanasi,Дата выезда с завода
+Zavoddan chiqish sanasi (reja),Дата выезда с завода (план)
 {0} (davom etmoqda),{0} (продолжается)
 {0} allaqachon mavjud: {1}. Yangisini yaratish o'rniga o'sha hujjatni oching/tahrirlang.,{0} уже существует: {1}. Вместо создания нового откройте/отредактируйте тот документ.
 {0} bilan suhbat,Чат с {0}
@@ -576,7 +592,14 @@ Zavoddan chiqish sanasi,Дата выезда с завода
 {0} turidagi oddiy (papka bo'lmagan) hisob bo'lishi kerak,Должен быть обычный (не групповой) счёт типа {0}
 {0} — KZ fura: {1} — Truck: {2} ({3}×{4}×{5} sm) — {6},{0} — KZ фура: {1} — Фура: {2} ({3}×{4}×{5} см) — {6}
 {0} — status tarixi,{0} — история статусов
+{0}-qator,Строка {0}
 "{0}-qator: ""{1}"" Order Detail ""{2}"" furasiga tegishli emas.","Строка {0}: Order Detail ""{1}"" не относится к фуре ""{2}""."
+"{0}: ""Fakt kelgan sana"" ""Fakt chiqqan sana""dan oldin bo'lishi mumkin emas",{0}: «Фактическая дата прибытия» не может быть раньше «Фактической даты выезда»
+"{0}: ""Kelish sanasi"" ""Zavoddan chiqish sanasi""dan keyin bo'lishi kerak",{0}: «Дата прибытия» должна быть позже «Даты выезда с завода»
+"{0}: ""Xitoy haydovchi"" ""{1}"" guruhidan bo'lishi kerak",{0}: «Китайский водитель» должен быть из группы «{1}»
+"{0}: ""Zavoddan chiqish sanasi"" bugundan oldin bo'lishi mumkin emas",{0}: «Дата выезда с завода» не может быть раньше сегодняшнего дня
+"{0}: ""{1}"" furasi jadvalda ikki marta",{0}: фура «{1}» указана в таблице дважды
+"{0}: ""{1}"" furasining raqamini o'zgartirib bo'lmaydi — unga Ichki Deklaratsiya, Purchase Invoice yoki kelish sanasi bog'langan","{0}: номер фуры «{1}» нельзя изменить — к ней привязаны внутренняя декларация, Purchase Invoice или дата прибытия"
 "{0}: javob saqlandi, lekin mijozga yuborilmadi — ro'yxatdan o'tgan Telegram kontakti yo'q yoki Telegram xatosi.","{0}: ответ сохранён, но не отправлен клиенту — нет зарегистрированного Telegram-контакта или ошибка Telegram."
 {0}: tarjima ishlamadi — javob asl matnda yuborildi.,{0}: перевод не удался — ответ отправлен исходным текстом.
 "{0}: tarjima qilinmadi, javob yuborilmadi — aniqroq qilib qayta yozing.","{0}: не переведено, ответ не отправлен — перепишите точнее."
