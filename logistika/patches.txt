@@ -9,3 +9,4 @@ logistika.patches.v1_0.backfill_pipeline_docstatus
 logistika.patches.v1_0.prefill_logistika_settings
 logistika.patches.v1_1.setup_tannarx
 logistika.patches.v1_1.move_pekin_list_to_ichki_deklaratsiya
+logistika.patches.v1_1.encrypt_telegram_token

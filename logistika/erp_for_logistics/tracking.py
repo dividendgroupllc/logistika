@@ -17,14 +17,15 @@ from frappe.utils import cstr, flt, nowtime, today
 from logistika.erp_for_logistics import kz_gps_tracking, traccar_client
 from logistika.erp_for_logistics.doctype.order_detail.order_detail import ON_CHINA_TRUCK_STAGES
 from logistika.erp_for_logistics.ld_telegram import get_order_chat_ids
-from logistika.telegram.messages import SHIPMENT_UPDATE
+from logistika.telegram.messages import SHIPMENT_UPDATE, render
 from logistika.telegram.sender import send_message
 
 
 def send_china_update(doc, row):
 	"""Order Detail mijoziga shu kuzatuv qatori haqida xabar yuboradi; kamida bitta
 	chatga ketsa `row.yuborilgan` = 1. Hujjatni saqlash chaqiruvchining ishi."""
-	message = SHIPMENT_UPDATE.format(
+	message = render(
+		SHIPMENT_UPDATE,
 		brand=doc.brand or doc.kliyent or "",
 		sana_vaqt=traccar_client.format_sana_vaqt(row.sana, row.vaqt),
 		address=row.qayerdaligi or "",
@@ -124,10 +125,14 @@ def save_and_send_china(entries):
 			row.qayerdaligi = location
 			row.vaqt = entry.get("vaqt") or nowtime()
 			row.yuborilgan = 0
-			sent += send_china_update(doc, row)
 			doc.flags.ignore_permissions = True
-			doc.save()
+			doc.save()  # avval saqlanadi — saqlash xato bersa xabar yuborilmaydi
 			saved += 1
+			row = next(r for r in doc.kunlik_kuzatuv if cstr(r.sana) == today())
+			delivered = send_china_update(doc, row)
+			if delivered:
+				frappe.db.set_value("Internal Logistics Tracking", row.name, "yuborilgan", 1, update_modified=False)
+			sent += delivered
 	return {"saved": saved, "sent": sent}
 
 

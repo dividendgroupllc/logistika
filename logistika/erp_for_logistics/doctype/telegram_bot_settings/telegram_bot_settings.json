@@ -5,26 +5,36 @@
  "engine": "InnoDB",
  "field_order": [
   "bot_token",
-  "is_active"
+  "is_active",
+  "webhook_secret"
  ],
  "fields": [
   {
    "description": "BotFather dan olingan token: 123456:ABC-DEF...",
    "fieldname": "bot_token",
-   "fieldtype": "Small Text",
+   "fieldtype": "Password",
    "label": "Bot Token",
-   "reqd": 1
+   "reqd": 1,
+   "length": 200
   },
   {
    "default": "1",
    "fieldname": "is_active",
    "fieldtype": "Check",
    "label": "Bot faol"
+  },
+  {
+   "fieldname": "webhook_secret",
+   "fieldtype": "Password",
+   "label": "Webhook maxfiy kaliti",
+   "read_only": 1,
+   "no_copy": 1,
+   "description": "\"Webhook'ni o'rnatish\" bosilganda avtomatik yaratiladi"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-07-12 09:00:00.000000",
+ "modified": "2026-11-18 22:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Telegram Bot Settings",
@@ -38,5 +48,5 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "track_changes": 1
+ "track_changes": 0
 }

@@ -1,3 +1,12 @@
+import html
+
+
+def render(template: str, **values) -> str:
+	"""Shablonni HTML'dan tozalangan qiymatlar bilan to'ldiradi — mijoz/buyurtma nomi,
+	manzil va h.k. ichidagi "&", "<", ">" Telegram'ning HTML parse_mode'ini buzmasligi uchun."""
+	return template.format(**{k: html.escape(str(v if v is not None else "")) for k, v in values.items()})
+
+
 ASK_PHONE = (
 	"Assalomu alaykum! Yukingiz qayerdaligi haqida xabar olish uchun "
 	"pastdagi tugma orqali telefon raqamingizni yuboring."
@@ -96,3 +105,16 @@ ORDER_DISPATCHED = (
 	"🚚 Sizning <b>{order}</b> buyurtmangiz yo'lga chiqdi!\n\n"
 	"Yukingiz endi tashish jarayonida — holati yangilanganda shu yerga xabar kelib turadi."
 )
+
+UPLOAD_BAD_FILE = (
+	"⚠️ Bu turdagi fayl qabul qilinmaydi. Iltimos, PDF, rasm (JPG/PNG) yoki Excel (XLSX/XLS) yuboring."
+)
+
+UPLOAD_TOO_LARGE = "⚠️ Fayl juda katta ({size_mb} MB). Maksimal hajm — {max_mb} MB."
+
+RELINKED_ELSEWHERE = (
+	"ℹ️ Sizning kontaktingiz boshqa Telegram akkauntga ulandi. Agar bu siz bo'lmasangiz, "
+	"kompaniya bilan bog'laning."
+)
+
+QA_RATE_LIMITED = "⏳ Juda ko'p xabar yuborildi. Iltimos, bir oz kutib, keyin yozing."

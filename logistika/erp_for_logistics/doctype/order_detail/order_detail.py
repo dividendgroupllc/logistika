@@ -139,13 +139,13 @@ def send_dispatched(order_detail):
 	""""Zavoddan chiqdi" tugmasi — mijozga "buyurtmangiz yo'lga chiqdi" xabarini bir
 	marta yuboradi (hech kimga yetmasa belgi qo'yilmaydi — qayta urinish mumkin)."""
 	from logistika.erp_for_logistics import tracking
-	from logistika.telegram.messages import ORDER_DISPATCHED
+	from logistika.telegram.messages import ORDER_DISPATCHED, render
 
 	doc = frappe.get_doc("Order Detail", order_detail)
 	doc.check_permission("write")
 	if doc.jonatish_xabari_yuborildi:
 		return 0
-	message = ORDER_DISPATCHED.format(order=doc.order)
+	message = render(ORDER_DISPATCHED, order=doc.order)
 	sent = sum(1 for chat_id in tracking.get_order_chat_ids(doc.order) if tracking.send_message(chat_id, message))
 	if sent:
 		doc.db_set("jonatish_xabari_yuborildi", 1, update_modified=False)

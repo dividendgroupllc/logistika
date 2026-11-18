@@ -26,8 +26,8 @@ class TestOrderChat(FrappeTestCase):
 			self.assertTrue(order_chat.save_customer_message(self.order.name, "1", "Salom"))
 		self.assertEqual(self._flag(), 1)
 		with patch("frappe.db.commit"), patch.object(order_chat, "_detect_language", return_value=None), patch.object(
-			order_chat, "get_order_chat_ids", return_value=[]
-		), patch("frappe.publish_realtime"):
+			order_chat, "get_order_chat_ids", return_value=["1"]
+		), patch.object(order_chat, "send_message", return_value=True), patch("frappe.publish_realtime"):
 			order_chat.send_staff_reply(self.order.name, "Assalomu alaykum")
 		self.assertEqual(self._flag(), 0)
 

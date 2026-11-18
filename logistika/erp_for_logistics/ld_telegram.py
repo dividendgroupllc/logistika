@@ -9,7 +9,7 @@
 import frappe
 
 from logistika.erp_for_logistics.pipeline_status import advance_order_detail_status, resolve_order_details_for_kz_truck
-from logistika.telegram.messages import PEKIN_LIST_GUIDANCE
+from logistika.telegram.messages import PEKIN_LIST_GUIDANCE, render
 from logistika.telegram.sender import send_document, send_message
 
 # Bitta hujjat/tugma qaysi pipeline bosqichini oldinga suradi (mos nomlangan
@@ -70,7 +70,7 @@ def send_ld_document(ld_name, fieldname):
 			# (Xitoydan kelgan invoys/qadoqlash varag'i)ni /upload orqali yuborish
 			# haqida qo'shimcha yo'riqnoma yuboriladi.
 			for chat_id in chat_ids:
-				send_message(chat_id, PEKIN_LIST_GUIDANCE.format(order=doc.order))
+				send_message(chat_id, render(PEKIN_LIST_GUIDANCE, order=doc.order))
 
 	return sent
 
@@ -98,8 +98,9 @@ def get_order_chat_ids(order_name):
 	if not contact_names:
 		return []
 
-	return frappe.get_all(
+	chat_ids = frappe.get_all(
 		"Contact",
 		filters={"name": ["in", contact_names], "telegram_chat_id": ["not in", ["", None]]},
 		pluck="telegram_chat_id",
 	)
+	return list(dict.fromkeys(chat_ids))  # bir xil chat ikki marta xabar olmasligi uchun
