@@ -40,3 +40,11 @@ class TestFuraTanlov(FrappeTestCase):
 
 	def test_tracking_fura_is_select(self):
 		self.assertEqual(frappe.get_meta("Internal Logistics Tracking").get_field("fura").fieldtype, "Select")
+
+
+class TestFaktKelishReadOnly(FrappeTestCase):
+	def test_arrival_date_set_only_by_intake(self):
+		# Qo'lda yozilsa fura "omborga keldi" bo'lib, WI ro'yxatidan yo'qoladi (prod, 2026-11-19).
+		field = frappe.get_meta("Order Detail Fura").get_field("fakt_kelish_sanasi")
+		self.assertTrue(field.read_only)
+		self.assertIn("Warehouse Intake", field.description)
