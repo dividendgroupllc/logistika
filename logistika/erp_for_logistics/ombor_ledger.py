@@ -1,4 +1,5 @@
 import frappe
+from frappe import _
 from frappe.utils import flt, today
 
 from logistika.erp_for_logistics.pipeline_status import advance_order_detail_status
@@ -217,58 +218,46 @@ def pull_for_warehouse_intake(fura):
 
 
 @frappe.whitelist()
-def pull_for_kz_loading(china_truck, order=None, kz_truck_loading=None):
-	"""KZ Truck Loading'dagi "Yuklarni tortish" tugmasi uchun — berilgan Xitoy furaning
-	ENG SO'NGGI Warehouse Intake'idan (mijoz `order`i berilsa — faqat shu Order'ning
-	Order Detail'lari qatorlari) har bir mahsulot uchun JORIY ombor qoldig'ini qaytaradi."""
-	if not china_truck:
-		frappe.throw("Manba Xitoy fura tanlanmagan")
-
-	allowed = None
-	if order:
-		from logistika.erp_for_logistics import furalar
-
-		allowed = set(furalar.order_details_on_plate(china_truck, order=order))
-		if not allowed:
-			frappe.throw(f'"{order}" buyurtmasida "{china_truck}" furasi yo\'q.')
-
-	intakes = frappe.get_all(
-		"Warehouse Intake",
-		filters={"fura": china_truck, "docstatus": 1},
-		order_by="creation desc",
-		pluck="name",
-	)
-	intake = None
-	for name in intakes:
-		doc = frappe.get_doc("Warehouse Intake", name)
-		if allowed is None or any(row.order in allowed for row in doc.items):
-			intake = doc
-			break
-	if not intake:
-		frappe.throw(f'"{china_truck}" furasi uchun mos (submit qilingan) Warehouse Intake topilmadi.')
-	if not intake.ombor:
-		frappe.throw(f'"{intake.name}" (Warehouse Intake) uchun Ombor tanlanmagan.')
-
-	items = [
-		row for row in intake.items if flt(row.fakt_qty) > 0 and (allowed is None or row.order in allowed)
-	]
-	balances = _query_balances(
-		intake.ombor,
-		[row.part_name for row in items],
-		order_details=[row.order for row in items if row.order],
-		exclude=("KZ Truck Loading", kz_truck_loading),
+def pull_for_kz_loading(order, kz_truck=None, kz_truck_loading=None):
+	"""KZ Truck Loading'dagi "Yuklarni tortish": mijoz Order'ining omborda qoldig'i bor BARCHA
+	yuklari (qaysi Xitoy furadan kelganidan qat'i nazar), (ombor, Order Detail, mahsulot, Xitoy
+	fura) bo'yicha — joriy qoldiq, uning kub va og'irligi bilan. KZ fura shu Order'ga Truck
+	Dispatch'da qo'yilgan bo'lishi kerak."""
+	frappe.has_permission("KZ Truck Loading", "read", throw=True)
+	if not order:
+		frappe.throw(_("Order tanlanmagan"))
+	if not kz_truck:
+		frappe.throw(_("KZ fura tanlanmagan"))
+	if not frappe.db.exists("Truck Dispatch", {"order": order, "mashina_raqami": kz_truck}):
+		frappe.throw(_('"{0}" KZ furasi "{1}" Order\'iga Truck Dispatch\'da qo\'yilmagan').format(kz_truck, order))
+	order_details = frappe.get_all("Order Detail", filters={"order": order}, pluck="name")
+	if not order_details:
+		return []
+	rows = frappe.db.sql(
+		"""select ombor, `order`, part_name, fura,
+			sum(if(harakat_turi = 'Kirim', miqdor, -miqdor)) as qoldiq,
+			sum(if(harakat_turi = 'Kirim', kub, -kub)) as kub,
+			sum(if(harakat_turi = 'Kirim', tonna, -tonna)) as tonna
+		from `tabOmbor Harakati`
+		where `order` in %(ods)s and not (reference_doctype = 'KZ Truck Loading' and reference_name = %(self)s)
+		group by ombor, `order`, part_name, fura
+		having qoldiq > 0.000001
+		order by fura, `order`, part_name""",
+		{"ods": tuple(order_details), "self": kz_truck_loading or ""},
+		as_dict=True,
 	)
 	return [
 		{
-			"china_truck": china_truck,
+			"ombor": row.ombor,
+			"china_truck": row.fura,
 			"order": row.order,
 			"part_name": row.part_name,
-			"quantity": row.quantity,
-			"ombor_fakt": balances.get((row.order, row.part_name), 0.0),
-			"volume_cbm": row.volume_cbm,
-			"net_weight": row.net_weight,
+			"quantity": flt(row.qoldiq, 6),
+			"ombor_fakt": flt(row.qoldiq, 6),
+			"volume_cbm": flt(row.kub, 6),
+			"net_weight": flt(row.tonna * 1000, 3),
 		}
-		for row in items
+		for row in rows
 	]
 
 

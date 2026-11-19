@@ -136,7 +136,7 @@ class TestWarehouseChain(FrappeTestCase):
 		self.assertAlmostEqual(rows[0]["mavjud"], 6)
 
 	def test_truck_dispatch_duplicate(self):
-		data = {"doctype": "Truck Dispatch", "hujjat_sanasi": today(), "order": self.od.name}
+		data = {"doctype": "Truck Dispatch", "hujjat_sanasi": today(), "order": self.order.name, "mashina_raqami": "01KZ5"}
 		td = frappe.get_doc(data).insert(ignore_permissions=True)
 		self.assertEqual(td.china_truck, PLATE)
 		with self.assertRaises(frappe.ValidationError):
@@ -202,7 +202,7 @@ class TestWarehouseChain(FrappeTestCase):
 		frappe.db.set_single_value("Logistika Settings", "kz_haydovchi_supplier_group", group)
 		driver = ensure_supplier("_T KZ Driver", group)
 		other = ensure_supplier("_T Not driver", ensure_supplier_group("_T Boshqa"))
-		td = frappe.get_doc({"doctype": "Truck Dispatch", "hujjat_sanasi": today(), "order": self.od.name, "haydovchi_ismi": other})
+		td = frappe.get_doc({"doctype": "Truck Dispatch", "hujjat_sanasi": today(), "order": self.order.name, "haydovchi_ismi": other})
 		with self.assertRaises(frappe.ValidationError):
 			td.insert(ignore_permissions=True)
 		td.haydovchi_ismi = driver

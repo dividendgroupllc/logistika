@@ -63,6 +63,17 @@ logistika.quick_create.open = function (kind, typed, on_created) {
 			args: (v) => ({ supplier_name: v.supplier_name, phone: v.phone, plate: v.plate, kind: "haydovchi" }),
 			name_field: "supplier_name",
 		},
+		kz_haydovchi: {
+			title: __("Yangi KZ haydovchi"),
+			method: "logistika.erp_for_logistics.quick_create.create_kz_driver",
+			fields: [
+				{ fieldname: "supplier_name", label: __("Haydovchi ismi"), fieldtype: "Data", reqd: 1 },
+				{ fieldname: "plate", label: __("Mashina raqami"), fieldtype: "Data", reqd: 1 },
+				{ fieldname: "phone", label: __("Telefon"), fieldtype: "Data", options: "Phone", reqd: 1 },
+			],
+			args: (v) => ({ supplier_name: v.supplier_name, plate: v.plate, phone: v.phone }),
+			name_field: "supplier_name",
+		},
 	};
 	const config = configs[kind];
 	const dialog = new frappe.ui.Dialog({

@@ -737,3 +737,22 @@ nakladnoy yuklanmagan,未上传运单
 "{0}: saqlandi ({1}), lekin hech kimga yuborilmadi — mijoz Telegram'ga ulanmaganmi?",{0}：已保存（{1}），但未发送给任何人 — 客户未绑定 Telegram？
 {0}: xato — Error Log'ga qarang,{0}：出错 — 请查看 Error Log
 {0}: {1} ta xabar yuborildi,{0}：已发送 {1} 条消息
+KZ Sarf Material,KZ 耗材
+KZ fura butun Order'ga umumiy qo'yiladi — qaysi yuk ketishi ortishda aniqlanadi,KZ 货车分配给整个订单 — 具体装哪些货在装车时确定
+KZ haydovchining mashina raqami (Truck Dispatch'ga o'zi tushadi),KZ 司机车牌号（自动填入车辆调度）
+KZ mashina raqami,KZ 车牌号
+O'lchov,单位
+"Ombordagi materiallar shu KZ furaga — submit'da ERPNext omboridan chiqim, tannarx bo'yicha shu fura yuklarining xarajati",仓库材料用于此 KZ 货车 — 提交时从 ERPNext 仓库出库，按成本计入该车货物费用
+"Ombordagi sarf materiali (zanjir, kamar, paddon...)",仓库耗材（链条、绑带、托盘…）
+Ombordan chiqim (Stock Entry),仓库出库（库存凭证）
+"Ombordan chiqim avval shu hisobga, so'ng KZ fura yuklarining tannarxiga (WIP) o'tkaziladi — qoldig'i doim 0",出库先记入此科目，再转入 KZ 货车货物成本（在制）— 余额始终为 0
+Order yuklari,订单货物
+Order yuklari (yo'lda / omborda),订单货物（在途 / 在库）
+Sarf materiallari,耗材
+Sarf materiallari (KZ yuklash),耗材（KZ 装车）
+Sarf materiallari (oraliq) hisobi,耗材（过渡）科目
+"Sarf materiallari (zanjir, kamar, paddon...)",耗材（链条、绑带、托盘…）
+Sarf materiallari ombori,耗材仓库
+Submit'da ERPNext ombor tannarxidan,提交时按 ERPNext 库存成本
+Tannarx (1 dona),成本（每件）
+"Zanjir, kamar, paddon va h.k. shu ERPNext omboridan chiqim qilinadi",链条、绑带、托盘等从此 ERPNext 仓库出库

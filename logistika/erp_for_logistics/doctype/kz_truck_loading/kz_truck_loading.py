@@ -25,6 +25,7 @@ class KZTruckLoading(Document):
 
 	def on_cancel(self):
 		tannarx.on_source_cancel(self)
+		tannarx.cancel_consumables(self)
 		ombor_ledger.delete_ledger_for_document(self.doctype, self.name)
 
 	def on_trash(self):

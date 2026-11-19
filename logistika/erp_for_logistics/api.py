@@ -77,15 +77,12 @@ def truck_options_for_order(order):
 	frappe.has_permission("Order", "read", doc=order, throw=True)
 	from logistika.erp_for_logistics import furalar
 
-	details = frappe.get_all("Order Detail", filters={"order": order}, pluck="name", order_by="name asc")
-	kz = []
-	if details:
-		kz = frappe.get_all(
-			"Truck Dispatch",
-			filters={"order": ["in", details], "mashina_raqami": ["is", "set"]},
-			pluck="mashina_raqami",
-			order_by="creation asc",
-		)
+	kz = frappe.get_all(
+		"Truck Dispatch",
+		filters={"order": order, "mashina_raqami": ["is", "set"]},
+		pluck="mashina_raqami",
+		order_by="creation asc",
+	)
 	return {
 		"china_trucks": furalar.plates(order=order),
 		"kz_trucks": list(dict.fromkeys(kz)),
@@ -133,12 +130,9 @@ def truck_dispatch_driver_info(order, kz_truck):
 	"kz_truck raqami" maydoni)."""
 	if not order or not kz_truck:
 		return None
-	details = _order_details_of(order)
-	if not details:
-		return None
 	return frappe.db.get_value(
 		"Truck Dispatch",
-		{"order": ["in", details], "mashina_raqami": kz_truck},
+		{"order": order, "mashina_raqami": kz_truck},
 		["haydovchi_ismi", "haydovchi_telefon", "vositachi", "mashina_raqami"],
 		as_dict=True,
 		order_by="creation desc",

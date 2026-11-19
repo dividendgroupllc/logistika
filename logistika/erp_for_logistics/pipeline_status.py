@@ -103,7 +103,7 @@ def get_pipeline_rows(order=None, status=None):
 		) fu on fu.parent = od.name
 		left join `tabTruck Dispatch` td on td.name = (
 			select td2.name from `tabTruck Dispatch` td2
-			where td2.`order` = od.name order by td2.creation desc limit 1
+			where td2.`order` = od.`order` order by td2.creation desc limit 1
 		)
 		left join `tabKZ Truck Loading` kzl on kzl.name = (
 			select k2.name from `tabKZ Truck Loading` k2

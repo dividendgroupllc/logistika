@@ -265,9 +265,11 @@ def sync_source_costs(doc, lines, currency, credit_account=None, posting_date=No
 			"kategoriya": line["kategoriya"],
 			"wip_hisob": line["wip_account"],
 			"xarajat_hisob": line["expense_account"],
-			"valyuta": currency,
+			# Qatorda o'z valyutasi/kredit hisobi bo'lishi mumkin (masalan sarf materiallari —
+			# kompaniya valyutasida, oraliq hisobdan).
+			"valyuta": line.get("currency") or currency,
 			"kz_fura": line.get("kz_fura"),
-			"kredit_hisob": credit_account,
+			"kredit_hisob": line.get("credit_account") or credit_account,
 		}
 		key = _line_key(row)
 		wanted.setdefault(key, {**row, "summa_valyutada": 0})
@@ -619,12 +621,78 @@ def peregruz_trucks(doc):
 
 
 def on_kz_truck_loading_submit(doc):
-	if not doc.yuklash_xarajatlari:
+	if not doc.yuklash_xarajatlari and not doc.get("sarf_materiallari"):
 		return
 	measures = _ledger_measures("KZ Truck Loading", doc.name, "Chiqim")
-	lines = _loading_cost_lines(doc, measures, "KZ", "wip_kz_hisobi", kz_fura=doc.kz_truck)
-	je = sync_source_costs(doc, lines, doc.valyuta, doc.tolov_hisobi, doc.sana)
+	lines = _loading_cost_lines(doc, measures, "KZ", "wip_kz_hisobi", kz_fura=doc.kz_truck) if doc.yuklash_xarajatlari else []
+	lines += _consumable_lines(doc, measures)
+	je = sync_source_costs(doc, lines, doc.valyuta or company_currency(), doc.tolov_hisobi, doc.sana)
 	doc.db_set("tannarx_je", je, update_modified=False)
+
+
+def _consumable_lines(doc, measures_by_od):
+	"""Sarf materiallari (zanjir, kamar, paddon...): Logistika Settings'dagi ERPNext omboridan
+	Material Issue (tannarx — ERPNext valuation) oraliq hisobga, so'ng summa shu KZ fura
+	yuklariga (WIP, kategoriya KZ) tonna/kub bo'yicha — JE oraliq hisobni yopadi."""
+	rows = [r for r in doc.get("sarf_materiallari") or [] if r.item and flt(r.qty) > 0]
+	if not rows:
+		return []
+	store = get_required_setting("sarf_materiallari_ombori")
+	clearing = get_required_setting("sarf_materiallari_hisobi")
+	company = get_company()
+	se = frappe.get_doc(
+		{
+			"doctype": "Stock Entry",
+			"stock_entry_type": "Material Issue",
+			"purpose": "Material Issue",
+			"company": company,
+			"posting_date": doc.sana,
+			"set_posting_time": 1,
+			"remarks": _("KZ Truck Loading {0} — sarf materiallari ({1})").format(doc.name, doc.kz_truck or "-"),
+			"items": [
+				{
+					"item_code": r.item,
+					"qty": flt(r.qty),
+					"s_warehouse": store,
+					"expense_account": clearing,
+					"cost_center": frappe.get_cached_value("Company", company, "cost_center"),
+				}
+				for r in rows
+			],
+		}
+	)
+	se.insert(ignore_permissions=True)
+	se.submit()
+	doc.db_set("sarf_stock_entry", se.name, update_modified=False)
+	for row, item in zip(rows, se.items):
+		frappe.db.set_value(
+			row.doctype, row.name, {"narx": flt(item.valuation_rate, 4), "summa": flt(item.amount, 2)}, update_modified=False
+		)
+	total = flt(sum(flt(item.amount) for item in se.items), 2)
+	wip = get_required_setting("wip_kz_hisobi")
+	expense = get_required_setting("kz_xarajat_hisobi")
+	return [
+		{
+			"order_detail": od,
+			"kategoriya": "KZ",
+			"wip_account": wip,
+			"expense_account": expense,
+			"amount": amount,
+			"kz_fura": doc.kz_truck,
+			"currency": company_currency(),
+			"credit_account": clearing,
+		}
+		for od, amount in allocate_by_tonnage(total, allocation_weights(measures_by_od)).items()
+	]
+
+
+def cancel_consumables(doc):
+	"""KZ Truck Loading bekor qilinganda — ombordan chiqim (Stock Entry) ham bekor."""
+	name = doc.get("sarf_stock_entry")
+	if name and frappe.db.get_value("Stock Entry", name, "docstatus") == 1:
+		frappe.get_doc("Stock Entry", name).cancel()
+	if name:
+		doc.db_set("sarf_stock_entry", None, update_modified=False)
 
 
 def on_source_cancel(doc):

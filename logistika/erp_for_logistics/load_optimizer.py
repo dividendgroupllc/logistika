@@ -20,16 +20,13 @@ from logistika.erp_for_logistics.doctype.internal_logistics_item.internal_logist
 
 
 def resolve_truck_type_for_kz_truck(order, kz_truck):
-	"""Berilgan KZ fura uchun Truck Type'ni Truck Dispatch'dan topadi — mijoz `order`ining
-	Order Detail'lariga tegishli, shu KZ furaga tayinlangan eng so'nggi Truck Dispatch."""
+	"""Berilgan KZ fura uchun Truck Type'ni Truck Dispatch'dan topadi — mijoz `order`iga shu
+	KZ fura qo'yilgan eng so'nggi Truck Dispatch."""
 	if not order or not kz_truck:
-		return None
-	order_details = frappe.get_all("Order Detail", filters={"order": order}, pluck="name")
-	if not order_details:
 		return None
 	return frappe.db.get_value(
 		"Truck Dispatch",
-		{"order": ["in", order_details], "mashina_raqami": kz_truck, "truck_type": ["is", "set"]},
+		{"order": order, "mashina_raqami": kz_truck, "truck_type": ["is", "set"]},
 		"truck_type",
 		order_by="creation desc",
 	)

@@ -82,11 +82,10 @@ class TestSanaTartibi(FrappeTestCase):
 			make_order_detail(self.order.name, sana=d(-5), zavoddan_chiqish_sanasi=d(-4), fakt_chiqish_sanasi=d(-6))
 		make_order_detail(self.order.name, sana=d(-5), zavoddan_chiqish_sanasi=d(-4), fakt_chiqish_sanasi=d(-4))
 
-	def test_truck_dispatch_not_before_order_detail(self):
-		od = make_order_detail(self.order.name, sana=d(-5))
+	def test_truck_dispatch_not_before_order(self):
 		with self.assertRaisesRegex(frappe.ValidationError, ORDER):
-			frappe.get_doc({"doctype": "Truck Dispatch", "hujjat_sanasi": d(-6), "order": od.name}).insert(ignore_permissions=True)
-		frappe.get_doc({"doctype": "Truck Dispatch", "hujjat_sanasi": d(-5), "order": od.name}).insert(ignore_permissions=True)
+			frappe.get_doc({"doctype": "Truck Dispatch", "hujjat_sanasi": d(-11), "order": self.order.name}).insert(ignore_permissions=True)
+		frappe.get_doc({"doctype": "Truck Dispatch", "hujjat_sanasi": d(-10), "order": self.order.name}).insert(ignore_permissions=True)
 
 	def test_logistic_documentation_not_before_order(self):
 		with self.assertRaisesRegex(frappe.ValidationError, ORDER):

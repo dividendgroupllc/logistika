@@ -22,7 +22,7 @@ class TestDocumentsPipeline(FrappeTestCase):
 
 	def test_truck_dispatch_advances(self):
 		frappe.get_doc(
-			{"doctype": "Truck Dispatch", "hujjat_sanasi": today(), "order": self.od.name, "mashina_raqami": KZ}
+			{"doctype": "Truck Dispatch", "hujjat_sanasi": today(), "order": self.order.name, "mashina_raqami": KZ}
 		).insert(ignore_permissions=True)
 		self.assertEqual(frappe.db.get_value("Order Detail", self.od.name, "status"), "Подготовка фура КЗ")
 

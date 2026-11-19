@@ -19,13 +19,13 @@
   "jami_kub",
   "jami_tonna",
   "sec_secure",
-  "zanjir_soni",
-  "kamar_soni",
   "cb_secure",
-  "paddon_soni",
   "masul_xodim",
   "yuklash_sxemasi",
   "yuklash_sxemasi_sanasi",
+  "sec_sarf",
+  "sarf_materiallari",
+  "sarf_stock_entry",
   "sec_yuklash_xarajati",
   "yuklash_xarajatlari",
   "valyuta",
@@ -73,7 +73,9 @@
   {
    "fieldname": "manba_china_truck",
    "fieldtype": "Select",
-   "label": "Manba Xitoy fura — tanlab \"Yuklarni tortish\""
+   "label": "Manba Xitoy fura — tanlab \"Yuklarni tortish\"",
+   "hidden": 1,
+   "reqd": 0
   },
   {
    "description": "Qaysi ombordan yuk chiqarilayotgani — \"Yuklarni tortish\" shu ombor qoldig'idan hisoblaydi",
@@ -116,23 +118,8 @@
    "label": "Mustahkamlash"
   },
   {
-   "fieldname": "zanjir_soni",
-   "fieldtype": "Int",
-   "label": "Zanjir soni"
-  },
-  {
-   "fieldname": "kamar_soni",
-   "fieldtype": "Int",
-   "label": "Kamar soni"
-  },
-  {
    "fieldname": "cb_secure",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "paddon_soni",
-   "fieldtype": "Int",
-   "label": "Paddon soni"
   },
   {
    "fieldname": "yuklash_sxemasi",
@@ -197,13 +184,33 @@
    "options": "Employee",
    "label": "Mas'ul xodim",
    "description": "Ortishga mas'ul — avtomatik, hujjatni kiritgan foydalanuvchining Employee'si"
+  },
+  {
+   "fieldname": "sec_sarf",
+   "fieldtype": "Section Break",
+   "label": "Sarf materiallari (zanjir, kamar, paddon...)"
+  },
+  {
+   "fieldname": "sarf_materiallari",
+   "fieldtype": "Table",
+   "options": "KZ Sarf Material",
+   "label": "Sarf materiallari",
+   "description": "Ombordagi materiallar shu KZ furaga — submit'da ERPNext omboridan chiqim, tannarx bo'yicha shu fura yuklarining xarajati"
+  },
+  {
+   "fieldname": "sarf_stock_entry",
+   "fieldtype": "Link",
+   "options": "Stock Entry",
+   "label": "Ombordan chiqim (Stock Entry)",
+   "read_only": 1,
+   "no_copy": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-19 10:00:00.000000",
+ "modified": "2026-11-19 19:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "KZ Truck Loading",

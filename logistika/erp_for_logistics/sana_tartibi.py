@@ -50,8 +50,7 @@ def order_detail(doc):
 
 
 def truck_dispatch(doc):
-	if doc.order:
-		not_before(doc.hujjat_sanasi, frappe.db.get_value("Order Detail", doc.order, "sana"), _("Hujjat sanasi"), _("Order Detail sanasi"))
+	not_before(doc.hujjat_sanasi, _order_date(doc.order), _("Hujjat sanasi"), _("Order sanasi"))
 
 
 def logistic_documentation(doc):

@@ -140,6 +140,36 @@ def create_cn_supplier(supplier_name, phone, kind, plate=None):
 	return doc.name
 
 
+@frappe.whitelist()
+def create_kz_driver(supplier_name, plate, phone):
+	"""Truck Dispatch'dagi "Haydovchi" → "Yangi yaratish": KZ haydovchi (ism, mashina raqami,
+	telefon) — raqam va telefon Truck Dispatch'ga o'zi tushadi."""
+	frappe.has_permission("Supplier", "create", throw=True)
+	supplier_name = (supplier_name or "").strip()
+	plate = (plate or "").strip()
+	phone = _normalize_phone(phone)
+	if not supplier_name:
+		frappe.throw(_("Ismni kiriting"))
+	if not plate:
+		frappe.throw(_("Mashina raqamini kiriting"))
+	if len(phone.lstrip("+")) < PHONE_MATCH_DIGITS:
+		frappe.throw(_("Telefon raqamini to'liq kiriting"))
+	return (
+		frappe.get_doc(
+			{
+				"doctype": "Supplier",
+				"supplier_name": supplier_name,
+				"supplier_group": get_required_setting("kz_haydovchi_supplier_group"),
+				"supplier_type": "Individual",
+				"kz_mashina_raqami": plate,
+				"mobile_no": phone,
+			}
+		)
+		.insert()
+		.name
+	)
+
+
 def validate_supplier(doc, method=None):
 	"""Supplier doc_event: haydovchi guruhidagi supplier'ning Xitoy telefoni Supplier
 	formasidan tahrirlanganda ham tekshiriladi."""

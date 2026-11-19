@@ -737,3 +737,38 @@ nakladnoy yuklanmagan,накладная не загружена
 "{0}: saqlandi ({1}), lekin hech kimga yuborilmadi — mijoz Telegram'ga ulanmaganmi?","{0}: сохранено ({1}), но никому не отправлено — клиент не подключён к Telegram?"
 {0}: xato — Error Log'ga qarang,{0}: ошибка — см. Error Log
 {0}: {1} ta xabar yuborildi,{0}: отправлено сообщений: {1}
+"""{0}"" KZ furasi ""{1}"" Order'iga Truck Dispatch'da qo'yilmagan",Фура KZ «{0}» не назначена заказу «{1}» в Truck Dispatch
+"Avval ""Yuklarni tortish"" bilan yuklarni tortib oling.",Сначала подтяните грузы кнопкой «Подтянуть грузы».
+Avval Order va KZ furani tanlang.,Сначала выберите заказ и фуру KZ.
+Barcha yuklar to'liq ortildi deb belgilandi,Все грузы отмечены как полностью загруженные
+Bu Order'da hali yuk (Order Detail) yo'q,В этом заказе пока нет грузов (Order Detail)
+Bu Order'ning omborda yuki yo'q.,У этого заказа нет грузов на складе.
+KZ Sarf Material,Расходный материал KZ
+KZ Truck Loading {0} — sarf materiallari ({1}),Загрузка KZ {0} — расходные материалы ({1})
+KZ fura butun Order'ga umumiy qo'yiladi — qaysi yuk ketishi ortishda aniqlanadi,"Фура KZ назначается на весь заказ — какие грузы уедут, определяется при загрузке"
+KZ fura tanlanmagan,Фура KZ не выбрана
+KZ haydovchining mashina raqami (Truck Dispatch'ga o'zi tushadi),Номер машины водителя KZ (подставляется в Truck Dispatch)
+KZ mashina raqami,Номер машины KZ
+Mashina raqamini kiriting,Введите номер машины
+O'lchov,Ед. изм.
+"Ombordagi materiallar shu KZ furaga — submit'da ERPNext omboridan chiqim, tannarx bo'yicha shu fura yuklarining xarajati",Материалы со склада на эту фуру KZ — при проведении списываются со склада ERPNext и по себестоимости относятся на грузы этой фуры
+"Ombordagi sarf materiali (zanjir, kamar, paddon...)","Расходный материал со склада (цепи, ремни, паллеты...)"
+Ombordan chiqim (Stock Entry),Списание со склада (Stock Entry)
+"Ombordan chiqim avval shu hisobga, so'ng KZ fura yuklarining tannarxiga (WIP) o'tkaziladi — qoldig'i doim 0","Списание сначала на этот счёт, затем переносится в себестоимость грузов фуры KZ (WIP) — остаток всегда 0"
+Order tanlanmagan,Заказ не выбран
+Order yuklari,Грузы заказа
+Order yuklari (yo'lda / omborda),Грузы заказа (в пути / на складе)
+Sarf materiallari,Расходные материалы
+Sarf materiallari (KZ yuklash),Расходные материалы (загрузка KZ)
+Sarf materiallari (oraliq) hisobi,Счёт расходных материалов (транзитный)
+"Sarf materiallari (zanjir, kamar, paddon...)","Расходные материалы (цепи, ремни, паллеты...)"
+Sarf materiallari ombori,Склад расходных материалов
+Submit'da ERPNext ombor tannarxidan,При проведении — по себестоимости склада ERPNext
+Tannarx (1 dona),Себестоимость (1 шт.)
+Telefon,Телефон
+Telefon raqamini to'liq kiriting,Введите номер телефона полностью
+Yangi KZ haydovchi,Новый водитель KZ
+"Zanjir, kamar, paddon va h.k. shu ERPNext omboridan chiqim qilinadi","Цепи, ремни, паллеты и т.п. списываются с этого склада ERPNext"
+{0} ta yuk qatori tortildi,Подтянуто строк грузов: {0}
+✅ Hammasini ortish,✅ Загрузить всё
+📥 Yuklarni tortish,📥 Подтянуть грузы

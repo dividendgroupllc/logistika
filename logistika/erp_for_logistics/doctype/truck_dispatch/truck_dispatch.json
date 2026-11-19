@@ -25,7 +25,9 @@
   "cb_driver",
   "prava",
   "teh_passport",
-  "skat_hujjat"
+  "skat_hujjat",
+  "sec_yuklar",
+  "yuklar_html"
  ],
  "fields": [
   {
@@ -45,9 +47,10 @@
    "fieldname": "order",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Order Detail",
-   "options": "Order Detail",
-   "reqd": 1
+   "label": "Order",
+   "options": "Order",
+   "reqd": 1,
+   "description": "KZ fura butun Order'ga umumiy qo'yiladi — qaysi yuk ketishi ortishda aniqlanadi"
   },
   {
    "fieldname": "china_truck",
@@ -102,7 +105,8 @@
    "fieldtype": "Data",
    "label": "Haydovchi telefon raqami",
    "fetch_from": "haydovchi_ismi.mobile_no",
-   "fetch_if_empty": 1
+   "fetch_if_empty": 1,
+   "read_only": 1
   },
   {
    "fieldname": "vositachi",
@@ -112,7 +116,9 @@
   {
    "fieldname": "mashina_raqami",
    "fieldtype": "Data",
-   "label": "Mashina raqami"
+   "label": "Mashina raqami",
+   "read_only": 1,
+   "fetch_from": "haydovchi_ismi.kz_mashina_raqami"
   },
   {
    "fieldname": "omborga_kirish_sanasi",
@@ -137,12 +143,22 @@
    "fieldname": "skat_hujjat",
    "fieldtype": "Attach",
    "label": "Skat hujjati"
+  },
+  {
+   "fieldname": "yuklar_html",
+   "fieldtype": "HTML",
+   "label": "Order yuklari"
+  },
+  {
+   "fieldname": "sec_yuklar",
+   "fieldtype": "Section Break",
+   "label": "Order yuklari (yo'lda / omborda)"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-19 10:00:00.000000",
+ "modified": "2026-11-19 18:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Truck Dispatch",

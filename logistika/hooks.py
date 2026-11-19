@@ -20,6 +20,7 @@ fixtures = [
 					"Customer-brand",
 					"Supplier-xitoy_telefon",
 					"Supplier-xitoy_mashina_nomeri",
+					"Supplier-kz_mashina_raqami",
 				],
 			]
 		],
@@ -60,7 +61,7 @@ app_include_css = "/assets/logistika/css/internal_logistics.css"
 app_include_js = [
 	"/assets/logistika/js/order_chat_widget.js?v=11",
 	"/assets/logistika/js/duplicate_warning.js?v=2",
-	"/assets/logistika/js/logistika_quick_create.js?v=3",
+	"/assets/logistika/js/logistika_quick_create.js?v=4",
 	"/assets/logistika/js/pekin_list_import.js?v=1",
 	"/assets/logistika/js/truck_options.js?v=1",
 	"/assets/logistika/js/bugungi_joylashuv.js?v=2",

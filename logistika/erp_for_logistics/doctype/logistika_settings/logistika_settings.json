@@ -27,6 +27,10 @@
   "wi_kutish_kunlari",
   "cb_ombor",
   "eski_malumot_rejimi",
+  "sarf_section",
+  "sarf_materiallari_ombori",
+  "cb_sarf",
+  "sarf_materiallari_hisobi",
   "chat_section",
   "tayyor_javoblar",
   "tannarx_section",
@@ -266,11 +270,34 @@
    "label": "Eski ma'lumot kiritish rejimi",
    "default": "0",
    "description": "Yoqilsa: Warehouse Intake'da barcha yo'ldagi furalar chiqadi va o'tgan sanalarni kiritish mumkin. Hujjatlar orasidagi sanalar ketma-ketligi baribir tekshiriladi."
+  },
+  {
+   "fieldname": "sarf_section",
+   "fieldtype": "Section Break",
+   "label": "Sarf materiallari (KZ yuklash)"
+  },
+  {
+   "fieldname": "sarf_materiallari_ombori",
+   "fieldtype": "Link",
+   "options": "Warehouse",
+   "label": "Sarf materiallari ombori",
+   "description": "Zanjir, kamar, paddon va h.k. shu ERPNext omboridan chiqim qilinadi"
+  },
+  {
+   "fieldname": "cb_sarf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sarf_materiallari_hisobi",
+   "fieldtype": "Link",
+   "options": "Account",
+   "label": "Sarf materiallari (oraliq) hisobi",
+   "description": "Ombordan chiqim avval shu hisobga, so'ng KZ fura yuklarining tannarxiga (WIP) o'tkaziladi — qoldig'i doim 0"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-11-19 17:00:00.000000",
+ "modified": "2026-11-19 19:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Logistika Settings",
