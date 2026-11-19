@@ -123,7 +123,9 @@ def mini_app_endpoint(fn=None, *, require_link=True):
 		def wrapper(*args, **kwargs):
 			ctx = get_context()
 			if not ctx:
-				raise frappe.AuthenticationError("Telegram orqali oching")
+				# Sabab kodi frontendga: imzo umuman yo'q (masalan klaviatura tugmasidan ochilgan —
+				# Telegram initData bermaydi) yoki imzo yaroqsiz/eskirgan.
+				raise frappe.AuthenticationError("bad_init_data" if _init_data_header() else "no_init_data")
 			if not _within_rate_limit(ctx.user_id):
 				raise frappe.TooManyRequestsError("Juda ko'p so'rov")
 			if require_link and not (ctx.contact and ctx.customers):

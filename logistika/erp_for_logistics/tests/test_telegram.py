@@ -159,7 +159,7 @@ class TestTelegramWebhook(FrappeTestCase):
 		with patch(SEND) as send:
 			wh.process_update(private_message(131, 111, text="/start"), SECRET)
 		self.assertEqual(send.call_args.args[1], ALREADY_LINKED["ru"])
-		self.assertEqual(send.call_args.kwargs["reply_markup"]["keyboard"][0][0]["text"], "📱 Кабинет")
+		self.assertEqual(send.call_args.kwargs["reply_markup"]["keyboard"][0][0], {"text": "📱 Кабинет"})
 
 	def test_language_callback_rejects_unknown_and_unlinked(self):
 		frappe.db.set_value("Contact", self.contact, "telegram_chat_id", "141")
@@ -188,17 +188,25 @@ class TestTelegramWebhook(FrappeTestCase):
 			wh.process_update(private_message(171, 152, text="/til"), SECRET)
 		self.assertEqual(choose.call_count, 2)
 
-	def test_main_menu_has_web_app(self):
-		frappe.db.set_single_value("Telegram Bot Settings", "mini_app_url", "https://cabinet.test/tg")
+	def test_main_menu_has_no_web_app(self):
+		# Klaviatura tugmasidan ochilgan Mini App'ga Telegram initData bermaydi — shuning
+		# uchun "Kabinet" oddiy tugma, bot javobidagi inline tugma Mini App'ni ochadi.
 		kb = main_menu_keyboard("ru")
-		self.assertEqual(kb["keyboard"][0][0]["text"], "📱 Кабинет")
-		self.assertTrue(kb["keyboard"][0][0]["web_app"]["url"].endswith("/tg"))
+		self.assertEqual(kb["keyboard"][0][0], {"text": "📱 Кабинет"})
 		self.assertEqual(kb["keyboard"][1][0]["text"], MENU_LANG)
+		self.assertNotIn("web_app", json.dumps(kb))
 
 	def _assert_cabinet_reply(self, send):
 		# web_app tugmasi faqat https manzilda (setUp'da beriladi)
 		self.assertEqual(send.call_args.args[1], render(USE_CABINET, "uz"))
-		self.assertIn("web_app", send.call_args.kwargs["reply_markup"]["keyboard"][0][0])
+		self.assertIn("web_app", send.call_args.kwargs["reply_markup"]["inline_keyboard"][0][0])
+
+	def test_cabinet_button_text_opens_inline_web_app(self):
+		frappe.db.set_value("Contact", self.contact, "telegram_chat_id", "175")
+		for i, text in enumerate(("📱 Kabinet", "📱 Кабинет", "📱 Cabinet")):
+			with patch(SEND) as send:
+				wh.process_update(private_message(175, 430 + i, text=text), SECRET)
+			self._assert_cabinet_reply(send)
 
 	def test_legacy_upload_and_qa_get_cabinet_reply(self):
 		frappe.db.set_value("Contact", self.contact, "telegram_chat_id", "172")

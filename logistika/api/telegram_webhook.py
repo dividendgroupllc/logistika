@@ -29,6 +29,7 @@ from logistika.telegram.keyboards import (
 	MENU_LANG,
 	language_keyboard,
 	main_menu_keyboard,
+	open_button,
 	phone_request_keyboard,
 )
 from logistika.telegram.messages import (
@@ -147,9 +148,11 @@ def _on_message(message: dict) -> None:
 		_send_language_choice(chat_id)
 		return
 
-	# Fayl, savol, eski menyu tugmalari yoki /upload, /savol — hammasi endi kabinetda.
+	# "Kabinet" tugmasi, fayl, savol, eski menyu tugmalari yoki /upload, /savol — hammasi
+	# kabinetda: inline "Kabinet" tugmasi (initData bilan ochadi).
 	if _is_linked(chat_id):
-		_say(chat_id, USE_CABINET, reply_markup=main_menu_keyboard(chat_language(chat_id)))
+		lang = chat_language(chat_id)
+		_say(chat_id, USE_CABINET, reply_markup=open_button(lang, "#/", "cabinet") or main_menu_keyboard(lang))
 	else:
 		_say(chat_id, ASK_PHONE, reply_markup=phone_request_keyboard(chat_language(chat_id)))
 

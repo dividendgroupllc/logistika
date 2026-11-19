@@ -44,9 +44,6 @@ class TestMiniAppBotButtons(FrappeTestCase):
 	def test_no_web_app_button_without_https(self):
 		frappe.db.set_single_value("Telegram Bot Settings", "mini_app_url", "http://logistika_xitoy/tg")
 		self.assertIsNone(keyboards.open_button("uz", "#/x"))
-		kb = keyboards.main_menu_keyboard("uz")
-		self.assertNotIn("web_app", str(kb))
-		self.assertEqual(kb["keyboard"][-1][0]["text"], keyboards.MENU_LANG)
 
 	def test_open_button_labels(self):
 		button = keyboards.open_button("ru", "#/yuk/X", "reply")["inline_keyboard"][0][0]

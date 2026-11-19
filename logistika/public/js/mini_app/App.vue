@@ -2,7 +2,9 @@
 	<div v-if="state === 'loading'" class="center muted">{{ t("loading") }}</div>
 	<div v-else-if="state === 'outside'" class="center">
 		<div style="font-size: 44px">📱</div>
-		<p>{{ t("open_in_tg") }}</p>
+		<p>{{ insideTelegram ? t("open_from_button") : t("open_in_tg") }}</p>
+		<p v-if="reason" class="muted">{{ reason }}</p>
+		<button v-if="insideTelegram" class="btn" @click="closeApp">{{ t("close") }}</button>
 	</div>
 	<div v-else-if="state === 'error'" class="center">
 		<p>{{ t("error") }}</p>
@@ -32,6 +34,13 @@ import { loadMe, store } from "./store";
 import Link from "./pages/Link.vue";
 
 const state = ref("loading");
+const reason = ref("");
+// Telegram ichida, lekin imzosiz (masalan eski klaviatura tugmasidan ochilgan).
+const insideTelegram = !!(tg && tg.platform && tg.platform !== "unknown");
+
+function closeApp() {
+	if (tg && tg.close) tg.close();
+}
 const route = useRoute();
 const router = useRouter();
 
@@ -48,7 +57,12 @@ async function start() {
 		const me = await loadMe();
 		state.value = me.linked ? "ready" : "link";
 	} catch (e) {
-		state.value = e instanceof ApiError && e.status === 401 ? "outside" : "error";
+		if (e instanceof ApiError && e.status === 401) {
+			reason.value = e.message === "bad_init_data" ? "bad_init_data" : "";
+			state.value = "outside";
+		} else {
+			state.value = "error";
+		}
 	}
 }
 

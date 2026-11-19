@@ -23,7 +23,7 @@ const M = {
 		language: "Til", contact_us: "Bog'lanish", call: "Qo'ng'iroq qilish", linked_via: "Telegram orqali ulangan",
 		link_title: "Kabinetga kirish", link_text: "Telefon raqamingizni ulashing — biz uni Litella'dagi mijoz raqamingiz bilan solishtiramiz.",
 		share_phone: "Raqamni ulashish", link_wait: "Tekshirilmoqda…", link_fail: "Raqam topilmadi. Menejeringizga murojaat qiling.",
-		open_in_tg: "Kabinetni Telegram'dagi bot orqali oching.", error: "Xatolik. Qayta urinib ko'ring.", retry: "Qayta urinish",
+		open_in_tg: "Kabinetni Telegram'dagi bot orqali oching.", open_from_button: "Kabinetni bot chatidagi «📱 Kabinet» tugmasini bosib, so'ng xabar ostidagi «📱 Kabinet» tugmasi orqali yoki chap pastdagi menyu tugmasi orqali oching.", close: "Yopish", error: "Xatolik. Qayta urinib ko'ring.", retry: "Qayta urinish",
 		loading: "Yuklanmoqda…", kz_truck: "KZ fura",
 	},
 	ru: {
@@ -45,7 +45,7 @@ const M = {
 		language: "Язык", contact_us: "Связь", call: "Позвонить", linked_via: "Подключено через Telegram",
 		link_title: "Вход в кабинет", link_text: "Поделитесь номером телефона — мы сверим его с вашим номером клиента в Litella.",
 		share_phone: "Поделиться номером", link_wait: "Проверяем…", link_fail: "Номер не найден. Обратитесь к менеджеру.",
-		open_in_tg: "Откройте кабинет через бота в Telegram.", error: "Ошибка. Попробуйте ещё раз.", retry: "Повторить",
+		open_in_tg: "Откройте кабинет через бота в Telegram.", open_from_button: "Откройте кабинет: нажмите «📱 Кабинет» в чате бота, затем кнопку «📱 Кабинет» под сообщением — или кнопку меню слева внизу.", close: "Закрыть", error: "Ошибка. Попробуйте ещё раз.", retry: "Повторить",
 		loading: "Загрузка…", kz_truck: "Фура KZ",
 	},
 	en: {
@@ -67,7 +67,7 @@ const M = {
 		language: "Language", contact_us: "Contact", call: "Call", linked_via: "Linked via Telegram",
 		link_title: "Sign in to the cabinet", link_text: "Share your phone number — we will match it with your Litella customer number.",
 		share_phone: "Share number", link_wait: "Checking…", link_fail: "Number not found. Please contact your manager.",
-		open_in_tg: "Open the cabinet from the bot in Telegram.", error: "Something went wrong. Try again.", retry: "Retry",
+		open_in_tg: "Open the cabinet from the bot in Telegram.", open_from_button: "Open the cabinet: tap «📱 Cabinet» in the bot chat, then the «📱 Cabinet» button under the message — or the menu button at the bottom left.", close: "Close", error: "Something went wrong. Try again.", retry: "Retry",
 		loading: "Loading…", kz_truck: "KZ truck",
 	},
 };

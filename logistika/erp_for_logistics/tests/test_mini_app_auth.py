@@ -54,12 +54,15 @@ class TestMiniAppAuth(FrappeTestCase):
 		self.assertIsNone(auth.verify_init_data("auth_date=1&user=%7B%7D&hash=" + "й" * 64, TOKEN))
 
 	def test_endpoint_without_header_is_401(self):
+		# Sabab kodi frontendga (qayerdan ochish kerakligini aytish uchun).
 		with patch.object(auth, "_init_data_header", return_value=None):
-			self.assertRaises(frappe.AuthenticationError, _guarded)
+			with self.assertRaisesRegex(frappe.AuthenticationError, "no_init_data"):
+				_guarded()
 		with patch.object(auth, "_init_data_header", return_value="garbage"), patch.object(
 			auth, "get_bot_token", return_value=TOKEN
 		):
-			self.assertRaises(frappe.AuthenticationError, _guarded)
+			with self.assertRaisesRegex(frappe.AuthenticationError, "bad_init_data"):
+				_guarded()
 
 	def test_unlinked_user_permission_error(self):
 		with as_user(777001):

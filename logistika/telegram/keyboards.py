@@ -49,11 +49,12 @@ def _web_app_url(path: str = "") -> str | None:
 
 
 def main_menu_keyboard(lang: str | None = None) -> dict:
-	"""Ro'yxatdan o'tgan mijozning doimiy pastki menyusi: kabinet (Telegram Mini App) va til.
-	Buyurtmalar, hujjatlar, pekin invoice va savollar — kabinet ichida."""
-	url = _web_app_url()
-	rows = [[{"text": _label(CABINET, lang), "web_app": {"url": url}}]] if url else []
-	return {"keyboard": rows + [[{"text": MENU_LANG}]], "resize_keyboard": True}
+	"""Ro'yxatdan o'tgan mijozning doimiy pastki menyusi: "Kabinet" va til.
+
+	"Kabinet" — oddiy matnli tugma (web_app EMAS): klaviatura tugmasidan ochilgan Mini App'ga
+	Telegram initData (imzo, foydalanuvchi) bermaydi va kabinet kira olmaydi. Bosilganda bot
+	inline "Ochish" tugmasini yuboradi — u (va bot menyu tugmasi) imzo bilan ochadi."""
+	return {"keyboard": [[{"text": _label(CABINET, lang)}], [{"text": MENU_LANG}]], "resize_keyboard": True}
 
 
 def open_button(lang: str | None, path: str, kind: str = "open") -> dict | None:
