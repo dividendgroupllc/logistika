@@ -5,6 +5,12 @@ const KZL_DUPLICATE_LABEL = "Bu order + KZ fura uchun yuklash hujjati";
 
 frappe.ui.form.on("KZ Truck Loading", {
 	onload(frm) {
+		if (frm.is_new() && !frm.doc.masul_xodim) {
+			// Ortishga mas'ul — kiritayotgan foydalanuvchining Employee'si (server ham to'ldiradi).
+			frappe.db.get_value("Employee", { user_id: frappe.session.user, status: "Active" }, "name").then((r) => {
+				if (r.message && r.message.name && !frm.doc.masul_xodim) frm.set_value("masul_xodim", r.message.name);
+			});
+		}
 		frm.set_query("harajat_turi", "yuklash_xarajatlari", () => {
 			return { query: "logistika.erp_for_logistics.ombor_xarajatlari.get_ombor_xarajati_accounts" };
 		});

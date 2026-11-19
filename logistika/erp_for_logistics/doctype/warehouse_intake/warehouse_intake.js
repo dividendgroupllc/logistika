@@ -6,9 +6,6 @@ frappe.ui.form.on("Warehouse Intake", {
 		frm.fields_dict.fura.get_query = () => {
 			return "logistika.erp_for_logistics.api.china_plates_on_road";
 		};
-		frm.set_query("harajat_turi", "yuklash_xarajatlari", () => {
-			return { query: "logistika.erp_for_logistics.ombor_xarajatlari.get_ombor_xarajati_accounts" };
-		});
 		frm.set_query("order", "items", () => {
 			return frm.doc.fura ? { filters: [["Order Detail Fura", "xitoy_mashina_nomeri", "=", frm.doc.fura]] } : {};
 		});
@@ -53,9 +50,15 @@ frappe.ui.form.on("Warehouse Intake Item", {
 });
 
 frappe.ui.form.on("Warehouse Intake", {
-	setup(frm) {
-		frm.set_query("tolov_hisobi", () => ({
-			filters: { account_type: ["in", ["Cash", "Bank"]], is_group: 0 },
-		}));
+	onload(frm) {
+		logistika_fill_employee(frm, "tushirgan_xodim");
 	},
 });
+
+// Yangi hujjatda — kiritayotgan foydalanuvchining Employee'si (server ham to'ldiradi).
+function logistika_fill_employee(frm, fieldname) {
+	if (!frm.is_new() || frm.doc[fieldname]) return;
+	frappe.db.get_value("Employee", { user_id: frappe.session.user, status: "Active" }, "name").then((r) => {
+		if (r.message && r.message.name && !frm.doc[fieldname]) frm.set_value(fieldname, r.message.name);
+	});
+}

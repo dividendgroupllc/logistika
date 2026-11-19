@@ -2,8 +2,8 @@
 # For license information, please see license.txt
 
 # Order — mijoz bilan kelishuv: kim, qaysi Xitoy postavshik, yuk (mahsulot, jami tonna/kub,
-# fayl), xizmat o'lchovi (xarajatlarni bo'lish shu bo'yicha) va Truck Type bo'yicha taxminiy
-# narx oralig'i (min–max, bitta truck uchun; aniq narx yuk yetib borgach qo'lda). Yuk,
+# fayl), xizmat o'lchovi (xarajatlarni bo'lish shu bo'yicha) va taxminiy narx oralig'i
+# (min–max: bitta truck, 1 kub yoki 1 tonna uchun; aniq narx yuk yetib borgach qo'lda). Yuk,
 # furalar, xarajat va pipeline holati "Order Detail" hujjatlarida yuritiladi.
 
 import frappe
@@ -23,21 +23,14 @@ class Order(Document):
 		self.validate_narxlar()
 
 	def validate_narxlar(self):
-		"""Har bir qator — bitta birlik uchun taxminiy narx: "Truck" (Truck Type bo'yicha,
-		bitta truck uchun), "Kub" (1 m³ uchun) yoki "Tonna" (1 t uchun)."""
+		"""Har bir qator — bitta birlik uchun taxminiy narx: "Truck" (bitta truck uchun),
+		"Kub" (1 m³ uchun) yoki "Tonna" (1 t uchun). Har bir birlik bir marta."""
 		seen = set()
 		for row in self.narxlar:
 			row.birlik = row.birlik or "Truck"
-			if row.birlik == "Truck":
-				if not row.truck_type:
-					frappe.throw(_("Narxlar, {0}-qator: Truck Type tanlang").format(row.idx))
-				key, label = ("Truck", row.truck_type), row.truck_type
-			else:
-				row.truck_type = None
-				key, label = (row.birlik, None), _(row.birlik)
-			if key in seen:
-				frappe.throw(_('Narxlar: "{0}" narxi ikki marta').format(label))
-			seen.add(key)
+			if row.birlik in seen:
+				frappe.throw(_('Narxlar: "{0}" narxi ikki marta').format(_(row.birlik)))
+			seen.add(row.birlik)
 			if flt(row.min_narx) and flt(row.max_narx) and flt(row.min_narx) > flt(row.max_narx):
 				frappe.throw(
 					_('Narxlar, {0}-qator: min narx ({1}) max narxdan ({2}) katta').format(

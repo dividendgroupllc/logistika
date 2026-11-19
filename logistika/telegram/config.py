@@ -32,3 +32,9 @@ def get_webhook_secret() -> str | None:
 def is_bot_active() -> bool:
 	"""Bot faolligini tekshiradi."""
 	return bool(frappe.db.get_single_value(SETTINGS, "is_active"))
+
+
+def mini_app_url(path: str = "") -> str:
+	"""Telegram Mini App (mijoz kabineti) manzili; `path` — hash marshrut (masalan "#/yuk/OD-1")."""
+	base = (frappe.db.get_single_value(SETTINGS, "mini_app_url") or "").strip() or frappe.utils.get_url("/tg")
+	return base + (path or "")

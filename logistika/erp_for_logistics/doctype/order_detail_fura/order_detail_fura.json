@@ -19,6 +19,7 @@
   "fakt_chiqish_sanasi",
   "fakt_kelish_sanasi",
   "jonatish_xabari_yuborildi",
+  "nakladnoy",
   "cb_xarajat",
   "xitoy_fura_summasi",
   "sugurta",
@@ -83,7 +84,7 @@
   {
    "fieldname": "taxminiy_tonna",
    "fieldtype": "Float",
-   "label": "Taxminiy tonna",
+   "label": "Tonna",
    "precision": "3",
    "non_negative": 1,
    "in_list_view": 1,
@@ -93,7 +94,7 @@
   {
    "fieldname": "taxminiy_kub",
    "fieldtype": "Float",
-   "label": "Taxminiy kub",
+   "label": "Kub",
    "description": "Pekin list kelguncha fura sig'imini tekshirish uchun",
    "precision": "3",
    "non_negative": 1
@@ -133,6 +134,13 @@
    "label": "\"Yo'lga chiqdi\" xabari yuborilgan",
    "read_only": 1,
    "no_copy": 1
+  },
+  {
+   "fieldname": "nakladnoy",
+   "fieldtype": "Attach",
+   "label": "Nakladnoy",
+   "description": "Rasm yoki PDF — \"Zavoddan chiqdi\" xabari bilan mijozga yuboriladi",
+   "allow_on_submit": 1
   },
   {
    "fieldname": "cb_xarajat",

@@ -1,13 +1,13 @@
+import json
 from unittest.mock import patch
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from logistika.api import telegram_webhook as wh
-from logistika.erp_for_logistics.doctype.order_detail.test_order_detail import make_order_detail
 from logistika.erp_for_logistics.tests.utils import make_order, setup_logistika_settings
-from logistika.telegram.keyboards import MENU_LANG, MENU_QA, MENU_UPLOAD
-from logistika.telegram.messages import ALREADY_LINKED, ASK_PHONE, LANGUAGE_SET, render
+from logistika.telegram.keyboards import MENU_LANG, main_menu_keyboard
+from logistika.telegram.messages import ALREADY_LINKED, ASK_PHONE, LANGUAGE_SET, USE_CABINET, render
 
 SECRET = "test-secret-123"
 
@@ -45,6 +45,7 @@ class TestTelegramWebhook(FrappeTestCase):
 		for p in self.patches:
 			p.start()
 		self.order = make_order(kliyent="_T TG Mijoz")
+		frappe.db.set_single_value("Telegram Bot Settings", "mini_app_url", "https://cabinet.test/tg")
 		self.contact = self._contact("_T TG Ali", "+998 90 765-43-21", "_T TG Mijoz")
 
 	def tearDown(self):
@@ -158,7 +159,7 @@ class TestTelegramWebhook(FrappeTestCase):
 		with patch(SEND) as send:
 			wh.process_update(private_message(131, 111, text="/start"), SECRET)
 		self.assertEqual(send.call_args.args[1], ALREADY_LINKED["ru"])
-		self.assertEqual(send.call_args.kwargs["reply_markup"]["keyboard"][0][0]["text"], MENU_UPLOAD["ru"])
+		self.assertEqual(send.call_args.kwargs["reply_markup"]["keyboard"][0][0]["text"], "📱 Кабинет")
 
 	def test_language_callback_rejects_unknown_and_unlinked(self):
 		frappe.db.set_value("Contact", self.contact, "telegram_chat_id", "141")
@@ -180,15 +181,47 @@ class TestTelegramWebhook(FrappeTestCase):
 		for lang in ("uz", "ru", "en"):
 			self.assertIn(ASK_PHONE[lang], text)
 
-	def test_menu_buttons_recognized_in_any_language(self):
+	def test_language_button_recognized(self):
 		frappe.db.set_value("Contact", self.contact, "telegram_chat_id", "171")
-		with patch.object(wh, "_cmd_qa_start") as qa:
-			wh.process_update(private_message(171, 150, text=MENU_QA["en"]), SECRET)
-		qa.assert_called_once()
 		with patch.object(wh, "_send_language_choice") as choose:
 			wh.process_update(private_message(171, 151, text=MENU_LANG), SECRET)
 			wh.process_update(private_message(171, 152, text="/til"), SECRET)
 		self.assertEqual(choose.call_count, 2)
+
+	def test_main_menu_has_web_app(self):
+		frappe.db.set_single_value("Telegram Bot Settings", "mini_app_url", "https://cabinet.test/tg")
+		kb = main_menu_keyboard("ru")
+		self.assertEqual(kb["keyboard"][0][0]["text"], "📱 Кабинет")
+		self.assertTrue(kb["keyboard"][0][0]["web_app"]["url"].endswith("/tg"))
+		self.assertEqual(kb["keyboard"][1][0]["text"], MENU_LANG)
+
+	def _assert_cabinet_reply(self, send):
+		# web_app tugmasi faqat https manzilda (setUp'da beriladi)
+		self.assertEqual(send.call_args.args[1], render(USE_CABINET, "uz"))
+		self.assertIn("web_app", send.call_args.kwargs["reply_markup"]["keyboard"][0][0])
+
+	def test_legacy_upload_and_qa_get_cabinet_reply(self):
+		frappe.db.set_value("Contact", self.contact, "telegram_chat_id", "172")
+		for i, text in enumerate(["/upload", "/savol", *sorted(wh.LEGACY_MENU)]):
+			with patch(SEND) as send:
+				wh.process_update(private_message(172, 400 + i, text=text), SECRET)
+			self._assert_cabinet_reply(send)
+
+	def test_plain_text_and_file_get_cabinet_reply(self):
+		frappe.db.set_value("Contact", self.contact, "telegram_chat_id", "173")
+		with patch(SEND) as send, patch("logistika.erp_for_logistics.order_chat.save_customer_message") as save:
+			wh.process_update(private_message(173, 410, text="Yukim qayerda?"), SECRET)
+		self._assert_cabinet_reply(send)
+		save.assert_not_called()
+		with patch(SEND) as send, patch("logistika.telegram.sender.download_incoming_file") as download:
+			wh.process_update(private_message(173, 411, document={"file_id": "F", "file_name": "x.pdf", "file_size": 10}), SECRET)
+		self._assert_cabinet_reply(send)
+		download.assert_not_called()
+
+	def test_unlinked_text_asks_phone(self):
+		with patch(SEND) as send:
+			wh.process_update(private_message(174, 420, text="salom"), SECRET)
+		self.assertIn("request_contact", json.dumps(send.call_args.kwargs["reply_markup"]))
 
 	def test_all_templates_have_three_languages_with_same_placeholders(self):
 		import string
@@ -211,64 +244,6 @@ class TestTelegramWebhook(FrappeTestCase):
 		self.assertEqual(render(template, "ru", x="<a>"), "Привет &lt;a&gt;")
 		self.assertEqual(render(template, "xx", x="a"), "Salom a")
 		self.assertEqual(render(template, None, x="a"), "Salom a\n\nПривет a\n\nHi a")
-
-	# ---------- upload ----------
-	def _ld_with_pending_upload(self, chat_id):
-		frappe.db.set_value("Contact", self.contact, "telegram_chat_id", str(chat_id))
-		ld = frappe.get_doc(
-			{"doctype": "Logistic Documentation", "sana": frappe.utils.today(), "order": self.order.name, "kz_truck": "01A1"}
-		).insert(ignore_permissions=True)
-		wh._set_pending_upload(chat_id, ld.name)
-		return ld
-
-	def test_upload_saved_private_with_safe_name(self):
-		ld = self._ld_with_pending_upload(444)
-		message = {"document": {"file_id": "F1", "file_name": "../../etc/x invoice.PDF", "file_size": 100}}
-		with patch(SEND), patch.object(wh, "download_incoming_file", return_value=(pdf_bytes(), "documents/file_1.pdf")):
-			wh.process_update(private_message(444, 70, **message), SECRET)
-		url = frappe.db.get_value("Logistic Documentation", ld.name, "pekin_invoice")
-		self.assertTrue(url.startswith("/private/files/"))
-		self.assertNotIn("..", url)
-		self.assertTrue(url.endswith(".pdf"))
-
-	def test_upload_rejects_bad_extension_and_size(self):
-		ld = self._ld_with_pending_upload(555)
-		with patch(SEND) as send, patch.object(wh, "download_incoming_file") as download:
-			wh.process_update(private_message(555, 80, document={"file_id": "F", "file_name": "x.exe", "file_size": 10}), SECRET)
-			wh.process_update(
-				private_message(555, 81, document={"file_id": "F", "file_name": "x.pdf", "file_size": 999_999_999}), SECRET
-			)
-		download.assert_not_called()
-		self.assertEqual(send.call_count, 2)
-		self.assertFalse(frappe.db.get_value("Logistic Documentation", ld.name, "pekin_invoice"))
-
-	def test_upload_rechecks_ownership(self):
-		ld = self._ld_with_pending_upload(666)
-		frappe.db.set_value("Contact", self.contact, "telegram_chat_id", None)
-		with patch(SEND), patch.object(wh, "download_incoming_file") as download:
-			wh.process_update(private_message(666, 90, document={"file_id": "F", "file_name": "x.pdf", "file_size": 10}), SECRET)
-		download.assert_not_called()
-		self.assertFalse(frappe.db.get_value("Logistic Documentation", ld.name, "pekin_invoice"))
-
-	# ---------- Q&A ----------
-	def test_qa_callback_uses_order_hash(self):
-		frappe.db.set_value("Contact", self.contact, "telegram_chat_id", "777")
-		make_order_detail(self.order.name)
-		with patch(SEND):
-			wh._cmd_qa_start(777)
-		good = f"qa_order:0:{wh._short_hash(self.order.name)}"
-		with patch(SEND) as send, patch.object(wh, "answer_callback_query"):
-			wh._handle_qa_order_callback("cb", 777, "qa_order:0:deadbe")
-			self.assertFalse(wh._get_pending_qa(777))
-			wh._handle_qa_order_callback("cb", 777, good)
-		self.assertEqual(wh._get_pending_qa(777), self.order.name)
-
-	def test_qa_rate_limited(self):
-		frappe.db.set_value("Contact", self.contact, "telegram_chat_id", "888")
-		with patch("logistika.erp_for_logistics.order_chat.save_customer_message", return_value="OCM-1") as save, patch(SEND):
-			for _ in range(wh.QA_RATE_LIMIT + 5):
-				wh._handle_qa_message(888, self.order.name, "salom")
-		self.assertEqual(save.call_count, wh.QA_RATE_LIMIT)
 
 
 class TestStaffReply(FrappeTestCase):

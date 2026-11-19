@@ -20,7 +20,6 @@ CLEARED = {"fakt_tonna": 0, "fakt_kub": 0, "ichki_deklaratsiya": None}
 
 class IchkiDeklaratsiya(Document):
 	def validate(self):
-		self.validate_tolovchi()
 		self.validate_fura()
 		compute_pekin_totals(self)
 		order_detail = frappe.get_doc("Order Detail", self.order_detail)
@@ -63,18 +62,6 @@ class IchkiDeklaratsiya(Document):
 		row = furalar.find_row(self.order_detail, plate) if plate else None
 		if row:
 			frappe.db.set_value(furalar.CHILD, row.name, values, update_modified=False)
-
-	def validate_tolovchi(self):
-		"""Kim to'ladi — faqat shu Order'ning mijozi yoki Xitoy postavshigi."""
-		if not self.ichki_deklaratsiya_tolovchi:
-			return
-		allowed = {self.kliyent, self.xitoy_postavshik} - {None, ""}
-		if self.ichki_deklaratsiya_tolovchi not in allowed:
-			frappe.throw(
-				_('"Kim to\'ladi" shu Order\'ning mijozi yoki Xitoy postavshigi bo\'lishi kerak: {0}').format(
-					", ".join(sorted(allowed)) or "-"
-				)
-			)
 
 	def on_trash(self):
 		self._set_row(self.xitoy_mashina_nomeri, CLEARED)

@@ -25,6 +25,21 @@ frappe.ui.form.on("Telegram Bot Settings", {
 				});
 			});
 		});
+		frm.add_custom_button(__("Mini App tugmasini o'rnatish"), () => {
+			if (frm.is_dirty()) {
+				frappe.msgprint(__("Avval saqlang (Save)."));
+				return;
+			}
+			frappe.call({ method: "logistika.telegram.sender.set_menu_button", freeze: true }).then(({ message: m }) => {
+				frappe.msgprint({
+					title: __("Mini App"),
+					indicator: m && m.ok ? "green" : "red",
+					message: m && m.ok
+						? __("Bot menyusida \"Kabinet\" tugmasi o'rnatildi: {0}", [frappe.utils.escape_html(m.url)])
+						: __("O'rnatilmadi: {0}", [frappe.utils.escape_html((m && m.description) || "")]),
+				});
+			});
+		});
 		frm.add_custom_button(__("Webhook'ni o'rnatish"), () => {
 			if (frm.is_dirty()) {
 				frappe.msgprint(__("Avval tokenni saqlang (Save)."));

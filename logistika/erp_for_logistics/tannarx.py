@@ -587,11 +587,10 @@ def _ledger_measures(reference_doctype, reference_name, harakat_turi):
 
 
 def on_warehouse_intake_submit(doc):
+	"""Fura kelgani — fura PI. Tushirish xarajatlari Warehouse Intake'da kiritilmaydi
+	(2026-11-19: hujjatni tushirgan xodim o'zi kiritadi, xarajat yo'q)."""
 	measures = _ledger_measures("Warehouse Intake", doc.name, "Kirim")
 	create_fura_purchase_invoices(doc, list(measures), doc.fura)
-	if doc.yuklash_xarajatlari:
-		je = sync_source_costs(doc, _loading_cost_lines(doc, measures, "Ombor", "wip_ombor_hisobi"), doc.valyuta, doc.tolov_hisobi, doc.sana)
-		doc.db_set("tannarx_je", je, update_modified=False)
 
 
 def on_peregruz_submit(doc):

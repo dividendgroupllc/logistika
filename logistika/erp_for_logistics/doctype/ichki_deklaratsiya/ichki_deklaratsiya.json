@@ -19,11 +19,7 @@
   "sec_pekin_jami",
   "jami_tonna",
   "cb_pekin",
-  "jami_kub",
-  "sec_deklaratsiya",
-  "ichki_deklaratsiya",
-  "ichki_deklaratsiya_tolovchi",
-  "cb_deklaratsiya"
+  "jami_kub"
  ],
  "fields": [
   {
@@ -115,27 +111,6 @@
    "label": "Jami kub",
    "read_only": 1,
    "precision": "3"
-  },
-  {
-   "fieldname": "sec_deklaratsiya",
-   "fieldtype": "Section Break",
-   "label": "Ichki deklaratsiya"
-  },
-  {
-   "fieldname": "ichki_deklaratsiya",
-   "fieldtype": "Attach",
-   "label": "Ichki deklaratsiya hujjati"
-  },
-  {
-   "fieldname": "ichki_deklaratsiya_tolovchi",
-   "fieldtype": "Link",
-   "options": "Customer",
-   "label": "Kim to'ladi",
-   "description": "Shu Order'ning mijozi yoki Xitoy postavshigi — deklaratsiyani o'zi to'laydi (bizda buxgalteriya yozuvi yo'q)"
-  },
-  {
-   "fieldname": "cb_deklaratsiya",
-   "fieldtype": "Column Break"
   }
  ],
  "links": [],

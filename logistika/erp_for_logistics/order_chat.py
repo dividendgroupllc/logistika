@@ -15,7 +15,8 @@ import frappe
 
 from logistika.erp_for_logistics.kimi_client import chat as kimi_chat
 from logistika.erp_for_logistics.ld_telegram import get_order_chat_ids
-from logistika.telegram.i18n import LANGUAGE_NAMES, chosen_language
+from logistika.telegram.i18n import LANGUAGE_NAMES, chat_language, chosen_language
+from logistika.telegram.keyboards import open_button, route
 from logistika.telegram.sender import send_message, send_photo
 
 
@@ -116,7 +117,7 @@ def is_order_delivered(order):
 	return all(status == final_stage for status in statuses)
 
 
-def save_customer_message(order, chat_id, text):
+def save_customer_message(order, chat_id, text, rasm=None):
 	"""Telegram webhook mijozdan kelgan xabarni saqlaydi. Tarjima Kimi API'ga tashqi
 	so'rov bo'lgani uchun (hozirgi model bilan odatda ~1-2s, lekin tarmoq/API sekinlashsa
 	uzayishi mumkin) buni webhook javobidan OLDIN kutib tursak, Telegram javobni
@@ -138,6 +139,7 @@ def save_customer_message(order, chat_id, text):
 			"sender": "Mijoz",
 			"telegram_chat_id": str(chat_id),
 			"matn": text,
+			"rasm": rasm,
 			"tarjima_xitoycha": None,
 			"tarjima_ruscha": None,
 		}
@@ -146,13 +148,14 @@ def save_customer_message(order, chat_id, text):
 	frappe.db.set_value("Order", order, "javob_kutilmoqda", 1, update_modified=False)
 	frappe.db.commit()
 	frappe.publish_realtime("logistika_chat_message", {"order": order}, after_commit=True)
-	frappe.enqueue(
-		"logistika.erp_for_logistics.order_chat._translate_customer_message_async",
-		queue="short",
-		doc_name=doc.name,
-		text=text,
-	)
-	_notify_document_owners(order, text)
+	if (text or "").strip():  # faqat rasm bo'lsa tarjima qilinadigan narsa yo'q
+		frappe.enqueue(
+			"logistika.erp_for_logistics.order_chat._translate_customer_message_async",
+			queue="short",
+			doc_name=doc.name,
+			text=text,
+		)
+	_notify_document_owners(order, text or "📷")
 	return doc.name
 
 
@@ -326,7 +329,12 @@ def deliver_staff_reply(doc_name, force_original=False):
 	sent = 0
 	for chat_id in chat_ids:
 		text = texts.get(chat_id) or None
-		ok = send_photo(chat_id, doc.rasm, caption=text) if doc.rasm else send_message(chat_id, text, parse_mode=None)
+		button = open_button(chat_language(chat_id), route("buyurtma", doc.order, "chat"), "reply")
+		ok = (
+			send_photo(chat_id, doc.rasm, caption=text, reply_markup=button)
+			if doc.rasm
+			else send_message(chat_id, text, reply_markup=button, parse_mode=None)
+		)
 		sent += 1 if ok else 0
 
 	holat = "Yuborildi" if sent else "Yuborilmadi"

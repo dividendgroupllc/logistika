@@ -24,7 +24,8 @@
   "omborga_kirish_sanasi",
   "cb_driver",
   "prava",
-  "teh_passport"
+  "teh_passport",
+  "skat_hujjat"
  ],
  "fields": [
   {
@@ -131,6 +132,11 @@
    "fieldname": "teh_passport",
    "fieldtype": "Attach",
    "label": "Tex passport"
+  },
+  {
+   "fieldname": "skat_hujjat",
+   "fieldtype": "Attach",
+   "label": "Skat hujjati"
   }
  ],
  "grid_page_length": 50,

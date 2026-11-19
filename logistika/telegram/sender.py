@@ -4,7 +4,7 @@ from typing import Optional
 import frappe
 import requests
 
-from logistika.telegram.config import get_bot_token, get_webhook_secret, is_bot_active
+from logistika.telegram.config import get_bot_token, get_webhook_secret, is_bot_active, mini_app_url
 
 _TELEGRAM_API = "https://api.telegram.org/bot{token}/{method}"
 MAX_MESSAGE_LENGTH = 4096
@@ -85,7 +85,9 @@ def send_location(chat_id, latitude: float, longitude: float) -> bool:
 		return False
 
 
-def send_document(chat_id, file_url: str, caption: Optional[str] = None) -> bool:
+def send_document(
+	chat_id, file_url: str, caption: Optional[str] = None, reply_markup: Optional[dict] = None, parse_mode: Optional[str] = None
+) -> bool:
 	"""Send a file already stored in Frappe (Attach field's file_url) as a Telegram document."""
 	if not is_bot_active():
 		return False
@@ -98,6 +100,10 @@ def send_document(chat_id, file_url: str, caption: Optional[str] = None) -> bool
 			data = {"chat_id": chat_id}
 			if caption:
 				data["caption"] = caption
+				if parse_mode:
+					data["parse_mode"] = parse_mode
+			if reply_markup:
+				data["reply_markup"] = json.dumps(reply_markup)
 			r = requests.post(_url("sendDocument"), data=data, files=files, timeout=30)
 		if not r.ok:
 			frappe.log_error(title=f"Telegram sendDocument Error (chat_id={chat_id})", message=r.text)
@@ -110,7 +116,9 @@ def send_document(chat_id, file_url: str, caption: Optional[str] = None) -> bool
 TELEGRAM_CAPTION_LIMIT = 1024
 
 
-def send_photo(chat_id, file_url: str, caption: Optional[str] = None) -> bool:
+def send_photo(
+	chat_id, file_url: str, caption: Optional[str] = None, reply_markup: Optional[dict] = None, parse_mode: Optional[str] = None
+) -> bool:
 	"""Frappe'dagi (shaxsiy bo'lishi mumkin) rasm faylini Telegram'ga rasm sifatida yuboradi.
 	Izoh oddiy matn (parse_mode yo'q); 1024 belgidan uzun bo'lsa alohida xabar bo'lib ketadi."""
 	if not is_bot_active():
@@ -123,6 +131,10 @@ def send_photo(chat_id, file_url: str, caption: Optional[str] = None) -> bool:
 			data = {"chat_id": chat_id}
 			if caption and not long_caption:
 				data["caption"] = caption
+				if parse_mode:
+					data["parse_mode"] = parse_mode
+			if reply_markup and not long_caption:
+				data["reply_markup"] = json.dumps(reply_markup)
 			r = requests.post(_url("sendPhoto"), data=data, files={"photo": (file_doc.file_name, f)}, timeout=30)
 		if not r.ok:
 			frappe.log_error(title=f"Telegram sendPhoto Error (chat_id={chat_id})", message=r.text)
@@ -131,8 +143,19 @@ def send_photo(chat_id, file_url: str, caption: Optional[str] = None) -> bool:
 		frappe.log_error(title=f"Telegram sendPhoto Exception (chat_id={chat_id})", message=_redact(e))
 		return False
 	if long_caption:
-		send_message(chat_id, long_caption, parse_mode=None)
+		send_message(chat_id, long_caption, reply_markup=reply_markup, parse_mode=parse_mode)
 	return True
+
+
+IMAGE_EXTENSIONS = ("jpg", "jpeg", "png", "webp")
+
+
+def send_file(chat_id, file_url: str, caption: Optional[str] = None, reply_markup: Optional[dict] = None, parse_mode: Optional[str] = "HTML") -> bool:
+	"""Rasm bo'lsa — rasm (sendPhoto), aks holda (PDF va h.k.) — hujjat (sendDocument)."""
+	extension = (file_url or "").rsplit(".", 1)[-1].lower()
+	if extension in IMAGE_EXTENSIONS:
+		return send_photo(chat_id, file_url, caption=caption, reply_markup=reply_markup, parse_mode=parse_mode)
+	return send_document(chat_id, file_url, caption=caption, reply_markup=reply_markup, parse_mode=parse_mode)
 
 
 def answer_callback_query(callback_query_id: str, text: Optional[str] = None) -> bool:
@@ -250,3 +273,22 @@ def delete_webhook() -> dict:
 		return r.json()
 	except Exception as e:
 		return {"ok": False, "description": _redact(e)}
+
+
+@frappe.whitelist()
+def set_menu_button() -> dict:
+	"""Bot chatidagi menyu tugmasini "Kabinet" (Telegram Mini App) qiladi — Telegram Bot
+	Settings'dagi "Mini App tugmasini o'rnatish" tugmasi."""
+	frappe.only_for("System Manager")
+	url = mini_app_url()
+	try:
+		r = requests.post(
+			_url("setChatMenuButton"),
+			json={"menu_button": {"type": "web_app", "text": "Kabinet", "web_app": {"url": url}}},
+			timeout=10,
+		)
+		result = r.json()
+	except Exception as e:
+		result = {"ok": False, "description": _redact(e)}
+	result["url"] = url
+	return result

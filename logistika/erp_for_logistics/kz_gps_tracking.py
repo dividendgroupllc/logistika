@@ -92,6 +92,8 @@ def _send_row_to_client(doc, row):
 	chaqiradi — Telegram'ga yuborish mantig'i bitta joyda."""
 	from logistika.telegram.i18n import chat_language
 	from logistika.telegram.messages import KZ_SHIPMENT_UPDATE, render
+	from logistika.erp_for_logistics.ld_telegram import get_order_chat_ids
+	from logistika.telegram.keyboards import open_button, route
 	from logistika.telegram.sender import send_location, send_message
 
 	if not doc.order:
@@ -103,16 +105,7 @@ def _send_row_to_client(doc, row):
 	if not order.kliyent:
 		frappe.throw("Bu Order'da mijoz (Kliyent) ko'rsatilmagan")
 
-	contact_names = frappe.get_all(
-		"Dynamic Link",
-		filters={"parenttype": "Contact", "link_doctype": "Customer", "link_name": order.kliyent},
-		pluck="parent",
-	)
-	chat_ids = frappe.get_all(
-		"Contact",
-		filters={"name": ["in", contact_names], "telegram_chat_id": ["not in", ["", None]]},
-		pluck="telegram_chat_id",
-	)
+	chat_ids = get_order_chat_ids(doc.order)
 
 	sent = 0
 	if chat_ids:
@@ -123,7 +116,11 @@ def _send_row_to_client(doc, row):
 			kz_fura=doc.kz_truck or "-",
 		)
 		for chat_id in chat_ids:
-			if send_message(chat_id, render(KZ_SHIPMENT_UPDATE, chat_language(chat_id), **values)):
+			if send_message(
+				chat_id,
+				render(KZ_SHIPMENT_UPDATE, chat_language(chat_id), **values),
+				reply_markup=open_button(chat_language(chat_id), route("buyurtma", doc.order)),
+			):
 				sent += 1
 				if row.latitude and row.longitude:
 					send_location(chat_id, row.latitude, row.longitude)

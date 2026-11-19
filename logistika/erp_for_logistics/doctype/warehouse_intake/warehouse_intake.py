@@ -6,11 +6,14 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
-from logistika.erp_for_logistics import furalar, ombor_ledger, tannarx
+from logistika.erp_for_logistics import furalar, ombor_ledger, tannarx, xodimlar
 from logistika.erp_for_logistics.api import china_plates_on_road
 
 
 class WarehouseIntake(Document):
+	def before_validate(self):
+		xodimlar.fill_employee(self, "tushirgan_xodim", required=True)
+
 	def validate(self):
 		# Faqat yo'ldagi (hali omborga kelmagan) Order Detail furasini qabul qilish mumkin.
 		if (self.is_new() or self.has_value_changed("fura")) and self.fura not in china_plates_on_road():

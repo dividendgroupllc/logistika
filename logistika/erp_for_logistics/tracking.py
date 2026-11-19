@@ -18,6 +18,7 @@ from frappe.utils import cstr, flt, nowtime, today
 from logistika.erp_for_logistics import furalar, kz_gps_tracking, traccar_client
 from logistika.erp_for_logistics.ld_telegram import get_order_chat_ids
 from logistika.telegram.i18n import chat_language
+from logistika.telegram.keyboards import open_button, route
 from logistika.telegram.messages import SHIPMENT_UPDATE, render
 from logistika.telegram.sender import send_message
 
@@ -43,7 +44,11 @@ def send_china_update(doc, row):
 	sent = sum(
 		1
 		for chat_id in get_order_chat_ids(doc.order)
-		if send_message(chat_id, render(SHIPMENT_UPDATE, chat_language(chat_id), **values))
+		if send_message(
+			chat_id,
+			render(SHIPMENT_UPDATE, chat_language(chat_id), **values),
+			reply_markup=open_button(chat_language(chat_id), route("yuk", doc.name)),
+		)
 	)
 	if sent:
 		row.yuborilgan = 1

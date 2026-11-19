@@ -6,7 +6,8 @@
  "field_order": [
   "bot_token",
   "is_active",
-  "webhook_secret"
+  "webhook_secret",
+  "mini_app_url"
  ],
  "fields": [
   {
@@ -30,11 +31,17 @@
    "read_only": 1,
    "no_copy": 1,
    "description": "\"Webhook'ni o'rnatish\" bosilganda avtomatik yaratiladi"
+  },
+  {
+   "fieldname": "mini_app_url",
+   "fieldtype": "Data",
+   "label": "Mini App manzili",
+   "description": "Mijoz kabineti (Telegram Mini App) manzili. Bo'sh bo'lsa — shu saytning /tg sahifasi."
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-11-18 22:00:00.000000",
+ "modified": "2026-11-19 15:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Telegram Bot Settings",

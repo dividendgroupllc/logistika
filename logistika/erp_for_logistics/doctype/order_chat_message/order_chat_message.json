@@ -12,6 +12,7 @@
   "telegram_chat_id",
   "holat",
   "tarjima_xato",
+  "mijoz_oqidi",
   "sec_matn",
   "matn",
   "rasm",
@@ -71,6 +72,13 @@
    "read_only": 1
   },
   {
+   "fieldname": "mijoz_oqidi",
+   "fieldtype": "Check",
+   "label": "Mijoz o'qidi",
+   "read_only": 1,
+   "default": "0"
+  },
+  {
    "fieldname": "sec_matn",
    "fieldtype": "Section Break"
   },
@@ -111,7 +119,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-19 00:10:00.000000",
+ "modified": "2026-11-19 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Order Chat Message",

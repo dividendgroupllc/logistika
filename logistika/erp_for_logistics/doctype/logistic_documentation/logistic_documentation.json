@@ -20,6 +20,10 @@
   "cb_per",
   "send_peregruz_hujjat",
   "peregruz_sent",
+  "sec_ichki_dek",
+  "ichki_deklaratsiya",
+  "ichki_deklaratsiya_summa",
+  "ichki_deklaratsiya_tolovchi",
   "tab_cl",
   "sec_cl",
   "pekin_invoice",
@@ -119,6 +123,27 @@
    "fieldtype": "Check",
    "label": "Kliyentga yuborilgan ✓",
    "read_only": 1
+  },
+  {
+   "fieldname": "sec_ichki_dek",
+   "fieldtype": "Section Break",
+   "label": "Ichki deklaratsiya"
+  },
+  {
+   "fieldname": "ichki_deklaratsiya",
+   "fieldtype": "Attach",
+   "label": "Ichki deklaratsiya"
+  },
+  {
+   "fieldname": "ichki_deklaratsiya_summa",
+   "fieldtype": "Currency",
+   "label": "Summa"
+  },
+  {
+   "fieldname": "ichki_deklaratsiya_tolovchi",
+   "fieldtype": "Select",
+   "label": "Kim to'ladi",
+   "options": "\nCustomer\nZavod"
   },
   {
    "fieldname": "tab_cl",
@@ -252,7 +277,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-18 19:00:00.000000",
+ "modified": "2026-11-19 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Logistic Documentation",

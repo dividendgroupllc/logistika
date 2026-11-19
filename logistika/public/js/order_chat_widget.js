@@ -58,9 +58,10 @@ logistika.order_chat.render_bubbles = function ($log, messages) {
 				}
 			} else if (!mine) {
 				main_text = m.tarjima_xitoycha || m.matn;
-				const parts = [`🇺🇿 ${frappe.utils.escape_html(m.matn)}`];
+				// Mijoz faqat rasm yuborgan bo'lsa (Telegram kabinetidan) matn bo'sh — qator chiqmaydi.
+				const parts = m.matn ? [`🇺🇿 ${frappe.utils.escape_html(m.matn)}`] : [];
 				if (m.tarjima_ruscha) parts.push(`🇷🇺 ${frappe.utils.escape_html(m.tarjima_ruscha)}`);
-				sub = `<div style="font-size:11px; color:#6b7280; margin-top:2px;">${parts.join("<br>")}</div>`;
+				if (parts.length) sub = `<div style="font-size:11px; color:#6b7280; margin-top:2px;">${parts.join("<br>")}</div>`;
 			}
 			const image = m.rasm
 				? `<a href="${encodeURI(m.rasm)}" target="_blank"><img src="${encodeURI(m.rasm)}" style="max-width:220px; max-height:220px; border-radius:6px; margin:4px 0;"></a>`

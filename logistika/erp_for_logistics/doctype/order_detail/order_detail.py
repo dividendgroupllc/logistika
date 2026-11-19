@@ -16,6 +16,8 @@ from logistika.erp_for_logistics import furalar, order_status_log, tannarx
 from logistika.erp_for_logistics.cn_validators import validate_cn_phone
 from logistika.erp_for_logistics.doctype.internal_logistics_item.internal_logistics_item import dims_to_cm
 from logistika.erp_for_logistics.pipeline_status import PIPELINE_STAGES
+from logistika.telegram.keyboards import open_button, route
+from logistika.telegram.sender import send_file
 
 # Yuk hali Xitoy furasida (omborga kirmagan) bo'lgan bosqichlar.
 ON_CHINA_TRUCK_STAGES = PIPELINE_STAGES[: PIPELINE_STAGES.index("Таможния склад")]
@@ -258,8 +260,9 @@ def driver_query(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 def send_dispatched(order_detail, row_name=None):
 	""""Zavoddan chiqdi" tugmasi — shu fura qatori uchun mijozga "buyurtmangiz yo'lga
-	chiqdi" xabarini bir marta yuboradi (hech kimga yetmasa belgi qo'yilmaydi — qayta
-	urinish mumkin). Yuborilsa "Fakt chiqqan sana" (bo'sh bo'lsa) bugun bo'ladi."""
+	chiqdi" xabarini qatorning nakladnoyi (rasm yoki PDF) bilan bir marta yuboradi; izohda
+	fura raqami, tonna va kub. Hech kimga yetmasa belgi qo'yilmaydi — qayta urinish mumkin.
+	Yuborilsa "Fakt chiqqan sana" (bo'sh bo'lsa) bugun bo'ladi."""
 	from logistika.erp_for_logistics import tracking
 	from logistika.telegram.messages import ORDER_DISPATCHED, render
 
@@ -278,16 +281,28 @@ def send_dispatched(order_detail, row_name=None):
 		frappe.throw(_("Qaysi fura yo'lga chiqqanini tanlang"))
 	if row.jonatish_xabari_yuborildi:
 		return 0
+	if not row.nakladnoy:
+		frappe.throw(
+			_("{0}-qator ({1}): avval nakladnoyni (rasm yoki PDF) yuklang.").format(row.idx, row.xitoy_mashina_nomeri or "-")
+		)
+	tonna, kub = furalar.row_load(row)
 	values = dict(
 		mahsulot=frappe.db.get_value("Order", doc.order, "mahsulot_nomi") or "-",
 		order_detail=doc.name,
 		sana=formatdate(row.fakt_chiqish_sanasi or row.zavoddan_chiqish_sanasi or today(), "dd.MM.yyyy"),
 		fura=row.xitoy_mashina_nomeri or "-",
+		tonna=flt(tonna, 3),
+		kub=flt(kub, 3),
 	)
 	sent = sum(
 		1
 		for chat_id in tracking.get_order_chat_ids(doc.order)
-		if tracking.send_message(chat_id, render(ORDER_DISPATCHED, tracking.chat_language(chat_id), **values))
+		if send_file(
+			chat_id,
+			row.nakladnoy,
+			caption=render(ORDER_DISPATCHED, tracking.chat_language(chat_id), **values),
+			reply_markup=open_button(tracking.chat_language(chat_id), route("yuk", doc.name)),
+		)
 	)
 	if sent:
 		frappe.db.set_value(

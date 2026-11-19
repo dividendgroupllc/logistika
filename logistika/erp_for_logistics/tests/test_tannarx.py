@@ -63,7 +63,7 @@ class TestTannarx(FrappeTestCase):
 	def _row(self, od, plate=PLATE):
 		return next(r for r in od.furalar if r.xitoy_mashina_nomeri == plate)
 
-	def _intake(self, items, costs=0, submit=True, plate=PLATE):
+	def _intake(self, items, submit=True, plate=PLATE):
 		doc = frappe.get_doc(
 			{
 				"doctype": "Warehouse Intake",
@@ -74,7 +74,6 @@ class TestTannarx(FrappeTestCase):
 					{"order": od.name, "part_name": "P0", "quantity": 100, "fakt_qty": fakt, "net_weight": self._row(od, plate).fakt_tonna * 1000, "volume_cbm": self._row(od, plate).fakt_kub}
 					for od, fakt in items
 				],
-				"yuklash_xarajatlari": [{"harajat_turi": self.acc.ombor_leaf, "summa": costs}] if costs else [],
 			}
 		).insert(ignore_permissions=True)
 		if submit:
@@ -161,10 +160,10 @@ class TestTannarx(FrappeTestCase):
 		od.save()
 		self.assertEqual(fura(od.reload()).tannarx_je, je)
 
-	def test_intake_fura_pi_and_shared_costs(self):
+	def test_intake_fura_pi(self):
 		od1 = self._od(20, xitoy_fura_summasi=1400)
 		od2 = self._od(10, order=make_order(kliyent="_T Tannarx Mijoz 2"))
-		wi = self._intake([(od1, 100), (od2, 100)], costs=300)
+		wi = self._intake([(od1, 100), (od2, 100)])
 
 		pi = frappe.get_doc("Purchase Invoice", fura(od1.reload()).fura_pi)
 		self.assertEqual((pi.docstatus, pi.supplier), (1, self.driver))
@@ -172,10 +171,9 @@ class TestTannarx(FrappeTestCase):
 		self.assertAlmostEqual(pi.base_grand_total, 1400 * CNY_RATE)
 		self.assertFalse(fura(od2.reload()).fura_pi)
 
-		ombor1 = sum(r.summa for r in self._rows(od1.name, kategoriya="Ombor"))
-		ombor2 = sum(r.summa for r in self._rows(od2.name, kategoriya="Ombor"))
-		self.assertAlmostEqual(ombor1, 200 * CNY_RATE)
-		self.assertAlmostEqual(ombor2, 100 * CNY_RATE)
+		# Tushirish xarajatlari Warehouse Intake'da yo'q (2026-11-19) — "Ombor" yozuvi yo'q.
+		self.assertEqual(self._rows(od1.name, kategoriya="Ombor"), [])
+		self.assertFalse(wi.meta.has_field("tannarx_je"))
 
 		wi.cancel()
 		self.assertEqual(frappe.db.get_value("Purchase Invoice", pi.name, "docstatus"), 2)
@@ -184,14 +182,16 @@ class TestTannarx(FrappeTestCase):
 		self.assertAlmostEqual(self._wip_balance(od2.name), 0)
 
 	def test_shared_costs_split_by_kub_for_kub_orders(self):
+		from logistika.erp_for_logistics.tannarx import allocate_by_tonnage, allocation_weights
+
 		kub_order_1 = make_order(kliyent="_T Tannarx Kub 1", xizmat_olchovi="Kub")
 		kub_order_2 = make_order(kliyent="_T Tannarx Kub 2", xizmat_olchovi="Kub")
 		# 1-chisi og'ir, lekin kichik (20 t, 10 m³); 2-chisi yengil, lekin katta (10 t, 30 m³).
 		od1 = self._od(order=kub_order_1, pekin_list=[{"part_name": "P0", "quantity": 100, "total_boxes": 10, "net_weight": 20000, "volume_cbm": 10}])
 		od2 = self._od(order=kub_order_2, pekin_list=[{"part_name": "P0", "quantity": 100, "total_boxes": 10, "net_weight": 10000, "volume_cbm": 30}])
-		self._intake([(od1, 100), (od2, 100)], costs=400)
-		self.assertAlmostEqual(self._sum(od1.name, "Ombor"), 100 * CNY_RATE)
-		self.assertAlmostEqual(self._sum(od2.name, "Ombor"), 300 * CNY_RATE)
+		split = allocate_by_tonnage(400, allocation_weights({od1.name: (20, 10), od2.name: (10, 30)}))
+		self.assertAlmostEqual(split[od1.name], 100)
+		self.assertAlmostEqual(split[od2.name], 300)
 
 	def test_intake_requires_driver_when_fura_sum(self):
 		od = self._od(20, xitoy_fura_summasi=1400, xitoy_haydovchi=None)
@@ -291,18 +291,6 @@ class TestTannarx(FrappeTestCase):
 		self.assertAlmostEqual(data[0].qabul_tonna, 20)
 		self.assertAlmostEqual(data[0].tonna_tannarxi, 7)
 
-	def test_declaration_payer_is_order_party(self):
-		od = self._od(20)
-		deklaratsiya = frappe.get_doc("Ichki Deklaratsiya", fura(od).ichki_deklaratsiya)
-		deklaratsiya.ichki_deklaratsiya_tolovchi = deklaratsiya.xitoy_postavshik
-		deklaratsiya.save()
-		deklaratsiya.ichki_deklaratsiya_tolovchi = deklaratsiya.kliyent
-		deklaratsiya.save()
-		deklaratsiya.ichki_deklaratsiya_tolovchi = ensure_customer("_T Boshqa mijoz")
-		with self.assertRaises(frappe.ValidationError):
-			deklaratsiya.save()
-		self.assertEqual(frappe.get_all("Tannarx Harakati", filters={"manba_doctype": "Ichki Deklaratsiya"}), [])
-
 	# ---------- bir nechta furali yuk ----------
 	def _two_truck_od(self):
 		from logistika.erp_for_logistics.doctype.order_detail.test_order_detail import make_declaration
@@ -372,8 +360,9 @@ class TestTannarx(FrappeTestCase):
 	def test_kub_split_falls_back_to_tonnage_without_volumes(self):
 		kub_order = make_order(kliyent="_T Tannarx Kub 3", xizmat_olchovi="Kub")
 		od = self._od(order=kub_order, pekin_list=[{"part_name": "P0", "quantity": 100, "total_boxes": 10, "net_weight": 20000, "volume_cbm": 0}])
-		self._intake([(od, 100)], costs=400)
-		self.assertAlmostEqual(self._sum(od.name, "Ombor"), 400 * CNY_RATE)
+		from logistika.erp_for_logistics.tannarx import allocate_by_tonnage, allocation_weights
+
+		self.assertAlmostEqual(allocate_by_tonnage(400, allocation_weights({od.name: (20, 0)}))[od.name], 400)
 
 	# ---------- Order Detail'ni o'chirish ----------
 	def test_order_detail_with_own_costs_can_be_deleted(self):
@@ -391,7 +380,9 @@ class TestTannarx(FrappeTestCase):
 
 	def test_order_detail_received_in_warehouse_cannot_be_deleted(self):
 		od = self._od(20, sugurta=700)
-		self._intake([(od, 100)], costs=100)
+		self._intake([(od, 100)])
+		# WI'da xarajat yo'q (2026-11-19) — bu yerda faqat havola (WI qatori) to'xtatadi.
+		frappe.get_doc("Ichki Deklaratsiya", fura(od.reload()).ichki_deklaratsiya).delete()
 		with self.assertRaises(frappe.ValidationError) as ctx:
 			frappe.delete_doc("Order Detail", od.name)
 		self.assertIn("Warehouse Intake", str(ctx.exception))
@@ -399,7 +390,7 @@ class TestTannarx(FrappeTestCase):
 
 	def test_order_detail_can_be_deleted_after_intake_cancelled(self):
 		od = self._od(20, xitoy_fura_summasi=1400, sugurta=700)
-		wi = self._intake([(od, 100)], costs=300)
+		wi = self._intake([(od, 100)])
 		pi = fura(od.reload()).fura_pi
 		wi.cancel()
 		wi.delete()  # bekor qilingan hujjat ham havola — Frappe'da avval o'chiriladi

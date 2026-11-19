@@ -12,6 +12,14 @@ from logistika.erp_for_logistics.tests.utils import make_order, setup_logistika_
 PLATE = "粤B12345"
 CHAT_IDS = "logistika.erp_for_logistics.tracking.get_order_chat_ids"
 SEND = "logistika.erp_for_logistics.tracking.send_message"
+SEND_FILE = "logistika.erp_for_logistics.doctype.order_detail.order_detail.send_file"
+NAKLADNOY = "/private/files/nakladnoy.pdf"
+
+
+def with_nakladnoy(doc):
+	for row in doc.furalar:
+		frappe.db.set_value("Order Detail Fura", row.name, "nakladnoy", NAKLADNOY)
+	return doc
 
 
 class TestChinaTracking(FrappeTestCase):
@@ -75,7 +83,8 @@ class TestChinaTracking(FrappeTestCase):
 		self.assertEqual(result, {"saved": 0, "sent": 0})
 
 	def test_send_dispatched_once(self):
-		with patch(CHAT_IDS, return_value=["1"]), patch(SEND, return_value=True) as send:
+		with_nakladnoy(self.od_a)
+		with patch(CHAT_IDS, return_value=["1"]), patch(SEND_FILE, return_value=True) as send:
 			self.assertEqual(send_dispatched(self.od_a.name), 1)
 			self.assertEqual(send_dispatched(self.od_a.name), 0)
 		self.assertEqual(send.call_count, 1)
@@ -84,14 +93,14 @@ class TestChinaTracking(FrappeTestCase):
 		self.assertEqual(str(row.fakt_chiqish_sanasi), today())
 
 	def test_send_dispatched_needs_truck_choice_when_several(self):
-		doc = make_order_detail(
-			self.order_a.name, furalar=[{"xitoy_mashina_nomeri": "_T X1"}, {"xitoy_mashina_nomeri": "_T X2"}]
+		doc = with_nakladnoy(
+			make_order_detail(self.order_a.name, furalar=[{"xitoy_mashina_nomeri": "_T X1"}, {"xitoy_mashina_nomeri": "_T X2"}])
 		)
-		with patch(CHAT_IDS, return_value=["1"]), patch(SEND, return_value=True) as send:
+		with patch(CHAT_IDS, return_value=["1"]), patch(SEND_FILE, return_value=True) as send:
 			with self.assertRaises(frappe.ValidationError):
 				send_dispatched(doc.name)
 			self.assertEqual(send_dispatched(doc.name, doc.furalar[1].name), 1)
-		self.assertIn("_T X2", send.call_args.args[1])
+		self.assertIn("_T X2", send.call_args.kwargs["caption"])
 		self.assertEqual(frappe.db.get_value("Order Detail Fura", doc.furalar[0].name, "jonatish_xabari_yuborildi"), 0)
 
 	def test_bulk_update_tags_truck_row(self):
@@ -101,11 +110,12 @@ class TestChinaTracking(FrappeTestCase):
 		self.assertEqual(self.od_a.kunlik_kuzatuv[0].fura, PLATE)
 
 	def test_dispatched_message_identifies_cargo(self):
-		with patch(CHAT_IDS, return_value=["1"]), patch(SEND, return_value=True) as send, patch(
+		with_nakladnoy(self.od_a)
+		with patch(CHAT_IDS, return_value=["1"]), patch(SEND_FILE, return_value=True) as send, patch(
 			"logistika.erp_for_logistics.tracking.chat_language", return_value="ru"
 		):
 			send_dispatched(self.od_a.name)
-		text = send.call_args.args[1]
+		text = send.call_args.kwargs["caption"]
 		for expected in (self.od_a.name, PLATE, "Profil", "Ваш груз выехал с завода"):
 			self.assertIn(expected, text)
 

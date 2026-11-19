@@ -65,8 +65,35 @@ def ensure_truck_type(name="_T China 33t", tonna=33, kub=90):
 	return name
 
 
+def ensure_employee(user="Administrator"):
+	"""Joriy (test) foydalanuvchining Employee'si — Warehouse Intake / KZ Truck Loading uni
+	avtomatik "xodim" qilib qo'yadi."""
+	name = frappe.db.get_value("Employee", {"user_id": user, "status": "Active"})
+	if name:
+		return name
+	company = frappe.db.get_value("Company", {}, "name", order_by="creation asc")
+	gender = frappe.db.get_value("Gender", {}, "name")
+	return (
+		frappe.get_doc(
+			{
+				"doctype": "Employee",
+				"first_name": f"_T Xodim {user}",
+				"company": company,
+				"status": "Active",
+				"gender": gender,
+				"date_of_birth": "1990-01-01",
+				"date_of_joining": "2020-01-01",
+				"user_id": user,
+			}
+		)
+		.insert(ignore_permissions=True)
+		.name
+	)
+
+
 def setup_logistika_settings():
 	"""Order / Order Detail testlari uchun minimal sozlama."""
+	ensure_employee(frappe.session.user)
 	settings = frappe.get_single("Logistika Settings")
 	settings.postavshik_customer_group = ensure_customer_group("_T Xitoy postavshik")
 	settings.haydovchi_supplier_group = ensure_supplier_group("_T Xitoy haydovchi")

@@ -88,28 +88,21 @@ class TestOrder(FrappeTestCase):
 		make_order()
 
 	def test_price_rows_by_truck_kub_and_tonna(self):
-		from logistika.erp_for_logistics.tests.utils import ensure_truck_type
-
-		truck = ensure_truck_type()
 		doc = make_order(
 			narxlar=[
-				{"birlik": "Truck", "truck_type": truck, "min_narx": 10000, "max_narx": 12000},
+				{"birlik": "Truck", "min_narx": 10000, "max_narx": 12000},
 				{"birlik": "Kub", "min_narx": 80, "max_narx": 95},
 				{"birlik": "Tonna", "min_narx": 300, "max_narx": 350},
 			]
 		)
 		self.assertEqual([r.birlik for r in doc.narxlar], ["Truck", "Kub", "Tonna"])
-		self.assertFalse(doc.narxlar[1].truck_type)
 
-	def test_truck_price_needs_truck_type(self):
+	def test_price_rows_have_no_truck_type(self):
+		self.assertFalse(frappe.get_meta("Order Narx").has_field("truck_type"))
+
+	def test_duplicate_truck_price_rejected(self):
 		with self.assertRaises(frappe.ValidationError):
-			make_order(narxlar=[{"birlik": "Truck", "min_narx": 10000}])
-
-	def test_kub_price_ignores_truck_type(self):
-		from logistika.erp_for_logistics.tests.utils import ensure_truck_type
-
-		doc = make_order(narxlar=[{"birlik": "Kub", "truck_type": ensure_truck_type(), "min_narx": 80}])
-		self.assertFalse(doc.narxlar[0].truck_type)
+			make_order(narxlar=[{"birlik": "Truck", "min_narx": 1}, {"birlik": "Truck", "min_narx": 2}])
 
 	def test_duplicate_price_unit_rejected(self):
 		with self.assertRaises(frappe.ValidationError):

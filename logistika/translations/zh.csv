@@ -324,7 +324,6 @@ Mustahkamlash,加固
 "Narx nimaga: bitta truck, 1 kub yoki 1 tonna",价格单位：每车、每立方米或每吨
 "Narxlar (taxminiy: truck, kub yoki tonna uchun)",价格（预估：按车、立方米或吨）
 "Narxlar, {0}-qator: min narx ({1}) max narxdan ({2}) katta",价格第{0}行：最低价格（{1}）大于最高价格（{2}）
-"Narxlar, {0}-qator: Truck Type tanlang",价格第{0}行：请选择车型
 "Narxlar: ""{0}"" narxi ikki marta",价格：“{0}”的价格重复
 Navbatda,排队中
 Nedostatka,短缺
@@ -685,3 +684,22 @@ Zavoddan chiqish sanasi (reja),出厂日期（计划）
 🔄 Qayta hisoblash,🔄 重新计算
 🚚 Zavoddan chiqdi (mijozga xabar),🚚 已出厂（通知客户）
 🛰 GPS yangilash (hammasi),🛰 GPS 更新（全部）
+Mijoz aloqa telefoni,客户联系电话
+Mijoz o'qidi,客户已读
+"Telegram kabinetida ""Bog'lanish"" bo'limida ko'rinadi",显示在 Telegram 客户中心的“联系”部分
+Avval saqlang (Save).,请先保存（Save）。
+"Bot menyusida ""Kabinet"" tugmasi o'rnatildi: {0}",已在机器人菜单中设置“客户中心”按钮：{0}
+Mijoz kabineti (Telegram Mini App) manzili. Bo'sh bo'lsa — shu saytning /tg sahifasi.,客户中心（Telegram Mini App）地址。为空时使用本站的 /tg 页面。
+Mini App,Mini App
+Mini App manzili,Mini App 地址
+Mini App tugmasini o'rnatish,设置 Mini App 按钮
+Avtomatik — hujjatni kiritgan foydalanuvchining Employee'si,自动 — 录入单据用户对应的员工
+"Foydalanuvchingiz ({0}) hech bir Employee'ga bog'lanmagan — ""{1}"" ni tanlang.",您的用户（{0}）未关联任何员工 — 请选择“{1}”。
+Mas'ul xodim,负责员工
+Nakladnoy,运单
+"Ortishga mas'ul — avtomatik, hujjatni kiritgan foydalanuvchining Employee'si",装车负责人 — 自动，为录入单据用户对应的员工
+"Rasm yoki PDF — ""Zavoddan chiqdi"" xabari bilan mijozga yuboriladi",图片或 PDF — 随“已出厂”消息发送给客户
+Skat hujjati,SKAT 文件
+Tushirgan xodim,卸货员工
+Zavod,工厂
+{0}-qator ({1}): avval nakladnoyni (rasm yoki PDF) yuklang.,第{0}行（{1}）：请先上传运单（图片或 PDF）。

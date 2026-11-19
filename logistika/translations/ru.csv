@@ -324,7 +324,6 @@ Mustahkamlash,Крепление
 "Narx nimaga: bitta truck, 1 kub yoki 1 tonna","За что цена: одна фура, 1 м³ или 1 тонна"
 "Narxlar (taxminiy: truck, kub yoki tonna uchun)","Цены (ориентировочно: за фуру, м³ или тонну)"
 "Narxlar, {0}-qator: min narx ({1}) max narxdan ({2}) katta","Цены, строка {0}: мин. цена ({1}) больше макс. цены ({2})"
-"Narxlar, {0}-qator: Truck Type tanlang","Цены, строка {0}: выберите Truck Type"
 "Narxlar: ""{0}"" narxi ikki marta",Цены: цена «{0}» указана дважды
 Navbatda,В очереди
 Nedostatka,Недостача
@@ -685,3 +684,22 @@ Zavoddan chiqish sanasi (reja),Дата выезда с завода (план)
 🔄 Qayta hisoblash,🔄 Пересчитать
 🚚 Zavoddan chiqdi (mijozga xabar),🚚 Выехал с завода (сообщение клиенту)
 🛰 GPS yangilash (hammasi),🛰 Обновить GPS (все)
+Mijoz aloqa telefoni,Телефон для связи с клиентами
+Mijoz o'qidi,Клиент прочитал
+"Telegram kabinetida ""Bog'lanish"" bo'limida ko'rinadi",Отображается в разделе «Связь» кабинета Telegram
+Avval saqlang (Save).,Сначала сохраните (Save).
+"Bot menyusida ""Kabinet"" tugmasi o'rnatildi: {0}",Кнопка «Кабинет» установлена в меню бота: {0}
+Mijoz kabineti (Telegram Mini App) manzili. Bo'sh bo'lsa — shu saytning /tg sahifasi.,Адрес кабинета клиента (Telegram Mini App). Если пусто — страница /tg этого сайта.
+Mini App,Mini App
+Mini App manzili,Адрес Mini App
+Mini App tugmasini o'rnatish,Установить кнопку Mini App
+Avtomatik — hujjatni kiritgan foydalanuvchining Employee'si,"Автоматически — сотрудник (Employee) пользователя, создавшего документ"
+"Foydalanuvchingiz ({0}) hech bir Employee'ga bog'lanmagan — ""{1}"" ni tanlang.",Ваш пользователь ({0}) не привязан ни к одному сотруднику (Employee) — выберите «{1}».
+Mas'ul xodim,Ответственный сотрудник
+Nakladnoy,Накладная
+"Ortishga mas'ul — avtomatik, hujjatni kiritgan foydalanuvchining Employee'si","Ответственный за погрузку — автоматически, сотрудник пользователя, создавшего документ"
+"Rasm yoki PDF — ""Zavoddan chiqdi"" xabari bilan mijozga yuboriladi",Фото или PDF — отправляется клиенту вместе с сообщением «Выехал с завода»
+Skat hujjati,Документ СКАТ
+Tushirgan xodim,"Сотрудник, разгрузивший груз"
+Zavod,Завод
+{0}-qator ({1}): avval nakladnoyni (rasm yoki PDF) yuklang.,Строка {0} ({1}): сначала загрузите накладную (фото или PDF).

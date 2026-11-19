@@ -72,6 +72,24 @@ class TestWarehouseChain(FrappeTestCase):
 	def _status(self):
 		return frappe.db.get_value("Order Detail", self.od.name, "status")
 
+	def test_intake_fills_unloading_employee(self):
+		from logistika.erp_for_logistics.tests.utils import ensure_employee
+
+		self.assertEqual(self._intake().tushirgan_xodim, ensure_employee(frappe.session.user))
+
+	def test_intake_without_employee_rejected(self):
+		from unittest.mock import patch
+
+		with patch("logistika.erp_for_logistics.xodimlar.current_employee", return_value=None):
+			with self.assertRaises(frappe.ValidationError):
+				self._intake(submit=False)
+
+	def test_loading_fills_responsible_employee(self):
+		from logistika.erp_for_logistics.tests.utils import ensure_employee
+
+		self._intake()
+		self.assertEqual(self._loading(5).masul_xodim, ensure_employee(frappe.session.user))
+
 	def test_intake_creates_ledger_and_advances(self):
 		intake = self._intake(fakt_qty=8)
 		ledger = frappe.get_all(

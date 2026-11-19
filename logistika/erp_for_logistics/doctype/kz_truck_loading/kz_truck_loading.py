@@ -3,11 +3,14 @@
 
 from frappe.model.document import Document
 
-from logistika.erp_for_logistics import ombor_ledger, tannarx
+from logistika.erp_for_logistics import ombor_ledger, tannarx, xodimlar
 from logistika.erp_for_logistics.api import assert_no_duplicate_document
 
 
 class KZTruckLoading(Document):
+	def before_validate(self):
+		xodimlar.fill_employee(self, "masul_xodim")
+
 	def validate(self):
 		assert_no_duplicate_document(
 			self, ["order", "kz_truck"], "Bu order + KZ fura uchun yuklash hujjati"

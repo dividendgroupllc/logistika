@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Litella mijoz kabineti — maket</title>
+<style>
+:root{
+  --bg:#ffffff; --sec:#f1f2f6; --text:#111418; --hint:#7d8590; --link:#2481cc; --btn:#2481cc; --btn-text:#fff;
+  --ok:#2e9e5b; --warn:#e08a00; --bad:#d64545; --line:#e4e6eb; --chip:#e8f1fb;
+  --page:#dfe3ea;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#17212b; --sec:#0e1621; --text:#f5f5f5; --hint:#8b9aa8; --link:#5eb5f7; --btn:#5288c1; --btn-text:#fff;
+    --line:#22303d; --chip:#1f3346; --page:#0b1118;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#17212b; --sec:#0e1621; --text:#f5f5f5; --hint:#8b9aa8; --link:#5eb5f7; --btn:#5288c1; --btn-text:#fff;
+  --line:#22303d; --chip:#1f3346; --page:#0b1118;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--text);font:15px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{display:flex;gap:32px;justify-content:center;align-items:flex-start;padding:24px 16px;flex-wrap:wrap}
+.notes{max-width:360px}
+.notes h1{font-size:20px;margin:0 0 8px}
+.notes p,.notes li{color:var(--hint);font-size:14px}
+.notes button{margin:4px 4px 0 0;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text);cursor:pointer}
+.phone{width:375px;max-width:100%;height:740px;background:var(--sec);border-radius:28px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,.18);border:8px solid #111}
+.tgbar{background:var(--bg);padding:10px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);font-weight:600}
+.tgbar .x{color:var(--link);font-weight:400;cursor:pointer}
+.tgbar .t{flex:1;text-align:center}
+.scr{flex:1;overflow:auto;padding:12px}
+.tabs{display:flex;background:var(--bg);border-top:1px solid var(--line)}
+.tabs a{flex:1;text-align:center;padding:8px 0 10px;font-size:11px;color:var(--hint);cursor:pointer;text-decoration:none;position:relative}
+.tabs a .i{display:block;font-size:20px}
+.tabs a.on{color:var(--link)}
+.badge{position:absolute;top:4px;left:55%;background:var(--bad);color:#fff;border-radius:9px;font-size:10px;padding:0 5px}
+.card{background:var(--bg);border-radius:14px;padding:12px;margin-bottom:10px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.muted{color:var(--hint);font-size:13px}
+.h{font-weight:600}
+.chip{display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;background:var(--chip);color:var(--link);white-space:nowrap}
+.chip.ok{background:rgba(46,158,91,.15);color:var(--ok)}
+.chip.warn{background:rgba(224,138,0,.15);color:var(--warn)}
+.chip.bad{background:rgba(214,69,69,.15);color:var(--bad)}
+.seg{display:flex;background:var(--bg);border-radius:10px;padding:3px;margin-bottom:10px}
+.seg span{flex:1;text-align:center;padding:6px;border-radius:8px;font-size:13px;color:var(--hint)}
+.seg span.on{background:var(--btn);color:var(--btn-text)}
+.search{width:100%;padding:9px 12px;border-radius:10px;border:none;background:var(--bg);color:var(--text);margin-bottom:10px;font-size:14px}
+.item{padding:10px 0;border-top:1px solid var(--line);cursor:pointer}
+.item:first-of-type{border-top:none}
+.alert{background:rgba(224,138,0,.12);border-radius:14px;padding:12px;margin-bottom:10px}
+.alert .h{color:var(--warn)}
+.btn{display:block;width:100%;text-align:center;background:var(--btn);color:var(--btn-text);border:none;border-radius:10px;padding:11px;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn.ghost{background:var(--chip);color:var(--link)}
+.steps{list-style:none;margin:0;padding:0}
+.steps li{display:flex;gap:10px;padding:6px 0;align-items:flex-start}
+.dot{width:18px;height:18px;border-radius:50%;flex:none;margin-top:2px;border:2px solid var(--line);background:var(--bg)}
+.done .dot{background:var(--ok);border-color:var(--ok)}
+.cur .dot{background:var(--btn);border-color:var(--btn);box-shadow:0 0 0 4px var(--chip)}
+.steps li.todo{color:var(--hint)}
+.sub{display:flex;gap:6px;overflow:auto;margin:-2px 0 10px}
+.sub span{padding:6px 12px;border-radius:16px;background:var(--bg);font-size:13px;white-space:nowrap;cursor:pointer}
+.sub span.on{background:var(--btn);color:var(--btn-text)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:6px 4px;border-top:1px solid var(--line);text-align:left}
+th{color:var(--hint);font-weight:500;border-top:none}
+.num{text-align:right}
+.msg{max-width:80%;padding:8px 10px;border-radius:14px;margin:6px 0;font-size:14px}
+.msg.me{margin-left:auto;background:#e1fec6;color:#111;border-bottom-right-radius:4px}
+.msg.them{background:var(--bg);border-bottom-left-radius:4px}
+.msg small{display:block;color:#7d8590;font-size:11px;text-align:right}
+.compose{display:flex;gap:6px;padding:8px;background:var(--bg);border-top:1px solid var(--line)}
+.compose input{flex:1;border:none;background:var(--sec);border-radius:18px;padding:9px 12px;color:var(--text)}
+.compose span{font-size:22px;cursor:pointer}
+.bot{background:#7e9cb5;padding:12px}
+.bubble{background:var(--bg);border-radius:12px;padding:10px;font-size:14px;max-width:290px}
+.ibtn{display:block;background:rgba(255,255,255,.35);color:#fff;text-align:center;border-radius:8px;padding:8px;margin-top:4px;max-width:290px;cursor:pointer;font-weight:600}
+.hidden{display:none !important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="notes">
+    <h1>Litella mijoz kabineti — maket</h1>
+    <p>Telegram Mini App, mijoz ko'radigan ekranlar. Pastki menyu va kartalarni bosing. Ma'lumotlar namuna.</p>
+    <p>Spec: <code>2026-11-18-telegram-mini-app-design.md</code></p>
+    <div>
+      <button onclick="go('bot')">Bot xabari</button>
+      <button onclick="go('orders')">Buyurtmalar</button>
+      <button onclick="go('order')">Buyurtma</button>
+      <button onclick="go('cargo')">Yuk</button>
+      <button onclick="go('docs')">Hujjatlar</button>
+      <button onclick="go('chats')">Chatlar</button>
+      <button onclick="go('chat')">Chat</button>
+      <button onclick="go('profile')">Profil</button>
+      <button onclick="go('link')">Ulanmagan</button>
+    </div>
+    <ul>
+      <li>Ranglar Telegram mavzusidan olinadi (oq/qora).</li>
+      <li>Ko'rsatilmaydi: narx/tannarx, haydovchi telefoni, postavshik, boshqa mijozlar yuki.</li>
+    </ul>
+  </div>
+
+  <div class="phone">
+    <div class="tgbar"><span class="x" onclick="back()">‹ Orqaga</span><span class="t" id="title">Litella</span><span class="x">⋯</span></div>
+
+    <!-- Bot chat -->
+    <div class="scr bot hidden" data-s="bot">
+      <div class="bubble">🚚 <b>Yukingiz zavoddan yo'lga chiqdi!</b><br><br>📦 Yuk: <b>Ventilyator jihozlari</b><br>🧾 Buyurtma: <b>Jihozvent-1-1</b><br>🗓 18.11.2026<br>🚛 Mashina: <b>新A·7K215</b></div>
+      <a class="ibtn" onclick="go('cargo')">📱 Ochish</a>
+      <div style="height:14px"></div>
+      <div class="bubble">💬 <b>Jihozvent-1</b> bo'yicha javob:<br>Yukingiz ertaga Xorgos omboriga yetib keladi.</div>
+      <a class="ibtn" onclick="go('chat')">↩️ Javob berish</a>
+      <div style="height:14px"></div>
+      <div class="bubble">📦 <b>Bagdan</b> yuki Xorgos omboriga keldi.</div>
+      <a class="ibtn" onclick="go('cargo')">📱 Ochish</a>
+      <div style="height:14px"></div>
+      <div class="muted" style="color:#fff">Menyu tugmasi: 📱 Kabinet</div>
+    </div>
+
+    <!-- Orders -->
+    <div class="scr hidden" data-s="orders">
+      <div class="alert">
+        <div class="h">Diqqat talab qiladi</div>
+        <div class="row item" onclick="go('docs')"><span>📎 Bagdan-1 — pekin invoice kutilmoqda</span><span>›</span></div>
+        <div class="row item" onclick="go('chat')"><span>💬 Jihozvent-1 — yangi javob</span><span>›</span></div>
+      </div>
+      <input class="search" placeholder="🔍 Mahsulot, ID yoki fura raqami">
+      <div class="seg"><span class="on">Faol</span><span>Yetkazilgan</span><span>Hammasi</span></div>
+      <div class="card" onclick="go('order')" style="cursor:pointer">
+        <div class="row"><span class="h">Ventilyator jihozlari</span><span class="chip bad">1 javob</span></div>
+        <div class="muted">Jihozvent-1 · 02.11.2026</div>
+        <div class="item row"><span>Jihozvent-1-1<br><span class="muted">📍 Urumchi, 18.11 09:40</span></span><span class="chip">Xitoyda yo'lda</span></div>
+        <div class="item row"><span>Jihozvent-1-2<br><span class="muted">Zavoddan chiqmagan</span></span><span class="chip">Zavodda</span></div>
+      </div>
+      <div class="card" onclick="go('order')" style="cursor:pointer">
+        <div class="row"><span class="h">Bagdan · plitka</span><span class="chip warn">Hujjat kerak</span></div>
+        <div class="muted">Bagdan-1 · 28.10.2026</div>
+        <div class="item row"><span>Bagdan-1-1<br><span class="muted">📍 Almaty, 17.11 22:10</span></span><span class="chip">Hujjatlar</span></div>
+      </div>
+      <div class="card">
+        <div class="row"><span class="h">Kafel · Ulgubek</span></div>
+        <div class="muted">Ulgubek-3 · 15.11.2026</div>
+        <div class="item muted">Tayyorlanmoqda — yuk hali kiritilmagan</div>
+      </div>
+    </div>
+
+    <!-- Order -->
+    <div class="scr hidden" data-s="order">
+      <div class="card">
+        <div class="h" style="font-size:17px">Ventilyator jihozlari</div>
+        <div class="muted">Jihozvent-1 · brand: Jihozvent</div>
+        <div class="row" style="margin-top:8px"><span>Jami: <b>18.4 t · 62 m³</b></span><span class="chip">Tonna bo'yicha</span></div>
+      </div>
+      <div class="sub"><span class="on">Yuklar</span><span onclick="go('chat')">Chat 🔴</span><span onclick="go('docs')">Hujjatlar</span></div>
+      <div class="card" onclick="go('cargo')" style="cursor:pointer">
+        <div class="row"><span class="h">Jihozvent-1-1</span><span class="chip">Xitoyda yo'lda</span></div>
+        <div class="muted">🚛 新A·7K215 · 9.2 t · 31 m³</div>
+        <div class="muted">📍 Urumchi, 18.11 09:40</div>
+      </div>
+      <div class="card">
+        <div class="row"><span class="h">Jihozvent-1-2</span><span class="chip">Zavodda</span></div>
+        <div class="muted">🚛 新A·3M904 · taxminan 9.2 t · chiqish ~20.11</div>
+      </div>
+    </div>
+
+    <!-- Cargo -->
+    <div class="scr hidden" data-s="cargo">
+      <div class="card">
+        <div class="row"><span class="h">Jihozvent-1-1</span><span class="chip">Xitoyda yo'lda</span></div>
+        <ul class="steps" style="margin-top:8px">
+          <li class="done"><span class="dot"></span><span>Zavoddan chiqdi<br><span class="muted">16.11</span></span></li>
+          <li class="cur"><span class="dot"></span><span><b>Xitoyda yo'lda</b><br><span class="muted">2 kundan beri</span></span></li>
+          <li class="todo"><span class="dot"></span>Xorgos omborida</li>
+          <li class="todo"><span class="dot"></span>KZ furaga yuklandi</li>
+          <li class="todo"><span class="dot"></span>Hujjatlar rasmiylashtirilmoqda</li>
+          <li class="todo"><span class="dot"></span>Yetkazishga yo'lda</li>
+          <li class="todo"><span class="dot"></span>Yetkazildi</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="h">Furalar</div>
+        <div class="item">
+          <div class="row"><b>新A·7K215</b><span class="muted">17.5 m</span></div>
+          <div class="muted">Chiqdi 16.11 · Kelishi ~20.11 (taxminan)</div>
+          <div class="muted">Sizning yukingiz: 9.2 t · 31 m³</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="h">Joylashuv tarixi</div>
+        <div class="item"><div class="row"><span>📍 Urumchi, G30 trassa</span><span class="muted">18.11 09:40</span></div></div>
+        <div class="item"><div class="row"><span>📍 Hami</span><span class="muted">17.11 10:15</span></div></div>
+        <div class="item"><div class="row"><span>📍 Zavoddan chiqdi (Foshan)</span><span class="muted">16.11 08:00</span></div></div>
+      </div>
+      <div class="card">
+        <div class="h">Yuk ro'yxati (pekin list)</div>
+        <table>
+          <tr><th>Mahsulot</th><th class="num">Soni</th><th class="num">kg</th><th class="num">m³</th></tr>
+          <tr><td>Ventilyator VR-80</td><td class="num">120</td><td class="num">5 400</td><td class="num">18</td></tr>
+          <tr><td>Havo kanali 300</td><td class="num">80</td><td class="num">3 800</td><td class="num">13</td></tr>
+          <tr><th>Jami</th><th class="num">200</th><th class="num">9 200</th><th class="num">31</th></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Docs -->
+    <div class="scr hidden" data-s="docs">
+      <div class="alert">
+        <div class="h">Bagdan-1 · KZ fura 01 A 123 BC</div>
+        <div class="muted">Peregruz hujjatini oldingiz. Endi pekin invoice'ni yuklang (PDF, Excel yoki rasm, 10 MB gacha).</div>
+        <button class="btn">📎 Pekin invoice yuklash</button>
+      </div>
+      <div class="card">
+        <div class="h">Bagdan-1</div>
+        <div class="item row"><span>📄 Peregruz hujjati<br><span class="muted">15.11.2026</span></span><span class="chip">Yuklab olish</span></div>
+        <div class="item row"><span>📄 CMR<br><span class="muted">hujjatlar tekshirilgach</span></span><span class="chip">Yuklab olish</span></div>
+        <div class="item row"><span>📎 Yuk fayli (siz bergan)</span><span class="chip">Yuklab olish</span></div>
+      </div>
+      <div class="card">
+        <div class="h">Jihozvent-1</div>
+        <div class="item row"><span>📎 Yuk fayli (siz bergan)</span><span class="chip">Yuklab olish</span></div>
+        <div class="item muted">Boshqa hujjatlar yuk Xorgos'dan o'tgach chiqadi</div>
+      </div>
+    </div>
+
+    <!-- Chats -->
+    <div class="scr hidden" data-s="chats">
+      <div class="card">
+        <div class="item row" onclick="go('chat')"><span><b>Jihozvent-1</b> · Ventilyator<br><span class="muted">Litella: Yukingiz ertaga Xorgos…</span></span><span class="chip bad">1</span></div>
+        <div class="item row"><span><b>Bagdan-1</b> · plitka<br><span class="muted">Siz: Rahmat, invoice'ni yubordim</span></span><span class="muted">17.11</span></div>
+        <div class="item row"><span><b>Ulgubek-3</b> · kafel<br><span class="muted">Hali xabar yo'q</span></span><span></span></div>
+      </div>
+    </div>
+
+    <!-- Chat -->
+    <div class="scr hidden" data-s="chat" style="display:flex;flex-direction:column;padding:0">
+      <div style="flex:1;overflow:auto;padding:12px">
+        <div class="muted" style="text-align:center">Jihozvent-1 · Ventilyator jihozlari</div>
+        <div class="msg me">Assalomu alaykum, yuk qachon Xorgos'ga yetadi?<small>17.11 14:02 ✓✓</small></div>
+        <div class="msg them"><b>Litella</b><br>Yukingiz ertaga Xorgos omboriga yetib keladi.<small>18.11 10:21</small></div>
+      </div>
+      <div class="compose"><span>📎</span><input placeholder="Xabar yozing…"><span>➤</span></div>
+    </div>
+
+    <!-- Profile -->
+    <div class="scr hidden" data-s="profile">
+      <div class="card">
+        <div class="h">Jihozvent MChJ</div>
+        <div class="muted">+998 90 123 45 67 · Telegram orqali ulangan</div>
+      </div>
+      <div class="card">
+        <div class="h">Til</div>
+        <div class="seg" style="margin:8px 0 0"><span class="on">O'zbek</span><span>Русский</span><span>English</span></div>
+      </div>
+      <div class="card">
+        <div class="h">Bog'lanish</div>
+        <div class="muted">Menejer: +998 ·· ··· ·· ··</div>
+      </div>
+    </div>
+
+    <!-- Not linked -->
+    <div class="scr hidden" data-s="link">
+      <div class="card" style="text-align:center;padding:28px 16px;margin-top:60px">
+        <div style="font-size:44px">📱</div>
+        <div class="h" style="font-size:17px;margin:8px 0">Kabinetga kirish</div>
+        <div class="muted">Telefon raqamingizni ulashing — biz uni Litella'dagi mijoz raqamingiz bilan solishtiramiz.</div>
+        <button class="btn">Raqamni ulashish</button>
+      </div>
+    </div>
+
+    <nav class="tabs" id="tabs">
+      <a data-t="orders" onclick="go('orders')"><span class="i">📦</span>Buyurtmalar</a>
+      <a data-t="docs" onclick="go('docs')"><span class="i">📄</span>Hujjatlar</a>
+      <a data-t="chats" onclick="go('chats')"><span class="i">💬</span>Chat<span class="badge">1</span></a>
+      <a data-t="profile" onclick="go('profile')"><span class="i">👤</span>Profil</a>
+    </nav>
+  </div>
+</div>
+<script>
+var titles={bot:"Litella bot",orders:"Buyurtmalar",order:"Jihozvent-1",cargo:"Jihozvent-1-1",docs:"Hujjatlar",chats:"Chat",chat:"Jihozvent-1",profile:"Profil",link:"Litella"};
+var tabOf={orders:"orders",order:"orders",cargo:"orders",docs:"docs",chats:"chats",chat:"chats",profile:"profile"};
+var hist=[];
+function go(s,noPush){
+  var cur=document.querySelector('.scr:not(.hidden)');
+  if(cur&&!noPush)hist.push(cur.dataset.s);
+  document.querySelectorAll('.scr').forEach(function(e){e.classList.toggle('hidden',e.dataset.s!==s)});
+  document.getElementById('title').textContent=titles[s];
+  document.getElementById('tabs').style.display=(s==='bot'||s==='link')?'none':'flex';
+  document.querySelectorAll('.tabs a').forEach(function(a){a.classList.toggle('on',a.dataset.t===tabOf[s])});
+}
+function back(){var p=hist.pop();if(p)go(p,true)}
+go('orders',true);
+</script>
+</body>
+</html>
