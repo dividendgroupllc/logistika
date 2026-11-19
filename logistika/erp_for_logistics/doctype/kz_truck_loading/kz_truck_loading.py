@@ -3,7 +3,7 @@
 
 from frappe.model.document import Document
 
-from logistika.erp_for_logistics import ombor_ledger, tannarx, xodimlar
+from logistika.erp_for_logistics import ombor_ledger, sana_tartibi, tannarx, xodimlar
 from logistika.erp_for_logistics.api import assert_no_duplicate_document
 
 
@@ -16,6 +16,7 @@ class KZTruckLoading(Document):
 			self, ["order", "kz_truck"], "Bu order + KZ fura uchun yuklash hujjati"
 		)
 		ombor_ledger.validate_no_overissue(self)
+		sana_tartibi.kz_truck_loading(self)
 
 	def on_submit(self):
 		ombor_ledger.sync_kz_truck_loading_ledger(self)

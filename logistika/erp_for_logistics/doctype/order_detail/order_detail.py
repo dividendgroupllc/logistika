@@ -12,7 +12,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, formatdate, getdate, today
 
-from logistika.erp_for_logistics import furalar, order_status_log, tannarx
+from logistika.erp_for_logistics import furalar, order_status_log, sana_tartibi, tannarx
 from logistika.erp_for_logistics.cn_validators import validate_cn_phone
 from logistika.erp_for_logistics.doctype.internal_logistics_item.internal_logistics_item import dims_to_cm
 from logistika.erp_for_logistics.pipeline_status import PIPELINE_STAGES
@@ -28,6 +28,8 @@ class OrderDetail(Document):
 	def validate(self):
 		self.validate_order_submitted()
 		self.validate_furalar()
+		self.validate_tracking_rows()
+		sana_tartibi.order_detail(self)
 		validate_capacity(self)
 		order_status_log.capture_status_changes(self)
 
@@ -38,6 +40,17 @@ class OrderDetail(Document):
 	def on_trash(self):
 		tannarx.delete_order_detail_costs(self)
 		frappe.db.delete("Order Item Status Log", {"order": self.name})
+
+	def validate_tracking_rows(self):
+		"""Kunlik kuzatuvdagi "Fura" — shu Order Detail furalaridan biri (bitta bo'lsa o'zi)."""
+		plates = [r.xitoy_mashina_nomeri for r in self.furalar if r.xitoy_mashina_nomeri]
+		for row in self.kunlik_kuzatuv:
+			if not row.fura and len(plates) == 1:
+				row.fura = plates[0]
+			elif row.fura and row.fura not in plates:
+				frappe.throw(
+					_('Kunlik kuzatuv, {0}-qator: "{1}" furasi bu Order Detail\'da yo\'q').format(row.idx, row.fura)
+				)
 
 	def validate_order_submitted(self):
 		if frappe.db.get_value("Order", self.order, "docstatus") != 1:
@@ -85,6 +98,7 @@ class OrderDetail(Document):
 			if (
 				changed("zavoddan_chiqish_sanasi")
 				and getdate(row.zavoddan_chiqish_sanasi) < getdate(today())
+				and not sana_tartibi.old_data_mode()
 				and not furalar.rows_on_plate(row.xitoy_mashina_nomeri, on_road=True, exclude_parent=self.name, fields="f.name")
 			):
 				frappe.throw(_('{0}: "Zavoddan chiqish sanasi" bugundan oldin bo\'lishi mumkin emas').format(label))
@@ -258,33 +272,64 @@ def driver_query(doctype, txt, searchfield, start, page_len, filters):
 
 
 @frappe.whitelist()
-def send_dispatched(order_detail, row_name=None):
-	""""Zavoddan chiqdi" tugmasi — shu fura qatori uchun mijozga "buyurtmangiz yo'lga
-	chiqdi" xabarini qatorning nakladnoyi (rasm yoki PDF) bilan bir marta yuboradi; izohda
-	fura raqami, tonna va kub. Hech kimga yetmasa belgi qo'yilmaydi — qayta urinish mumkin.
-	Yuborilsa "Fakt chiqqan sana" (bo'sh bo'lsa) bugun bo'ladi."""
-	from logistika.erp_for_logistics import tracking
-	from logistika.telegram.messages import ORDER_DISPATCHED, render
+def send_dispatched(order_detail, row_name=None, row_names=None):
+	""""Zavoddan chiqdi" tugmasi — tanlangan fura qatorlari (bitta, bir nechta yoki hammasi)
+	uchun mijozga "yo'lga chiqdi" xabarini nakladnoyi (rasm yoki PDF) bilan yuboradi. Tekshiruv
+	shu yerda, yuborish — fon vazifasida (telegram_jobs): sayt qotmaydi."""
+	from logistika.erp_for_logistics import telegram_jobs
 
 	doc = frappe.get_doc("Order Detail", order_detail)
 	doc.check_permission("write")
-	pending = [r for r in doc.furalar if not r.jonatish_xabari_yuborildi]
+	names = frappe.parse_json(row_names) if isinstance(row_names, str) else list(row_names or [])
 	if row_name:
-		row = next((r for r in doc.furalar if r.name == row_name), None)
+		names = [row_name]
+	pending = [r for r in doc.furalar if not r.jonatish_xabari_yuborildi]
+	if not names:
+		if not pending:
+			return {"queued": 0}
+		if len(pending) > 1:
+			frappe.throw(_("Qaysi fura yo'lga chiqqanini tanlang"))
+		names = [pending[0].name]
+	rows = []
+	for name in names:
+		row = next((r for r in doc.furalar if r.name == name), None)
 		if not row:
 			frappe.throw(_("Fura qatori topilmadi"))
-	elif len(pending) == 1:
-		row = pending[0]
-	elif not pending:
-		return 0
-	else:
-		frappe.throw(_("Qaysi fura yo'lga chiqqanini tanlang"))
-	if row.jonatish_xabari_yuborildi:
-		return 0
-	if not row.nakladnoy:
-		frappe.throw(
-			_("{0}-qator ({1}): avval nakladnoyni (rasm yoki PDF) yuklang.").format(row.idx, row.xitoy_mashina_nomeri or "-")
+		if not row.jonatish_xabari_yuborildi:
+			rows.append(row)
+	missing = [f"{r.idx}-qator ({r.xitoy_mashina_nomeri or '-'})" for r in rows if not r.nakladnoy]
+	if missing:
+		frappe.throw(_("Avval nakladnoyni (rasm yoki PDF) yuklang: {0}").format(", ".join(missing)))
+	if rows:
+		telegram_jobs.enqueue(
+			f"{__name__}.dispatch_rows",
+			_("Zavoddan chiqdi"),
+			"Order Detail",
+			doc.name,
+			order_detail=doc.name,
+			row_names=[r.name for r in rows],
 		)
+	return {"queued": len(rows)}
+
+
+def dispatch_rows(order_detail, row_names):
+	"""Fon vazifasi: har bir tanlangan (hali yuborilmagan, nakladnoyi bor) qator uchun xabar."""
+	doc = frappe.get_doc("Order Detail", order_detail)
+	sent = rows = 0
+	for row in doc.furalar:
+		if row.name in row_names and not row.jonatish_xabari_yuborildi and row.nakladnoy:
+			delivered = _dispatch_row(doc, row)
+			sent += delivered
+			rows += 1 if delivered else 0
+	return {"sent": sent, "rows": rows}
+
+
+def _dispatch_row(doc, row):
+	"""Bitta fura qatori uchun mijozning barcha chatlariga; kamida bittasiga yetsa qatorga
+	belgi va (bo'sh bo'lsa) bugungi "Fakt chiqqan sana"."""
+	from logistika.erp_for_logistics import tracking
+	from logistika.telegram.messages import ORDER_DISPATCHED, render
+
 	tonna, kub = furalar.row_load(row)
 	values = dict(
 		mahsulot=frappe.db.get_value("Order", doc.order, "mahsulot_nomi") or "-",

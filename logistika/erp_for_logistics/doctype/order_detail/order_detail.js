@@ -15,6 +15,7 @@ frappe.ui.form.on("Order Detail", {
 	},
 
 	refresh(frm) {
+		set_tracking_plate_options(frm);
 		frm.add_custom_button(__("Yo'ldagi furaga qo'shish"), () => add_open_truck(frm), __("Fura"));
 		frm.add_custom_button(
 			__("Yangi haydovchi"),
@@ -46,14 +47,18 @@ frappe.ui.form.on("Order Detail", {
 		bind_tracking_row_clicks();
 		const pending = saved_rows.filter((r) => !r.jonatish_xabari_yuborildi);
 		if (!frm.is_new() && pending.length && frm.doc.status === "Внутринний фура") {
-			frm.add_custom_button(__("🚚 Zavoddan chiqdi (mijozga xabar)"), () =>
-				choose_row(frm, pending, (row) => send_dispatched(frm, row))
-			);
+			frm.add_custom_button(__("🚚 Zavoddan chiqdi (mijozga xabar)"), () => choose_dispatch_rows(frm, pending));
 		}
 	},
 });
 
 frappe.ui.form.on("Order Detail Fura", {
+	xitoy_mashina_nomeri(frm) {
+		set_tracking_plate_options(frm);
+	},
+	furalar_remove(frm) {
+		set_tracking_plate_options(frm);
+	},
 	// Haydovchi almashtirilganda yangi haydovchining telefoni olinadi; fura raqami esa faqat
 	// bo'sh bo'lsa (raqamga Ichki Deklaratsiya / PI bog'langan bo'lishi mumkin).
 	xitoy_haydovchi(frm, cdt, cdn) {
@@ -91,24 +96,48 @@ function choose_row(frm, rows, callback) {
 	dialog.show();
 }
 
-function send_dispatched(frm, row) {
-	const run = () =>
-		frappe
-			.call({
-				method: `${OD_METHOD}.send_dispatched`,
-				args: { order_detail: frm.doc.name, row_name: row.name },
-				freeze: true,
-			})
-			.then((r) => {
-				if (r.message) {
-					frappe.show_alert({ message: __("Mijozga yuborildi"), indicator: "green" });
-					frm.reload_doc();
-				} else {
-					frappe.msgprint(__("Yuborilmadi — mijozning Telegram kontakti topilmadi."));
-				}
-			});
-	if (frm.is_dirty()) frm.save().then(run);
-	else run();
+// "Zavoddan chiqdi": bitta, bir nechta yoki hamma fura — nakladnoysizlari tanlanmaydi.
+// Yuborish fonda; natija bildirishnoma bo'lib keladi va forma yangilanadi.
+function choose_dispatch_rows(frm, rows) {
+	const ready = rows.filter((r) => r.nakladnoy);
+	const fields = rows.map((r) => ({
+		fieldname: `row_${r.idx}`,
+		fieldtype: "Check",
+		label: r.nakladnoy
+			? `${r.xitoy_mashina_nomeri} — ${flt(r.taxminiy_tonna)} t / ${flt(r.taxminiy_kub)} m³`
+			: `${r.xitoy_mashina_nomeri} — ${__("nakladnoy yuklanmagan")}`,
+		default: rows.length === 1 && r.nakladnoy ? 1 : 0,
+		read_only: r.nakladnoy ? 0 : 1,
+	}));
+	const dialog = new frappe.ui.Dialog({
+		title: __("Qaysi furalar zavoddan chiqdi?"),
+		fields,
+		primary_action_label: __("Mijozga yuborish"),
+		primary_action(values) {
+			const names = rows.filter((r) => r.nakladnoy && values[`row_${r.idx}`]).map((r) => r.name);
+			if (!names.length) {
+				frappe.msgprint(__("Kamida bitta fura tanlang."));
+				return;
+			}
+			dialog.hide();
+			const run = () =>
+				frappe
+					.call({ method: `${OD_METHOD}.send_dispatched`, args: { order_detail: frm.doc.name, row_names: names } })
+					.then((r) => logistika.telegram_jobs.queued(r));
+			if (frm.is_dirty()) frm.save().then(run);
+			else run();
+		},
+		secondary_action_label: ready.length > 1 ? __("Hammasi") : null,
+		secondary_action:
+			ready.length > 1
+				? () => rows.forEach((r) => r.nakladnoy && dialog.set_value(`row_${r.idx}`, 1))
+				: null,
+	});
+	if (!ready.length) {
+		frappe.msgprint(__("Avval furalar qatoriga nakladnoyni (rasm yoki PDF) yuklang."));
+		return;
+	}
+	dialog.show();
 }
 
 function truck_label(t) {
@@ -195,14 +224,18 @@ function bind_tracking_row_clicks() {
 					.call({
 						method: "logistika.erp_for_logistics.gps_tracking.send_row",
 						args: { order_detail: frm.doc.name, row_name },
-						freeze: true,
 					})
-					.then((r) => {
-						frm.reload_doc();
-						if (r.message) frappe.show_alert({ message: __("Mijozga yuborildi"), indicator: "green" });
-						else frappe.msgprint(__("Yuborilmadi — mijozning Telegram kontakti topilmadi."));
-					});
+					.then((r) => logistika.telegram_jobs.queued(r));
 			if (frm.is_dirty()) frm.save().then(send);
 			else send();
 		});
+}
+
+
+// Kunlik kuzatuvdagi "Fura" — shu Order Detail furalaridan tanlanadi (bitta bo'lsa server o'zi qo'yadi).
+function set_tracking_plate_options(frm) {
+	const grid = frm.fields_dict.kunlik_kuzatuv && frm.fields_dict.kunlik_kuzatuv.grid;
+	if (!grid) return;
+	const plates = (frm.doc.furalar || []).map((r) => r.xitoy_mashina_nomeri).filter(Boolean);
+	grid.update_docfield_property("fura", "options", [""].concat(plates));
 }

@@ -3,8 +3,8 @@
 
 # "Logistic Documentation" hujjatidagi "Перегруз данный", "Eksport deklaratsiya" va
 # "Tranzit hujjati" fayllarini bog'langan Order mijoziga Telegram orqali yuborish
-# (chiquvchi tomon). Kirish tomoni ("Pekin invoice" — mijozdan avtomatik qabul qilish,
-# /upload buyrug'i orqali) logistika.api.telegram_webhook modulida amalga oshirilgan.
+# (chiquvchi tomon, fon vazifasida). Kirish tomoni ("Pekin invoice" — mijoz Telegram
+# kabinetidan yuklaydi) — logistika.erp_for_logistics.pekin_invoice.
 
 import frappe
 
@@ -50,9 +50,29 @@ def send_ld_document(ld_name, fieldname):
 	if not frappe.db.exists("Order", doc.order):
 		frappe.throw(f'"{doc.order}" nomli Order topilmadi — havola eskirgan yoki o\'chirilgan bo\'lishi mumkin.')
 
-	chat_ids = get_order_chat_ids(doc.order)
-	if not chat_ids:
+	if not get_order_chat_ids(doc.order):
 		frappe.msgprint("Bu buyurtma mijozining ro'yxatdan o'tgan Telegram akkaunti topilmadi")
+		return {"queued": 0}
+
+	from logistika.erp_for_logistics import telegram_jobs
+
+	telegram_jobs.enqueue(
+		"logistika.erp_for_logistics.ld_telegram.deliver_ld_document",
+		frappe._(SENDABLE_FIELDS[fieldname]["label"]),
+		"Logistic Documentation",
+		doc.name,
+		ld_name=doc.name,
+		fieldname=fieldname,
+	)
+	return {"queued": 1}
+
+
+def deliver_ld_document(ld_name, fieldname):
+	"""Fon vazifasi (send_ld_document tekshirgandan keyin)."""
+	doc = frappe.get_doc("Logistic Documentation", ld_name)
+	file_url = doc.get(fieldname)
+	chat_ids = get_order_chat_ids(doc.order)
+	if not file_url or not chat_ids:
 		return 0
 
 	config = SENDABLE_FIELDS[fieldname]
@@ -68,9 +88,8 @@ def send_ld_document(ld_name, fieldname):
 		_advance_status(doc, config["target_status"])
 
 		if fieldname == "peregruz_hujjat":
-			# Birinchi hujjat (peregruz danniy) yuborilgach, mijozga Pekin list
-			# (Xitoydan kelgan invoys/qadoqlash varag'i)ni /upload orqali yuborish
-			# haqida qo'shimcha yo'riqnoma yuboriladi.
+			# Birinchi hujjat (peregruz danniy) yuborilgach, mijozga Pekin list'ni kabinet
+			# (Hujjatlar) orqali yuklash haqida qo'shimcha yo'riqnoma yuboriladi.
 			for chat_id in chat_ids:
 				send_message(
 					chat_id,

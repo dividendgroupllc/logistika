@@ -216,23 +216,8 @@ function do_send(frm, row_name) {
 	frappe.call({
 		method: "logistika.erp_for_logistics.kz_gps_tracking.send_row",
 		args: { kz_transit_name: frm.doc.name, row_name: row.name },
-		freeze: true,
-		freeze_message: __("Yuborilmoqda..."),
-		callback: (r) => {
-			frm.reload_doc();
-			if (r.message) {
-				frappe.show_alert({
-					message: __("Mijozga yuborildi ({0} kishi)", [r.message]),
-					indicator: "green",
-				});
-			} else {
-				frappe.msgprint(
-					__(
-						"Yuborilmadi — mijozning ro'yxatdan o'tgan Telegram kontakti topilmadi yoki xatolik yuz berdi."
-					)
-				);
-			}
-		},
+		// Yuborish fonda — natija bildirishnoma bo'lib keladi va hujjat yangilanadi.
+		callback: (r) => logistika.telegram_jobs.queued(r),
 		error: () => frappe.msgprint(__("Xatolik yuz berdi. Qayta urinib ko'ring.")),
 	});
 }

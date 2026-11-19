@@ -50,7 +50,7 @@ class TestChinaTracking(FrappeTestCase):
 
 	def test_bulk_saves_and_sends_each_client(self):
 		with patch(CHAT_IDS, side_effect=lambda order: [f"chat-{order}"]), patch(SEND, return_value=True) as send:
-			result = tracking.save_and_send_china([{"fura": PLATE, "qayerdaligi": "Urumchi", "vaqt": "10:00:00"}])
+			result = tracking.save_and_send_china_now([{"fura": PLATE, "qayerdaligi": "Urumchi", "vaqt": "10:00:00"}])
 		self.assertEqual(result, {"saved": 2, "sent": 2})
 		self.assertEqual(send.call_count, 2)
 		for od in (self.od_a, self.od_b):
@@ -62,8 +62,8 @@ class TestChinaTracking(FrappeTestCase):
 
 	def test_bulk_updates_today_row(self):
 		with patch(CHAT_IDS, return_value=["1"]), patch(SEND, return_value=True):
-			tracking.save_and_send_china([{"fura": PLATE, "qayerdaligi": "Urumchi"}])
-			tracking.save_and_send_china([{"fura": PLATE, "qayerdaligi": "Xorgos"}])
+			tracking.save_and_send_china_now([{"fura": PLATE, "qayerdaligi": "Urumchi"}])
+			tracking.save_and_send_china_now([{"fura": PLATE, "qayerdaligi": "Xorgos"}])
 		self.od_a.reload()
 		self.assertEqual(len(self.od_a.kunlik_kuzatuv), 1)
 		self.assertEqual(self.od_a.kunlik_kuzatuv[0].qayerdaligi, "Xorgos")
@@ -71,7 +71,7 @@ class TestChinaTracking(FrappeTestCase):
 
 	def test_bulk_no_contact(self):
 		with patch(CHAT_IDS, return_value=[]), patch(SEND) as send:
-			result = tracking.save_and_send_china([{"fura": PLATE, "qayerdaligi": "Urumchi"}])
+			result = tracking.save_and_send_china_now([{"fura": PLATE, "qayerdaligi": "Urumchi"}])
 		send.assert_not_called()
 		self.assertEqual(result, {"saved": 2, "sent": 0})
 		self.od_a.reload()
@@ -79,14 +79,14 @@ class TestChinaTracking(FrappeTestCase):
 
 	def test_empty_location_skipped(self):
 		with patch(CHAT_IDS, return_value=["1"]), patch(SEND, return_value=True):
-			result = tracking.save_and_send_china([{"fura": PLATE, "qayerdaligi": "  "}])
+			result = tracking.save_and_send_china_now([{"fura": PLATE, "qayerdaligi": "  "}])
 		self.assertEqual(result, {"saved": 0, "sent": 0})
 
 	def test_send_dispatched_once(self):
 		with_nakladnoy(self.od_a)
 		with patch(CHAT_IDS, return_value=["1"]), patch(SEND_FILE, return_value=True) as send:
-			self.assertEqual(send_dispatched(self.od_a.name), 1)
-			self.assertEqual(send_dispatched(self.od_a.name), 0)
+			self.assertEqual(send_dispatched(self.od_a.name), {"queued": 1})  # testda fon vazifasi darhol bajariladi
+			self.assertEqual(send_dispatched(self.od_a.name), {"queued": 0})
 		self.assertEqual(send.call_count, 1)
 		row = frappe.get_doc("Order Detail Fura", self.od_a.furalar[0].name)
 		self.assertEqual(row.jonatish_xabari_yuborildi, 1)
@@ -99,13 +99,13 @@ class TestChinaTracking(FrappeTestCase):
 		with patch(CHAT_IDS, return_value=["1"]), patch(SEND_FILE, return_value=True) as send:
 			with self.assertRaises(frappe.ValidationError):
 				send_dispatched(doc.name)
-			self.assertEqual(send_dispatched(doc.name, doc.furalar[1].name), 1)
+			self.assertEqual(send_dispatched(doc.name, doc.furalar[1].name), {"queued": 1})
 		self.assertIn("_T X2", send.call_args.kwargs["caption"])
 		self.assertEqual(frappe.db.get_value("Order Detail Fura", doc.furalar[0].name, "jonatish_xabari_yuborildi"), 0)
 
 	def test_bulk_update_tags_truck_row(self):
 		with patch(CHAT_IDS, return_value=[]):
-			tracking.save_and_send_china([{"fura": PLATE, "qayerdaligi": "Turpan"}])
+			tracking.save_and_send_china_now([{"fura": PLATE, "qayerdaligi": "Turpan"}])
 		self.od_a.reload()
 		self.assertEqual(self.od_a.kunlik_kuzatuv[0].fura, PLATE)
 
@@ -143,7 +143,7 @@ class TestKzTracking(FrappeTestCase):
 		with patch("frappe.db.commit"), patch(
 			"logistika.erp_for_logistics.kz_gps_tracking._send_row_to_client", return_value=1
 		) as send:
-			result = tracking.save_and_send_kz([{"kz_transit": self.kzt.name, "joylashuv": "Almaty"}])
+			result = tracking.save_and_send_kz_now([{"kz_transit": self.kzt.name, "joylashuv": "Almaty"}])
 		self.assertEqual(result, {"saved": 1, "sent": 1})
 		send.assert_called_once()
 		self.kzt.reload()

@@ -6,7 +6,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
-from logistika.erp_for_logistics import furalar, ombor_ledger, tannarx, xodimlar
+from logistika.erp_for_logistics import furalar, ombor_ledger, sana_tartibi, tannarx, xodimlar
 from logistika.erp_for_logistics.api import china_plates_on_road
 
 
@@ -23,6 +23,7 @@ class WarehouseIntake(Document):
 				)
 			)
 		self.compute_farq()
+		sana_tartibi.warehouse_intake(self)
 		for row in self.items:
 			if row.order and not furalar.find_row(row.order, self.fura):
 				frappe.throw(

@@ -13,6 +13,7 @@
 # furalarga joy qo'lda yoziladi.
 
 import frappe
+from frappe import _
 from frappe.utils import cstr, flt, nowtime, today
 
 from logistika.erp_for_logistics import furalar, kz_gps_tracking, traccar_client
@@ -134,9 +135,22 @@ def _today_row(rows, append, fura=None):
 
 @frappe.whitelist()
 def save_and_send_china(entries):
+	"""Ommaviy "Bugungi joylashuv" (Xitoy) — fonda saqlab yuboradi (sayt qotmaydi)."""
+	from logistika.erp_for_logistics import telegram_jobs
+
+	frappe.has_permission("Order Detail", "write", throw=True)
+	entries = frappe.parse_json(entries) if isinstance(entries, str) else entries
+	entries = [e for e in entries or [] if e.get("fura") and cstr(e.get("qayerdaligi")).strip()]
+	if entries:
+		telegram_jobs.enqueue(
+			"logistika.erp_for_logistics.tracking.save_and_send_china_now", _("Bugungi joylashuv (Xitoy)"), entries=entries
+		)
+	return {"queued": len(entries)}
+
+
+def save_and_send_china_now(entries):
 	"""entries: [{"fura", "qayerdaligi", "vaqt"?}] — har bir furadagi Order Detail'larga
 	bugungi kuzatuv qatorini yozadi (bor bo'lsa yangilaydi) va mijozlarga yuboradi."""
-	frappe.has_permission("Order Detail", "write", throw=True)
 	entries = frappe.parse_json(entries) if isinstance(entries, str) else entries
 	saved = sent = 0
 	for entry in entries or []:
@@ -216,9 +230,22 @@ def refresh_all_kz_gps():
 
 @frappe.whitelist()
 def save_and_send_kz(entries):
+	"""Ommaviy "Bugungi joylashuv" (KZ) — fonda saqlab yuboradi (sayt qotmaydi)."""
+	from logistika.erp_for_logistics import telegram_jobs
+
+	frappe.has_permission("KZ Transit", "write", throw=True)
+	entries = frappe.parse_json(entries) if isinstance(entries, str) else entries
+	entries = [e for e in entries or [] if e.get("kz_transit")]
+	if entries:
+		telegram_jobs.enqueue(
+			"logistika.erp_for_logistics.tracking.save_and_send_kz_now", _("Bugungi joylashuv (KZ)"), entries=entries
+		)
+	return {"queued": len(entries)}
+
+
+def save_and_send_kz_now(entries):
 	"""entries: [{"kz_transit", "joylashuv"?, "vaqt"?}] — joylashuv berilsa bugungi
 	qatorga yoziladi; bugungi qatorda joylashuv bo'lsa mijozga yuboriladi."""
-	frappe.has_permission("KZ Transit", "write", throw=True)
 	entries = frappe.parse_json(entries) if isinstance(entries, str) else entries
 	saved = sent = 0
 	for entry in entries or []:

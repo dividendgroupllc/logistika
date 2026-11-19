@@ -5,7 +5,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from logistika.erp_for_logistics import furalar
+from logistika.erp_for_logistics import furalar, sana_tartibi
 from logistika.erp_for_logistics.api import assert_no_duplicate_document
 from logistika.erp_for_logistics.pipeline_status import advance_order_detail_status
 
@@ -13,6 +13,7 @@ from logistika.erp_for_logistics.pipeline_status import advance_order_detail_sta
 class TruckDispatch(Document):
 	def validate(self):
 		assert_no_duplicate_document(self, ["order"], "Bu Order Detail uchun Truck Dispatch")
+		sana_tartibi.truck_dispatch(self)
 		self.set_china_truck()
 		if self.haydovchi_ismi and (self.is_new() or self.has_value_changed("haydovchi_ismi")):
 			group = frappe.db.get_single_value("Logistika Settings", "kz_haydovchi_supplier_group")

@@ -3,7 +3,7 @@
 
 from frappe.model.document import Document
 
-from logistika.erp_for_logistics import tannarx
+from logistika.erp_for_logistics import sana_tartibi, tannarx
 from logistika.erp_for_logistics.api import assert_no_duplicate_document
 from logistika.erp_for_logistics.pipeline_status import (
 	advance_order_detail_status,
@@ -14,6 +14,7 @@ from logistika.erp_for_logistics.pipeline_status import (
 class KZTransit(Document):
 	def validate(self):
 		assert_no_duplicate_document(self, ["order", "kz_truck"], "Bu order va fura uchun KZ Transit")
+		sana_tartibi.kz_transit(self)
 
 	def on_update(self):
 		# Tannarx: KZ xarajatlari aktivga; yetib borganda COGS + draft Sales Invoice.

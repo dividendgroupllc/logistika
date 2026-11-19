@@ -701,3 +701,39 @@ Tushirgan xodim,"Сотрудник, разгрузивший груз"
 Zavod,Завод
 {0}-qator ({1}): avval nakladnoyni (rasm yoki PDF) yuklang.,Строка {0} ({1}): сначала загрузите накладную (фото или PDF).
 Pekin invoice и Pekin list (Order Detail) проверены,Пекин-инвойс и пекин-лист (Order Detail) проверены
+"""{0}"" ({1}) ""{2}"" ({3}) dan oldin bo'lishi mumkin emas",«{0}» ({1}) не может быть раньше «{2}» ({3})
+Eski ma'lumot kiritish rejimi,Режим ввода старых данных
+KZ Transit sanasi,Дата KZ Transit
+KZ furaga yuklangan sana,Дата загрузки в фуру KZ
+Ombor va eski ma'lumotlar,Склад и старые данные
+Order Detail sanasi,Дата Order Detail
+Order sanasi,Дата заказа
+Peregruz sanasi,Дата перегруза
+WI: kutilayotgan furalar oynasi (kun),WI: окно ожидаемых фур (дней)
+Warehouse Intake sanasi,Дата приёмки на склад
+Warehouse Intake'da kelish sanasi bugundan ± shuncha kun ichidagi yo'ldagi furalar chiqadi (kelish sanasi yozilmaganlari — doim). 0 — filtr yo'q.,В приёмке на склад показываются фуры в пути с датой прибытия в пределах ± стольких дней от сегодня (без даты прибытия — всегда). 0 — без фильтра.
+Yoqilsa: Warehouse Intake'da barcha yo'ldagi furalar chiqadi va o'tgan sanalarni kiritish mumkin. Hujjatlar orasidagi sanalar ketma-ketligi baribir tekshiriladi.,Если включено: в приёмке на склад показываются все фуры в пути и можно вводить прошедшие даты. Последовательность дат между документами всё равно проверяется.
+Yuklash sanasi,Дата загрузки
+Zavoddan chiqish sanasi,Дата выезда с завода
+{0} furasi chiqqan sana,Дата выезда фуры {0}
+{0} furasi omborga kelgan sana,Дата прибытия фуры {0} на склад
+{0}-qator ({1}),Строка {0} ({1})
+Avval furalar qatoriga nakladnoyni (rasm yoki PDF) yuklang.,Сначала загрузите накладную (фото или PDF) в строку фуры.
+Avval nakladnoyni (rasm yoki PDF) yuklang: {0},Сначала загрузите накладную (фото или PDF): {0}
+Bugungi joylashuv (KZ),Местоположение сегодня (KZ)
+Bugungi joylashuv (Xitoy),Местоположение сегодня (Китай)
+Hammasi,Все
+KZ joylashuv,Местоположение KZ
+Kamida bitta fura tanlang.,Выберите хотя бы одну фуру.
+"Kunlik kuzatuv, {0}-qator: ""{1}"" furasi bu Order Detail'da yo'q","Ежедневное отслеживание, строка {0}: фуры «{1}» нет в этом Order Detail"
+Mijozga yuborish,Отправить клиенту
+Navbatga qo'yildi — yuborilgach shu yerda xabar chiqadi,Поставлено в очередь — после отправки здесь появится уведомление
+Qaysi furalar zavoddan chiqdi?,Какие фуры выехали с завода?
+Shu Order Detail'ning furalaridan biri,Одна из фур этого Order Detail
+Yuboriladigan narsa yo'q,Нечего отправлять
+Zavoddan chiqdi,Выехал с завода
+nakladnoy yuklanmagan,накладная не загружена
+{0}: hech kimga yuborilmadi — mijoz Telegram'ga ulanmaganmi?,{0}: никому не отправлено — клиент не подключён к Telegram?
+"{0}: saqlandi ({1}), lekin hech kimga yuborilmadi — mijoz Telegram'ga ulanmaganmi?","{0}: сохранено ({1}), но никому не отправлено — клиент не подключён к Telegram?"
+{0}: xato — Error Log'ga qarang,{0}: ошибка — см. Error Log
+{0}: {1} ta xabar yuborildi,{0}: отправлено сообщений: {1}

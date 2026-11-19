@@ -9,7 +9,7 @@
 # Peregruz (manba Xitoy fura) submit bo'lganda to'ldiriladi.
 
 import frappe
-from frappe.utils import flt
+from frappe.utils import add_days, flt, today
 
 CHILD = "Order Detail Fura"
 ON_ROAD = "f.fakt_kelish_sanasi is null"
@@ -45,8 +45,12 @@ def order_details_on_plate(plate, on_road=False, order=None):
 	return list(dict.fromkeys(r.order_detail for r in rows_on_plate(plate, on_road, order, fields="f.name")))
 
 
-def plates(on_road=False, txt=None, order=None):
+def plates(on_road=False, txt=None, order=None, arrival_window=None):
+	"""`arrival_window` (kun) — faqat kelish sanasi bugundan ±shuncha kun ichidagi (yoki
+	kelish sanasi yozilmagan) qatorlar."""
 	conditions = ["f.parenttype = 'Order Detail'", "ifnull(f.xitoy_mashina_nomeri, '') != ''"]
+	if arrival_window is not None:
+		conditions.append("(f.kelish_sanasi is null or f.kelish_sanasi between %(from)s and %(to)s)")
 	if on_road:
 		conditions.append(ON_ROAD)
 	if txt:
@@ -61,7 +65,12 @@ def plates(on_road=False, txt=None, order=None):
 			where {" and ".join(conditions)}
 			group by f.xitoy_mashina_nomeri
 			order by min(od.name), min(f.idx)""",
-			{"txt": f"%{txt}%", "order": order},
+			{
+				"txt": f"%{txt}%",
+				"order": order,
+				"from": add_days(today(), -(arrival_window or 0)),
+				"to": add_days(today(), arrival_window or 0),
+			},
 		)
 	]
 

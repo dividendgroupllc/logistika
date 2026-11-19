@@ -47,17 +47,17 @@ logistika.quick_create.open = function (kind, typed, on_created) {
 			fields: [
 				{ fieldname: "supplier_name", label: __("Haydovchi ismi"), fieldtype: "Data", reqd: 1 },
 				{
+					fieldname: "plate",
+					label: __("Xitoy mashina nomeri"),
+					fieldtype: "Data",
+					reqd: 1,
+				},
+				{
 					fieldname: "phone",
 					label: __("Xitoy fura telefon"),
 					fieldtype: "Data",
 					reqd: 1,
 					description: "+86 138 0013 8000",
-				},
-				{
-					fieldname: "plate",
-					label: __("Xitoy mashina nomeri"),
-					fieldtype: "Data",
-					reqd: 1,
 				},
 			],
 			args: (v) => ({ supplier_name: v.supplier_name, phone: v.phone, plate: v.plate, kind: "haydovchi" }),
@@ -86,3 +86,21 @@ logistika.quick_create.open = function (kind, typed, on_created) {
 	if (typed) dialog.set_value(config.name_field, typed);
 	dialog.show();
 };
+
+
+// Order Detail "Furalar" jadvalidagi "Xitoy haydovchi" maydonining "+ Yangi yaratish" tugmasi
+// Supplier'ning to'liq formasi o'rniga 3 maydonli oynani ochadi (ism, mashina raqami, telefon).
+// Saqlangach haydovchi shu qatorga tushadi — telefon va raqamni qator o'zi oladi.
+(function () {
+	const original = frappe.ui.form.make_quick_entry;
+	frappe.ui.form.make_quick_entry = function (doctype, after_insert) {
+		const link = frappe._from_link;
+		if (doctype === "Supplier" && link && link.df && link.df.parent === "Order Detail Fura" && link.df.fieldname === "xitoy_haydovchi") {
+			const typed = (frappe.route_options && frappe.route_options.name_field) || "";
+			frappe.route_options = null;
+			logistika.quick_create.open("haydovchi", typed, (name) => after_insert && after_insert({ name }));
+			return Promise.resolve();
+		}
+		return original.apply(this, arguments);
+	};
+})();

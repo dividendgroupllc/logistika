@@ -23,6 +23,10 @@
   "haydovchi_supplier_group",
   "column_break_guruh",
   "kz_haydovchi_supplier_group",
+  "ombor_section",
+  "wi_kutish_kunlari",
+  "cb_ombor",
+  "eski_malumot_rejimi",
   "chat_section",
   "tayyor_javoblar",
   "tannarx_section",
@@ -239,11 +243,34 @@
    "options": "Item",
    "label": "Logistika xizmati (Item)",
    "description": "Mijozga Sales Invoice qatori uchun"
+  },
+  {
+   "fieldname": "ombor_section",
+   "fieldtype": "Section Break",
+   "label": "Ombor va eski ma'lumotlar"
+  },
+  {
+   "fieldname": "wi_kutish_kunlari",
+   "fieldtype": "Int",
+   "label": "WI: kutilayotgan furalar oynasi (kun)",
+   "default": "3",
+   "description": "Warehouse Intake'da kelish sanasi bugundan ± shuncha kun ichidagi yo'ldagi furalar chiqadi (kelish sanasi yozilmaganlari — doim). 0 — filtr yo'q."
+  },
+  {
+   "fieldname": "cb_ombor",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "eski_malumot_rejimi",
+   "fieldtype": "Check",
+   "label": "Eski ma'lumot kiritish rejimi",
+   "default": "0",
+   "description": "Yoqilsa: Warehouse Intake'da barcha yo'ldagi furalar chiqadi va o'tgan sanalarni kiritish mumkin. Hujjatlar orasidagi sanalar ketma-ketligi baribir tekshiriladi."
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-11-19 14:00:00.000000",
+ "modified": "2026-11-19 17:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Logistika Settings",

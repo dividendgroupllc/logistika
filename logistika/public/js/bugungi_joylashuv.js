@@ -96,10 +96,11 @@ logistika.tracking.open_china = function (list_view) {
 					return;
 				}
 				frappe
-					.call({ method: "logistika.erp_for_logistics.tracking.save_and_send_china", args: { entries }, freeze: true })
+					.call({ method: "logistika.erp_for_logistics.tracking.save_and_send_china", args: { entries } })
 					.then((res) => {
+						// Saqlash va yuborish fonda — natija bildirishnoma bo'lib keladi.
 						dialog.hide();
-						logistika.tracking._report(res, list_view);
+						logistika.telegram_jobs.queued(res);
 					});
 			},
 		});
@@ -148,10 +149,10 @@ logistika.tracking.open_kz = function (list_view) {
 					return;
 				}
 				frappe
-					.call({ method: "logistika.erp_for_logistics.tracking.save_and_send_kz", args: { entries }, freeze: true })
+					.call({ method: "logistika.erp_for_logistics.tracking.save_and_send_kz", args: { entries } })
 					.then((res) => {
 						dialog.hide();
-						logistika.tracking._report(res, list_view);
+						logistika.telegram_jobs.queued(res);
 					});
 			},
 		});

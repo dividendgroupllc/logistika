@@ -164,22 +164,7 @@ function send_to_telegram(frm, fieldname) {
 	frappe.call({
 		method: "logistika.erp_for_logistics.ld_telegram.send_ld_document",
 		args: { ld_name: frm.doc.name, fieldname },
-		freeze: true,
-		freeze_message: __("Yuborilmoqda..."),
-		callback: (r) => {
-			const sent = r.message || 0;
-			if (sent > 0) {
-				frappe.show_alert({
-					message: __("{0} ta kontaktga yuborildi", [sent]),
-					indicator: "green",
-				});
-				frm.reload_doc();
-			} else {
-				frappe.show_alert({
-					message: __("Hech kimga yuborilmadi — mijozning Telegram akkaunti topilmadi"),
-					indicator: "orange",
-				});
-			}
-		},
+		// Yuborish fonda — natija bildirishnoma bo'lib keladi (logistika.telegram_jobs).
+		callback: (r) => logistika.telegram_jobs.queued(r),
 	});
 }

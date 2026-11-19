@@ -88,7 +88,7 @@ class TestNakladnoyDispatch(FrappeTestCase):
 	def test_dispatch_sends_nakladnoy_with_truck_and_load(self):
 		url = self.attach()
 		sent, send = self.dispatch()
-		self.assertEqual(sent, 1)
+		self.assertEqual(sent, {"queued": 1})  # testda fon vazifasi darhol bajariladi
 		chat_id, file_url = send.call_args.args[:2]
 		caption = send.call_args.kwargs["caption"]
 		self.assertEqual((chat_id, file_url), ("1", url))

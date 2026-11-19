@@ -60,10 +60,11 @@ app_include_css = "/assets/logistika/css/internal_logistics.css"
 app_include_js = [
 	"/assets/logistika/js/order_chat_widget.js?v=11",
 	"/assets/logistika/js/duplicate_warning.js?v=2",
-	"/assets/logistika/js/logistika_quick_create.js?v=2",
+	"/assets/logistika/js/logistika_quick_create.js?v=3",
 	"/assets/logistika/js/pekin_list_import.js?v=1",
 	"/assets/logistika/js/truck_options.js?v=1",
-	"/assets/logistika/js/bugungi_joylashuv.js?v=1",
+	"/assets/logistika/js/bugungi_joylashuv.js?v=2",
+	"/assets/logistika/js/telegram_jobs.js?v=1",
 ]
 
 # include js, css files in header of web template

@@ -46,9 +46,11 @@ def truck_plate_autocomplete(txt=None, **kwargs):
 def china_plates_on_road(txt=None, **kwargs):
 	"""Yo'ldagi (hali omborga yetib kelmagan) Order Detail'larning Xitoy fura raqamlari —
 	Warehouse Intake'da faqat shu furalarni tanlash uchun."""
-	from logistika.erp_for_logistics import furalar
+	from logistika.erp_for_logistics import furalar, sana_tartibi
 
-	return sorted(furalar.plates(on_road=True, txt=txt))
+	days = frappe.db.get_single_value("Logistika Settings", "wi_kutish_kunlari")
+	window = None if sana_tartibi.old_data_mode() or not days else int(days)
+	return sorted(furalar.plates(on_road=True, txt=txt, arrival_window=window))
 
 
 @frappe.whitelist()
@@ -199,11 +201,20 @@ def telegram_registration_status(order_names):
 
 
 @frappe.whitelist()
-def order_detail_plates(order_detail):
-	"""Order Detail'ning Furalar jadvalidagi raqamlar — Ichki Deklaratsiya'da fura tanlash uchun."""
+def order_detail_plates(order_detail, current=None):
+	"""Order Detail'ning Furalar jadvalidagi raqamlar — Ichki Deklaratsiya'da fura tanlash uchun.
+	Pekin list'i (Ichki Deklaratsiya) allaqachon kiritilgan furalar chiqmaydi; `current` —
+	ochiq turgan deklaratsiya (o'z furasi ro'yxatda qoladi)."""
 	from logistika.erp_for_logistics import furalar
 
 	if not order_detail:
 		return []
 	frappe.has_permission("Order Detail", "read", doc=order_detail, throw=True)
-	return furalar.plates_of(order_detail)
+	declared = set(
+		frappe.get_all(
+			"Ichki Deklaratsiya",
+			filters={"order_detail": order_detail, "name": ["!=", current or ""]},
+			pluck="xitoy_mashina_nomeri",
+		)
+	)
+	return [plate for plate in furalar.plates_of(order_detail) if plate not in declared]

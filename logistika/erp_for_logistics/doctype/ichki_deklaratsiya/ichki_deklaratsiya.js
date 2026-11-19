@@ -18,7 +18,10 @@ function load_plates(frm, reset) {
 		return;
 	}
 	frappe
-		.call("logistika.erp_for_logistics.api.order_detail_plates", { order_detail: frm.doc.order_detail })
+		.call("logistika.erp_for_logistics.api.order_detail_plates", {
+			order_detail: frm.doc.order_detail,
+			current: frm.is_new() ? null : frm.doc.name,
+		})
 		.then((r) => {
 			const plates = r.message || [];
 			frm.set_df_property("xitoy_mashina_nomeri", "options", [""].concat(plates));

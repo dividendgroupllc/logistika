@@ -74,6 +74,8 @@ def send_row(kz_transit_name, row_name):
 	bog'langan Order'ning mijoziga Telegram orqali yuboradi. Manzil GPS orqali
 	tasdiqlangan ("Obnovit" bosilgan) yoki xodim tomonidan qo'lda yozilgan bo'lishi
 	mumkin — ikkalasi ham qabul qilinadi, faqat manzilning o'zi bo'lishi shart."""
+	from logistika.erp_for_logistics import telegram_jobs
+
 	doc = frappe.get_doc("KZ Transit", kz_transit_name)
 	doc.check_permission("write")
 	row = _find_row_by_name(doc, row_name)
@@ -84,6 +86,22 @@ def send_row(kz_transit_name, row_name):
 			"Bu qatorda manzil yo'q — avval \"Obnovit\" tugmasi bilan GPS orqali oling "
 			"yoki manzilni qo'lda yozib kiriting"
 		)
+	telegram_jobs.enqueue(
+		"logistika.erp_for_logistics.kz_gps_tracking.deliver_row",
+		frappe._("KZ joylashuv"),
+		"KZ Transit",
+		doc.name,
+		kz_transit_name=doc.name,
+		row_name=row_name,
+	)
+	return {"queued": 1}
+
+
+def deliver_row(kz_transit_name, row_name):
+	doc = frappe.get_doc("KZ Transit", kz_transit_name)
+	row = _find_row_by_name(doc, row_name)
+	if not row or not row.joylashuv:
+		return 0
 	return _send_row_to_client(doc, row)
 
 

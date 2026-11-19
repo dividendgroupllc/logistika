@@ -70,7 +70,7 @@ class TestMiniAppBotButtons(FrappeTestCase):
 		with patch.object(tracking, "get_order_chat_ids", return_value=["1"]), patch.object(
 			order_detail, "send_file", return_value=True
 		) as send:
-			self.assertEqual(send_dispatched(self.od.name), 1)
+			self.assertEqual(send_dispatched(self.od.name), {"queued": 1})
 		self.assertTrue(web_app_url(send.call_args).endswith(keyboards.route("yuk", self.od.name)))
 
 	def test_staff_reply_has_reply_button(self):
