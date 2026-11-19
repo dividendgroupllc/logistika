@@ -116,3 +116,13 @@ class TestOrder(FrappeTestCase):
 		name = quick_create.create_cn_postavshik("_T Raqamli postavshik", "+86 139 1111 2222")
 		doc = make_order(xitoy_postavshik=name)
 		self.assertEqual(doc.xitoy_zavod_raqami, "+8613911112222")
+
+	def test_expected_delivery_date(self):
+		from frappe.utils import add_days, today
+
+		field = frappe.get_meta("Order").get_field("yetkazish_sanasi")
+		self.assertEqual((field.fieldtype, field.allow_on_submit), ("Date", 1))
+		make_order(yetkazish_sanasi=add_days(today(), 20))
+		with self.assertRaises(frappe.ValidationError):
+			make_order(yetkazish_sanasi=add_days(today(), -1))
+

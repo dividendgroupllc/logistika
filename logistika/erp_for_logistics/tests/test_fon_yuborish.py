@@ -143,3 +143,34 @@ def fake_job(sent):
 
 def failing_job():
 	raise RuntimeError("boom")
+
+
+class TestDispatchDate(FrappeTestCase):
+	""""Zavoddan chiqdi" — chiqqan sanani tanlash (esdan chiqsa ertasi kuni kechagi sana bilan)."""
+
+	def setUp(self):
+		frappe.db.savepoint("dsana")
+		setup_logistika_settings()
+		from frappe.utils import add_days
+
+		self.add_days = add_days
+		order = make_order(zakaz_sanasi=add_days(today(), -5))
+		self.od = make_order_detail(order.name, sana=add_days(today(), -3), zavoddan_chiqish_sanasi=today())
+		frappe.db.set_value("Order Detail Fura", self.od.furalar[0].name, "nakladnoy", "/private/files/n.pdf")
+
+	def tearDown(self):
+		frappe.db.rollback(save_point="dsana")
+
+	def send(self, dates):
+		with patch.object(tracking, "get_order_chat_ids", return_value=["1"]), patch.object(od_module, "send_file", return_value=True):
+			return od_module.send_dispatched(self.od.name, row_names=frappe.as_json([self.od.furalar[0].name]), dates=frappe.as_json(dates))
+
+	def test_chosen_date_is_saved(self):
+		yesterday = self.add_days(today(), -1)
+		self.send({self.od.furalar[0].name: yesterday})
+		self.assertEqual(str(frappe.db.get_value("Order Detail Fura", self.od.furalar[0].name, "fakt_chiqish_sanasi")), yesterday)
+
+	def test_future_or_before_order_detail_rejected(self):
+		for bad in (self.add_days(today(), 1), self.add_days(today(), -4)):
+			with self.assertRaises(frappe.ValidationError):
+				self.send({self.od.furalar[0].name: bad})

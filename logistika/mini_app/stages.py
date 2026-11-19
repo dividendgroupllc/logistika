@@ -6,35 +6,37 @@
 
 import frappe
 
-STAGE_KEYS = ["zavodda", "xitoyda", "omborda", "kz_yuklandi", "hujjatlar", "yetkazishga", "yetkazildi"]
+STAGE_KEYS = ["qabul", "chiqdi", "omborda", "ortildi", "hujjatlar", "yolda", "yetkazildi"]
 
+# Kabinetdagi bosqichlar (har birida sana): 0 — Order qabul qilindi (Order sanasi), keyin
+# zavoddan chiqish, omborga kelish, KZ furaga ortish, hujjatlar, KZ yo'li, yetib borish.
 STAGE_LABELS = {
 	"uz": [
-		"Zavodda tayyorlanmoqda",
-		"Xitoyda yo'lda",
-		"Xorgos omborida",
-		"KZ furaga yuklandi",
+		"Order qabul qilindi",
+		"Zavoddan chiqdi",
+		"Omborga keldi",
+		"KZ furaga ortildi",
 		"Hujjatlar rasmiylashtirilmoqda",
-		"Yetkazishga yo'lda",
-		"Yetkazildi",
+		"Yo'lda (KZ)",
+		"Yetib bordi va qabul qilindi",
 	],
 	"ru": [
-		"Готовится на заводе",
-		"В пути по Китаю",
-		"На складе в Хоргосе",
+		"Заказ принят",
+		"Выехал с завода",
+		"Прибыл на склад",
 		"Загружен в фуру KZ",
 		"Оформление документов",
-		"В пути к доставке",
-		"Доставлен",
+		"В пути (KZ)",
+		"Доставлен и принят",
 	],
 	"en": [
-		"Being prepared at the factory",
-		"On the way in China",
-		"At the Khorgos warehouse",
+		"Order accepted",
+		"Left the factory",
+		"Arrived at the warehouse",
 		"Loaded onto the KZ truck",
 		"Documents in progress",
-		"On the way to delivery",
-		"Delivered",
+		"On the way (KZ)",
+		"Delivered and accepted",
 	],
 }
 
@@ -55,7 +57,7 @@ _STATUS_STAGE = {
 
 
 def customer_stage(status, departed):
-	"""Mijoz bosqichi (0–6). Fura hali zavoddan chiqmagan "Внутринний фура" — 0."""
+	"""Mijoz bosqichi (0–6). Fura hali zavoddan chiqmagan "Внутринний фура" — 0 (Order qabul qilindi)."""
 	if status == "Внутринний фура" and not departed:
 		return 0
 	return _STATUS_STAGE.get(status, 1)

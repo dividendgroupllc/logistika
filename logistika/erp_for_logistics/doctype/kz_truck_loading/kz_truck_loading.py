@@ -3,7 +3,7 @@
 
 from frappe.model.document import Document
 
-from logistika.erp_for_logistics import ombor_ledger, sana_tartibi, tannarx, xodimlar
+from logistika.erp_for_logistics import bosqich_xabar, ombor_ledger, sana_tartibi, tannarx, xodimlar
 from logistika.erp_for_logistics.api import assert_no_duplicate_document
 
 
@@ -22,6 +22,7 @@ class KZTruckLoading(Document):
 		ombor_ledger.sync_kz_truck_loading_ledger(self)
 		ombor_ledger.advance_kz_truck_loading_status(self)
 		tannarx.on_kz_truck_loading_submit(self)
+		bosqich_xabar.on_kz_loading(self)
 
 	def on_cancel(self):
 		tannarx.on_source_cancel(self)

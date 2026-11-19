@@ -15,12 +15,15 @@ frappe.ui.form.on("KZ Truck Loading", {
 			return { query: "logistika.erp_for_logistics.ombor_xarajatlari.get_ombor_xarajati_accounts" };
 		});
 	},
+	setup(frm) {
+		// Faqat omborda hali ortilmagan yuki bor Order'lar.
+		frm.set_query("order", () => ({ query: "logistika.erp_for_logistics.api.orders_with_stock" }));
+	},
 	order(frm) {
-		// KZ fura — shu Order'ga Truck Dispatch'da qo'yilganlaridan.
-		logistika.truck_options.apply(frm, { kz: "kz_truck" });
+		set_kz_truck_options(frm);
 	},
 	refresh(frm) {
-		logistika.truck_options.apply(frm, { kz: "kz_truck" });
+		set_kz_truck_options(frm);
 		if (frm.doc.docstatus === 0) {
 			frm.add_custom_button(__("📥 Yuklarni tortish"), () => pull_loads(frm), __("Yuklar"));
 			frm.add_custom_button(__("✅ Hammasini ortish"), () => load_all(frm), __("Yuklar"));
@@ -110,3 +113,19 @@ frappe.ui.form.on("KZ Truck Loading", {
 		}));
 	},
 });
+
+
+// KZ fura — shu Order'ga Truck Dispatch'da qo'yilgan, hali yo'lga chiqmaganlari.
+function set_kz_truck_options(frm) {
+	if (!frm.doc.order) return;
+	frappe
+		.call("logistika.erp_for_logistics.api.kz_trucks_for_loading", {
+			order: frm.doc.order,
+			current: frm.is_new() ? null : frm.doc.name,
+		})
+		.then((r) => {
+			const options = [""].concat(r.message || []);
+			if (frm.doc.kz_truck && !options.includes(frm.doc.kz_truck)) options.push(frm.doc.kz_truck);
+			frm.set_df_property("kz_truck", "options", options.join("\n"));
+		});
+}

@@ -772,3 +772,13 @@ Yangi KZ haydovchi,Новый водитель KZ
 ✅ Hammasini ortish,✅ Загрузить всё
 📥 Yuklarni tortish,📥 Подтянуть грузы
 "Warehouse Intake'da ""Fura"" bosilganda kelish sanasi bugundan ± shuncha kun ichidagi yo'ldagi furalar chiqadi (sanasizlari — doim). Raqam yozilsa barcha yo'ldagi furalar orasidan qidiriladi. 0 — filtr yo'q.","В приёмке на склад при нажатии на «Фура» показываются фуры в пути с датой прибытия в пределах ± стольких дней от сегодня (без даты — всегда). Если ввести номер, поиск идёт по всем фурам в пути. 0 — без фильтра."
+Chiqqan sana,Дата выезда
+Hujjatlar bosqichi — mijozga xabar,Этап документов — сообщение клиенту
+KZ furaga ortish — mijozga xabar,Загрузка в фуру KZ — сообщение клиенту
+"Mijozga va'da qilingan sana — Telegram kabinetida ""yetib kelishi kutilayotgan sana"" bo'lib ko'rinadi","Дата, обещанная клиенту — в кабинете Telegram показывается как «ожидаемая дата прибытия»"
+Mijozga yetkazish sanasi,Дата доставки клиенту
+Omborga qabul — mijozga xabar,Приёмка на склад — сообщение клиенту
+Yetkazildi — mijozga xabar,Доставлено — сообщение клиенту
+Yetkazish,Доставка
+{0}: chiqqan sana,{0}: дата выезда
+{0}: chiqqan sana bugundan keyin bo'lishi mumkin emas,{0}: дата выезда не может быть позже сегодняшней

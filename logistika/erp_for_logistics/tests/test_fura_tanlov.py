@@ -48,3 +48,23 @@ class TestFaktKelishReadOnly(FrappeTestCase):
 		field = frappe.get_meta("Order Detail Fura").get_field("fakt_kelish_sanasi")
 		self.assertTrue(field.read_only)
 		self.assertIn("Warehouse Intake", field.description)
+
+
+class TestDeclarationOrderDetailChoice(FrappeTestCase):
+	def setUp(self):
+		frappe.db.savepoint("idq")
+		setup_logistika_settings()
+
+	def tearDown(self):
+		frappe.db.rollback(save_point="idq")
+
+	def test_fully_declared_order_detail_hidden(self):
+		from logistika.erp_for_logistics.api import undeclared_order_details
+
+		od = make_order_detail(make_order().name, furalar=[{"xitoy_mashina_nomeri": "_T D1"}, {"xitoy_mashina_nomeri": "_T D2"}])
+		names = lambda: [r[0] for r in undeclared_order_details("Order Detail", od.name, "name", 0, 20, {})]  # noqa: E731
+		self.assertEqual(names(), [od.name])
+		make_declaration(od, pekin_rows((1000, 2)), plate="_T D1")
+		self.assertEqual(names(), [od.name])  # D2 hali qoldi
+		make_declaration(od, pekin_rows((1000, 2)), plate="_T D2")
+		self.assertEqual(names(), [])

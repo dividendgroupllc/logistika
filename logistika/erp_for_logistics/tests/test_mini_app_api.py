@@ -134,3 +134,28 @@ class TestMiniAppApi(FrappeTestCase):
 		self.call(api.set_language, "ru")
 		self.assertEqual(frappe.db.get_value("Contact", {"telegram_chat_id": str(USER)}, "telegram_til"), "ru")
 		self.assertRaises(frappe.ValidationError, self.call, api.set_language, "zh")
+
+	def test_expected_delivery_date_in_cabinet(self):
+		from frappe.utils import add_days
+
+		frappe.db.set_value("Order", self.order.name, "yetkazish_sanasi", add_days(today(), 15))
+		self.assertEqual(self.call(api.order, self.order.name)["kutilayotgan_sana"], add_days(today(), 15))
+		self.assertEqual(self.call(api.cargo, self.od.name)["kutilayotgan_sana"], add_days(today(), 15))
+
+	def test_stage_dates_and_locations_per_stage(self):
+		from frappe.utils import add_days
+
+		frappe.db.set_value("Order", self.order.name, "zakaz_sanasi", add_days(today(), -5))
+		row = self.od.furalar[0].name
+		frappe.db.set_value("Order Detail Fura", row, {"fakt_chiqish_sanasi": add_days(today(), -3), "fakt_kelish_sanasi": add_days(today(), -1)})
+		frappe.get_doc(
+			{"doctype": "Internal Logistics Tracking", "parent": self.od.name, "parenttype": "Order Detail", "parentfield": "kunlik_kuzatuv",
+			 "idx": 1, "fura": "粤B12345", "sana": add_days(today(), -2), "vaqt": "09:00", "qayerdaligi": "Urumchi", "yuborilgan": 1}
+		).db_insert()
+		data = self.call(api.cargo, self.od.name)
+		dates = {int(k): v for k, v in data["stage_dates"].items()}
+		self.assertEqual(dates[0], add_days(today(), -5))  # Order qabul qilindi
+		self.assertEqual(dates[1], add_days(today(), -3))  # zavoddan chiqdi
+		self.assertEqual(dates[2], add_days(today(), -1))  # omborga keldi
+		self.assertEqual(data["locations"][0]["bosqich"], 1)  # Xitoy joylashuvi "Zavoddan chiqdi" ichida
+

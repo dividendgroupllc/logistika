@@ -595,13 +595,19 @@ def on_warehouse_intake_submit(doc):
 	create_fura_purchase_invoices(doc, list(measures), doc.fura)
 
 
-def on_peregruz_submit(doc):
+def peregruz_measures(doc):
+	"""{Order Detail: (tonna, kub)} — Peregruz'da haqiqatda o'tkazilgan yuk."""
 	measures = {}
 	for row in doc.yuklar:
 		if row.order and flt(row.fakt_transload) > 0:
 			kub, tonna = _prorate_kub_tonna(row.fakt_transload, row.quantity, row.volume_cbm, row.net_weight)
 			old_tonna, old_kub = measures.get(row.order, (0, 0))
 			measures[row.order] = (old_tonna + tonna, old_kub + kub)
+	return measures
+
+
+def on_peregruz_submit(doc):
+	measures = peregruz_measures(doc)
 	for plate, order_details in peregruz_trucks(doc).items():
 		create_fura_purchase_invoices(doc, order_details, plate)
 	if doc.yuklash_xarajatlari:

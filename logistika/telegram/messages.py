@@ -104,3 +104,28 @@ USE_CABINET = {
 	"ru": "📱 Заказы, документы и вопросы теперь в кабинете. Нажмите кнопку <b>📱 Кабинет</b> ниже.",
 	"en": "📱 Orders, documents and questions are now in the cabinet. Tap the <b>📱 Cabinet</b> button below.",
 }
+
+
+WAREHOUSE_RECEIVED = {
+	"uz": "📦 <b>{order_detail}</b> — {ombor} omboriga qabul qilindi · {sana} · {tonna} t · {kub} m³",
+	"ru": "📦 <b>{order_detail}</b> — принят на склад {ombor} · {sana} · {tonna} т · {kub} м³",
+	"en": "📦 <b>{order_detail}</b> — received at {ombor} warehouse · {sana} · {tonna} t · {kub} m³",
+}
+
+LOADED = {
+	"uz": "🚛 <b>{order_detail}</b> — KZ furaga ortildi · {kz_fura} · {sana} · {tonna} t · {kub} m³",
+	"ru": "🚛 <b>{order_detail}</b> — загружен в фуру KZ · {kz_fura} · {sana} · {tonna} т · {kub} м³",
+	"en": "🚛 <b>{order_detail}</b> — loaded onto KZ truck · {kz_fura} · {sana} · {tonna} t · {kub} m³",
+}
+
+DOCS_STAGE = {
+	"uz": "📄 <b>{order_detail}</b> — hujjatlar rasmiylashtirilmoqda",
+	"ru": "📄 <b>{order_detail}</b> — оформляются документы",
+	"en": "📄 <b>{order_detail}</b> — documents in progress",
+}
+
+DELIVERED = {
+	"uz": "✅ <b>{order_detail}</b> — yetib bordi va qabul qilindi · {sana}",
+	"ru": "✅ <b>{order_detail}</b> — доставлен и принят · {sana}",
+	"en": "✅ <b>{order_detail}</b> — delivered and accepted · {sana}",
+}

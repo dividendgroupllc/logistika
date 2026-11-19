@@ -6,7 +6,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
-from logistika.erp_for_logistics import furalar, ombor_ledger, sana_tartibi, tannarx, xodimlar
+from logistika.erp_for_logistics import bosqich_xabar, furalar, ombor_ledger, sana_tartibi, tannarx, xodimlar
 
 
 class WarehouseIntake(Document):
@@ -47,6 +47,7 @@ class WarehouseIntake(Document):
 		ombor_ledger.sync_warehouse_intake_ledger(self)
 		ombor_ledger.advance_warehouse_intake_status(self)
 		tannarx.on_warehouse_intake_submit(self)
+		bosqich_xabar.on_warehouse_intake(self)
 
 	def on_cancel(self):
 		furalar.unmark_arrived(self._order_details(), self.fura, self.sana, self)

@@ -100,21 +100,39 @@ function choose_row(frm, rows, callback) {
 // Yuborish fonda; natija bildirishnoma bo'lib keladi va forma yangilanadi.
 function choose_dispatch_rows(frm, rows) {
 	const ready = rows.filter((r) => r.nakladnoy);
-	const fields = rows.map((r) => ({
-		fieldname: `row_${r.idx}`,
-		fieldtype: "Check",
-		label: r.nakladnoy
-			? `${r.xitoy_mashina_nomeri} — ${flt(r.taxminiy_tonna)} t / ${flt(r.taxminiy_kub)} m³`
-			: `${r.xitoy_mashina_nomeri} — ${__("nakladnoy yuklanmagan")}`,
-		default: rows.length === 1 && r.nakladnoy ? 1 : 0,
-		read_only: r.nakladnoy ? 0 : 1,
-	}));
+	// Har bir fura: belgilash + chiqqan sana (standart — bugun; esdan chiqsa kechagi sana).
+	const fields = [];
+	rows.forEach((r, i) => {
+		if (i) fields.push({ fieldtype: "Section Break" });
+		fields.push(
+			{
+				fieldname: `row_${r.idx}`,
+				fieldtype: "Check",
+				label: r.nakladnoy
+					? `${r.xitoy_mashina_nomeri} — ${flt(r.taxminiy_tonna)} t / ${flt(r.taxminiy_kub)} m³`
+					: `${r.xitoy_mashina_nomeri} — ${__("nakladnoy yuklanmagan")}`,
+				default: rows.length === 1 && r.nakladnoy ? 1 : 0,
+				read_only: r.nakladnoy ? 0 : 1,
+			},
+			{ fieldtype: "Column Break" },
+			{
+				fieldname: `sana_${r.idx}`,
+				fieldtype: "Date",
+				label: __("Chiqqan sana"),
+				default: r.fakt_chiqish_sanasi || frappe.datetime.get_today(),
+				depends_on: `eval:doc.row_${r.idx}`,
+			}
+		);
+	});
 	const dialog = new frappe.ui.Dialog({
 		title: __("Qaysi furalar zavoddan chiqdi?"),
 		fields,
 		primary_action_label: __("Mijozga yuborish"),
 		primary_action(values) {
-			const names = rows.filter((r) => r.nakladnoy && values[`row_${r.idx}`]).map((r) => r.name);
+			const chosen = rows.filter((r) => r.nakladnoy && values[`row_${r.idx}`]);
+			const names = chosen.map((r) => r.name);
+			const dates = {};
+			chosen.forEach((r) => (dates[r.name] = values[`sana_${r.idx}`] || frappe.datetime.get_today()));
 			if (!names.length) {
 				frappe.msgprint(__("Kamida bitta fura tanlang."));
 				return;
@@ -122,7 +140,7 @@ function choose_dispatch_rows(frm, rows) {
 			dialog.hide();
 			const run = () =>
 				frappe
-					.call({ method: `${OD_METHOD}.send_dispatched`, args: { order_detail: frm.doc.name, row_names: names } })
+					.call({ method: `${OD_METHOD}.send_dispatched`, args: { order_detail: frm.doc.name, row_names: names, dates } })
 					.then((r) => logistika.telegram_jobs.queued(r));
 			if (frm.is_dirty()) frm.save().then(run);
 			else run();

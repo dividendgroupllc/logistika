@@ -5,6 +5,7 @@
 			<div class="card">
 				<div class="h big">{{ data.mahsulot || data.brand || data.name }}</div>
 				<div class="muted">{{ data.name }}<template v-if="data.brand"> · {{ data.brand }}</template> · {{ fmtDate(data.date) }}</div>
+				<div v-if="data.kutilayotgan_sana && !data.delivered" class="muted">{{ t("expected") }}: <b>{{ fmtDate(data.kutilayotgan_sana) }}</b></div>
 				<div v-if="data.jami_tonna || data.jami_kub" class="row" style="margin-top: 8px">
 					<span>{{ t("total") }}: <b>{{ fmtNum(data.jami_tonna) }} t · {{ fmtNum(data.jami_kub) }} {{ t("m3") }}</b></span>
 					<span class="chip">{{ data.xizmat_olchovi === "Kub" ? t("by_kub") : t("by_ton") }}</span>

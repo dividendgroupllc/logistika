@@ -36,7 +36,18 @@ class TestMiniAppStages(FrappeTestCase):
 		for labels in stages.STAGE_LABELS.values():
 			self.assertEqual(len(labels), len(stages.STAGE_KEYS))
 		self.assertEqual(len(stages.STAGE_KEYS), 7)
-		self.assertEqual(stages.STAGE_LABELS["uz"][2], "Xorgos omborida")
+		self.assertEqual(
+			stages.STAGE_LABELS["uz"],
+			[
+				"Order qabul qilindi",
+				"Zavoddan chiqdi",
+				"Omborga keldi",
+				"KZ furaga ortildi",
+				"Hujjatlar rasmiylashtirilmoqda",
+				"Yo'lda (KZ)",
+				"Yetib bordi va qabul qilindi",
+			],
+		)
 
 	def test_departed(self):
 		from logistika.erp_for_logistics.doctype.order_detail.test_order_detail import make_order_detail

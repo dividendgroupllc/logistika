@@ -28,6 +28,8 @@
   "valyuta",
   "sec_narx",
   "narxlar",
+  "sec_yetkazish",
+  "yetkazish_sanasi",
   "amended_from",
   "sec_chat",
   "javob_kutilmoqda",
@@ -202,6 +204,18 @@
    "fieldname": "chat_html",
    "fieldtype": "HTML",
    "label": "Chat"
+  },
+  {
+   "fieldname": "sec_yetkazish",
+   "fieldtype": "Section Break",
+   "label": "Yetkazish"
+  },
+  {
+   "fieldname": "yetkazish_sanasi",
+   "fieldtype": "Date",
+   "label": "Mijozga yetkazish sanasi",
+   "allow_on_submit": 1,
+   "description": "Mijozga va'da qilingan sana — Telegram kabinetida \"yetib kelishi kutilayotgan sana\" bo'lib ko'rinadi"
   }
  ],
  "grid_page_length": 50,
@@ -232,7 +246,7 @@
    "group": "Mijoz"
   }
  ],
- "modified": "2026-11-19 12:00:00.000000",
+ "modified": "2026-11-19 22:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Order",

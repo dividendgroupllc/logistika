@@ -112,7 +112,7 @@ def order(name):
 	doc = frappe.db.get_value(
 		"Order",
 		name,
-		["name", "mahsulot_nomi", "brand", "zakaz_sanasi", "jami_tonna", "jami_kub", "xizmat_olchovi"],
+		["name", "mahsulot_nomi", "brand", "zakaz_sanasi", "jami_tonna", "jami_kub", "xizmat_olchovi", "yetkazish_sanasi"],
 		as_dict=True,
 	)
 	ods = ser.order_details_of([name])
@@ -124,6 +124,7 @@ def order(name):
 		"jami_tonna": flt(doc.jami_tonna, 3),
 		"jami_kub": flt(doc.jami_kub, 3),
 		"xizmat_olchovi": doc.xizmat_olchovi,
+		"kutilayotgan_sana": ser._d(doc.yetkazish_sanasi),
 		"delivered": ser.is_delivered(ods),
 		"unread": ser.unread_counts([name]).get(name, 0),
 		"cargo": [{**ser.cargo_card(od), "furalar": [ser.fura(r) for r in ser.fura_rows(od.name)]} for od in ods],
@@ -141,6 +142,7 @@ def cargo(order_detail):
 		"name": order_detail,
 		"order": order_name,
 		"mahsulot": frappe.db.get_value("Order", order_name, "mahsulot_nomi"),
+		"kutilayotgan_sana": ser._d(frappe.db.get_value("Order", order_name, "yetkazish_sanasi")),
 		"stage": ser.stage_of(status, rows),
 		"stage_dates": ser.stage_dates(order_detail, rows),
 		"furalar": [ser.fura(r) for r in rows],

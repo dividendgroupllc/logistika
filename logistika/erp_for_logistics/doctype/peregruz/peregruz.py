@@ -3,7 +3,7 @@
 
 from frappe.model.document import Document
 
-from logistika.erp_for_logistics import furalar, peregruz, sana_tartibi, tannarx
+from logistika.erp_for_logistics import bosqich_xabar, furalar, peregruz, sana_tartibi, tannarx
 from logistika.erp_for_logistics.api import assert_no_duplicate_document
 
 
@@ -18,6 +18,7 @@ class Peregruz(Document):
 			furalar.mark_arrived(order_details, plate, self.sana)
 		peregruz.advance_status(self)
 		tannarx.on_peregruz_submit(self)
+		bosqich_xabar.on_kz_loading(self, tannarx.peregruz_measures(self))
 
 	def on_trash(self):
 		tannarx.release_source_ledger(self)

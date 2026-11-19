@@ -272,7 +272,7 @@ def driver_query(doctype, txt, searchfield, start, page_len, filters):
 
 
 @frappe.whitelist()
-def send_dispatched(order_detail, row_name=None, row_names=None):
+def send_dispatched(order_detail, row_name=None, row_names=None, dates=None):
 	""""Zavoddan chiqdi" tugmasi — tanlangan fura qatorlari (bitta, bir nechta yoki hammasi)
 	uchun mijozga "yo'lga chiqdi" xabarini nakladnoyi (rasm yoki PDF) bilan yuboradi. Tekshiruv
 	shu yerda, yuborish — fon vazifasida (telegram_jobs): sayt qotmaydi."""
@@ -300,6 +300,17 @@ def send_dispatched(order_detail, row_name=None, row_names=None):
 	missing = [f"{r.idx}-qator ({r.xitoy_mashina_nomeri or '-'})" for r in rows if not r.nakladnoy]
 	if missing:
 		frappe.throw(_("Avval nakladnoyni (rasm yoki PDF) yuklang: {0}").format(", ".join(missing)))
+	# Chiqqan sana — oynada tanlanadi (esdan chiqsa ertasi kuni kechagi sana bilan); bugundan
+	# keyin va Order Detail sanasidan oldin bo'lmaydi. Xabar yuborilishidan oldin yoziladi.
+	dates = frappe.parse_json(dates) if isinstance(dates, str) else (dates or {})
+	for row in rows:
+		chosen = dates.get(row.name)
+		if not chosen:
+			continue
+		if getdate(chosen) > getdate(today()):
+			frappe.throw(_("{0}: chiqqan sana bugundan keyin bo'lishi mumkin emas").format(row.xitoy_mashina_nomeri))
+		sana_tartibi.not_before(chosen, doc.sana, _("{0}: chiqqan sana").format(row.xitoy_mashina_nomeri), _("Order Detail sanasi"))
+		frappe.db.set_value(furalar.CHILD, row.name, "fakt_chiqish_sanasi", chosen, update_modified=False)
 	if rows:
 		telegram_jobs.enqueue(
 			f"{__name__}.dispatch_rows",

@@ -76,7 +76,7 @@ def locations(order_detail, order):
 	"""Mijozga yuborilgan joylashuvlar (Xitoy kunlik kuzatuv + KZ Transit nuqtalari),
 	eng yangisi birinchi."""
 	items = [
-		{"sana": _d(r.sana), "vaqt": _t(r.vaqt), "text": r.qayerdaligi, "fura": r.fura, "kz_fura": None, "lat": None, "lng": None}
+		{"sana": _d(r.sana), "vaqt": _t(r.vaqt), "text": r.qayerdaligi, "fura": r.fura, "kz_fura": None, "lat": None, "lng": None, "bosqich": 1}
 		for r in frappe.get_all(
 			"Internal Logistics Tracking",
 			filters={"parent": order_detail, "parenttype": "Order Detail", "yuborilgan": 1},
@@ -95,7 +95,7 @@ def locations(order_detail, order):
 			has_point = bool(flt(r.latitude) and flt(r.longitude))
 			items.append(
 				{
-					"sana": _d(r.sana), "vaqt": _t(r.vaqt), "text": r.joylashuv, "fura": None, "kz_fura": r.kz_truck,
+					"sana": _d(r.sana), "vaqt": _t(r.vaqt), "text": r.joylashuv, "fura": None, "kz_fura": r.kz_truck, "bosqich": 3,
 					"lat": flt(r.latitude) if has_point else None, "lng": flt(r.longitude) if has_point else None,
 				}
 			)
@@ -116,11 +116,34 @@ def cargo_card(od):
 
 
 def stage_dates(order_detail, rows):
-	"""{bosqich: birinchi sana} — status tarixidan; 1-bosqich — fura fakt chiqqan sana."""
-	dates = {}
-	departed = sorted(_d(r.fakt_chiqish_sanasi) for r in rows if r.fakt_chiqish_sanasi)
-	if departed:
-		dates[1] = departed[0]
+	"""{bosqich: sana}: 0 — Order sanasi, 1 — fura fakt chiqqan, 2 — omborga kelgan,
+	3 — KZ furaga ortilgan (yuklash/Peregruz), 6 — KZ Transit yetib borgan; qolganlari —
+	status tarixidan (birinchi kirgan kuni)."""
+	order = frappe.db.get_value("Order Detail", order_detail, "order")
+	dates = {0: _d(frappe.db.get_value("Order", order, "zakaz_sanasi"))}
+	first = lambda values: sorted(_d(v) for v in values if v)[0] if any(values) else None  # noqa: E731
+	dates[1] = first([r.fakt_chiqish_sanasi for r in rows])
+	dates[2] = first([r.fakt_kelish_sanasi for r in rows])
+	loaded = []
+	for parent, child, qty in (("KZ Truck Loading", "KZ Load Item", "fakt_ortilgan"), ("Peregruz", "Peregruz Item", "fakt_transload")):
+		loaded += [
+			r[0]
+			for r in frappe.db.sql(
+				f"""select p.sana from `tab{parent}` p inner join `tab{child}` i on i.parent = p.name
+				where i.`order` = %s and p.docstatus = 1 and i.{qty} > 0""",
+				order_detail,
+			)
+		]
+	dates[3] = first(loaded)
+	trucks = _kz_trucks(order_detail)
+	if trucks:
+		dates[6] = first(
+			frappe.get_all(
+				"KZ Transit",
+				filters={"order": order, "kz_truck": ["in", trucks], "fakt_yetib_borgan": ["is", "set"]},
+				pluck="fakt_yetib_borgan",
+			)
+		)
 	for log in frappe.get_all(
 		"Order Item Status Log",
 		filters={"order": order_detail},
@@ -128,8 +151,9 @@ def stage_dates(order_detail, rows):
 		order_by="changed_at asc",
 	):
 		stage = customer_stage(log.new_status, True)
-		dates.setdefault(stage, cstr(log.changed_at)[:10])
-	return dates
+		if not dates.get(stage):
+			dates[stage] = cstr(log.changed_at)[:10]
+	return {stage: date for stage, date in dates.items() if date}
 
 
 def packing(order_detail):

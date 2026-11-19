@@ -756,3 +756,13 @@ Submit'da ERPNext ombor tannarxidan,提交时按 ERPNext 库存成本
 Tannarx (1 dona),成本（每件）
 "Zanjir, kamar, paddon va h.k. shu ERPNext omboridan chiqim qilinadi",链条、绑带、托盘等从此 ERPNext 仓库出库
 "Warehouse Intake'da ""Fura"" bosilganda kelish sanasi bugundan ± shuncha kun ichidagi yo'ldagi furalar chiqadi (sanasizlari — doim). Raqam yozilsa barcha yo'ldagi furalar orasidan qidiriladi. 0 — filtr yo'q.",入库时点击“货车”显示预计到达日期在今天 ± 该天数内的在途货车（无日期的始终显示）。输入车牌号时在所有在途货车中搜索。0 — 不过滤。
+Chiqqan sana,出发日期
+Hujjatlar bosqichi — mijozga xabar,单证阶段 — 通知客户
+KZ furaga ortish — mijozga xabar,装上 KZ 货车 — 通知客户
+"Mijozga va'da qilingan sana — Telegram kabinetida ""yetib kelishi kutilayotgan sana"" bo'lib ko'rinadi",承诺给客户的日期 — 在 Telegram 客户中心显示为“预计到达日期”
+Mijozga yetkazish sanasi,交付客户日期
+Omborga qabul — mijozga xabar,入库 — 通知客户
+Yetkazildi — mijozga xabar,已交付 — 通知客户
+Yetkazish,交付
+{0}: chiqqan sana,{0}：出发日期
+{0}: chiqqan sana bugundan keyin bo'lishi mumkin emas,{0}：出发日期不能晚于今天

@@ -76,3 +76,29 @@ class TestKzYuklashTortish(FrappeTestCase):
 
 	def test_china_truck_field_hidden(self):
 		self.assertTrue(frappe.get_meta("KZ Truck Loading").get_field("manba_china_truck").hidden)
+
+	def test_order_choice_only_with_goods_in_warehouse(self):
+		from logistika.erp_for_logistics.api import orders_with_stock
+
+		empty = make_order(kliyent="_T Bo'sh")
+		names = [r[0] for r in orders_with_stock("Order", "", "name", 0, 50, {})]
+		self.assertIn(self.order.name, names)
+		self.assertNotIn(empty.name, names)
+
+	def test_departed_kz_truck_not_offered(self):
+		from logistika.erp_for_logistics.api import kz_trucks_for_loading
+
+		frappe.get_doc(
+			{"doctype": "Truck Dispatch", "hujjat_sanasi": today(), "order": self.order.name, "mashina_raqami": "01KZ2"}
+		).insert(ignore_permissions=True)
+		self.assertEqual(kz_trucks_for_loading(self.order.name), ["01KZ1", "01KZ2"])
+		rows = pull_for_kz_loading(self.order.name, "01KZ1")
+		doc = frappe.get_doc(
+			{
+				"doctype": "KZ Truck Loading", "sana": today(), "order": self.order.name, "kz_truck": "01KZ1", "ombor": self.ombor,
+				"yuklar": [{**r, "fakt_ortilgan": r["ombor_fakt"]} for r in rows if r["part_name"] == "P1"],
+			}
+		).insert(ignore_permissions=True)
+		self.assertEqual(kz_trucks_for_loading(self.order.name, current=doc.name), ["01KZ1", "01KZ2"])  # o'z hujjati
+		doc.submit()
+		self.assertEqual(kz_trucks_for_loading(self.order.name), ["01KZ2"])  # 01KZ1 yo'lga chiqdi

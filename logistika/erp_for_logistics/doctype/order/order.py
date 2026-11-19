@@ -21,6 +21,9 @@ class Order(Document):
 		self.validate_postavshik_group()
 		self.validate_kliyent_group()
 		self.validate_narxlar()
+		from logistika.erp_for_logistics.sana_tartibi import not_before
+
+		not_before(self.yetkazish_sanasi, self.zakaz_sanasi, _("Mijozga yetkazish sanasi"), _("Order sanasi"))
 
 	def validate_narxlar(self):
 		"""Har bir qator — bitta birlik uchun taxminiy narx: "Truck" (bitta truck uchun),

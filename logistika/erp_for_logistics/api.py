@@ -214,3 +214,68 @@ def order_detail_plates(order_detail, current=None):
 		)
 	)
 	return [plate for plate in furalar.plates_of(order_detail) if plate not in declared]
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def undeclared_order_details(doctype, txt, searchfield, start, page_len, filters):
+	"""Ichki Deklaratsiya'da "Order Detail" tanlovi: kamida bitta furasiga hali pekin list
+	(Ichki Deklaratsiya) kiritilmagan Order Detail'lar — hammasi kiritilganlari chiqmaydi."""
+	return frappe.db.sql(
+		"""select od.name, od.kliyent from `tabOrder Detail` od
+		where od.name like %(txt)s and exists (
+			select 1 from `tabOrder Detail Fura` f
+			where f.parent = od.name and f.parenttype = 'Order Detail' and ifnull(f.xitoy_mashina_nomeri, '') != ''
+				and not exists (
+					select 1 from `tabIchki Deklaratsiya` d
+					where d.order_detail = od.name and d.xitoy_mashina_nomeri = f.xitoy_mashina_nomeri
+				)
+		)
+		order by od.creation desc
+		limit %(start)s, %(page_len)s""",
+		{"txt": f"%{txt}%", "start": int(start), "page_len": int(page_len)},
+	)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def orders_with_stock(doctype, txt, searchfield, start, page_len, filters):
+	"""KZ Truck Loading'da "Order" tanlovi: omborda hali ortilmagan yuki bor Order'lar."""
+	return frappe.db.sql(
+		"""select o.name, o.kliyent from `tabOrder` o
+		where o.docstatus = 1 and o.name like %(txt)s and exists (
+			select 1 from `tabOmbor Harakati` h inner join `tabOrder Detail` od on od.name = h.`order`
+			where od.`order` = o.name
+			group by h.`order`, h.part_name, h.ombor
+			having sum(if(h.harakat_turi = 'Kirim', h.miqdor, -h.miqdor)) > 0.000001
+		)
+		order by o.creation desc
+		limit %(start)s, %(page_len)s""",
+		{"txt": f"%{txt}%", "start": int(start), "page_len": int(page_len)},
+	)
+
+
+@frappe.whitelist()
+def kz_trucks_for_loading(order, current=None):
+	"""KZ Truck Loading'da "KZ fura" tanlovi: shu Order'ga Truck Dispatch'da qo'yilgan, hali
+	yo'lga chiqmagan furalar (shu Order uchun submit qilingan yuklash yoki KZ Transit'i yo'q).
+	`current` — ochiq turgan yuklash hujjati (o'z furasi qoladi)."""
+	if not order:
+		return []
+	frappe.has_permission("Order", "read", doc=order, throw=True)
+	trucks = frappe.get_all(
+		"Truck Dispatch",
+		filters={"order": order, "mashina_raqami": ["is", "set"]},
+		pluck="mashina_raqami",
+		order_by="creation asc",
+	)
+	departed = set(
+		frappe.get_all(
+			"KZ Truck Loading",
+			filters={"order": order, "docstatus": 1, "name": ["!=", current or ""]},
+			pluck="kz_truck",
+		)
+	) | set(frappe.get_all("Peregruz", filters={"order": order, "docstatus": 1}, pluck="kz_truck"))
+	departed |= set(frappe.get_all("KZ Transit", filters={"order": order}, pluck="kz_truck"))
+	own = frappe.db.get_value("KZ Truck Loading", current, "kz_truck") if current else None
+	return [t for t in dict.fromkeys(trucks) if t not in departed or t == own]

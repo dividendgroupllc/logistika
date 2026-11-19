@@ -2,6 +2,10 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Ichki Deklaratsiya", {
+	setup(frm) {
+		// Barcha furalariga pekin list kiritilgan Order Detail'lar chiqmaydi.
+		frm.set_query("order_detail", () => ({ query: "logistika.erp_for_logistics.api.undeclared_order_details" }));
+	},
 	refresh(frm) {
 		logistika.pekin_import.render(frm, "pekin_import_html", "pekin_list");
 		load_plates(frm);

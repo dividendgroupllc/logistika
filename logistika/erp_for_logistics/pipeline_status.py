@@ -233,3 +233,6 @@ def advance_order_detail_status(order_detail_names, new_status):
 		doc.status = new_status
 		doc.flags.ignore_permissions = True
 		doc.save()
+		from logistika.erp_for_logistics import bosqich_xabar
+
+		bosqich_xabar.on_status_change(name, current, new_status)
