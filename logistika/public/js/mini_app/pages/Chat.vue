@@ -1,6 +1,6 @@
 <template>
 	<div class="chat">
-		<div class="msgs">
+		<div ref="list" class="msgs">
 			<div class="muted" style="text-align: center">{{ name }}</div>
 			<div v-if="!loaded" class="empty">{{ error ? t("error") : t("loading") }}</div>
 			<div v-else-if="!messages.length" class="empty">{{ t("no_messages") }}</div>
@@ -13,7 +13,6 @@
 					{{ time(m.at) }}
 				</small>
 			</div>
-			<div ref="bottom"></div>
 		</div>
 		<div v-if="delivered" class="compose muted">{{ t("delivered_chat") }}</div>
 		<form v-else class="compose" @submit.prevent="send">
@@ -21,7 +20,7 @@
 			<textarea v-model="text" rows="1" :placeholder="picked ? `${t('photo')}: ${picked.name}` : t('write')" @keydown.enter.exact.prevent="send"></textarea>
 			<button class="icon" type="submit" :disabled="sending || (!text.trim() && !picked)">➤</button>
 		</form>
-		<div v-if="sendError" class="err" style="padding: 0 12px 70px">{{ sendError }}</div>
+		<div v-if="sendError" class="err" style="padding: 0 12px 8px; background: var(--bg)">{{ sendError }}</div>
 	</div>
 </template>
 
@@ -41,15 +40,19 @@ const picked = ref(null);
 const sending = ref(false);
 const sendError = ref("");
 const showOriginal = reactive({});
-const bottom = ref(null);
+const list = ref(null);
 let timer = null;
 
 function time(at) {
 	return String(at || "").slice(11, 16);
 }
 
-function scroll() {
-	nextTick(() => bottom.value && bottom.value.scrollIntoView({ block: "end" }));
+// Faqat xabarlar ro'yxati aylanadi (sahifa emas — aks holda Telegram oynasi pastga siljiydi).
+function scroll(force) {
+	const el = list.value;
+	if (!el) return;
+	const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+	if (force || nearBottom) nextTick(() => (el.scrollTop = el.scrollHeight));
 }
 
 // Har safar to'liq ro'yxat: xodim javobi tarjimadan keyin kechroq "yuborildi" bo'ladi —
@@ -61,8 +64,9 @@ async function refresh() {
 		const known = new Set(messages.value.map((m) => m.name));
 		const fresh = data.messages.filter((m) => !known.has(m.name));
 		if (fresh.length || data.messages.length !== messages.value.length) {
+			const first = !messages.value.length;
 			messages.value = data.messages;
-			scroll();
+			scroll(first || fresh.some((m) => m.sender === "me"));
 			if (fresh.some((m) => m.sender === "staff")) markRead();
 		}
 		loaded.value = true;

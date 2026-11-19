@@ -47,12 +47,11 @@ class TestMiniAppDocuments(FrappeTestCase):
 	def set_ld(self, **values):
 		frappe.db.set_value("Logistic Documentation", self.ld, values, update_modified=False)
 
-	def test_ttn_and_ichki_deklaratsiya_never_listed(self):
-		self.set_ld(ttn_hujjat=private_file("Logistic Documentation", self.ld))
-		self.assertNotIn(("Logistic Documentation", "ttn_hujjat"), self.fields())
+	def test_ichki_deklaratsiya_never_listed(self):
+		self.set_ld(ichki_deklaratsiya=private_file("Logistic Documentation", self.ld))
+		self.assertNotIn(("Logistic Documentation", "ichki_deklaratsiya"), self.fields())
 		with as_user(USER):
-			self.assertRaises(frappe.PermissionError, api.file_link, "Logistic Documentation", self.ld, "ttn_hujjat")
-			self.assertRaises(frappe.PermissionError, api.file_link, "Ichki Deklaratsiya", "X", "ichki_deklaratsiya")
+			self.assertRaises(frappe.PermissionError, api.file_link, "Logistic Documentation", self.ld, "ichki_deklaratsiya")
 
 	def test_peregruz_hidden_until_sent(self):
 		self.set_ld(peregruz_hujjat=private_file("Logistic Documentation", self.ld))

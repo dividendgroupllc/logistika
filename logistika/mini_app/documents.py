@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 # Mijozga ko'rinadigan fayllar (spec §4.4). Ro'yxatda yo'q maydon — hech qachon ko'rinmaydi
-# (TTN, Ichki deklaratsiya, sug'urta, haydovchi hujjatlari). Mijoz Frappe user emas —
+# (Ichki deklaratsiya, sug'urta, haydovchi hujjatlari). Mijoz Frappe user emas —
 # private fayllar qisqa muddatli token orqali beriladi (file_link → download).
 
 import secrets

@@ -77,6 +77,8 @@ onMounted(() => {
 	if (tg) {
 		tg.ready();
 		tg.expand();
+		// Ro'yxatni aylantirganda Telegram oynasi pastga tortilib yopilmasin (Bot API 7.7+).
+		if (tg.disableVerticalSwipes && tg.isVersionAtLeast && tg.isVersionAtLeast("7.7")) tg.disableVerticalSwipes();
 		if (tg.BackButton) tg.BackButton.onClick(() => (window.history.length > 1 ? router.back() : router.push("/")));
 	}
 	start();

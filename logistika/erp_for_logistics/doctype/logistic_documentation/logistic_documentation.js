@@ -34,9 +34,6 @@ frappe.ui.form.on("Logistic Documentation", {
 	pekin_invoice(frm) {
 		render_tr_docs_preview(frm);
 	},
-	ttn_hujjat(frm) {
-		render_tr_docs_preview(frm);
-	},
 	tranzit_hujjat(frm) {
 		render_cl_cmr_preview(frm);
 	},
@@ -109,16 +106,15 @@ function render_driver_preview(frm) {
 	});
 }
 
-// Transit bo'limida (Kliyent hujjatlaridan) Pekin invoice, TTN va (Internal
-// Logistics'dan) Pekin list'ga tezkor havola — xodim boshqa tabga/hujjatga
-// o'tmasdan shu uchtasi biriktirilganini ko'rib, tekshirib chiqishi uchun.
+// Transit bo'limida (Kliyent hujjatlaridan) Pekin invoice va (Order Detail'dan) Pekin
+// list'ga tezkor havola — xodim boshqa tabga/hujjatga o'tmasdan ikkalasi
+// biriktirilganini ko'rib, tekshirib chiqishi uchun.
 function render_tr_docs_preview(frm) {
 	const $wrapper = frm.fields_dict.tr_docs_preview_html?.$wrapper;
 	if (!$wrapper) return;
 
 	const rows = [
 		attach_preview_row(__("Pekin invoice"), frm.doc.pekin_invoice),
-		attach_preview_row(__("TTN"), frm.doc.ttn_hujjat),
 	];
 
 	$wrapper.html(`<div>${rows.join("")}<div class="text-muted" data-region="tr-il-row">${__("Pekin list qidirilmoqda...")}</div></div>`);

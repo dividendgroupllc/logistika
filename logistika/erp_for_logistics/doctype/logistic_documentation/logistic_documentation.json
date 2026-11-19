@@ -27,7 +27,6 @@
   "tab_cl",
   "sec_cl",
   "pekin_invoice",
-  "ttn_hujjat",
   "eksport_deklaratsiya",
   "eksport_deklaratsiya_summa",
   "cb_cl",
@@ -162,12 +161,6 @@
    "permlevel": 1
   },
   {
-   "fieldname": "ttn_hujjat",
-   "fieldtype": "Attach",
-   "label": "TTN hujjati",
-   "permlevel": 1
-  },
-  {
    "fieldname": "eksport_deklaratsiya",
    "fieldtype": "Attach",
    "label": "Eksport deklaratsiya (ED/CO)",
@@ -240,7 +233,7 @@
   },
   {
    "default": "0",
-   "description": "Pekin invoice, TTN и Pekin list (Order Detail) проверены",
+   "description": "Pekin invoice и Pekin list (Order Detail) проверены",
    "fieldname": "tr_docs_tasdiqlandi",
    "fieldtype": "Check",
    "label": "Документы проверены ✓"
@@ -277,7 +270,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-19 10:00:00.000000",
+ "modified": "2026-11-19 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Logistic Documentation",

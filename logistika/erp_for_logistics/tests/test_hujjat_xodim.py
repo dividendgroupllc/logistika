@@ -28,6 +28,9 @@ class TestDoctypeFields(FrappeTestCase):
 		self.assertIsNone(field("Ichki Deklaratsiya", "ichki_deklaratsiya_tolovchi"))
 		self.assertEqual(field("Ichki Deklaratsiya", "pekin_list").fieldtype, "Table")
 
+	def test_ttn_removed_from_ld(self):
+		self.assertIsNone(field("Logistic Documentation", "ttn_hujjat"))
+
 	def test_fura_row_tonna_kub_nakladnoy(self):
 		self.assertEqual(field("Order Detail Fura", "taxminiy_tonna").label, "Tonna")
 		self.assertEqual(field("Order Detail Fura", "taxminiy_kub").label, "Kub")

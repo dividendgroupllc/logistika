@@ -19,7 +19,7 @@ class LogisticDocumentation(Document):
 		if self.has_value_changed("tranzit_check") and self.tranzit_check:
 			_advance_status(self, "Транзитний оформеления")
 
-		# Transit bo'limida Pekin invoice/TTN/Pekin list ko'rib tasdiqlanganda.
+		# Transit bo'limida Pekin invoice va Pekin list ko'rib tasdiqlanganda.
 		if self.has_value_changed("tr_docs_tasdiqlandi") and self.tr_docs_tasdiqlandi:
 			_advance_status(self, "Документы проверены")
 

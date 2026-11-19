@@ -395,7 +395,6 @@ PDF юклаш,下载 PDF
 PDF юклашда браузер хатоси: ,下载 PDF 时浏览器出错： 
 Pekin invoice,装箱发票
 Pekin invoice (kliyentdan),装箱发票（来自客户）
-"Pekin invoice, TTN и Pekin list (Order Detail) проверены",装箱发票、TTN 和装箱单（订单明细）已核对
 Pekin list,装箱单
 Pekin list (fakt),装箱单（实际）
 Pekin list / Fakt qabul,装箱单 / 实收
@@ -501,8 +500,6 @@ Truck Dispatch hujjati topilmadi,未找到货车发运单据
 "Truck Dispatch'dagi ""Haydovchi"" shu guruhdagi supplier'lardan tanlanadi",货车发运中的“司机”从此组的供应商中选择
 Truck Type,车型
 Truck type / turi,车型 / 类型
-TTN,TTN
-TTN hujjati,TTN 单据
 Turi,类型
 Valyuta,货币
 Vaqt,时间
@@ -703,3 +700,4 @@ Skat hujjati,SKAT 文件
 Tushirgan xodim,卸货员工
 Zavod,工厂
 {0}-qator ({1}): avval nakladnoyni (rasm yoki PDF) yuklang.,第{0}行（{1}）：请先上传运单（图片或 PDF）。
+Pekin invoice и Pekin list (Order Detail) проверены,北京发票和装箱单（Order Detail）已核对
