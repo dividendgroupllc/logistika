@@ -48,9 +48,11 @@ def china_plates_on_road(txt=None, **kwargs):
 	Warehouse Intake'da faqat shu furalarni tanlash uchun."""
 	from logistika.erp_for_logistics import furalar, sana_tartibi
 
+	# Kelish sanasi oynasi (±N kun) faqat bo'sh maydonda chiqadigan ro'yxatni qisqartiradi:
+	# raqam yozilsa barcha yo'ldagi furalar orasidan qidiriladi — fura hech qachon yashirinmaydi.
 	days = frappe.db.get_single_value("Logistika Settings", "wi_kutish_kunlari")
-	window = None if sana_tartibi.old_data_mode() or not days else int(days)
-	return sorted(furalar.plates(on_road=True, txt=txt, arrival_window=window))
+	use_window = not (txt or "").strip() and not sana_tartibi.old_data_mode() and days
+	return sorted(furalar.plates(on_road=True, txt=txt, arrival_window=int(days) if use_window else None))
 
 
 @frappe.whitelist()

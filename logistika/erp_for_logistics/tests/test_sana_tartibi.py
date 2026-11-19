@@ -45,22 +45,38 @@ class TestSanaTartibi(FrappeTestCase):
 		make_order_detail(self.order.name, xitoy_mashina_nomeri="_T YAQIN", kelish_sanasi=d(2))
 		make_order_detail(self.order.name, xitoy_mashina_nomeri="_T UZOQ", kelish_sanasi=d(10))
 		make_order_detail(self.order.name, xitoy_mashina_nomeri="_T SANASIZ", kelish_sanasi=None)
-		plates = china_plates_on_road(txt="_T ")
+		# Bo'sh maydon (bosilganda) — faqat yaqin kunlardagilar; ro'yxatni qisqartiradi xolos.
+		plates = china_plates_on_road()
 		self.assertIn("_T YAQIN", plates)
 		self.assertIn("_T SANASIZ", plates)
 		self.assertNotIn("_T UZOQ", plates)
+		# Raqam yozilsa — barcha yo'ldagi furalar orasidan qidiradi (fura hech qachon "yo'qolmaydi").
+		self.assertIn("_T UZOQ", china_plates_on_road(txt="UZOQ"))
 		self.eski()
-		self.assertIn("_T UZOQ", china_plates_on_road(txt="_T "))
+		self.assertIn("_T UZOQ", china_plates_on_road())
 		self.eski(0)
 		self.window(0)  # 0 — filtr yo'q
-		self.assertIn("_T UZOQ", china_plates_on_road(txt="_T "))
+		self.assertIn("_T UZOQ", china_plates_on_road())
+
+	def test_wi_accepts_on_road_truck_outside_window(self):
+		self.window(3)
+		od = make_order_detail(self.order.name, xitoy_mashina_nomeri="_T UZOQ", kelish_sanasi=d(10))
+		frappe.get_doc(
+			{
+				"doctype": "Warehouse Intake",
+				"sana": today(),
+				"fura": "_T UZOQ",
+				"ombor": ensure_ombor(),
+				"items": [{"order": od.name, "part_name": "P0", "quantity": 1, "fakt_qty": 1}],
+			}
+		).insert(ignore_permissions=True)
 
 	def test_wi_window_includes_recent_past(self):
 		self.window(3)
 		self.eski()
 		make_order_detail(self.order.name, sana=d(-7), xitoy_mashina_nomeri="_T KECHIKKAN", zavoddan_chiqish_sanasi=d(-6), kelish_sanasi=d(-2))
 		self.eski(0)
-		self.assertIn("_T KECHIKKAN", china_plates_on_road(txt="_T "))
+		self.assertIn("_T KECHIKKAN", china_plates_on_road())
 
 	def test_past_departure_allowed_only_in_old_data_mode(self):
 		with self.assertRaises(frappe.ValidationError):

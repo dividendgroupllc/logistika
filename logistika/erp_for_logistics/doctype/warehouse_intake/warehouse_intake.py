@@ -7,7 +7,6 @@ from frappe.model.document import Document
 from frappe.utils import flt
 
 from logistika.erp_for_logistics import furalar, ombor_ledger, sana_tartibi, tannarx, xodimlar
-from logistika.erp_for_logistics.api import china_plates_on_road
 
 
 class WarehouseIntake(Document):
@@ -16,7 +15,8 @@ class WarehouseIntake(Document):
 
 	def validate(self):
 		# Faqat yo'ldagi (hali omborga kelmagan) Order Detail furasini qabul qilish mumkin.
-		if (self.is_new() or self.has_value_changed("fura")) and self.fura not in china_plates_on_road():
+		# Istalgan yo'ldagi fura (kelish sanasi oynasi faqat tanlov ro'yxatini qisqartiradi).
+		if (self.is_new() or self.has_value_changed("fura")) and self.fura not in furalar.plates(on_road=True):
 			frappe.throw(
 				_("\"{0}\" — yo'ldagi Order Detail'larda bunday fura yo'q (yoki u allaqachon omborga kelgan).").format(
 					self.fura

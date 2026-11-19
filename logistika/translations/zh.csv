@@ -711,7 +711,6 @@ Order sanasi,订单日期
 Peregruz sanasi,转运日期
 WI: kutilayotgan furalar oynasi (kun),入库：预计到达货车窗口（天）
 Warehouse Intake sanasi,入库日期
-Warehouse Intake'da kelish sanasi bugundan ± shuncha kun ichidagi yo'ldagi furalar chiqadi (kelish sanasi yozilmaganlari — doim). 0 — filtr yo'q.,入库时显示预计到达日期在今天 ± 该天数内的在途货车（未填到达日期的始终显示）。0 — 不过滤。
 Yoqilsa: Warehouse Intake'da barcha yo'ldagi furalar chiqadi va o'tgan sanalarni kiritish mumkin. Hujjatlar orasidagi sanalar ketma-ketligi baribir tekshiriladi.,启用后：入库时显示所有在途货车，并可录入过去的日期。单据之间的日期先后顺序仍会校验。
 Yuklash sanasi,装车日期
 Zavoddan chiqish sanasi,出厂日期
@@ -756,3 +755,4 @@ Sarf materiallari ombori,耗材仓库
 Submit'da ERPNext ombor tannarxidan,提交时按 ERPNext 库存成本
 Tannarx (1 dona),成本（每件）
 "Zanjir, kamar, paddon va h.k. shu ERPNext omboridan chiqim qilinadi",链条、绑带、托盘等从此 ERPNext 仓库出库
+"Warehouse Intake'da ""Fura"" bosilganda kelish sanasi bugundan ± shuncha kun ichidagi yo'ldagi furalar chiqadi (sanasizlari — doim). Raqam yozilsa barcha yo'ldagi furalar orasidan qidiriladi. 0 — filtr yo'q.",入库时点击“货车”显示预计到达日期在今天 ± 该天数内的在途货车（无日期的始终显示）。输入车牌号时在所有在途货车中搜索。0 — 不过滤。

@@ -711,7 +711,6 @@ Order sanasi,Дата заказа
 Peregruz sanasi,Дата перегруза
 WI: kutilayotgan furalar oynasi (kun),WI: окно ожидаемых фур (дней)
 Warehouse Intake sanasi,Дата приёмки на склад
-Warehouse Intake'da kelish sanasi bugundan ± shuncha kun ichidagi yo'ldagi furalar chiqadi (kelish sanasi yozilmaganlari — doim). 0 — filtr yo'q.,В приёмке на склад показываются фуры в пути с датой прибытия в пределах ± стольких дней от сегодня (без даты прибытия — всегда). 0 — без фильтра.
 Yoqilsa: Warehouse Intake'da barcha yo'ldagi furalar chiqadi va o'tgan sanalarni kiritish mumkin. Hujjatlar orasidagi sanalar ketma-ketligi baribir tekshiriladi.,Если включено: в приёмке на склад показываются все фуры в пути и можно вводить прошедшие даты. Последовательность дат между документами всё равно проверяется.
 Yuklash sanasi,Дата загрузки
 Zavoddan chiqish sanasi,Дата выезда с завода
@@ -772,3 +771,4 @@ Yangi KZ haydovchi,Новый водитель KZ
 {0} ta yuk qatori tortildi,Подтянуто строк грузов: {0}
 ✅ Hammasini ortish,✅ Загрузить всё
 📥 Yuklarni tortish,📥 Подтянуть грузы
+"Warehouse Intake'da ""Fura"" bosilganda kelish sanasi bugundan ± shuncha kun ichidagi yo'ldagi furalar chiqadi (sanasizlari — doim). Raqam yozilsa barcha yo'ldagi furalar orasidan qidiriladi. 0 — filtr yo'q.","В приёмке на склад при нажатии на «Фура» показываются фуры в пути с датой прибытия в пределах ± стольких дней от сегодня (без даты — всегда). Если ввести номер, поиск идёт по всем фурам в пути. 0 — без фильтра."

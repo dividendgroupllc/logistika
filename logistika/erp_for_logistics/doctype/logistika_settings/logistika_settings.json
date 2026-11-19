@@ -258,7 +258,7 @@
    "fieldtype": "Int",
    "label": "WI: kutilayotgan furalar oynasi (kun)",
    "default": "3",
-   "description": "Warehouse Intake'da kelish sanasi bugundan ± shuncha kun ichidagi yo'ldagi furalar chiqadi (kelish sanasi yozilmaganlari — doim). 0 — filtr yo'q."
+   "description": "Warehouse Intake'da \"Fura\" bosilganda kelish sanasi bugundan ± shuncha kun ichidagi yo'ldagi furalar chiqadi (sanasizlari — doim). Raqam yozilsa barcha yo'ldagi furalar orasidan qidiriladi. 0 — filtr yo'q."
   },
   {
    "fieldname": "cb_ombor",
@@ -297,7 +297,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-11-19 19:00:00.000000",
+ "modified": "2026-11-19 20:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Logistika Settings",
