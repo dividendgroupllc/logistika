@@ -75,8 +75,8 @@ class TestNakladnoyDispatch(FrappeTestCase):
 		from logistika.erp_for_logistics.doctype.order_detail import order_detail
 
 		with patch.object(tracking, "get_order_chat_ids", return_value=["1"]), patch.object(
-			order_detail, "send_file", return_value=True
-		) as send:
+			tracking, "chat_language", return_value="uz"
+		), patch.object(order_detail, "send_file", return_value=True) as send:
 			sent = order_detail.send_dispatched(self.od.name)
 		return sent, send
 
@@ -92,8 +92,7 @@ class TestNakladnoyDispatch(FrappeTestCase):
 		chat_id, file_url = send.call_args.args[:2]
 		caption = send.call_args.kwargs["caption"]
 		self.assertEqual((chat_id, file_url), ("1", url))
-		for text in ("粤B12345", "9.5", "31", "Ventilyator", self.od.name):
-			self.assertIn(text, caption)
+		self.assertEqual(caption, f"🚚 <b>{self.od.name}</b> zavoddan yo'lga chiqdi · 🚛 粤B12345")
 		self.assertIn("web_app", str(send.call_args.kwargs["reply_markup"]))
 		self.assertEqual(frappe.db.get_value("Order Detail Fura", self.row.name, "jonatish_xabari_yuborildi"), 1)
 

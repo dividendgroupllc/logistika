@@ -7,6 +7,17 @@ LANGUAGES = ("uz", "ru", "en")
 DEFAULT_LANGUAGE = "uz"
 
 
+def short_when(sana, vaqt=None) -> str:
+	"""Qisqa, tilga bog'liq bo'lmagan vaqt: "19.11 09:40"."""
+	from frappe.utils import formatdate
+
+	text = formatdate(sana, "dd.MM") if sana else ""
+	if vaqt:
+		parts = str(vaqt).split(":")
+		text = f"{text} {int(parts[0]):02d}:{parts[1]}" if len(parts) > 1 else text
+	return text.strip()
+
+
 def render(template, lang: str | None = DEFAULT_LANGUAGE, **values) -> str:
 	"""Shablonni HTML'dan tozalangan qiymatlar bilan to'ldiradi — mijoz/buyurtma nomi,
 	manzil va h.k. ichidagi "&", "<", ">" Telegram'ning HTML parse_mode'ini buzmasligi uchun.
@@ -58,52 +69,27 @@ LANGUAGE_SET = {
 }
 
 SHIPMENT_UPDATE = {
-	"uz": "📦 Sizning <b>{brand}</b> mahsulotingiz holati yangilandi\n\n🗓 Sana: {sana_vaqt}\n📍 Manzil: {address}\n🚛 Xitoy fura: {fura}\n📐 Jami kub: {jami_kub} m³\n⚖️ Jami tonna: {jami_tonna} t",
-	"ru": "📦 Статус вашего груза <b>{brand}</b> обновлён\n\n🗓 Дата: {sana_vaqt}\n📍 Местоположение: {address}\n🚛 Китайская фура: {fura}\n📐 Общий объём: {jami_kub} м³\n⚖️ Общий вес: {jami_tonna} т",
-	"en": "📦 Your <b>{brand}</b> cargo status has been updated\n\n🗓 Date: {sana_vaqt}\n📍 Location: {address}\n🚛 Chinese truck: {fura}\n📐 Total volume: {jami_kub} m³\n⚖️ Total weight: {jami_tonna} t",
+	"uz": "📍 <b>{order_detail}</b> — {address} · {sana_vaqt}",
+	"ru": "📍 <b>{order_detail}</b> — {address} · {sana_vaqt}",
+	"en": "📍 <b>{order_detail}</b> — {address} · {sana_vaqt}",
 }
 
 KZ_SHIPMENT_UPDATE = {
-	"uz": "📦 Sizning <b>{brand}</b> mahsulotingiz holati yangilandi\n\n🗓 Sana: {sana_vaqt}\n📍 Manzil: {address}\n🚛 KZ fura: {kz_fura}",
-	"ru": "📦 Статус вашего груза <b>{brand}</b> обновлён\n\n🗓 Дата: {sana_vaqt}\n📍 Местоположение: {address}\n🚛 Фура KZ: {kz_fura}",
-	"en": "📦 Your <b>{brand}</b> cargo status has been updated\n\n🗓 Date: {sana_vaqt}\n📍 Location: {address}\n🚛 KZ truck: {kz_fura}",
+	"uz": "📍 <b>{order}</b> — {address} · {sana_vaqt} · 🚛 {kz_fura}",
+	"ru": "📍 <b>{order}</b> — {address} · {sana_vaqt} · 🚛 {kz_fura}",
+	"en": "📍 <b>{order}</b> — {address} · {sana_vaqt} · 🚛 {kz_fura}",
 }
 
 PEKIN_LIST_GUIDANCE = {
-	"uz": (
-		"📋 Endi bizga <b>Pekin list</b> kerak — bu Xitoy zavodidan kelgan invoys/qadoqlash varag'i, unda "
-		"mahsulotlar ro'yxati va ularning miqdori/og'irligi ko'rsatilgan bo'ladi. Shu hujjatsiz keyingi bosqich "
-		"(eksport deklaratsiyasi) tayyorlanishi kechikadi.\n\n<b>{order}</b> buyurtmasi uchun faylni (PDF, Excel "
-		"yoki rasm) kabinetning <b>Hujjatlar</b> bo'limida yuklang — pastdagi tugma."
-	),
-	"ru": (
-		"📋 Теперь нам нужен <b>пекин-лист</b> — инвойс/упаковочный лист от китайского завода со списком товаров, "
-		"их количеством и весом. Без него подготовка следующего этапа (экспортной декларации) задержится.\n\n"
-		"Загрузите файл (PDF, Excel или фото) для заказа <b>{order}</b> в разделе <b>Документы</b> кабинета — кнопка ниже."
-	),
-	"en": (
-		"📋 We now need the <b>packing list</b> — the invoice/packing list from the Chinese factory with the list "
-		"of goods, their quantity and weight. Without it the next step (export declaration) will be delayed.\n\n"
-		"Upload the file (PDF, Excel or photo) for order <b>{order}</b> in the <b>Documents</b> section of the cabinet — button below."
-	),
+	"uz": "📋 <b>{order}</b>: pekin invoice kerak — kabinetning <b>Hujjatlar</b> bo'limida yuklang.",
+	"ru": "📋 <b>{order}</b>: нужен пекин-инвойс — загрузите его в разделе <b>Документы</b> кабинета.",
+	"en": "📋 <b>{order}</b>: packing invoice needed — upload it in the <b>Documents</b> section of the cabinet.",
 }
 
 ORDER_DISPATCHED = {
-	"uz": (
-		"🚚 Yukingiz zavoddan yo'lga chiqdi!\n\n📦 Yuk: <b>{mahsulot}</b>\n🧾 Buyurtma ID: <b>{order_detail}</b>\n"
-		"🗓 Sana: {sana}\n🚛 Mashina raqami: <b>{fura}</b>\n⚖️ Tonna: {tonna} t · 📐 Kub: {kub} m³\n\n"
-		"Nakladnoy ilova qilingan. Holati yangilanganda shu yerga xabar kelib turadi."
-	),
-	"ru": (
-		"🚚 Ваш груз выехал с завода!\n\n📦 Груз: <b>{mahsulot}</b>\n🧾 ID заказа: <b>{order_detail}</b>\n"
-		"🗓 Дата: {sana}\n🚛 Номер машины: <b>{fura}</b>\n⚖️ Вес: {tonna} т · 📐 Объём: {kub} м³\n\n"
-		"Накладная во вложении. При обновлении статуса сюда придёт сообщение."
-	),
-	"en": (
-		"🚚 Your cargo has left the factory!\n\n📦 Cargo: <b>{mahsulot}</b>\n🧾 Order ID: <b>{order_detail}</b>\n"
-		"🗓 Date: {sana}\n🚛 Truck number: <b>{fura}</b>\n⚖️ Weight: {tonna} t · 📐 Volume: {kub} m³\n\n"
-		"The waybill is attached. You will get a message here when the status changes."
-	),
+	"uz": "🚚 <b>{order_detail}</b> zavoddan yo'lga chiqdi · 🚛 {fura}",
+	"ru": "🚚 <b>{order_detail}</b> выехал с завода · 🚛 {fura}",
+	"en": "🚚 <b>{order_detail}</b> has left the factory · 🚛 {fura}",
 }
 
 RELINKED_ELSEWHERE = {

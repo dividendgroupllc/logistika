@@ -109,7 +109,7 @@ def _send_row_to_client(doc, row):
 	"""`send_row` (qo'lda) va kunlik avtomatik yuborish IKKALASI ham shu funksiyani
 	chaqiradi — Telegram'ga yuborish mantig'i bitta joyda."""
 	from logistika.telegram.i18n import chat_language
-	from logistika.telegram.messages import KZ_SHIPMENT_UPDATE, render
+	from logistika.telegram.messages import KZ_SHIPMENT_UPDATE, render, short_when
 	from logistika.erp_for_logistics.ld_telegram import get_order_chat_ids
 	from logistika.telegram.keyboards import open_button, route
 	from logistika.telegram.sender import send_location, send_message
@@ -128,8 +128,8 @@ def _send_row_to_client(doc, row):
 	sent = 0
 	if chat_ids:
 		values = dict(
-			brand=order.brand or "",
-			sana_vaqt=traccar_client.format_sana_vaqt(row.sana, row.vaqt),
+			order=doc.order,
+			sana_vaqt=short_when(row.sana, row.vaqt),
 			address=row.joylashuv or "",
 			kz_fura=doc.kz_truck or "-",
 		)

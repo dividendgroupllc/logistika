@@ -16,11 +16,11 @@ import frappe
 from frappe import _
 from frappe.utils import cstr, flt, nowtime, today
 
-from logistika.erp_for_logistics import furalar, kz_gps_tracking, traccar_client
+from logistika.erp_for_logistics import furalar, kz_gps_tracking
 from logistika.erp_for_logistics.ld_telegram import get_order_chat_ids
 from logistika.telegram.i18n import chat_language
 from logistika.telegram.keyboards import open_button, route
-from logistika.telegram.messages import SHIPMENT_UPDATE, render
+from logistika.telegram.messages import SHIPMENT_UPDATE, render, short_when
 from logistika.telegram.sender import send_message
 
 
@@ -32,16 +32,8 @@ def _fura_row(doc, plate):
 def send_china_update(doc, row):
 	"""Order Detail mijoziga shu kuzatuv qatori haqida xabar yuboradi; kamida bitta
 	chatga ketsa `row.yuborilgan` = 1. Hujjatni saqlash chaqiruvchining ishi."""
-	fura_row = _fura_row(doc, row.get("fura"))
-	tonna, kub = furalar.row_load(fura_row) if fura_row else (0, 0)
-	values = dict(
-		brand=doc.brand or doc.kliyent or "",
-		sana_vaqt=traccar_client.format_sana_vaqt(row.sana, row.vaqt),
-		address=row.qayerdaligi or "",
-		fura=row.get("fura") or (fura_row.xitoy_mashina_nomeri if fura_row else None) or "-",
-		jami_kub=flt(kub, 3),
-		jami_tonna=flt(tonna, 3),
-	)
+	# Qisqa xabar: qaysi yuk, qayerda, qachon — tafsilotlar kabinetda ("Ochish").
+	values = dict(order_detail=doc.name, sana_vaqt=short_when(row.sana, row.vaqt), address=row.qayerdaligi or "")
 	sent = sum(
 		1
 		for chat_id in get_order_chat_ids(doc.order)

@@ -330,15 +330,8 @@ def _dispatch_row(doc, row):
 	from logistika.erp_for_logistics import tracking
 	from logistika.telegram.messages import ORDER_DISPATCHED, render
 
-	tonna, kub = furalar.row_load(row)
-	values = dict(
-		mahsulot=frappe.db.get_value("Order", doc.order, "mahsulot_nomi") or "-",
-		order_detail=doc.name,
-		sana=formatdate(row.fakt_chiqish_sanasi or row.zavoddan_chiqish_sanasi or today(), "dd.MM.yyyy"),
-		fura=row.xitoy_mashina_nomeri or "-",
-		tonna=flt(tonna, 3),
-		kub=flt(kub, 3),
-	)
+	# Qisqa xabar (nakladnoy ilova): qaysi yuk va qaysi fura — tafsilotlar kabinetda.
+	values = dict(order_detail=doc.name, fura=row.xitoy_mashina_nomeri or "-")
 	sent = sum(
 		1
 		for chat_id in tracking.get_order_chat_ids(doc.order)

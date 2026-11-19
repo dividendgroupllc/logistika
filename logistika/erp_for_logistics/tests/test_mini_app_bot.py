@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, patch
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import today
+from frappe.utils import formatdate, today
 
 from logistika.erp_for_logistics.doctype.order_detail.test_order_detail import make_order_detail
 from logistika.erp_for_logistics.tests.mini_app_utils import linked_contact, make_ld
@@ -55,11 +55,12 @@ class TestMiniAppBotButtons(FrappeTestCase):
 
 		row = self.od.append("kunlik_kuzatuv", {"fura": "粤B12345", "sana": today(), "vaqt": "09:00", "qayerdaligi": "Urumchi"})
 		with patch.object(tracking, "get_order_chat_ids", return_value=["1"]), patch.object(
-			tracking, "send_message", return_value=True
-		) as send:
+			tracking, "chat_language", return_value="uz"
+		), patch.object(tracking, "send_message", return_value=True) as send:
 			tracking.send_china_update(self.od, row)
 		self.assertTrue(web_app_url(send.call_args).endswith(keyboards.route("yuk", self.od.name)))
 		self.assertNotIn(" ", web_app_url(send.call_args))
+		self.assertEqual(send.call_args.args[1], f"📍 <b>{self.od.name}</b> — Urumchi · {formatdate(today(), 'dd.MM')} 09:00")
 
 	def test_dispatched_has_open_button(self):
 		from logistika.erp_for_logistics import tracking
@@ -91,11 +92,16 @@ class TestMiniAppBotButtons(FrappeTestCase):
 
 		ld = make_ld(self.order.name, peregruz_hujjat="/private/files/p.pdf")
 		with patch.object(ld_telegram, "get_order_chat_ids", return_value=["1"]), patch.object(
-			ld_telegram, "send_document", return_value=True
-		) as doc, patch.object(ld_telegram, "send_message", return_value=True) as msg:
+			ld_telegram, "chat_language", return_value="uz"
+		), patch.object(ld_telegram, "send_document", return_value=True) as doc, patch.object(
+			ld_telegram, "send_message", return_value=True
+		) as msg:
 			ld_telegram.send_ld_document(ld, "peregruz_hujjat")
 		self.assertTrue(web_app_url(doc.call_args).endswith("#/hujjatlar"))
 		self.assertNotIn("/upload", msg.call_args.args[1])
+		self.assertEqual(
+			msg.call_args.args[1], f"📋 <b>{self.order.name}</b>: pekin invoice kerak — kabinetning <b>Hujjatlar</b> bo'limida yuklang."
+		)
 		self.assertTrue(web_app_url(msg.call_args).endswith("#/hujjatlar"))
 
 	def test_kz_update_dedupes_chat_ids_and_has_button(self):
@@ -109,6 +115,7 @@ class TestMiniAppBotButtons(FrappeTestCase):
 			self.assertEqual(kz_gps_tracking._send_row_to_client(doc, row), 1)
 		self.assertEqual(send.call_count, 1)
 		self.assertTrue(web_app_url(send.call_args).endswith(keyboards.route("buyurtma", self.order.name)))
+		self.assertEqual(send.call_args.args[1], f"📍 <b>{self.order.name}</b> — Almaty · {formatdate(today(), 'dd.MM')} 08:00 · 🚛 01KZ777")
 
 	def test_set_menu_button(self):
 		from logistika.telegram import sender

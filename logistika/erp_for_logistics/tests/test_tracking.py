@@ -116,8 +116,8 @@ class TestChinaTracking(FrappeTestCase):
 		):
 			send_dispatched(self.od_a.name)
 		text = send.call_args.kwargs["caption"]
-		for expected in (self.od_a.name, PLATE, "Profil", "Ваш груз выехал с завода"):
-			self.assertIn(expected, text)
+		# Qisqa xabar (2026-11-19): qaysi yuk va qaysi fura — tafsilotlar kabinetda.
+		self.assertEqual(text, f"🚚 <b>{self.od_a.name}</b> выехал с завода · 🚛 {PLATE}")
 
 
 class TestKzTracking(FrappeTestCase):
