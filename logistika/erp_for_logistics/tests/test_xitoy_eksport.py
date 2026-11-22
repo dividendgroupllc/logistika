@@ -48,6 +48,10 @@ class TestXitoyEksport(FrappeTestCase):
 		self.bux = ensure_user("_t_buxgalter@example.com", BUX)
 		self.order = make_order(kliyent="_T XEH Mijoz")
 		self.od = make_order_detail(self.order.name, furalar=[{"xitoy_mashina_nomeri": "_T E1"}, {"xitoy_mashina_nomeri": "_T E2"}])
+		from logistika.erp_for_logistics.tests.utils import ensure_account
+
+		self.cny_cash = ensure_account("_T Kassa CNY", f"Cash In Hand - {_abbr()}", account_type="Cash")
+		frappe.db.set_value("Account", self.cny_cash, "account_currency", "CNY")
 		self.publish = patch("frappe.publish_realtime").start()
 		self.notify = patch.object(xeh, "enqueue_create_notification").start()
 
@@ -95,12 +99,10 @@ class TestXitoyEksport(FrappeTestCase):
 		self.as_(self.broker, xeh.upload_export_document, doc.name, url)
 		return url
 
-	def pay(self, doc, summa=150):
+	def pay(self, doc):
 		def fill():
 			d = frappe.get_doc("Xitoy Eksport Hujjati", doc.name)
 			d.chek = self.file(d, "chek", "chek.jpg")
-			d.summa = summa
-			d.valyuta = "USD"
 			d.save()
 
 		self.as_(self.log, fill)
@@ -191,7 +193,7 @@ class TestXitoyEksport(FrappeTestCase):
 		self.assertTrue(self.as_(self.broker, find_file_by_url, url))
 		self.assertTrue(self.as_(self.bux, find_file_by_url, url))
 		self.pay(doc)
-		self.as_(self.bux, xeh.approve, doc.name, f"Cash - {_abbr()}")
+		self.as_(self.bux, xeh.approve, doc.name, self.cny_cash)
 		self.assertEqual(self.status(doc), "Yakunlandi")
 		natija = frappe.db.get_value("Xitoy Eksport Hujjati", doc.name, "eksport_hujjat_natija")
 		self.assertTrue(self.as_(self.log, find_file_by_url, natija))  # endi ochiq
@@ -213,33 +215,36 @@ class TestXitoyEksport(FrappeTestCase):
 
 		def approve():
 			frappe.local.session.data["csrf_token"] = "tok"
-			xeh.approve(doc.name, f"Cash - {_abbr()}")
+			xeh.approve(doc.name, self.cny_cash)
 			return frappe.session.user, frappe.local.session.data.get("csrf_token")
 
 		self.assertEqual(self.as_(self.bux, approve), (self.bux, "tok"))
 
-	def test_multi_currency_payment(self):
-		from logistika.erp_for_logistics.tests.utils import ensure_account
-
-		cny_cash = ensure_account("_T Kassa CNY", f"Cash In Hand - {_abbr()}", account_type="Cash")
-		frappe.db.set_value("Account", cny_cash, "account_currency", "CNY")
+	def test_price_from_settings(self):
+		frappe.db.set_single_value("Logistika Settings", "broker_xizmat_summa", 750)
 		doc = self.new_doc()
 		self.to_payment(doc)
+		self.pay(doc)
+		self.as_(self.bux, xeh.approve, doc.name, self.cny_cash)
+		doc = frappe.get_doc("Xitoy Eksport Hujjati", doc.name)
+		self.assertEqual((doc.summa, doc.valyuta), (750, "CNY"))
+		self.assertEqual(flt(frappe.db.get_value("Payment Entry", doc.payment_entry, "received_amount"), 2), 750)
+		self.assertEqual(frappe.db.get_value("Sales Invoice", doc.sales_invoice, "outstanding_amount"), 0)
 
-		def fill():
+	def test_summa_hidden_and_extra_documents_only_after_return(self):
+		meta = frappe.get_meta("Xitoy Eksport Hujjati")
+		self.assertTrue(meta.get_field("summa").hidden)
+		self.assertTrue(meta.get_field("valyuta").hidden)
+		self.assertIn("Qo'shimcha hujjat kerak", meta.get_field("sec_qoshimcha").depends_on)
+		doc = self.new_doc()
+
+		def add_extra():
 			d = frappe.get_doc("Xitoy Eksport Hujjati", doc.name)
-			d.chek = self.file(d, "chek", "chek.jpg")
-			d.summa = 1000
-			d.valyuta = "CNY"
+			d.append("qoshimcha_hujjatlar", {"fayl": self.file(d, "qoshimcha_hujjatlar", "x.pdf")})
 			d.save()
 
-		self.as_(self.log, fill)
-		self.as_(self.log, xeh.send_to_accountant, doc.name)
-		self.as_(self.bux, xeh.approve, doc.name, cny_cash)
-		doc = frappe.get_doc("Xitoy Eksport Hujjati", doc.name)
-		pe = frappe.get_doc("Payment Entry", doc.payment_entry)
-		self.assertEqual((pe.paid_to, flt(pe.received_amount, 2)), (cny_cash, 1000))  # kassaga — aynan chekdagi summa
-		self.assertEqual(frappe.db.get_value("Sales Invoice", doc.sales_invoice, "outstanding_amount"), 0)
+		with self.assertRaises(frappe.ValidationError):
+			self.as_(self.log, add_extra)  # qoralamada — broker hali qaytarmagan
 
 	def test_same_truck_on_another_order_allowed(self):
 		self.new_doc(plates=("_T E1",))
@@ -268,17 +273,18 @@ class TestXitoyEksport(FrappeTestCase):
 		self.to_payment(doc)
 		with self.assertRaises(frappe.ValidationError):
 			self.as_(self.log, xeh.send_to_accountant, doc.name)  # chek yo'q
-		self.pay(doc, 150)
+		self.pay(doc)
 		self.assertEqual(self.status(doc), "Buxgalter tasdig'ida")
+		self.assertEqual(frappe.db.get_value("Xitoy Eksport Hujjati", doc.name, ["summa", "valyuta"]), (600, "CNY"))  # avtomatik
 		with self.assertRaises(frappe.PermissionError):
-			self.as_(self.log, xeh.approve, doc.name, f"Cash - {_abbr()}")
-		self.as_(self.bux, xeh.approve, doc.name, f"Cash - {_abbr()}")
+			self.as_(self.log, xeh.approve, doc.name, self.cny_cash)
+		self.as_(self.bux, xeh.approve, doc.name, self.cny_cash)
 		doc = frappe.get_doc("Xitoy Eksport Hujjati", doc.name)
 		si = frappe.get_doc("Sales Invoice", doc.sales_invoice)
 		pe = frappe.get_doc("Payment Entry", doc.payment_entry)
 		self.assertEqual((si.docstatus, si.customer, si.company), (1, self.order.xitoy_postavshik, TEST_COMPANY))
-		self.assertEqual((si.items[0].item_code, si.grand_total), ("_T Broker xizmati", 150))
-		self.assertEqual((pe.docstatus, pe.paid_to, pe.paid_amount), (1, f"Cash - {_abbr()}", 150))
+		self.assertEqual(si.items[0].item_code, "_T Broker xizmati")
+		self.assertEqual((pe.docstatus, pe.paid_to, flt(pe.received_amount, 2)), (1, self.cny_cash, 600))
 		self.assertEqual(pe.references[0].reference_name, si.name)
 		self.assertEqual(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"), 0)
 

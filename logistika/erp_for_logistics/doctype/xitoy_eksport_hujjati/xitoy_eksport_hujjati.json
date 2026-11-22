@@ -84,7 +84,8 @@
   {
    "fieldname": "sec_qoshimcha",
    "fieldtype": "Section Break",
-   "label": "Qo'shimcha hujjatlar"
+   "label": "Qo'shimcha hujjatlar",
+   "depends_on": "eval:doc.status==\"Qo'shimcha hujjat kerak\" || (doc.qaytarishlar || []).length"
   },
   {
    "fieldname": "qaytarishlar",
@@ -135,13 +136,17 @@
    "fieldtype": "Currency",
    "options": "valyuta",
    "label": "Summa",
-   "non_negative": 1
+   "non_negative": 1,
+   "hidden": 1,
+   "read_only": 1
   },
   {
    "fieldname": "valyuta",
    "fieldtype": "Link",
    "options": "Currency",
-   "label": "Valyuta"
+   "label": "Valyuta",
+   "hidden": 1,
+   "read_only": 1
   },
   {
    "fieldname": "rad_izohi",
@@ -240,7 +245,7 @@
  "owner": "Administrator",
  "modified_by": "Administrator",
  "creation": "2026-11-22 10:00:00.000000",
- "modified": "2026-11-22 12:00:00.000000",
+ "modified": "2026-11-22 14:00:00.000000",
  "sort_field": "modified",
  "sort_order": "DESC",
  "field_order": [

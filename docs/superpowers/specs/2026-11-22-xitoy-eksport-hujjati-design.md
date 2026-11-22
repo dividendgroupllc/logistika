@@ -23,7 +23,10 @@ kirim bo'ladi va zavodga "Broker xizmati" sotuvi shakllanadi. Logistic Documenta
 - **Qaytarishlar tarixi** — sabab (ro'yxatdan), izoh, kim, qachon.
 - **Eksport hujjati** (broker yuklaydi) — "Yakunlandi"gacha ichki logistikaga ko'rinmaydi va yuklab
   olinmaydi (ilova biriktirmalari ro'yxati orqali ham).
-- **To'lov**: chek (fayl), summa, valyuta (ichki logistika); to'lov hisobi (Cash/Bank — buxgalter).
+- **To'lov**: chek (fayl, ichki logistika); summa/valyuta kiritilmaydi — Logistika Settings "Broker xizmati
+  narxi/valyutasi" (standart 600 CNY), formada ko'rinmaydi; to'lov hisobi (Cash/Bank — buxgalter).
+- "Qo'shimcha hujjatlar" bo'limi faqat broker qaytargandan keyin ko'rinadi va faqat "Qo'shimcha hujjat kerak"
+  holatida o'zgartiriladi.
 - Bog'langan: Sales Invoice, Payment Entry.
 
 ## Statuslar va o'tishlar
@@ -32,7 +35,7 @@ kirim bo'ladi va zavodga "Broker xizmati" sotuvi shakllanadi. Logistic Documenta
 | Qoralama | Ichki logistika | "Brokerga yuborish" (≥1 fura, ≥1 litsenziya) → Brokerda |
 | Brokerda | Broker | "Qo'shimcha hujjat so'rash" (sabab + izoh) → Qo'shimcha hujjat kerak; "Eksport hujjatini yuklash" → To'lov kutilmoqda |
 | Qo'shimcha hujjat kerak | Ichki logistika | qo'shimcha fayl yuklab "Brokerga qayta yuborish" → Brokerda |
-| To'lov kutilmoqda | Ichki logistika | chek + summa + valyuta, "Buxgalterga yuborish" → Buxgalter tasdig'ida |
+| To'lov kutilmoqda | Ichki logistika | chek, "Buxgalterga yuborish" (summa avtomatik) → Buxgalter tasdig'ida |
 | Buxgalter tasdig'ida | Buxgalter yordamchisi | to'lov hisobini tanlab "Tasdiqlash" → Yakunlandi; "Rad etish" (izoh) → To'lov kutilmoqda |
 | Yakunlandi | Ichki logistika | eksport hujjatini ko'radi/yuklab oladi |
 

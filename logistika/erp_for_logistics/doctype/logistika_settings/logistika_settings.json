@@ -33,6 +33,8 @@
   "sarf_materiallari_hisobi",
   "broker_section",
   "broker_xizmat_item",
+  "broker_xizmat_summa",
+  "broker_xizmat_valyuta",
   "broker_qaytarish_sabablari",
   "chat_section",
   "tayyor_javoblar",
@@ -315,11 +317,26 @@
    "options": "Broker Qaytarish Sababi",
    "label": "Broker qaytarish sabablari",
    "description": "Broker qo'shimcha hujjat so'raganda shu ro'yxatdan tanlaydi"
+  },
+  {
+   "fieldname": "broker_xizmat_summa",
+   "fieldtype": "Currency",
+   "options": "broker_xizmat_valyuta",
+   "label": "Broker xizmati narxi",
+   "default": "600",
+   "description": "Chek buxgalterga yuborilganda summa avtomatik shu bo'ladi"
+  },
+  {
+   "fieldname": "broker_xizmat_valyuta",
+   "fieldtype": "Link",
+   "options": "Currency",
+   "label": "Broker xizmati valyutasi",
+   "default": "CNY"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-11-22 10:00:00.000000",
+ "modified": "2026-11-22 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Logistika Settings",

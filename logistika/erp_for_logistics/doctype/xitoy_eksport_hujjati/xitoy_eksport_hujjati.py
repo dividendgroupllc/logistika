@@ -28,7 +28,8 @@ from logistika.erp_for_logistics import furalar
 
 DOCTYPE = "Xitoy Eksport Hujjati"
 HOLDER = "Xitoy Eksport Yopiq Fayl"
-SYSTEM_FIELDS = ("eksport_hujjat", "eksport_hujjat_natija", "tolov_hisobi", "sales_invoice", "payment_entry", "rad_izohi")
+SYSTEM_FIELDS = ("eksport_hujjat", "eksport_hujjat_natija", "tolov_hisobi", "sales_invoice", "payment_entry", "rad_izohi", "summa", "valyuta")
+DEFAULT_PRICE, DEFAULT_CURRENCY = 600, "CNY"
 LOGISTIKA, BROKER, BUXGALTER = "Ichki logistika bo'limi", "Broker", "Buxgalter yordamchisi"
 QORALAMA, BROKERDA, QOSHIMCHA = "Qoralama", "Brokerda", "Qo'shimcha hujjat kerak"
 TOLOV, TASDIQ, YAKUN = "To'lov kutilmoqda", "Buxgalter tasdig'ida", "Yakunlandi"
@@ -82,7 +83,12 @@ class XitoyEksportHujjati(Document):
 		before = self.get_doc_before_save()
 		if not before or self.flags.status_transition:
 			return
-		if any(cstr(self.get(f)) != cstr(before.get(f)) for f in SYSTEM_FIELDS) or len(self.qaytarishlar) != len(before.qaytarishlar):
+		def differs(field):
+			if field == "summa":
+				return flt(self.summa) != flt(before.summa)
+			return cstr(self.get(field)) != cstr(before.get(field))
+
+		if any(differs(f) for f in SYSTEM_FIELDS) or len(self.qaytarishlar) != len(before.qaytarishlar):
 			frappe.throw(_("Bu maydonlarni faqat tizim o'zgartiradi"))
 		if self.status != QORALAMA and self.order != before.order:
 			frappe.throw(_("Order'ni faqat qoralamada o'zgartirish mumkin"))
@@ -92,11 +98,10 @@ class XitoyEksportHujjati(Document):
 
 		if self.status != QORALAMA and (rows(self, "furalar") != rows(before, "furalar") or rows(self, "litsenziyalar") != rows(before, "litsenziyalar")):
 			frappe.throw(_("Furalar va litsenziyalarni faqat qoralamada o'zgartirish mumkin"))
-		if self.status not in (QORALAMA, QOSHIMCHA) and rows(self, "qoshimcha_hujjatlar") != rows(before, "qoshimcha_hujjatlar"):
+		if self.status != QOSHIMCHA and rows(self, "qoshimcha_hujjatlar") != rows(before, "qoshimcha_hujjatlar"):
 			frappe.throw(_("Qo'shimcha hujjatni faqat broker so'raganda yuklash mumkin"))
-		changed = flt(self.summa) != flt(before.summa) or any(cstr(self.get(f)) != cstr(before.get(f)) for f in ("chek", "valyuta"))
-		if self.status != TOLOV and changed:
-			frappe.throw(_("Chek va summani faqat \"To'lov kutilmoqda\" holatida kiritish mumkin"))
+		if self.status != TOLOV and cstr(self.chek) != cstr(before.chek):
+			frappe.throw(_("Chekni faqat \"To'lov kutilmoqda\" holatida yuklash mumkin"))
 
 
 # ---------------------------------------------------------------- yordamchilar ----------
@@ -205,10 +210,20 @@ def upload_export_document(name, fayl):
 
 @frappe.whitelist()
 def send_to_accountant(name):
+	"""Summa kiritilmaydi — Logistika Settings'dagi broker xizmati narxi (standart 600 CNY)."""
 	doc = _load(name, (TOLOV,), LOGISTIKA)
-	if not doc.chek or flt(doc.summa) <= 0 or not doc.valyuta:
-		frappe.throw(_("Chek, summa va valyutani kiriting"))
-	return _move(doc, TASDIQ, BUXGALTER, _("to'lov cheki tasdiqlash uchun yuborildi"), rad_izohi=None)
+	if not doc.chek:
+		frappe.throw(_("To'lov chekini yuklang"))
+	settings = frappe.get_cached_doc("Logistika Settings")
+	return _move(
+		doc,
+		TASDIQ,
+		BUXGALTER,
+		_("to'lov cheki tasdiqlash uchun yuborildi"),
+		rad_izohi=None,
+		summa=flt(settings.get("broker_xizmat_summa")) or DEFAULT_PRICE,
+		valyuta=settings.get("broker_xizmat_valyuta") or DEFAULT_CURRENCY,
+	)
 
 
 @frappe.whitelist()

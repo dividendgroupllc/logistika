@@ -871,3 +871,9 @@ Order'ni faqat qoralamada o'zgartirish mumkin,Заказ можно менять
 Xitoy Eksport Yopiq Fayl,Закрытый файл экспорта из Китая
 {0} → {1} kursi topilmadi — Currency Exchange'ga qo'shing,Курс {0} → {1} не найден — добавьте в Currency Exchange
 "Broker qo'shimcha hujjat so'radi: <b>{0}</b>{1}. Hujjatni ""Qo'shimcha hujjatlar""ga yuklab, qayta yuboring.",Брокер запросил доп. документ: <b>{0}</b>{1}. Загрузите его в «Дополнительные документы» и отправьте повторно.
+Broker xizmati narxi,Стоимость услуги брокера
+Broker xizmati valyutasi,Валюта услуги брокера
+Chek buxgalterga yuborilganda summa avtomatik shu bo'ladi,При отправке чека бухгалтеру сумма автоматически равна этой
+"Chekni faqat ""To'lov kutilmoqda"" holatida yuklash mumkin",Чек можно загрузить только в статусе «Ожидается оплата»
+To'lov chekini yuklang,Загрузите чек об оплате
+"To'lov chekini yuklang, so'ng ""Buxgalterga yuborish"" (summa avtomatik).","Загрузите чек об оплате, затем «Отправить бухгалтеру» (сумма автоматически)."

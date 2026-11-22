@@ -812,3 +812,9 @@ Order'ni faqat qoralamada o'zgartirish mumkin,订单只能在草稿中修改
 Xitoy Eksport Yopiq Fayl,中国出口封存文件
 {0} → {1} kursi topilmadi — Currency Exchange'ga qo'shing,未找到 {0} → {1} 汇率 — 请在 Currency Exchange 中添加
 "Broker qo'shimcha hujjat so'radi: <b>{0}</b>{1}. Hujjatni ""Qo'shimcha hujjatlar""ga yuklab, qayta yuboring.",报关行要求补充文件：<b>{0}</b>{1}。请上传到“补充文件”后重新发送。
+Broker xizmati narxi,报关服务价格
+Broker xizmati valyutasi,报关服务币种
+Chek buxgalterga yuborilganda summa avtomatik shu bo'ladi,收据发送给会计时金额自动为此值
+"Chekni faqat ""To'lov kutilmoqda"" holatida yuklash mumkin",只能在“待付款”状态下上传收据
+To'lov chekini yuklang,请上传付款收据
+"To'lov chekini yuklang, so'ng ""Buxgalterga yuborish"" (summa avtomatik).",请上传付款收据，然后点击“发送给会计”（金额自动）。

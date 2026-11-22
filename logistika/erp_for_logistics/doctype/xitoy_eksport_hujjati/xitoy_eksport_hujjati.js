@@ -68,8 +68,9 @@ function lock_fields(frm) {
 	const s = frm.doc.status || "Qoralama";
 	frm.set_df_property("furalar", "read_only", s !== "Qoralama");
 	frm.set_df_property("litsenziyalar", "read_only", s !== "Qoralama");
-	frm.set_df_property("qoshimcha_hujjatlar", "read_only", !["Qoralama", "Qo'shimcha hujjat kerak"].includes(s));
-	["chek", "summa", "valyuta"].forEach((f) => frm.set_df_property(f, "read_only", s !== "To'lov kutilmoqda"));
+	// Qo'shimcha hujjat — faqat broker qaytarganda (bo'lim ham shundagina ko'rinadi).
+	frm.set_df_property("qoshimcha_hujjatlar", "read_only", s !== "Qo'shimcha hujjat kerak");
+	frm.set_df_property("chek", "read_only", s !== "To'lov kutilmoqda");
 	frm.toggle_display("eksport_hujjat_natija", s === "Yakunlandi");
 }
 
@@ -85,7 +86,7 @@ function show_intro(frm) {
 	} else if (s === "To'lov kutilmoqda") {
 		frm.set_intro(
 			(frm.doc.rad_izohi ? __("Buxgalter rad etdi: {0}", [frappe.utils.escape_html(frm.doc.rad_izohi)]) + "<br>" : "") +
-				__("To'lov chekini, summa va valyutani kiriting, so'ng \"Buxgalterga yuborish\"."),
+				__("To'lov chekini yuklang, so'ng \"Buxgalterga yuborish\" (summa avtomatik)."),
 			frm.doc.rad_izohi ? "red" : "blue"
 		);
 	} else if (s === "Yakunlandi") {
