@@ -1,0 +1,274 @@
+{
+ "name": "Xitoy Eksport Hujjati",
+ "autoname": "XEH-.YYYY.-.#####",
+ "naming_rule": "Expression (old style)",
+ "track_changes": 1,
+ "title_field": "order",
+ "show_title_field_in_link": 0,
+ "fields": [
+  {
+   "fieldname": "sec_asosiy",
+   "fieldtype": "Section Break",
+   "label": "Asosiy"
+  },
+  {
+   "fieldname": "sana",
+   "fieldtype": "Date",
+   "label": "Sana",
+   "default": "Today",
+   "reqd": 1
+  },
+  {
+   "fieldname": "order",
+   "fieldtype": "Link",
+   "options": "Order",
+   "label": "Order",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "cb_asosiy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "kliyent",
+   "fieldtype": "Link",
+   "options": "Customer",
+   "label": "Kliyent",
+   "fetch_from": "order.kliyent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "xitoy_postavshik",
+   "fieldtype": "Link",
+   "options": "Customer",
+   "label": "Xitoy postavshik (zavod)",
+   "fetch_from": "order.xitoy_postavshik",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "options": "Qoralama\nBrokerda\nQo'shimcha hujjat kerak\nTo'lov kutilmoqda\nBuxgalter tasdig'ida\nYakunlandi",
+   "default": "Qoralama",
+   "label": "Status",
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "sec_furalar",
+   "fieldtype": "Section Break",
+   "label": "Furalar"
+  },
+  {
+   "fieldname": "furalar",
+   "fieldtype": "Table",
+   "options": "Xitoy Eksport Fura",
+   "label": "Furalar",
+   "reqd": 1,
+   "description": "Shu Order'ning yo'ldagi Xitoy furalari"
+  },
+  {
+   "fieldname": "sec_litsenziya",
+   "fieldtype": "Section Break",
+   "label": "Eksport litsenziyalari"
+  },
+  {
+   "fieldname": "litsenziyalar",
+   "fieldtype": "Table",
+   "options": "Xitoy Eksport Fayl",
+   "label": "Eksport litsenziyalari"
+  },
+  {
+   "fieldname": "sec_qoshimcha",
+   "fieldtype": "Section Break",
+   "label": "Qo'shimcha hujjatlar"
+  },
+  {
+   "fieldname": "qaytarishlar",
+   "fieldtype": "Table",
+   "options": "Xitoy Eksport Qaytarish",
+   "label": "Broker qaytarishlari",
+   "read_only": 1
+  },
+  {
+   "fieldname": "qoshimcha_hujjatlar",
+   "fieldtype": "Table",
+   "options": "Xitoy Eksport Fayl",
+   "label": "Qo'shimcha hujjatlar"
+  },
+  {
+   "fieldname": "sec_eksport",
+   "fieldtype": "Section Break",
+   "label": "Ichki eksport hujjati"
+  },
+  {
+   "fieldname": "eksport_hujjat",
+   "fieldtype": "Link",
+   "label": "Ichki eksport hujjati (broker)",
+   "permlevel": 1,
+   "read_only": 1,
+   "description": "Broker yuklagan hujjat yopiq saqlovda — buxgalter tasdiqlagunga qadar ichki logistikaga ko'rinmaydi",
+   "options": "Xitoy Eksport Yopiq Fayl"
+  },
+  {
+   "fieldname": "eksport_hujjat_natija",
+   "fieldtype": "Attach",
+   "label": "Ichki eksport hujjati",
+   "read_only": 1,
+   "description": "To'lov tasdiqlangach ochiladi"
+  },
+  {
+   "fieldname": "sec_tolov",
+   "fieldtype": "Section Break",
+   "label": "To'lov"
+  },
+  {
+   "fieldname": "chek",
+   "fieldtype": "Attach",
+   "label": "To'lov cheki"
+  },
+  {
+   "fieldname": "summa",
+   "fieldtype": "Currency",
+   "options": "valyuta",
+   "label": "Summa",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "valyuta",
+   "fieldtype": "Link",
+   "options": "Currency",
+   "label": "Valyuta"
+  },
+  {
+   "fieldname": "rad_izohi",
+   "fieldtype": "Small Text",
+   "label": "Buxgalter izohi (rad etilgan)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_tolov",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tolov_hisobi",
+   "fieldtype": "Link",
+   "options": "Account",
+   "label": "To'lov hisobi",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "options": "Sales Invoice",
+   "label": "Broker xizmati (Sales Invoice)",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "payment_entry",
+   "fieldtype": "Link",
+   "options": "Payment Entry",
+   "label": "To'lov (Payment Entry)",
+   "read_only": 1,
+   "no_copy": 1
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "share": 1,
+   "email": 1
+  },
+  {
+   "role": "System Manager",
+   "permlevel": 1,
+   "read": 1,
+   "write": 1
+  },
+  {
+   "role": "Ichki logistika bo'limi",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "Broker",
+   "read": 1,
+   "write": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "Broker",
+   "permlevel": 1,
+   "read": 1,
+   "write": 1
+  },
+  {
+   "role": "Buxgalter yordamchisi",
+   "read": 1,
+   "write": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "Buxgalter yordamchisi",
+   "permlevel": 1,
+   "read": 1
+  }
+ ],
+ "actions": [],
+ "links": [],
+ "states": [],
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "module": "Erp for logistics",
+ "owner": "Administrator",
+ "modified_by": "Administrator",
+ "creation": "2026-11-22 10:00:00.000000",
+ "modified": "2026-11-22 12:00:00.000000",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "field_order": [
+  "sec_asosiy",
+  "sana",
+  "order",
+  "cb_asosiy",
+  "kliyent",
+  "xitoy_postavshik",
+  "status",
+  "sec_furalar",
+  "furalar",
+  "sec_litsenziya",
+  "litsenziyalar",
+  "sec_qoshimcha",
+  "qaytarishlar",
+  "qoshimcha_hujjatlar",
+  "sec_eksport",
+  "eksport_hujjat",
+  "eksport_hujjat_natija",
+  "sec_tolov",
+  "chek",
+  "summa",
+  "valyuta",
+  "rad_izohi",
+  "cb_tolov",
+  "tolov_hisobi",
+  "sales_invoice",
+  "payment_entry"
+ ]
+}

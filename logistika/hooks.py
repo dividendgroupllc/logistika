@@ -25,6 +25,7 @@ fixtures = [
 			]
 		],
 	},
+	{"dt": "Role", "filters": [["name", "in", ["Ichki logistika bo'limi", "Broker", "Buxgalter yordamchisi"]]]},
 	{
 		"dt": "Property Setter",
 		"filters": [["doc_type", "=", "Account"], ["property", "=", "translated_doctype"]],
@@ -65,7 +66,7 @@ app_include_js = [
 	"/assets/logistika/js/pekin_list_import.js?v=1",
 	"/assets/logistika/js/truck_options.js?v=1",
 	"/assets/logistika/js/bugungi_joylashuv.js?v=2",
-	"/assets/logistika/js/telegram_jobs.js?v=1",
+	"/assets/logistika/js/telegram_jobs.js?v=2",
 ]
 
 # include js, css files in header of web template

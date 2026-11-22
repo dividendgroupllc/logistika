@@ -782,3 +782,92 @@ Yetkazildi — mijozga xabar,Доставлено — сообщение кли�
 Yetkazish,Доставка
 {0}: chiqqan sana,{0}: дата выезда
 {0}: chiqqan sana bugundan keyin bo'lishi mumkin emas,{0}: дата выезда не может быть позже сегодняшней
+"""{0}"" furasi jadvalda ikki marta",Фура «{0}» указана в таблице дважды
+"""{0}"" furasi uchun eksport hujjati allaqachon bor: {1}",Для фуры «{0}» уже есть экспортный документ: {1}
+"""{0}"" — ""{1}"" Order'ining yo'ldagi furasi emas",«{0}» — не фура в пути заказа «{1}»
+Avval qo'shimcha hujjatni yuklang,Сначала загрузите дополнительный документ
+Broker,Брокер
+Broker Qaytarish Sababi,Причина возврата брокером
+Broker qaytarish sabablari,Причины возврата брокером
+Broker qaytarishlari,Возвраты брокера
+Broker qo'shimcha hujjat so'raganda shu ro'yxatdan tanlaydi,"Брокер выбирает из этого списка, запрашивая доп. документы"
+Broker xizmati (Item),Услуга брокера (Item)
+Broker xizmati (Sales Invoice),Услуга брокера (Sales Invoice)
+Broker xizmati — {0} ({1}). Tasdiqladi: {2},Услуга брокера — {0} ({1}). Подтвердил: {2}
+Broker yuklaydi — buxgalter tasdiqlagunga qadar faqat broker va buxgalterga ko'rinadi,Загружает брокер — до подтверждения бухгалтером видят только брокер и бухгалтер
+Brokerda,У брокера
+Brokerga qayta yuborish,Повторно отправить брокеру
+Brokerga yuborish,Отправить брокеру
+Bu amal uchun ruxsatingiz yo'q,У вас нет прав на это действие
+Buxgalter izohi (rad etilgan),Комментарий бухгалтера (отклонено)
+Buxgalter rad etdi: {0},Бухгалтер отклонил: {0}
+Buxgalter tasdig'ida,На подтверждении у бухгалтера
+Buxgalter yordamchisi,Помощник бухгалтера
+Buxgalterga yuborish,Отправить бухгалтеру
+"Chek va summani faqat ""To'lov kutilmoqda"" holatida kiritish mumkin",Чек и сумму можно вводить только в статусе «Ожидается оплата»
+"Chek, summa va valyutani kiriting","Укажите чек, сумму и валюту"
+Chekni rad etish,Отклонить чек
+Eksport litsenziyalari,Экспортные лицензии
+Eksport litsenziyalarini yuklang,Загрузите экспортные лицензии
+Fayl,Файл
+Furalar va litsenziyalarni faqat qoralamada o'zgartirish mumkin,Фуры и лицензии можно менять только в черновике
+"Hujjat ""{0}"" holatida — bu amal mumkin emas",Документ в статусе «{0}» — это действие недоступно
+Ichki eksport hujjati,Внутренний экспортный документ
+Ichki eksport hujjati (broker),Внутренний экспортный документ (брокер)
+Ichki eksport hujjatini yuklang,Загрузите внутренний экспортный документ
+Ichki eksport hujjatini yuklash,Загрузить внутренний экспортный документ
+Ichki logistika bo'limi,Отдел внутренней логистики
+Kamida bitta furani tanlang,Выберите хотя бы одну фуру
+Kim,Кто
+"Logistika Settings'da ""Broker qaytarish sabablari"" ro'yxati bo'sh.",В Logistika Settings список «Причины возврата брокером» пуст.
+Order'da Xitoy postavshik (zavod) ko'rsatilmagan,В заказе не указан китайский поставщик (завод)
+Qaytarish,Вернуть
+Qo'shimcha hujjat kerak,Нужен дополнительный документ
+Qo'shimcha hujjat so'rash,Запросить дополнительный документ
+Qo'shimcha hujjatlar,Дополнительные документы
+Qo'shimcha hujjatni faqat broker so'raganda yuklash mumkin,Доп. документ можно загрузить только по запросу брокера
+Qoralama,Черновик
+Rad etish,Отклонить
+Rad etish sababi,Причина отклонения
+Rad etish sababini yozing,Укажите причину отклонения
+Sabab,Причина
+Sababni ro'yxatdan tanlang,Выберите причину из списка
+Shu Order'ning yo'ldagi Xitoy furalari,Китайские фуры в пути этого заказа
+Status faqat tugmalar orqali o'zgaradi,Статус меняется только кнопками
+Tasdiqlash,Подтвердить
+To'lov,Оплата
+To'lov (Payment Entry),Оплата (Payment Entry)
+To'lov cheki,Чек об оплате
+"To'lov chekini, summa va valyutani kiriting, so'ng ""Buxgalterga yuborish"".","Укажите чек, сумму и валюту, затем «Отправить бухгалтеру»."
+To'lov hisobi valyutasi ({0}) to'lov valyutasiga ({1}) mos emas,Валюта счёта оплаты ({0}) не совпадает с валютой оплаты ({1})
+To'lov hisobi {0} kompaniyasining Cash yoki Bank hisobi bo'lishi kerak,Счёт оплаты должен быть счётом Cash или Bank компании {0}
+To'lov kutilmoqda,Ожидается оплата
+To'lov tasdiqlandi — ichki eksport hujjati quyida.,Оплата подтверждена — внутренний экспортный документ ниже.
+To'lov tasdiqlangach ochiladi,Откроется после подтверждения оплаты
+To'lov tasdiqlanganda zavodga shu xizmat sotiladi (Sales Invoice),При подтверждении оплаты эта услуга продаётся заводу (Sales Invoice)
+To'lovni tasdiqlash,Подтверждение оплаты
+Xitoy Eksport Fayl,Файл экспорта из Китая
+Xitoy Eksport Fura,Фура экспорта из Китая
+Xitoy Eksport Hujjati,Экспортный документ Китая
+Xitoy Eksport Qaytarish,Возврат экспорта из Китая
+Xitoy eksport hujjati (broker),Экспортный документ Китая (брокер)
+Xitoy postavshik (zavod),Китайский поставщик (завод)
+Yakunlandi,Завершено
+broker qo'shimcha hujjat so'radi: {0},брокер запросил доп. документ: {0}
+buxgalter chekni rad etdi: {0},бухгалтер отклонил чек: {0}
+ichki eksport hujjati tayyor — to'lov chekini yuklang,внутренний экспортный документ готов — загрузите чек об оплате
+qo'shimcha hujjatlar yuklandi — qayta ko'rib chiqing,дополнительные документы загружены — проверьте снова
+to'lov cheki tasdiqlash uchun yuborildi,чек об оплате отправлен на подтверждение
+to'lov tasdiqlandi — ichki eksport hujjati ochildi,оплата подтверждена — внутренний экспортный документ открыт
+yangi eksport hujjati brokerga yuborildi,новый экспортный документ отправлен брокеру
+{0} valyutasidagi Cash/Bank hisobi topilmadi.,Счёт Cash/Bank в валюте {0} не найден.
+"Broker xizmati — {0} ({1}), to'lov {2} {3}. Tasdiqladi: {4}","Услуга брокера — {0} ({1}), оплата {2} {3}. Подтвердил: {4}"
+Broker yuklagan hujjat yopiq saqlovda — buxgalter tasdiqlagunga qadar ichki logistikaga ko'rinmaydi,Документ брокера в закрытом хранилище — до подтверждения бухгалтером не виден внутренней логистике
+Bu maydonlarni faqat tizim o'zgartiradi,Эти поля изменяет только система
+Faqat qoralamadagi eksport hujjatini o'chirish mumkin,Удалить можно только экспортный документ в статусе черновика
+Ichki eksport hujjati topilmadi,Внутренний экспортный документ не найден
+"Ichki eksport hujjatini shu hujjatning ""Ichki eksport hujjatini yuklash"" tugmasi orqali yopiq (private) holda yuklang",Загрузите внутренний экспортный документ закрытым (private) через кнопку «Загрузить внутренний экспортный документ» этого документа
+Order'ni faqat qoralamada o'zgartirish mumkin,Заказ можно менять только в черновике
+Xitoy Eksport Yopiq Fayl,Закрытый файл экспорта из Китая
+{0} → {1} kursi topilmadi — Currency Exchange'ga qo'shing,Курс {0} → {1} не найден — добавьте в Currency Exchange
+"Broker qo'shimcha hujjat so'radi: <b>{0}</b>{1}. Hujjatni ""Qo'shimcha hujjatlar""ga yuklab, qayta yuboring.",Брокер запросил доп. документ: <b>{0}</b>{1}. Загрузите его в «Дополнительные документы» и отправьте повторно.

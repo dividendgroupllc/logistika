@@ -16,6 +16,16 @@ logistika.telegram_jobs.queued = function (r) {
 };
 
 $(document).on("app_ready", () => {
+	// Xitoy Eksport Hujjati va boshqa topshiriqlar — qabul qiluvchiga o'ng tomonda havolali xabar.
+	frappe.realtime.on("logistika_topshiriq", (data) => {
+		const link = `<a href="/app/${frappe.router.slug(data.doctype)}/${encodeURIComponent(data.name)}">${frappe.utils.escape_html(data.message)}</a>`;
+		frappe.show_alert({ message: link, indicator: "blue" }, 20);
+		frappe.utils.play_sound("alert");
+		if (cur_frm && cur_frm.doctype === data.doctype && cur_frm.doc.name === data.name && !cur_frm.is_dirty()) {
+			cur_frm.reload_doc();
+		}
+	});
+
 	frappe.realtime.on("logistika_telegram_done", (data) => {
 		frappe.show_alert({ message: data.message, indicator: data.ok ? "green" : "orange" }, 10);
 		if (data.doctype && cur_frm && cur_frm.doctype === data.doctype && cur_frm.doc.name === data.name && !cur_frm.is_dirty()) {

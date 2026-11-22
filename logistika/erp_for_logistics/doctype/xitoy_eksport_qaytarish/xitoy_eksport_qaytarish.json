@@ -1,0 +1,59 @@
+{
+ "name": "Xitoy Eksport Qaytarish",
+ "istable": 1,
+ "editable_grid": 1,
+ "fields": [
+  {
+   "fieldname": "sabab",
+   "fieldtype": "Data",
+   "label": "Sabab",
+   "read_only": 1,
+   "in_list_view": 1,
+   "columns": 3
+  },
+  {
+   "fieldname": "izoh",
+   "fieldtype": "Small Text",
+   "label": "Izoh",
+   "read_only": 1,
+   "in_list_view": 1,
+   "columns": 4
+  },
+  {
+   "fieldname": "kim",
+   "fieldtype": "Link",
+   "options": "User",
+   "label": "Kim",
+   "read_only": 1,
+   "in_list_view": 1,
+   "columns": 2
+  },
+  {
+   "fieldname": "sana",
+   "fieldtype": "Datetime",
+   "label": "Sana",
+   "read_only": 1,
+   "in_list_view": 1,
+   "columns": 1
+  }
+ ],
+ "permissions": [],
+ "actions": [],
+ "links": [],
+ "states": [],
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "module": "Erp for logistics",
+ "owner": "Administrator",
+ "modified_by": "Administrator",
+ "creation": "2026-11-22 10:00:00.000000",
+ "modified": "2026-11-22 10:00:00.000000",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "field_order": [
+  "sabab",
+  "izoh",
+  "kim",
+  "sana"
+ ]
+}

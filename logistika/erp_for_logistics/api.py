@@ -279,3 +279,42 @@ def kz_trucks_for_loading(order, current=None):
 	departed |= set(frappe.get_all("KZ Transit", filters={"order": order}, pluck="kz_truck"))
 	own = frappe.db.get_value("KZ Truck Loading", current, "kz_truck") if current else None
 	return [t for t in dict.fromkeys(trucks) if t not in departed or t == own]
+
+
+_LOADED_SOURCES = (("KZ Truck Loading", "KZ Load Item", "fakt_ortilgan"), ("Peregruz", "Peregruz Item", "fakt_transload"))
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def orders_loaded_not_delivered(doctype, txt, searchfield, start, page_len, filters):
+	"""KZ Transit'da "Order" tanlovi: KZ furaga ortilgan (submit qilingan yuklash yoki
+	Peregruz), lekin hali yetkazilmagan yuki bor Order'lar."""
+	loaded = " or ".join(
+		f"""exists (select 1 from `tab{parent}` p inner join `tab{child}` i on i.parent = p.name
+			where p.docstatus = 1 and i.`order` = od.name and i.{qty} > 0)"""
+		for parent, child, qty in _LOADED_SOURCES
+	)
+	return frappe.db.sql(
+		f"""select o.name, o.kliyent from `tabOrder` o
+		where o.docstatus = 1 and o.name like %(txt)s and exists (
+			select 1 from `tabOrder Detail` od
+			where od.`order` = o.name and od.status != 'Клиент получил' and ({loaded})
+		)
+		order by o.creation desc
+		limit %(start)s, %(page_len)s""",
+		{"txt": f"%{txt}%", "start": int(start), "page_len": int(page_len)},
+	)
+
+
+@frappe.whitelist()
+def kz_trucks_for_transit(order, current=None):
+	"""KZ Transit'da "KZ fura" tanlovi: shu Order uchun ortilgan, hali KZ Transit'i ochilmagan
+	furalar (`current` — ochiq turgan KZ Transit, o'z furasi qoladi)."""
+	if not order:
+		return []
+	frappe.has_permission("Order", "read", doc=order, throw=True)
+	loaded = []
+	for parent, _child, _qty in _LOADED_SOURCES:
+		loaded += frappe.get_all(parent, filters={"order": order, "docstatus": 1}, pluck="kz_truck", order_by="creation asc")
+	taken = set(frappe.get_all("KZ Transit", filters={"order": order, "name": ["!=", current or ""]}, pluck="kz_truck"))
+	return [t for t in dict.fromkeys(loaded) if t and t not in taken]

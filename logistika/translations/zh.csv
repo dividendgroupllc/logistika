@@ -766,3 +766,49 @@ Yetkazildi — mijozga xabar,已交付 — 通知客户
 Yetkazish,交付
 {0}: chiqqan sana,{0}：出发日期
 {0}: chiqqan sana bugundan keyin bo'lishi mumkin emas,{0}：出发日期不能晚于今天
+Broker,报关行
+Broker Qaytarish Sababi,报关行退回原因
+Broker qaytarish sabablari,报关行退回原因
+Broker qaytarishlari,报关行退回记录
+Broker qo'shimcha hujjat so'raganda shu ro'yxatdan tanlaydi,报关行要求补充文件时从此列表选择
+Broker xizmati (Item),报关服务（物料）
+Broker xizmati (Sales Invoice),报关服务（销售发票）
+Broker yuklaydi — buxgalter tasdiqlagunga qadar faqat broker va buxgalterga ko'rinadi,由报关行上传 — 会计确认前仅报关行和会计可见
+Brokerda,报关行处理中
+Buxgalter izohi (rad etilgan),会计备注（已驳回）
+Buxgalter tasdig'ida,待会计确认
+Buxgalter yordamchisi,会计助理
+Eksport litsenziyalari,出口许可证
+Fayl,文件
+Ichki eksport hujjati,国内出口单据
+Ichki eksport hujjati (broker),国内出口单据（报关行）
+Ichki logistika bo'limi,国内物流部
+Kim,操作人
+Qo'shimcha hujjat kerak,需要补充文件
+Qo'shimcha hujjatlar,补充文件
+Qoralama,草稿
+Sabab,原因
+Shu Order'ning yo'ldagi Xitoy furalari,此订单的在途中国货车
+To'lov,付款
+To'lov (Payment Entry),付款（付款凭证）
+To'lov cheki,付款收据
+To'lov kutilmoqda,待付款
+To'lov tasdiqlangach ochiladi,付款确认后开放
+To'lov tasdiqlanganda zavodga shu xizmat sotiladi (Sales Invoice),付款确认后向工厂销售此服务（销售发票）
+Xitoy Eksport Fayl,中国出口文件
+Xitoy Eksport Fura,中国出口货车
+Xitoy Eksport Hujjati,中国出口单据
+Xitoy Eksport Qaytarish,中国出口退回
+Xitoy eksport hujjati (broker),中国出口单据（报关行）
+Xitoy postavshik (zavod),中国供应商（工厂）
+Yakunlandi,已完成
+"Broker xizmati — {0} ({1}), to'lov {2} {3}. Tasdiqladi: {4}",报关服务 — {0}（{1}），付款 {2} {3}。确认人：{4}
+Broker yuklagan hujjat yopiq saqlovda — buxgalter tasdiqlagunga qadar ichki logistikaga ko'rinmaydi,报关行上传的单据处于封存状态 — 会计确认前国内物流不可见
+Bu maydonlarni faqat tizim o'zgartiradi,这些字段只能由系统修改
+Faqat qoralamadagi eksport hujjatini o'chirish mumkin,只能删除草稿状态的出口单据
+Ichki eksport hujjati topilmadi,未找到国内出口单据
+"Ichki eksport hujjatini shu hujjatning ""Ichki eksport hujjatini yuklash"" tugmasi orqali yopiq (private) holda yuklang",请通过本单据的“上传国内出口单据”按钮以私有方式上传
+Order'ni faqat qoralamada o'zgartirish mumkin,订单只能在草稿中修改
+Xitoy Eksport Yopiq Fayl,中国出口封存文件
+{0} → {1} kursi topilmadi — Currency Exchange'ga qo'shing,未找到 {0} → {1} 汇率 — 请在 Currency Exchange 中添加
+"Broker qo'shimcha hujjat so'radi: <b>{0}</b>{1}. Hujjatni ""Qo'shimcha hujjatlar""ga yuklab, qayta yuboring.",报关行要求补充文件：<b>{0}</b>{1}。请上传到“补充文件”后重新发送。

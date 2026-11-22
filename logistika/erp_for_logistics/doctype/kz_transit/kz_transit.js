@@ -5,14 +5,14 @@ const KZT_DUPLICATE_LABEL = "Bu order va fura uchun KZ Transit";
 
 frappe.ui.form.on("KZ Transit", {
 	refresh(frm) {
-		logistika.truck_options.apply(frm, { kz: "kz_truck" });
+		set_transit_truck_options(frm);
 		apply_gps_row_states(frm);
 		setTimeout(() => apply_gps_row_states(frm), 200);
 		bind_gps_row_clicks();
 		render_customer_chat(frm);
 	},
 	order(frm) {
-		logistika.truck_options.apply(frm, { kz: "kz_truck" });
+		set_transit_truck_options(frm);
 		render_customer_chat(frm);
 	},
 	kz_truck(frm) {
@@ -227,5 +227,25 @@ frappe.ui.form.on("KZ Transit", {
 		frm.set_query("tolov_hisobi", () => ({
 			filters: { account_type: ["in", ["Cash", "Bank"]], is_group: 0 },
 		}));
+	},
+});
+
+
+// KZ fura — shu Order uchun ortilgan, hali KZ Transit'i ochilmagan furalar.
+function set_transit_truck_options(frm) {
+	if (!frm.doc.order) return;
+	frappe
+		.call("logistika.erp_for_logistics.api.kz_trucks_for_transit", { order: frm.doc.order, current: frm.is_new() ? null : frm.doc.name })
+		.then((r) => {
+			const options = [""].concat(r.message || []);
+			if (frm.doc.kz_truck && !options.includes(frm.doc.kz_truck)) options.push(frm.doc.kz_truck);
+			frm.set_df_property("kz_truck", "options", options.join("\n"));
+		});
+}
+
+frappe.ui.form.on("KZ Transit", {
+	setup(frm) {
+		// Faqat KZ furaga ortilgan, hali yetkazilmagan yuki bor Order'lar.
+		frm.set_query("order", () => ({ query: "logistika.erp_for_logistics.api.orders_loaded_not_delivered" }));
 	},
 });

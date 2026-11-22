@@ -1,0 +1,29 @@
+[
+ {
+  "doctype": "Role",
+  "name": "Ichki logistika bo'limi",
+  "role_name": "Ichki logistika bo'limi",
+  "desk_access": 1,
+  "disabled": 0,
+  "is_custom": 0,
+  "modified": "2026-11-22 10:00:00.000000"
+ },
+ {
+  "doctype": "Role",
+  "name": "Broker",
+  "role_name": "Broker",
+  "desk_access": 1,
+  "disabled": 0,
+  "is_custom": 0,
+  "modified": "2026-11-22 10:00:00.000000"
+ },
+ {
+  "doctype": "Role",
+  "name": "Buxgalter yordamchisi",
+  "role_name": "Buxgalter yordamchisi",
+  "desk_access": 1,
+  "disabled": 0,
+  "is_custom": 0,
+  "modified": "2026-11-22 10:00:00.000000"
+ }
+]

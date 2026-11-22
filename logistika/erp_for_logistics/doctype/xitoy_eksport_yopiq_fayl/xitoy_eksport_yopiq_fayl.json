@@ -1,0 +1,58 @@
+{
+ "actions": [],
+ "links": [],
+ "states": [],
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "module": "Erp for logistics",
+ "owner": "Administrator",
+ "modified_by": "Administrator",
+ "creation": "2026-11-22 12:00:00.000000",
+ "modified": "2026-11-22 12:00:00.000000",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "name": "Xitoy Eksport Yopiq Fayl",
+ "autoname": "XEYF-.#####",
+ "naming_rule": "Expression (old style)",
+ "fields": [
+  {
+   "fieldname": "hujjat",
+   "fieldtype": "Link",
+   "options": "Xitoy Eksport Hujjati",
+   "label": "Xitoy Eksport Hujjati",
+   "reqd": 1,
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "fayl",
+   "fieldtype": "Attach",
+   "label": "Ichki eksport hujjati",
+   "read_only": 1
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1
+  },
+  {
+   "role": "Broker",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "Buxgalter yordamchisi",
+   "read": 1
+  }
+ ],
+ "field_order": [
+  "hujjat",
+  "fayl"
+ ]
+}

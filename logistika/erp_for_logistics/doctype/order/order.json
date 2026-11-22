@@ -246,7 +246,7 @@
    "group": "Mijoz"
   }
  ],
- "modified": "2026-11-19 22:00:00.000000",
+ "modified": "2026-11-22 11:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Order",
@@ -267,6 +267,24 @@
    "share": 1,
    "submit": 1,
    "write": 1
+  },
+  {
+   "role": "Ichki logistika bo'limi",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "Broker",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "Buxgalter yordamchisi",
+   "read": 1,
+   "report": 1,
+   "print": 1
   }
  ],
  "row_format": "Dynamic",
