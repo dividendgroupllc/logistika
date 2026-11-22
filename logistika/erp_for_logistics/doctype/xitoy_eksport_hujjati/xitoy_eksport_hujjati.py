@@ -345,8 +345,9 @@ def _create_sale_and_payment(doc, account, approver):
 	si.submit()
 
 	# bank_account — kirim shu hisobga; kurs va summalar ERPNext'ning o'zida shu hisob valyutasi
-	# bo'yicha hisoblanadi (keyin paid_to'ni almashtirish kursni yangilamaydi).
-	pe = get_payment_entry("Sales Invoice", si.name, bank_account=account, ignore_permissions=True)
+	# bo'yicha hisoblanadi (keyin paid_to'ni almashtirish kursni yangilamaydi). ignore_permissions
+	# berilmaydi: ERPNext 15.124+ da bu parametr yo'q, bu yer esa baribir _as_system() ichida.
+	pe = get_payment_entry("Sales Invoice", si.name, bank_account=account)
 	pe.reference_no = doc.name
 	pe.reference_date = today()
 	pe.insert(ignore_permissions=True)

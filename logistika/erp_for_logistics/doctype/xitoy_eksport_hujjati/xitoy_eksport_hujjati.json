@@ -60,7 +60,8 @@
   {
    "fieldname": "sec_furalar",
    "fieldtype": "Section Break",
-   "label": "Furalar"
+   "label": "Furalar",
+   "permlevel": 3
   },
   {
    "fieldname": "furalar",
@@ -68,37 +69,43 @@
    "options": "Xitoy Eksport Fura",
    "label": "Furalar",
    "reqd": 1,
-   "description": "Shu Order'ning yo'ldagi Xitoy furalari"
+   "description": "Shu Order'ning yo'ldagi Xitoy furalari",
+   "permlevel": 3
   },
   {
    "fieldname": "sec_litsenziya",
    "fieldtype": "Section Break",
-   "label": "Eksport litsenziyalari"
+   "label": "Eksport litsenziyalari",
+   "permlevel": 3
   },
   {
    "fieldname": "litsenziyalar",
    "fieldtype": "Table",
    "options": "Xitoy Eksport Fayl",
-   "label": "Eksport litsenziyalari"
+   "label": "Eksport litsenziyalari",
+   "permlevel": 3
   },
   {
    "fieldname": "sec_qoshimcha",
    "fieldtype": "Section Break",
    "label": "Qo'shimcha hujjatlar",
-   "depends_on": "eval:doc.status==\"Qo'shimcha hujjat kerak\" || (doc.qaytarishlar || []).length"
+   "depends_on": "eval:doc.status==\"Qo'shimcha hujjat kerak\" || (doc.qaytarishlar || []).length",
+   "permlevel": 3
   },
   {
    "fieldname": "qaytarishlar",
    "fieldtype": "Table",
    "options": "Xitoy Eksport Qaytarish",
    "label": "Broker qaytarishlari",
-   "read_only": 1
+   "read_only": 1,
+   "permlevel": 3
   },
   {
    "fieldname": "qoshimcha_hujjatlar",
    "fieldtype": "Table",
    "options": "Xitoy Eksport Fayl",
-   "label": "Qo'shimcha hujjatlar"
+   "label": "Qo'shimcha hujjatlar",
+   "permlevel": 3
   },
   {
    "fieldname": "sec_eksport",
@@ -124,12 +131,14 @@
   {
    "fieldname": "sec_tolov",
    "fieldtype": "Section Break",
-   "label": "To'lov"
+   "label": "To'lov",
+   "permlevel": 2
   },
   {
    "fieldname": "chek",
    "fieldtype": "Attach",
-   "label": "To'lov cheki"
+   "label": "To'lov cheki",
+   "permlevel": 2
   },
   {
    "fieldname": "summa",
@@ -138,7 +147,8 @@
    "label": "Summa",
    "non_negative": 1,
    "hidden": 1,
-   "read_only": 1
+   "read_only": 1,
+   "permlevel": 2
   },
   {
    "fieldname": "valyuta",
@@ -146,24 +156,28 @@
    "options": "Currency",
    "label": "Valyuta",
    "hidden": 1,
-   "read_only": 1
+   "read_only": 1,
+   "permlevel": 2
   },
   {
    "fieldname": "rad_izohi",
    "fieldtype": "Small Text",
    "label": "Buxgalter izohi (rad etilgan)",
-   "read_only": 1
+   "read_only": 1,
+   "permlevel": 2
   },
   {
    "fieldname": "cb_tolov",
-   "fieldtype": "Column Break"
+   "fieldtype": "Column Break",
+   "permlevel": 2
   },
   {
    "fieldname": "tolov_hisobi",
    "fieldtype": "Link",
    "options": "Account",
    "label": "To'lov hisobi",
-   "read_only": 1
+   "read_only": 1,
+   "permlevel": 2
   },
   {
    "fieldname": "sales_invoice",
@@ -171,7 +185,8 @@
    "options": "Sales Invoice",
    "label": "Broker xizmati (Sales Invoice)",
    "read_only": 1,
-   "no_copy": 1
+   "no_copy": 1,
+   "permlevel": 2
   },
   {
    "fieldname": "payment_entry",
@@ -179,7 +194,8 @@
    "options": "Payment Entry",
    "label": "To'lov (Payment Entry)",
    "read_only": 1,
-   "no_copy": 1
+   "no_copy": 1,
+   "permlevel": 2
   }
  ],
  "permissions": [
@@ -234,6 +250,40 @@
    "role": "Buxgalter yordamchisi",
    "permlevel": 1,
    "read": 1
+  },
+  {
+   "role": "System Manager",
+   "permlevel": 2,
+   "read": 1,
+   "write": 1
+  },
+  {
+   "role": "Ichki logistika bo'limi",
+   "permlevel": 2,
+   "read": 1,
+   "write": 1
+  },
+  {
+   "role": "Buxgalter yordamchisi",
+   "permlevel": 2,
+   "read": 1
+  },
+  {
+   "role": "System Manager",
+   "permlevel": 3,
+   "read": 1,
+   "write": 1
+  },
+  {
+   "role": "Ichki logistika bo'limi",
+   "permlevel": 3,
+   "read": 1,
+   "write": 1
+  },
+  {
+   "role": "Broker",
+   "permlevel": 3,
+   "read": 1
   }
  ],
  "actions": [],
@@ -245,7 +295,7 @@
  "owner": "Administrator",
  "modified_by": "Administrator",
  "creation": "2026-11-22 10:00:00.000000",
- "modified": "2026-11-22 14:00:00.000000",
+ "modified": "2026-11-22 17:00:00.000000",
  "sort_field": "modified",
  "sort_order": "DESC",
  "field_order": [

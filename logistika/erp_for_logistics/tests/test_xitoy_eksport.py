@@ -246,6 +246,68 @@ class TestXitoyEksport(FrappeTestCase):
 		with self.assertRaises(frappe.ValidationError):
 			self.as_(self.log, add_extra)  # qoralamada — broker hali qaytarmagan
 
+	def test_payment_section_hidden_from_broker(self):
+		doc = self.new_doc()
+		self.to_payment(doc)
+		self.pay(doc)
+		self.as_(self.bux, xeh.approve, doc.name, self.cny_cash)
+		fields = ("chek", "summa", "valyuta", "tolov_hisobi", "sales_invoice", "payment_entry")
+
+		def seen():
+			d = frappe.get_doc("Xitoy Eksport Hujjati", doc.name)
+			d.apply_fieldlevel_read_permissions()
+			return {f: bool(d.get(f)) for f in fields}
+
+		self.assertFalse(any(self.as_(self.broker, seen).values()))
+		self.assertTrue(all(self.as_(self.log, seen).values()))
+		self.assertTrue(all(self.as_(self.bux, seen).values()))
+
+	def test_accountant_sees_only_header_export_and_payment(self):
+		doc = self.new_doc()
+		self.as_(self.log, xeh.send_to_broker, doc.name)
+		self.as_(self.broker, xeh.request_documents, doc.name, "Invoys kerak")
+
+		def add_extra():
+			d = frappe.get_doc("Xitoy Eksport Hujjati", doc.name)
+			d.append("qoshimcha_hujjatlar", {"fayl": self.file(d, "qoshimcha_hujjatlar", "invoys.pdf")})
+			d.save()
+
+		self.as_(self.log, add_extra)
+		self.as_(self.log, xeh.resend_to_broker, doc.name)
+		self.as_(self.broker, xeh.upload_export_document, doc.name, self.broker_file(doc))
+		self.pay(doc)
+		self.as_(self.bux, xeh.approve, doc.name, self.cny_cash)
+		visible = ("sana", "order", "status", "eksport_hujjat_natija", "chek", "sales_invoice", "payment_entry")
+		hidden = ("furalar", "litsenziyalar", "qoshimcha_hujjatlar", "qaytarishlar")
+
+		def seen(user):
+			def look():
+				d = frappe.get_doc("Xitoy Eksport Hujjati", doc.name)
+				d.apply_fieldlevel_read_permissions()
+				return {f: bool(d.get(f)) for f in visible + hidden}
+
+			return self.as_(user, look)
+
+		self.assertEqual(seen(self.bux), {**{f: True for f in visible}, **{f: False for f in hidden}})
+		self.assertTrue(all(seen(self.log)[f] for f in hidden))
+		self.assertTrue(all(seen(self.broker)[f] for f in hidden))
+
+	def test_approve_with_newer_erpnext_payment_entry_signature(self):
+		"""ERPNext 15.124+: get_payment_entry'da ignore_permissions parametri yo'q."""
+		from erpnext.accounts.doctype.payment_entry import payment_entry as pe_mod
+
+		real = pe_mod.get_payment_entry
+
+		def newer(dt, dn, party_amount=None, bank_account=None, bank_amount=None, party_type=None, payment_type=None, reference_date=None, created_from_payment_request=False):
+			return real(dt, dn, party_amount=party_amount, bank_account=bank_account, bank_amount=bank_amount, party_type=party_type, payment_type=payment_type, reference_date=reference_date)
+
+		doc = self.new_doc()
+		self.to_payment(doc)
+		self.pay(doc)
+		with patch.object(pe_mod, "get_payment_entry", newer):
+			self.as_(self.bux, xeh.approve, doc.name, self.cny_cash)
+		self.assertEqual(self.status(doc), "Yakunlandi")
+
 	def test_same_truck_on_another_order_allowed(self):
 		self.new_doc(plates=("_T E1",))
 		order2 = make_order(kliyent="_T XEH Mijoz 2")

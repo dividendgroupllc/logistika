@@ -11,11 +11,35 @@ function has(role) {
 	return frappe.user.has_role(role) || frappe.user.has_role("System Manager");
 }
 
+// Rolga ko'rinmaydigan bo'limlar — maydon ruxsat darajasi bilan (server qiymatni bermaydi):
+// 2 — to'lov (brokerga yo'q), 3 — furalar, litsenziya, qo'shimcha hujjatlar (buxgalterga yo'q).
+// Forma tarixidagi o'zgarish qatorlari, "fayl biriktirildi" yozuvlari va yon paneldagi
+// biriktirmalar ham yashiriladi — kerakli fayllar maydon/jadvallardan ochiladi.
+function hide_restricted(frm) {
+	const restricted = frm.meta.fields.filter(
+		(df) => df.permlevel && !frappe.perm.has_perm(frm.doctype, df.permlevel, "read")
+	);
+	if (!restricted.length) return;
+	restricted.forEach((df) => {
+		const meta_df = frappe.meta.get_docfield(frm.doctype, df.fieldname);
+		if (meta_df) meta_df.hidden = 1;
+	});
+	// 1-daraja (broker fayli ushlagichi) bu yerga fayl biriktirmaydi — faqat 2/3 uchun.
+	if (!restricted.some((df) => df.permlevel >= 2)) return;
+	const info = frm.get_docinfo && frm.get_docinfo();
+	if (info && (info.attachment_logs || []).length) {
+		info.attachment_logs = [];
+		frm.timeline && frm.timeline.refresh();
+	}
+	$(frm.wrapper).find(".form-attachments").hide();
+}
+
 frappe.ui.form.on("Xitoy Eksport Hujjati", {
 	setup(frm) {
 		frm.set_query("order", () => ({ filters: { docstatus: 1 } }));
 	},
 	refresh(frm) {
+		hide_restricted(frm);
 		set_truck_options(frm);
 		lock_fields(frm);
 		show_intro(frm);
@@ -54,7 +78,7 @@ function run(frm, method, args = {}) {
 
 // Furalar — shu Order'ning yo'ldagi, boshqa eksport hujjatida bo'lmagan Xitoy furalari.
 function set_truck_options(frm) {
-	if (!frm.doc.order) return;
+	if (!frm.doc.order || !frappe.perm.has_perm(frm.doctype, 3, "write")) return;
 	frappe
 		.call(`${XEH}.order_trucks`, { order: frm.doc.order, current: frm.is_new() ? null : frm.doc.name })
 		.then((r) => {
@@ -83,7 +107,7 @@ function show_intro(frm) {
 			frappe.utils.escape_html(last.sabab),
 			last.izoh ? " — " + frappe.utils.escape_html(last.izoh) : "",
 		]), "orange");
-	} else if (s === "To'lov kutilmoqda") {
+	} else if (s === "To'lov kutilmoqda" && has(ROLES.log)) {
 		frm.set_intro(
 			(frm.doc.rad_izohi ? __("Buxgalter rad etdi: {0}", [frappe.utils.escape_html(frm.doc.rad_izohi)]) + "<br>" : "") +
 				__("To'lov chekini yuklang, so'ng \"Buxgalterga yuborish\" (summa avtomatik)."),

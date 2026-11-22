@@ -179,6 +179,11 @@ app_include_js = [
 # Hook on document methods and events
 
 doc_events = {
+	# Kurs bir yo'nalishda kiritiladi, teskarisi avtomatik (logistika/erp_for_logistics/kurs.py).
+	"Currency Exchange": {
+		"on_update": "logistika.erp_for_logistics.kurs.sync_inverse",
+		"on_trash": "logistika.erp_for_logistics.kurs.delete_inverse",
+	},
 	"Supplier": {
 		"validate": "logistika.erp_for_logistics.quick_create.validate_supplier",
 	},
