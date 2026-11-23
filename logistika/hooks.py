@@ -25,7 +25,7 @@ fixtures = [
 			]
 		],
 	},
-	{"dt": "Role", "filters": [["name", "in", ["Ichki logistika bo'limi", "Broker", "Buxgalter yordamchisi"]]]},
+	{"dt": "Role", "filters": [["name", "in", ["Ichki logistika bo'limi", "Broker", "Buxgalter yordamchisi", "Tashqi logistika bo'limi", "Tashqi broker"]]]},
 	{
 		"dt": "Property Setter",
 		"filters": [["doc_type", "=", "Account"], ["property", "=", "translated_doctype"]],
@@ -158,6 +158,14 @@ app_include_js = [
 # -----------
 # Permissions evaluated in scripted ways
 
+# Tashqi broker — faqat o'ziga yuborilgan Logistic Documentation'lar.
+permission_query_conditions = {
+	"Logistic Documentation": "logistika.erp_for_logistics.ld_ruxsat.query_conditions",
+}
+has_permission = {
+	"Logistic Documentation": "logistika.erp_for_logistics.ld_ruxsat.has_permission",
+}
+
 # permission_query_conditions = {
 # 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
 # }
@@ -251,6 +259,8 @@ scheduler_events = {
 # Request Events
 # ----------------
 # before_request = ["logistika.utils.before_request"]
+# Tashqi broker — faqat LD metodlari (ld_ruxsat.guard_request).
+before_request = ["logistika.erp_for_logistics.ld_ruxsat.guard_request"]
 # after_request = ["logistika.utils.after_request"]
 
 # Job Events

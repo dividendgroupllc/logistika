@@ -818,3 +818,70 @@ Chek buxgalterga yuborilganda summa avtomatik shu bo'ladi,收据发送给会计�
 "Chekni faqat ""To'lov kutilmoqda"" holatida yuklash mumkin",只能在“待付款”状态下上传收据
 To'lov chekini yuklang,请上传付款收据
 "To'lov chekini yuklang, so'ng ""Buxgalterga yuborish"" (summa avtomatik).",请上传付款收据，然后点击“发送给会计”（金额自动）。
+"""Yo'lga chiqdi"" tugmasi bosilgach ""Yo'lda"" bo'ladi — kunlik GPS (Traccar) yangilanishi faqat ""Yo'lda"" hujjatlar uchun",点击“已出发”后变为“在途”——每日GPS（Traccar）更新仅适用于“在途”单据
+"""{0}"" faqat {1} holatida o'zgartiriladi",“{0}”只能在{1}状态下修改
+"""{0}"" maydoni qo'lda o'zgartirilmaydi",字段“{0}”不能手动修改
+Avval CO'ni yuklang,请先上传CO
+Avval ED va CMR'ni yuklang,请先上传ED和CMR
+Avval Peregruz danniy hujjatini yuklang,请先上传转运数据文件
+Avval tranzit rasmiylashtirilsin (Logistic Documentation yakunlanmagan),请先完成过境手续（物流单据未完成）
+Broker yopiq fayli,报关员保密文件
+Brokerga qayta jo'natish,重新发送给报关员
+Bu qadamni {0} bajaradi,此步骤由{0}执行
+CO (kelib chiqish sertifikati),CO（原产地证书）
+CO tayyor,CO已就绪
+CO tayyor — hujjatlarni tashqi brokerga jo'nating,CO已就绪——请将文件发送给外部报关员
+CO tayyor ✓,CO已就绪 ✓
+CO xodimi,CO负责人
+ED (eksport deklaratsiya),ED（出口报关单）
+ED va CMR tayyor,ED和CMR已就绪
+ED va CMR tayyor ✓,ED和CMR已就绪 ✓
+ED va CMR xodimi,ED和CMR负责人
+"ED va CMR yuklaydi, tashqi brokerga jo'natadi",上传ED和CMR，发送给外部报关员
+"ED, CMR, CO",ED、CMR、CO
+ED/CMR va CO tayyor deb belgilanishi kerak,ED/CMR和CO须标记为已就绪
+Faqat Qoralama holatidagi hujjatni o'chirish mumkin,只能删除草稿状态的单据
+Fayl shu hujjatga (yopiq holda) yuklangan bo'lishi kerak,文件须（以私有方式）上传到此单据
+Fura allaqachon yo'lga chiqqan,货车已出发
+Holat tugmalar orqali o'zgaradi,状态只能通过按钮更改
+Hujjat holati: {0},单据状态：{0}
+Hujjat turini tanlang: {0},请选择文件类型：{0}
+Hujjat yetishmaydi,缺少文件
+Hujjatlar tayyorlanmoqda,文件准备中
+"Hujjatlarni ko'rib chiqing, tranzit hujjatini yuklab turini tanlang.",请审核文件，上传过境文件并选择类型。
+Invoice kutilmoqda,等待发票
+Jo'nashga tayyor,待出发
+Kliyentga jo'natish,发送给客户
+LD Yopiq Fayl,物流单据保密文件
+"Logistika Settings'da ""Tashqi broker qaytarish sabablari"" ro'yxati bo'sh.",Logistika Settings中“外部报关员退回原因”列表为空。
+Order va KZ fura jo'natilgandan keyin o'zgartirilmaydi,发送后不能修改订单和KZ货车
+"Pekin invoice bo'yicha ED, CMR va CO'ni yuklang va ""tayyor"" deb belgilang.",根据北京发票上传ED、CMR和CO并标记“已就绪”。
+"Pekin invoice keldi — ED, CMR va CO tayyorlang",北京发票已到——请准备ED、CMR和CO
+Pekin invoice yuklash (mijoz o'rniga),上传北京发票（代客户）
+Pekin list va haydovchi,北京装箱单和司机
+Peregruz danniy mijozga yuborildi — Pekin invoice kutilmoqda.,转运数据已发送给客户——等待北京发票。
+Peregruz danniy xodimi,转运数据负责人
+Peregruz danniy yuklaydi va mijozga jo'natadi,上传转运数据并发送给客户
+Qaytarishlar tarixi,退回记录
+Qaytarishlar tarixi qo'lda o'zgartirilmaydi,退回记录不能手动修改
+Saqlangandan keyin ko'rinadi,保存后可见
+Tashqi broker,外部报关员
+Tashqi broker qaytarish sabablari,外部报关员退回原因
+Tashqi brokerga jo'natish,发送给外部报关员
+Tashqi logistika (Logistic Documentation),外部物流（物流单据）
+Tashqi logistika bo'limi,外部物流部
+Tayyor,完成
+Tranzit hujjati,过境文件
+Tranzit hujjatini yuklash,上传过境文件
+Tranzit rasmiylashtirildi: {0},过境手续已完成：{0}
+Tranzit rasmiylashtiruvi,过境手续
+Tranzit rasmiylashtiruvi (Akt peregruza / TIR karnet),过境手续（转运单/TIR证）
+Tranzit rasmiylashtiruvi (tashqi broker),过境手续（外部报关员）
+Yo'lga chiqdi,已出发
+hujjatlar tuzatildi — qayta ko'rib chiqing,文件已更正——请重新审核
+tashqi broker qaytardi: {0},外部报关员退回：{0}
+tranzit rasmiylashtirildi: {0},过境手续已完成：{0}
+tranzit rasmiylashtiruvi uchun hujjatlar yuborildi,已发送文件办理过境手续
+Перегруз данный va Pekin invoice,转运数据和北京发票
+"""Yo'lda"" holati faqat ""Yo'lga chiqdi"" tugmasi orqali qo'yiladi",“在途”状态只能通过“已出发”按钮设置
+"Fura yo'lga chiqdi, lekin GPS joylashuvi hozircha olinmadi",货车已出发，但暂未获取GPS位置

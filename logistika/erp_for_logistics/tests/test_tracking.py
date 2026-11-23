@@ -128,6 +128,9 @@ class TestKzTracking(FrappeTestCase):
 		self.kzt = frappe.get_doc(
 			{"doctype": "KZ Transit", "sana": today(), "order": self.order.name, "kz_truck": "01A123BC"}
 		).insert(ignore_permissions=True)
+		# Kuzatuv "Yo'lga chiqdi"dan keyin boshlanadi (yangi transit — "Jo'nashga tayyor").
+		frappe.db.set_value("KZ Transit", self.kzt.name, "holati", "Yo'lda")
+		self.kzt.reload()
 
 	def tearDown(self):
 		frappe.db.rollback(save_point="kz_tracking_test")

@@ -77,14 +77,15 @@
    "read_only": 1
   },
   {
-   "default": "Yo'lda",
-   "description": "Kunlik GPS yangilanishi shu holat \"Yo'lda\" bo'lgan hujjatlar uchungina ishlaydi",
+   "default": "Jo'nashga tayyor",
+   "description": "\"Yo'lga chiqdi\" tugmasi bosilgach \"Yo'lda\" bo'ladi — kunlik GPS (Traccar) yangilanishi faqat \"Yo'lda\" hujjatlar uchun",
    "fieldname": "holati",
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Holati",
-   "options": "Yo'lda\nYakunlangan"
+   "options": "Jo'nashga tayyor\nYo'lda\nYakunlangan",
+   "read_only": 1
   },
   {
    "default": "0",
@@ -231,7 +232,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-18 14:00:00.000000",
+ "modified": "2026-11-23 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "KZ Transit",

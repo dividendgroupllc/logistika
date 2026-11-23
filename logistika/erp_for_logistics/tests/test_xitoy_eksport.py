@@ -9,6 +9,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils.file_manager import save_file
 
 from logistika.erp_for_logistics.doctype.order_detail.test_order_detail import make_order_detail
+from logistika.erp_for_logistics import topshiriq
 from logistika.erp_for_logistics.doctype.xitoy_eksport_hujjati import xitoy_eksport_hujjati as xeh
 from logistika.erp_for_logistics.tests.utils import TEST_COMPANY, _abbr, make_order, setup_tannarx_settings
 
@@ -53,7 +54,7 @@ class TestXitoyEksport(FrappeTestCase):
 		self.cny_cash = ensure_account("_T Kassa CNY", f"Cash In Hand - {_abbr()}", account_type="Cash")
 		frappe.db.set_value("Account", self.cny_cash, "account_currency", "CNY")
 		self.publish = patch("frappe.publish_realtime").start()
-		self.notify = patch.object(xeh, "enqueue_create_notification").start()
+		self.notify = patch.object(topshiriq, "enqueue_create_notification").start()
 
 	def tearDown(self):
 		patch.stopall()
@@ -307,6 +308,16 @@ class TestXitoyEksport(FrappeTestCase):
 		with patch.object(pe_mod, "get_payment_entry", newer):
 			self.as_(self.bux, xeh.approve, doc.name, self.cny_cash)
 		self.assertEqual(self.status(doc), "Yakunlandi")
+
+	def test_ld_reasons_not_accepted_here(self):
+		settings = frappe.get_single("Logistika Settings")
+		settings.set("ld_qaytarish_sabablari", [{"sabab": "Faqat LD sababi"}])
+		settings.save(ignore_permissions=True)
+		doc = self.new_doc()
+		self.as_(self.log, xeh.send_to_broker, doc.name)
+		self.assertNotIn("Faqat LD sababi", self.as_(self.broker, xeh.return_reasons))
+		with self.assertRaises(frappe.ValidationError):
+			self.as_(self.broker, xeh.request_documents, doc.name, "Faqat LD sababi")
 
 	def test_same_truck_on_another_order_allowed(self):
 		self.new_doc(plates=("_T E1",))

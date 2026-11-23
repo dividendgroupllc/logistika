@@ -877,3 +877,70 @@ Chek buxgalterga yuborilganda summa avtomatik shu bo'ladi,При отправк�
 "Chekni faqat ""To'lov kutilmoqda"" holatida yuklash mumkin",Чек можно загрузить только в статусе «Ожидается оплата»
 To'lov chekini yuklang,Загрузите чек об оплате
 "To'lov chekini yuklang, so'ng ""Buxgalterga yuborish"" (summa avtomatik).","Загрузите чек об оплате, затем «Отправить бухгалтеру» (сумма автоматически)."
+"""Yo'lga chiqdi"" tugmasi bosilgach ""Yo'lda"" bo'ladi — kunlik GPS (Traccar) yangilanishi faqat ""Yo'lda"" hujjatlar uchun",После кнопки «Выехал» статус становится «В пути» — ежедневное обновление GPS (Traccar) только для документов «В пути»
+"""{0}"" faqat {1} holatida o'zgartiriladi",«{0}» можно изменить только в статусе {1}
+"""{0}"" maydoni qo'lda o'zgartirilmaydi",Поле «{0}» нельзя менять вручную
+Avval CO'ni yuklang,Сначала загрузите CO
+Avval ED va CMR'ni yuklang,Сначала загрузите ED и CMR
+Avval Peregruz danniy hujjatini yuklang,Сначала загрузите документ «Перегруз данный»
+Avval tranzit rasmiylashtirilsin (Logistic Documentation yakunlanmagan),Сначала оформите транзит (Logistic Documentation не завершён)
+Broker yopiq fayli,Закрытый файл брокера
+Brokerga qayta jo'natish,Повторно отправить брокеру
+Bu qadamni {0} bajaradi,Этот шаг выполняет {0}
+CO (kelib chiqish sertifikati),CO (сертификат происхождения)
+CO tayyor,CO готов
+CO tayyor — hujjatlarni tashqi brokerga jo'nating,CO готов — отправьте документы внешнему брокеру
+CO tayyor ✓,CO готов ✓
+CO xodimi,Сотрудник CO
+ED (eksport deklaratsiya),ED (экспортная декларация)
+ED va CMR tayyor,ED и CMR готовы
+ED va CMR tayyor ✓,ED и CMR готовы ✓
+ED va CMR xodimi,Сотрудник ED и CMR
+"ED va CMR yuklaydi, tashqi brokerga jo'natadi","Загружает ED и CMR, отправляет внешнему брокеру"
+"ED, CMR, CO","ED, CMR, CO"
+ED/CMR va CO tayyor deb belgilanishi kerak,ED/CMR и CO должны быть отмечены как готовые
+Faqat Qoralama holatidagi hujjatni o'chirish mumkin,Удалить можно только документ в статусе «Черновик»
+Fayl shu hujjatga (yopiq holda) yuklangan bo'lishi kerak,Файл должен быть загружен (закрыто) именно к этому документу
+Fura allaqachon yo'lga chiqqan,Фура уже выехала
+Holat tugmalar orqali o'zgaradi,Статус меняется только кнопками
+Hujjat holati: {0},Статус документа: {0}
+Hujjat turini tanlang: {0},Выберите тип документа: {0}
+Hujjat yetishmaydi,Не хватает документа
+Hujjatlar tayyorlanmoqda,Документы готовятся
+"Hujjatlarni ko'rib chiqing, tranzit hujjatini yuklab turini tanlang.","Проверьте документы, загрузите транзитный документ и выберите его тип."
+Invoice kutilmoqda,Ожидается инвойс
+Jo'nashga tayyor,Готов к отправке
+Kliyentga jo'natish,Отправить клиенту
+LD Yopiq Fayl,LD Закрытый файл
+"Logistika Settings'da ""Tashqi broker qaytarish sabablari"" ro'yxati bo'sh.",В Logistika Settings список «Причины возврата внешнего брокера» пуст.
+Order va KZ fura jo'natilgandan keyin o'zgartirilmaydi,Order и фуру KZ нельзя менять после отправки
+"Pekin invoice bo'yicha ED, CMR va CO'ni yuklang va ""tayyor"" deb belgilang.","По Pekin invoice загрузите ED, CMR и CO и отметьте «готово»."
+"Pekin invoice keldi — ED, CMR va CO tayyorlang","Пришёл Pekin invoice — подготовьте ED, CMR и CO"
+Pekin invoice yuklash (mijoz o'rniga),Загрузить Pekin invoice (вместо клиента)
+Pekin list va haydovchi,Pekin list и водитель
+Peregruz danniy mijozga yuborildi — Pekin invoice kutilmoqda.,«Перегруз данный» отправлен клиенту — ожидается Pekin invoice.
+Peregruz danniy xodimi,Сотрудник «Перегруз данный»
+Peregruz danniy yuklaydi va mijozga jo'natadi,Загружает «Перегруз данный» и отправляет клиенту
+Qaytarishlar tarixi,История возвратов
+Qaytarishlar tarixi qo'lda o'zgartirilmaydi,Историю возвратов нельзя менять вручную
+Saqlangandan keyin ko'rinadi,Будет видно после сохранения
+Tashqi broker,Внешний брокер
+Tashqi broker qaytarish sabablari,Причины возврата внешнего брокера
+Tashqi brokerga jo'natish,Отправить внешнему брокеру
+Tashqi logistika (Logistic Documentation),Внешняя логистика (Logistic Documentation)
+Tashqi logistika bo'limi,Отдел внешней логистики
+Tayyor,Готово
+Tranzit hujjati,Транзитный документ
+Tranzit hujjatini yuklash,Загрузить транзитный документ
+Tranzit rasmiylashtirildi: {0},Транзит оформлен: {0}
+Tranzit rasmiylashtiruvi,Транзитное оформление
+Tranzit rasmiylashtiruvi (Akt peregruza / TIR karnet),Транзитное оформление (Акт перегруза / TIR карнет)
+Tranzit rasmiylashtiruvi (tashqi broker),Транзитное оформление (внешний брокер)
+Yo'lga chiqdi,Выехал
+hujjatlar tuzatildi — qayta ko'rib chiqing,документы исправлены — проверьте ещё раз
+tashqi broker qaytardi: {0},внешний брокер вернул: {0}
+tranzit rasmiylashtirildi: {0},транзит оформлен: {0}
+tranzit rasmiylashtiruvi uchun hujjatlar yuborildi,документы отправлены на транзитное оформление
+Перегруз данный va Pekin invoice,Перегруз данный и Pekin invoice
+"""Yo'lda"" holati faqat ""Yo'lga chiqdi"" tugmasi orqali qo'yiladi",Статус «В пути» ставится только кнопкой «Выехал»
+"Fura yo'lga chiqdi, lekin GPS joylashuvi hozircha olinmadi","Фура выехала, но GPS-местоположение пока не получено"

@@ -167,44 +167,6 @@ class TestLogistikaSettings(FrappeTestCase):
 		self.assertEqual(frappe.get_single("Logistika Settings").yuklash_xarajat_guruhi, self.group)
 
 
-class TestDeclarationAmountInSettings(FrappeTestCase):
-	def setUp(self):
-		frappe.db.savepoint("decl_amount_test")
-
-	def tearDown(self):
-		frappe.db.rollback(save_point="decl_amount_test")
-
-	def test_amount_lives_in_settings_not_in_declaration(self):
-		settings_meta = frappe.get_meta("Logistika Settings")
-		self.assertEqual(settings_meta.get_field("ichki_deklaratsiya_summa").options, "ichki_deklaratsiya_valyuta")
-		self.assertEqual(settings_meta.get_field("ichki_deklaratsiya_valyuta").options, "Currency")
-		section_labels = [f.fieldname for f in settings_meta.fields if f.fieldtype == "Section Break"]
-		self.assertEqual(section_labels[1], "ichki_deklaratsiya_section")
-		declaration_meta = frappe.get_meta("Ichki Deklaratsiya")
-		self.assertIsNone(declaration_meta.get_field("ichki_deklaratsiya_summa"))
-		self.assertIsNone(declaration_meta.get_field("valyuta"))
-
-	def test_patch_copies_latest_amount_when_settings_empty(self):
-		from logistika.patches.v1_1 import move_declaration_amount_to_settings as patch_module
-
-		if not frappe.db.has_column("Ichki Deklaratsiya", "ichki_deklaratsiya_summa"):
-			self.skipTest("eski ustun bazada yo'q")
-		frappe.db.set_single_value("Logistika Settings", {"ichki_deklaratsiya_summa": 0, "ichki_deklaratsiya_valyuta": None})
-		name = frappe.get_all("Ichki Deklaratsiya", pluck="name", limit=1)
-		if not name:
-			self.skipTest("Ichki Deklaratsiya yo'q")
-		frappe.db.sql(
-			"update `tabIchki Deklaratsiya` set ichki_deklaratsiya_summa = 750, valyuta = 'USD', modified = now() + interval 1 day where name = %s",
-			name[0],
-		)
-		patch_module.execute()
-		self.assertEqual(frappe.db.get_single_value("Logistika Settings", "ichki_deklaratsiya_summa"), 750)
-		self.assertEqual(frappe.db.get_single_value("Logistika Settings", "ichki_deklaratsiya_valyuta"), "USD")
-		frappe.db.set_single_value("Logistika Settings", "ichki_deklaratsiya_summa", 100)
-		patch_module.execute()  # Settings to'la bo'lsa tegmaydi
-		self.assertEqual(frappe.db.get_single_value("Logistika Settings", "ichki_deklaratsiya_summa"), 100)
-
-
 class TestFixtureFilter(FrappeTestCase):
 	def test_every_custom_field_fixture_is_exported(self):
 		import json

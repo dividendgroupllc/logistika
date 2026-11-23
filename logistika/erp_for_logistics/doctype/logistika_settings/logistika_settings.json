@@ -8,10 +8,6 @@
   "ichki_logistika_xarajat_guruhi",
   "column_break_xarajat",
   "yuklash_xarajat_guruhi",
-  "ichki_deklaratsiya_section",
-  "ichki_deklaratsiya_summa",
-  "cb_ichki_deklaratsiya",
-  "ichki_deklaratsiya_valyuta",
   "sugurta_section",
   "sugurta_xarajat_hisobi",
   "column_break_sugurta",
@@ -36,6 +32,13 @@
   "broker_xizmat_summa",
   "broker_xizmat_valyuta",
   "broker_qaytarish_sabablari",
+  "ld_section",
+  "ld_peregruz_xodimi",
+  "ld_ed_cmr_xodimi",
+  "cb_ld",
+  "ld_co_xodimi",
+  "ld_tashqi_broker",
+  "ld_qaytarish_sabablari",
   "chat_section",
   "tayyor_javoblar",
   "tannarx_section",
@@ -75,28 +78,6 @@
    "fieldtype": "Link",
    "label": "Yuklash xarajatlari papkasi",
    "options": "Account"
-  },
-  {
-   "fieldname": "ichki_deklaratsiya_section",
-   "fieldtype": "Section Break",
-   "label": "Ichki deklaratsiya"
-  },
-  {
-   "fieldname": "ichki_deklaratsiya_summa",
-   "fieldtype": "Currency",
-   "label": "Ichki deklaratsiya summasi",
-   "options": "ichki_deklaratsiya_valyuta",
-   "description": "Barcha Ichki Deklaratsiya'lar uchun bitta summa"
-  },
-  {
-   "fieldname": "cb_ichki_deklaratsiya",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "ichki_deklaratsiya_valyuta",
-   "fieldtype": "Link",
-   "label": "Valyuta",
-   "options": "Currency"
   },
   {
    "fieldname": "sugurta_section",
@@ -332,11 +313,54 @@
    "options": "Currency",
    "label": "Broker xizmati valyutasi",
    "default": "CNY"
+  },
+  {
+   "fieldname": "ld_section",
+   "fieldtype": "Section Break",
+   "label": "Tashqi logistika (Logistic Documentation)",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "ld_peregruz_xodimi",
+   "fieldtype": "Link",
+   "options": "User",
+   "label": "Peregruz danniy xodimi",
+   "description": "Peregruz danniy yuklaydi va mijozga jo'natadi"
+  },
+  {
+   "fieldname": "ld_ed_cmr_xodimi",
+   "fieldtype": "Link",
+   "options": "User",
+   "label": "ED va CMR xodimi",
+   "description": "ED va CMR yuklaydi, tashqi brokerga jo'natadi"
+  },
+  {
+   "fieldname": "cb_ld",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ld_co_xodimi",
+   "fieldtype": "Link",
+   "options": "User",
+   "label": "CO xodimi"
+  },
+  {
+   "fieldname": "ld_tashqi_broker",
+   "fieldtype": "Link",
+   "options": "User",
+   "label": "Tashqi broker",
+   "description": "Tranzit rasmiylashtiruvi (Akt peregruza / TIR karnet)"
+  },
+  {
+   "fieldname": "ld_qaytarish_sabablari",
+   "fieldtype": "Table",
+   "options": "Broker Qaytarish Sababi",
+   "label": "Tashqi broker qaytarish sabablari"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-11-22 14:00:00.000000",
+ "modified": "2026-11-23 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Logistika Settings",

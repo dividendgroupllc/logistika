@@ -16,6 +16,7 @@ import frappe
 TRANSACTION_DOCTYPES = [
 	"Xitoy Eksport Hujjati",
 	"Xitoy Eksport Yopiq Fayl",
+	"LD Yopiq Fayl",
 	"Logistic Documentation",
 	"KZ Transit",
 	"Peregruz",

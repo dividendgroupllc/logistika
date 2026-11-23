@@ -47,11 +47,15 @@ class TestMiniAppDocuments(FrappeTestCase):
 	def set_ld(self, **values):
 		frappe.db.set_value("Logistic Documentation", self.ld, values, update_modified=False)
 
-	def test_ichki_deklaratsiya_never_listed(self):
-		self.set_ld(ichki_deklaratsiya=private_file("Logistic Documentation", self.ld))
-		self.assertNotIn(("Logistic Documentation", "ichki_deklaratsiya"), self.fields())
+	def test_internal_documents_never_listed(self):
+		# ED, CO, CMR va tranzit hujjati mijozga ko'rsatilmaydi (2026-11-23).
+		fields = ("ed", "co", "cmr", "tranzit_hujjat")
+		self.set_ld(**{f: private_file("Logistic Documentation", self.ld, fname=f"{f}.txt") for f in fields})
+		listed = self.fields()
+		for f in fields:
+			self.assertNotIn(("Logistic Documentation", f), listed)
 		with as_user(USER):
-			self.assertRaises(frappe.PermissionError, api.file_link, "Logistic Documentation", self.ld, "ichki_deklaratsiya")
+			self.assertRaises(frappe.PermissionError, api.file_link, "Logistic Documentation", self.ld, "cmr")
 
 	def test_peregruz_hidden_until_sent(self):
 		self.set_ld(peregruz_hujjat=private_file("Logistic Documentation", self.ld))
@@ -59,12 +63,6 @@ class TestMiniAppDocuments(FrappeTestCase):
 		self.set_ld(peregruz_sent=1)
 		self.assertIn(("Logistic Documentation", "peregruz_hujjat"), self.fields())
 		self.assertEqual(self.call(api.documents)["pending"][0]["name"], self.ld)
-
-	def test_cmr_visible_after_docs_checked(self):
-		self.set_ld(tranzit_hujjat=private_file("Logistic Documentation", self.ld))
-		self.assertNotIn(("Logistic Documentation", "tranzit_hujjat"), self.fields())
-		self.set_ld(tr_docs_tasdiqlandi=1)
-		self.assertIn(("Logistic Documentation", "tranzit_hujjat"), self.fields())
 
 	def test_order_file_listed_and_filtered_by_order(self):
 		frappe.db.set_value("Order", self.order, "yuk_fayli", private_file("Order", self.order))

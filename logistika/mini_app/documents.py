@@ -18,8 +18,6 @@ VISIBLE = (
 	("Order", "yuk_fayli", "yuk_fayli", {}),
 	("Logistic Documentation", "peregruz_hujjat", "peregruz", {"peregruz_sent": 1}),
 	("Logistic Documentation", "pekin_invoice", "pekin_invoice", {}),
-	("Logistic Documentation", "eksport_deklaratsiya", "eksport", {"eksport_sent": 1}),
-	("Logistic Documentation", "tranzit_hujjat", "cmr", {"tr_docs_tasdiqlandi": 1}),
 	("KZ Transit", "kliyent_oldi_hujjat", "kliyent_oldi", {}),
 	# Fura nakladnoyi — "Zavoddan chiqdi" xabari bilan yuborilgandan keyin.
 	("Order Detail Fura", "nakladnoy", "nakladnoy", {"jonatish_xabari_yuborildi": 1}),

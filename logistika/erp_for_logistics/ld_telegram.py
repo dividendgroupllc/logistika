@@ -1,8 +1,8 @@
 # Copyright (c) 2026, sardorbek qamchibekov and contributors
 # For license information, please see license.txt
 
-# "Logistic Documentation" hujjatidagi "Перегруз данный", "Eksport deklaratsiya" va
-# "Tranzit hujjati" fayllarini bog'langan Order mijoziga Telegram orqali yuborish
+# "Logistic Documentation" hujjatidagi "Перегруз данный" faylini bog'langan Order mijoziga
+# Telegram orqali yuborish (faqat LD'ning `send_to_client` tugmasidan — qadam egasi tekshiriladi)
 # (chiquvchi tomon, fon vazifasida). Kirish tomoni ("Pekin invoice" — mijoz Telegram
 # kabinetidan yuklaydi) — logistika.erp_for_logistics.pekin_invoice.
 
@@ -14,28 +14,19 @@ from logistika.telegram.keyboards import open_button
 from logistika.telegram.messages import PEKIN_LIST_GUIDANCE, render
 from logistika.telegram.sender import send_document, send_message
 
-# Bitta hujjat/tugma qaysi pipeline bosqichini oldinga suradi (mos nomlangan
-# PIPELINE_STAGES yozuvi) — "Tranzit" endi Telegram orqali yuborilmagani uchun bu
-# yerda yo'q; uning bosqichi (Транзитний оформеления) `tranzit_check` checkbox
-# belgilanganda logistic_documentation.py orqali suriladi.
+# Yuboriladigan maydon → pipeline bosqichi (ED/CO va tranzit hujjati mijozga yuborilmaydi).
 SENDABLE_FIELDS = {
 	"peregruz_hujjat": {
 		"label": "Перегруз данный",
 		"sent_field": "peregruz_sent",
 		"target_status": "Перегруз данный",
 	},
-	"eksport_deklaratsiya": {
-		"label": "Eksport deklaratsiya (ED/CO)",
-		"sent_field": "eksport_sent",
-		"target_status": "Документация ED CO для клиента",
-	},
 }
 
 
-@frappe.whitelist()
 def send_ld_document(ld_name, fieldname):
-	"""Logistic Documentation'dagi berilgan Attach maydonini (peregruz_hujjat yoki
-	eksport_deklaratsiya) bog'langan Order'ning mijoziga Telegram orqali yuboradi."""
+	"""Logistic Documentation'dagi Attach maydonini (peregruz_hujjat) bog'langan Order'ning
+	mijoziga Telegram orqali yuboradi. Whitelist emas — faqat send_to_client orqali."""
 	if fieldname not in SENDABLE_FIELDS:
 		frappe.throw("Bu maydonni Telegram orqali yuborib bo'lmaydi")
 
@@ -85,6 +76,8 @@ def deliver_ld_document(ld_name, fieldname):
 
 	if sent > 0:
 		doc.db_set(config["sent_field"], 1, update_modified=False)
+		if fieldname == "peregruz_hujjat" and doc.status == "Qoralama":
+			doc.db_set("status", "Invoice kutilmoqda", update_modified=False)
 		_advance_status(doc, config["target_status"])
 
 		if fieldname == "peregruz_hujjat":

@@ -114,16 +114,6 @@ def order_details_with_pekin_list(order):
 	return _order_details_with_pekin_list(order)
 
 
-EKSPORT_DEKLARATSIYA_RATE_PER_PEKIN_LIST = 100
-
-
-@frappe.whitelist()
-def calc_eksport_deklaratsiya_summa(order):
-	"""Eksport deklaratsiya summasi — mijoz Order'ining pekin list'i bor Order Detail'lari
-	soni (har biri alohida pekin list / invoys) × EKSPORT_DEKLARATSIYA_RATE_PER_PEKIN_LIST."""
-	return len(_order_details_with_pekin_list(order)) * EKSPORT_DEKLARATSIYA_RATE_PER_PEKIN_LIST
-
-
 @frappe.whitelist()
 def truck_dispatch_driver_info(order, kz_truck):
 	"""Logistic Documentation'ning Transit bo'limida ko'rsatish uchun — mijoz Order'i
@@ -146,6 +136,8 @@ def find_duplicate_documents(doctype, filters, exclude_name=None):
 	"""Berilgan doctype'da, berilgan filtrlarga (masalan {"order": "...", "china_truck": "..."}) mos
 	keladigan MAVJUD hujjat(lar)ni topadi — yangi hujjat yaratishda 'bu allaqachon bormi?' ogohlantirish
 	uchun. exclude_name — joriy (tahrirlanayotgan) hujjatning o'zi natijaga tushmasligi uchun."""
+	# Faqat o'qish huquqi bor doctype bo'yicha (aks holda istalgan jadvalni qidirib bo'lardi).
+	frappe.has_permission(doctype, "read", throw=True)
 	if isinstance(filters, str):
 		import json
 		filters = json.loads(filters)

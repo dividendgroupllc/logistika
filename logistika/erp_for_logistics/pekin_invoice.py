@@ -69,7 +69,10 @@ def save_pekin_invoice(ld_name, customers, filename, content):
 	frappe.db.commit()
 
 	try:
+		from logistika.erp_for_logistics.doctype.logistic_documentation.logistic_documentation import on_client_invoice
+
 		_advance_status(ld, TARGET_STATUS)
+		on_client_invoice(ld_name)
 		frappe.db.commit()
 	except Exception:
 		frappe.db.rollback()

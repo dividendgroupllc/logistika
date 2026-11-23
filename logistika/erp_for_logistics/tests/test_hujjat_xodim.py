@@ -18,14 +18,10 @@ def field(doctype, fieldname):
 
 
 class TestDoctypeFields(FrappeTestCase):
-	def test_ichki_deklaratsiya_document_back_on_ld(self):
-		self.assertEqual(field("Logistic Documentation", "ichki_deklaratsiya").fieldtype, "Attach")
-		self.assertEqual(field("Logistic Documentation", "ichki_deklaratsiya_summa").fieldtype, "Currency")
-		payer = field("Logistic Documentation", "ichki_deklaratsiya_tolovchi")
-		self.assertEqual(payer.fieldtype, "Select")
-		self.assertIn("Zavod", payer.options)
-		self.assertIsNone(field("Ichki Deklaratsiya", "ichki_deklaratsiya"))
-		self.assertIsNone(field("Ichki Deklaratsiya", "ichki_deklaratsiya_tolovchi"))
+	def test_ichki_deklaratsiya_removed_from_ld(self):
+		# 2026-11-23: LD'dagi Ichki deklaratsiya bo'limi olib tashlandi (alohida hujjat qoladi).
+		for gone in ("ichki_deklaratsiya", "ichki_deklaratsiya_summa", "ichki_deklaratsiya_tolovchi"):
+			self.assertIsNone(field("Logistic Documentation", gone), gone)
 		self.assertEqual(field("Ichki Deklaratsiya", "pekin_list").fieldtype, "Table")
 
 	def test_ttn_removed_from_ld(self):

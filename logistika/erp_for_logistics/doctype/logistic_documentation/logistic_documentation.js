@@ -1,170 +1,253 @@
 // Copyright (c) 2026, sardorbek qamchibekov  and contributors
 // For license information, please see license.txt
 
-// Tranzit hujjati endi Telegram orqali mijozga yuborilmaydi — faqat oddiy
-// biriktirma (attach) sifatida saqlanadi, xolos.
+// Logistic Documentation — bosqichli jarayon: Peregruz xodimi → mijoz (Pekin invoice) →
+// ED/CMR va CO xodimlari → tashqi broker (tranzit hujjati) → Yakunlandi. Tugmalar faqat
+// Logistika Settings'da shu qadamga tanlangan foydalanuvchiga (yoki System Manager'ga).
+
+const LD = "logistika.erp_for_logistics.doctype.logistic_documentation.logistic_documentation";
 const LD_DUPLICATE_LABEL = "Bu order+fura uchun Logistic Documentation";
+const S = {
+	qoralama: "Qoralama",
+	invoice: "Invoice kutilmoqda",
+	tayyorlash: "Hujjatlar tayyorlanmoqda",
+	brokerda: "Brokerda",
+	yetishmaydi: "Hujjat yetishmaydi",
+	yakun: "Yakunlandi",
+};
+const TURLAR = [
+	{ value: "Акт перегруза", label: "Akt peregruza (Акт перегруза)" },
+	{ value: "Тир карнет", label: "TIR karnet (Тир карнет)" },
+];
 
-frappe.ui.form.on("Logistic Documentation", {
-	refresh(frm) {
-		logistika.truck_options.apply(frm, { kz: "kz_truck" });
-		render_tr_docs_preview(frm);
-		render_cl_cmr_preview(frm);
-		render_driver_preview(frm);
-		if (!frm.is_new()) {
-			frm.add_custom_button(__("🔄 Qayta hisoblash"), () => calc_eksport_summa(frm), __("Eksport deklaratsiya"));
-		}
-		// route_options orqali Order + KZ fura oldindan to'ldirilgan holatni ham qamrab olish uchun
-		check_duplicate_ld(frm);
-	},
-	order(frm) {
-		logistika.truck_options.apply(frm, { kz: "kz_truck" });
-		render_tr_docs_preview(frm);
-		render_driver_preview(frm);
-		if (!frm.doc.eksport_deklaratsiya_summa) {
-			calc_eksport_summa(frm);
-		}
-	},
-	kz_truck(frm) {
-		render_driver_preview(frm);
-		// KZ fura — Order'dan keyin tanlanadigan, hal qiluvchi ikkinchi maydon: shu (order,
-		// kz_truck) juftlik uchun boshqa Logistic Documentation allaqachon bormi, tekshiramiz.
-		check_duplicate_ld(frm);
-	},
-	pekin_invoice(frm) {
-		render_tr_docs_preview(frm);
-	},
-	tranzit_hujjat(frm) {
-		render_cl_cmr_preview(frm);
-	},
-	send_peregruz_hujjat(frm) {
-		send_to_telegram(frm, "peregruz_hujjat");
-	},
-	send_eksport_deklaratsiya(frm) {
-		send_to_telegram(frm, "eksport_deklaratsiya");
-	},
-	cl_go_to_transit(frm) {
-		$(frm.wrapper).find('button[data-fieldname="tab_tr"]').trigger("click");
-	},
-});
-
-// Eksport deklaratsiya summasi — shu Order'ning pekin list'i bor Order Detail'lari
-// hujjat(lar)idagi "Pekin list" jadvalida nechta ALOHIDA buyurtma (=alohida
-// import qilingan pekin list) borligiga qarab avtomatik hisoblanadi (har biri
-// $100, logistika.erp_for_logistics.api.calc_eksport_deklaratsiya_summa'da).
-// Faqat maydon hali BO'SH bo'lsa avtomatik to'ldiriladi — qo'lda kiritilgan/
-// tuzatilgan qiymatni bosib o'tmaydi. Pekin list keyinroq o'zgarsa, yuqoridagi
-// "🔄 Qayta hisoblash" tugmasi bilan qo'lda qayta hisoblash mumkin.
-function calc_eksport_summa(frm) {
-	if (!frm.doc.order) return;
-	frappe.call({
-		method: "logistika.erp_for_logistics.api.calc_eksport_deklaratsiya_summa",
-		args: { order: frm.doc.order },
-		callback: (r) => {
-			if (r.message) {
-				frm.set_value("eksport_deklaratsiya_summa", r.message);
-			}
-		},
-	});
+function is_admin() {
+	return frappe.user.has_role("System Manager");
 }
 
-// Yangi (saqlanmagan) hujjatda Order + KZ fura ikkalasi ham tanlangan bo'lsa, xuddi shu
-// juftlik uchun boshqa Logistic Documentation allaqachon mavjudligini ogohlantiradi (saqlangan
-// hujjatni tahrirlashda kerak emas — u o'zi "mavjud" hujjat).
-function check_duplicate_ld(frm) {
-	if (!frm.is_new()) return;
-	if (!frm.doc.order || !frm.doc.kz_truck) return;
-	logistika.duplicate_warning.check(
-		frm,
-		{ order: frm.doc.order, kz_truck: frm.doc.kz_truck },
-		LD_DUPLICATE_LABEL
+// Shu qadamning egasimi: "peregruz" | "ed_cmr" | "co" | "broker".
+function is_step(frm, key) {
+	if (is_admin()) return true;
+	if (key === "broker") return frm.doc.broker === frappe.session.user;
+	const users = (frm.doc.__onload && frm.doc.__onload.ld_users) || {};
+	return users[key] === frappe.session.user;
+}
+
+function only_broker() {
+	return (
+		frappe.user.has_role("Tashqi broker") &&
+		!["Tashqi logistika bo'limi", "System Manager"].some((r) => frappe.user.has_role(r))
 	);
 }
 
-// Transit bo'limida — Order + KZ fura bo'yicha Truck Dispatch'dagi haydovchi/
-// mashina ma'lumotlarini ko'rsatadi (boshqa hujjatga o'tmasdan tekshirish uchun).
-function render_driver_preview(frm) {
-	const $wrapper = frm.fields_dict.tr_driver_preview_html?.$wrapper;
-	if (!$wrapper) return;
+frappe.ui.form.on("Logistic Documentation", {
+	refresh(frm) {
+		const s = frm.doc.status || S.qoralama;
+		if (s === S.qoralama) logistika.truck_options.apply(frm, { kz: "kz_truck" });
+		hide_for_broker(frm);
+		lock_fields(frm);
+		show_intro(frm);
+		render_info(frm);
+		check_duplicate_ld(frm);
+		if (!frm.is_new()) add_buttons(frm);
+	},
+	order(frm) {
+		logistika.truck_options.apply(frm, { kz: "kz_truck" });
+	},
+	kz_truck(frm) {
+		// KZ fura — Order'dan keyin tanlanadigan ikkinchi maydon: shu juftlik uchun LD bormi.
+		check_duplicate_ld(frm);
+	},
+});
 
-	if (!frm.doc.order || !frm.doc.kz_truck) {
-		$wrapper.html(`<div class="text-muted">🚚 ${__("Haydovchi")}: ${__("Avval Order va KZ fura tanlang")}</div>`);
-		return;
-	}
-	frappe.call({
-		method: "logistika.erp_for_logistics.api.truck_dispatch_driver_info",
-		args: { order: frm.doc.order, kz_truck: frm.doc.kz_truck },
-		callback: (r) => {
-			const info = r.message;
-			if (!info) {
-				$wrapper.html(`<div class="text-muted">🚚 ${__("Haydovchi")}: ${__("Truck Dispatch hujjati topilmadi")}</div>`);
+function add_buttons(frm) {
+	const s = frm.doc.status;
+	const primary = (label, fn) => frm.add_custom_button(label, fn).addClass("btn-primary");
+	const docs_step = s === S.tayyorlash || s === S.yetishmaydi;
+
+	if (s === S.qoralama && is_step(frm, "peregruz")) {
+		primary(__("Kliyentga jo'natish"), () => {
+			if (!frm.doc.peregruz_hujjat) {
+				frappe.msgprint(__("Avval Peregruz danniy hujjatini yuklang"));
 				return;
 			}
-			const parts = [info.haydovchi_ismi, info.haydovchi_telefon, info.vositachi].filter(Boolean);
-			$wrapper.html(`<div>🚚 ${__("Haydovchi")}: ${frappe.utils.escape_html(parts.join(" — ") || __("kiritilmagan"))}</div>`);
-		},
-	});
+			run(frm, "send_to_client").then((r) => logistika.telegram_jobs.queued(r));
+		});
+	}
+	if ((s === S.qoralama || s === S.invoice) && is_step(frm, "peregruz")) {
+		frm.add_custom_button(__("Pekin invoice yuklash (mijoz o'rniga)"), () => upload_invoice(frm));
+	}
+	if (docs_step && is_step(frm, "ed_cmr") && !frm.doc.ed_cmr_tayyor) {
+		frm.add_custom_button(__("ED va CMR tayyor"), () => run(frm, "mark_ed_cmr_ready"));
+	}
+	if (docs_step && is_step(frm, "co") && !frm.doc.co_tayyor) {
+		frm.add_custom_button(__("CO tayyor"), () => run(frm, "mark_co_ready"));
+	}
+	const ready = frm.doc.ed_cmr_tayyor && frm.doc.co_tayyor;
+	if (s === S.tayyorlash && is_step(frm, "ed_cmr") && ready) {
+		primary(__("Tashqi brokerga jo'natish"), () => run(frm, "send_to_broker"));
+	}
+	if (s === S.yetishmaydi && is_step(frm, "ed_cmr") && ready) {
+		primary(__("Brokerga qayta jo'natish"), () => run(frm, "resend_to_broker"));
+	}
+	if (s === S.brokerda && is_step(frm, "broker")) {
+		primary(__("Tranzit hujjatini yuklash"), () => upload_transit(frm));
+		frm.add_custom_button(__("Hujjat yetishmaydi"), () => request_documents(frm));
+	}
 }
 
-// Transit bo'limida (Kliyent hujjatlaridan) Pekin invoice va (Order Detail'dan) Pekin
-// list'ga tezkor havola — xodim boshqa tabga/hujjatga o'tmasdan ikkalasi
-// biriktirilganini ko'rib, tekshirib chiqishi uchun.
-function render_tr_docs_preview(frm) {
-	const $wrapper = frm.fields_dict.tr_docs_preview_html?.$wrapper;
-	if (!$wrapper) return;
+function run(frm, method, args = {}) {
+	const call = () =>
+		frappe
+			.call({ method: `${LD}.${method}`, args: { name: frm.doc.name, ...args }, freeze: true })
+			.then((r) => {
+				frm.reload_doc();
+				return r;
+			});
+	return frm.is_dirty() ? frm.save().then(call) : call();
+}
 
-	const rows = [
-		attach_preview_row(__("Pekin invoice"), frm.doc.pekin_invoice),
-	];
+function lock_fields(frm) {
+	const s = frm.doc.status || S.qoralama;
+	const docs_step = s === S.tayyorlash || s === S.yetishmaydi;
+	frm.set_df_property("order", "read_only", s !== S.qoralama);
+	frm.set_df_property("kz_truck", "read_only", s !== S.qoralama);
+	frm.set_df_property("peregruz_hujjat", "read_only", !(s === S.qoralama && is_step(frm, "peregruz")));
+	["ed", "cmr"].forEach((f) => frm.set_df_property(f, "read_only", !(docs_step && is_step(frm, "ed_cmr"))));
+	frm.set_df_property("co", "read_only", !(docs_step && is_step(frm, "co")));
+}
 
-	$wrapper.html(`<div>${rows.join("")}<div class="text-muted" data-region="tr-il-row">${__("Pekin list qidirilmoqda...")}</div></div>`);
+function show_intro(frm) {
+	frm.set_intro("");
+	const s = frm.doc.status;
+	const last = (frm.doc.qaytarishlar || []).slice(-1)[0];
+	if (s === S.invoice) {
+		frm.set_intro(__("Peregruz danniy mijozga yuborildi — Pekin invoice kutilmoqda."), "blue");
+	} else if (s === S.tayyorlash) {
+		frm.set_intro(__("Pekin invoice bo'yicha ED, CMR va CO'ni yuklang va \"tayyor\" deb belgilang."), "blue");
+	} else if (s === S.yetishmaydi && last) {
+		frm.set_intro(
+			__("Tashqi broker qaytardi: <b>{0}</b>{1}. Hujjatni tuzatib, qayta jo'nating.", [
+				frappe.utils.escape_html(last.sabab),
+				last.izoh ? " — " + frappe.utils.escape_html(last.izoh) : "",
+			]),
+			"orange"
+		);
+	} else if (s === S.brokerda && is_step(frm, "broker")) {
+		frm.set_intro(__("Hujjatlarni ko'rib chiqing, tranzit hujjatini yuklab turini tanlang."), "blue");
+	} else if (s === S.yakun) {
+		frm.set_intro(__("Tranzit rasmiylashtirildi: {0}", [frappe.utils.escape_html(frm.doc.tr_hujjat_turi || "")]), "green");
+	}
+}
 
-	if (!frm.doc.order) {
-		$wrapper.find('[data-region="tr-il-row"]').text(__("Avval Order tanlang"));
+// Tashqi broker: yon paneldagi biriktirmalar va "fayl biriktirildi" yozuvlari ko'rinmaydi —
+// kerakli fayllar maydonlardan ochiladi.
+function hide_for_broker(frm) {
+	if (!only_broker()) return;
+	const info = frm.get_docinfo && frm.get_docinfo();
+	if (info && (info.attachment_logs || []).length) {
+		info.attachment_logs = [];
+		frm.timeline && frm.timeline.refresh();
+	}
+	$(frm.wrapper).find(".form-attachments").hide();
+}
+
+// Pekin list va haydovchi — server LD huquqi bo'yicha beradi (broker Order'ni o'qimaydi).
+function render_info(frm) {
+	const $pekin = frm.fields_dict.tr_docs_preview_html && frm.fields_dict.tr_docs_preview_html.$wrapper;
+	const $driver = frm.fields_dict.tr_driver_preview_html && frm.fields_dict.tr_driver_preview_html.$wrapper;
+	if (!$pekin || !$driver) return;
+	if (frm.is_new()) {
+		$pekin.html(`<div class="text-muted">${__("Saqlangandan keyin ko'rinadi")}</div>`);
+		$driver.html("");
 		return;
 	}
-	frappe.call({
-		method: "logistika.erp_for_logistics.api.order_details_with_pekin_list",
-		args: { order: frm.doc.order },
-		callback: (r) => {
-			const names = r.message || [];
-			const $row = $wrapper.find('[data-region="tr-il-row"]');
-			if (!names.length) {
-				$row.text(__("Pekin list — Order Detail'larda pekin list kiritilmagan"));
-				return;
-			}
-			const links = names
-				.map((n) => `<a href="/app/order-detail/${encodeURIComponent(n)}" target="_blank">${frappe.utils.escape_html(n)}</a>`)
-				.join(", ");
-			$row.html(`📦 ${__("Pekin list")}: ${links}`);
-		},
+	frappe.call(`${LD}.form_info`, { name: frm.doc.name }).then((r) => {
+		const info = r.message || {};
+		const names = info.pekin || [];
+		const links = names
+			.map((n) =>
+				only_broker()
+					? frappe.utils.escape_html(n)
+					: `<a href="/app/order-detail/${encodeURIComponent(n)}" target="_blank">${frappe.utils.escape_html(n)}</a>`
+			)
+			.join(", ");
+		$pekin.html(
+			names.length
+				? `📦 ${__("Pekin list")}: ${links}`
+				: `<div class="text-muted">${__("Pekin list — Order Detail'larda pekin list kiritilmagan")}</div>`
+		);
+		const d = info.driver;
+		const parts = d ? [d.haydovchi_ismi, d.haydovchi_telefon, d.vositachi].filter(Boolean) : [];
+		$driver.html(
+			d
+				? `<div>🚚 ${__("Haydovchi")}: ${frappe.utils.escape_html(parts.join(" — ") || __("kiritilmagan"))}</div>`
+				: `<div class="text-muted">🚚 ${__("Haydovchi")}: ${__("Truck Dispatch hujjati topilmadi")}</div>`
+		);
 	});
 }
 
-function attach_preview_row(label, file_url) {
-	if (!file_url) {
-		return `<div class="text-muted">📄 ${label}: ${__("biriktirilmagan")}</div>`;
-	}
-	return `<div>📄 ${label}: <a href="${frappe.utils.escape_html(file_url)}" target="_blank">${__("ko'rish")}</a></div>`;
-}
-
-// Kliyent hujjatlari bo'limida — Transit bo'limiga biriktirilgan CMR'ni shu
-// yerdan ham ko'rish (boshqa tabga o'tmasdan tasdiqlash uchun).
-function render_cl_cmr_preview(frm) {
-	const $wrapper = frm.fields_dict.cl_cmr_preview_html?.$wrapper;
-	if (!$wrapper) return;
-	$wrapper.html(attach_preview_row("CMR", frm.doc.tranzit_hujjat));
-}
-
-function send_to_telegram(frm, fieldname) {
-	if (frm.is_dirty()) {
-		frappe.msgprint(__("Avval hujjatni saqlang, keyin yuboring."));
-		return;
-	}
-	frappe.call({
-		method: "logistika.erp_for_logistics.ld_telegram.send_ld_document",
-		args: { ld_name: frm.doc.name, fieldname },
-		// Yuborish fonda — natija bildirishnoma bo'lib keladi (logistika.telegram_jobs).
-		callback: (r) => logistika.telegram_jobs.queued(r),
+function upload_invoice(frm) {
+	new frappe.ui.FileUploader({
+		doctype: frm.doctype,
+		docname: frm.doc.name,
+		allow_toggle_private: false,
+		make_attachments_public: false,
+		on_success: (file) => run(frm, "upload_invoice", { fayl: file.file_url }),
 	});
+}
+
+// Broker fayli yopiq saqlovga yuklanadi ("Tayyor"gacha boshqalar ko'rmaydi), keyin turi tanlanadi.
+function upload_transit(frm) {
+	frappe.call(`${LD}.prepare_broker_upload`, { name: frm.doc.name }).then((r) => {
+		new frappe.ui.FileUploader({
+			doctype: "LD Yopiq Fayl",
+			docname: r.message,
+			fieldname: "fayl",
+			allow_toggle_private: false,
+			make_attachments_public: false,
+			on_success: (file) => {
+				const d = new frappe.ui.Dialog({
+					title: __("Tranzit rasmiylashtiruvi"),
+					fields: [{ fieldname: "turi", fieldtype: "Select", label: __("Hujjat turi"), options: TURLAR, reqd: 1 }],
+					primary_action_label: __("Tayyor"),
+					primary_action(v) {
+						d.hide();
+						run(frm, "broker_done", { fayl: file.file_url, turi: v.turi });
+					},
+				});
+				d.show();
+			},
+		});
+	});
+}
+
+function request_documents(frm) {
+	frappe.call(`${LD}.return_reasons`).then((r) => {
+		const reasons = r.message || [];
+		if (!reasons.length) {
+			frappe.msgprint(__("Logistika Settings'da \"Tashqi broker qaytarish sabablari\" ro'yxati bo'sh."));
+			return;
+		}
+		const d = new frappe.ui.Dialog({
+			title: __("Hujjat yetishmaydi"),
+			fields: [
+				{ fieldname: "sabab", fieldtype: "Select", label: __("Sabab"), options: reasons, reqd: 1 },
+				{ fieldname: "izoh", fieldtype: "Small Text", label: __("Izoh") },
+			],
+			primary_action_label: __("Qaytarish"),
+			primary_action(v) {
+				d.hide();
+				run(frm, "request_documents", { sabab: v.sabab, izoh: v.izoh || null });
+			},
+		});
+		d.show();
+	});
+}
+
+// Yangi (saqlanmagan) hujjatda Order + KZ fura ikkalasi tanlangan bo'lsa, xuddi shu juftlik
+// uchun boshqa Logistic Documentation allaqachon mavjudligini ogohlantiradi.
+function check_duplicate_ld(frm) {
+	if (!frm.is_new()) return;
+	if (!frm.doc.order || !frm.doc.kz_truck) return;
+	logistika.duplicate_warning.check(frm, { order: frm.doc.order, kz_truck: frm.doc.kz_truck }, LD_DUPLICATE_LABEL);
 }

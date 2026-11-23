@@ -5,6 +5,23 @@ const KZT_DUPLICATE_LABEL = "Bu order va fura uchun KZ Transit";
 
 frappe.ui.form.on("KZ Transit", {
 	refresh(frm) {
+		// Fura jo'naganda — holat "Yo'lda", Traccar kuzatuvi shundan boshlanadi (LD yakunlangan bo'lsa).
+		if (!frm.is_new() && frm.doc.holati === "Jo'nashga tayyor") {
+			frm.add_custom_button(__("Yo'lga chiqdi"), () =>
+				frappe
+					.call({
+						method: "logistika.erp_for_logistics.doctype.kz_transit.kz_transit.yolga_chiqdi",
+						args: { name: frm.doc.name },
+						freeze: true,
+					})
+					.then((r) => {
+						if (r.message && !r.message.gps) {
+							frappe.show_alert({ message: __("Fura yo'lga chiqdi, lekin GPS joylashuvi hozircha olinmadi"), indicator: "orange" }, 8);
+						}
+						frm.reload_doc();
+					})
+			).addClass("btn-primary");
+		}
 		set_transit_truck_options(frm);
 		apply_gps_row_states(frm);
 		setTimeout(() => apply_gps_row_states(frm), 200);

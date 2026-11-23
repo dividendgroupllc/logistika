@@ -16,15 +16,13 @@
 # shu hujjatga ("eksport_hujjat_natija") biriktiriladi. Har topshirishda qabul qiluvchi rolga
 # o'ng tomonda chiqadigan xabar (realtime) va qo'ng'iroqcha bildirishnomasi.
 
-from contextlib import contextmanager
 
 import frappe
 from frappe import _
-from frappe.desk.doctype.notification_log.notification_log import enqueue_create_notification
 from frappe.model.document import Document
 from frappe.utils import cstr, flt, now_datetime, today
 
-from logistika.erp_for_logistics import furalar
+from logistika.erp_for_logistics import furalar, topshiriq
 
 DOCTYPE = "Xitoy Eksport Hujjati"
 HOLDER = "Xitoy Eksport Yopiq Fayl"
@@ -33,7 +31,6 @@ DEFAULT_PRICE, DEFAULT_CURRENCY = 600, "CNY"
 LOGISTIKA, BROKER, BUXGALTER = "Ichki logistika bo'limi", "Broker", "Buxgalter yordamchisi"
 QORALAMA, BROKERDA, QOSHIMCHA = "Qoralama", "Brokerda", "Qo'shimcha hujjat kerak"
 TOLOV, TASDIQ, YAKUN = "To'lov kutilmoqda", "Buxgalter tasdig'ida", "Yakunlandi"
-REALTIME_EVENT = "logistika_topshiriq"
 
 
 class XitoyEksportHujjati(Document):
@@ -132,19 +129,7 @@ def _move(doc, status, notify_role, message, **values):
 
 def notify(doc, role, message):
 	"""Rol foydalanuvchilariga: qo'ng'iroqcha (Notification Log) va o'ng tomonda darhol xabar."""
-	users = [
-		u
-		for u in frappe.get_all("Has Role", filters={"role": role, "parenttype": "User"}, pluck="parent")
-		if u not in ("Guest", frappe.session.user) and frappe.db.get_value("User", u, "enabled")
-	]
-	if not users:
-		return
-	subject = f"{doc.name} ({doc.order}): {message}"
-	enqueue_create_notification(
-		users, {"type": "Alert", "document_type": DOCTYPE, "document_name": doc.name, "subject": subject, "from_user": frappe.session.user}
-	)
-	for user in users:
-		frappe.publish_realtime(REALTIME_EVENT, {"message": subject, "doctype": DOCTYPE, "name": doc.name}, user=user, after_commit=True)
+	topshiriq.notify_users(DOCTYPE, doc.name, topshiriq.role_users(role), f"{doc.name} ({doc.order}): {message}")
 
 
 # ---------------------------------------------------------------- o'tishlar -------------
@@ -163,8 +148,7 @@ def send_to_broker(name):
 @frappe.whitelist()
 def request_documents(name, sabab, izoh=None):
 	doc = _load(name, (BROKERDA,), BROKER)
-	allowed = frappe.get_all("Broker Qaytarish Sababi", filters={"parenttype": "Logistika Settings"}, pluck="sabab")
-	if sabab not in allowed:
+	if sabab not in _reasons():
 		frappe.throw(_("Sababni ro'yxatdan tanlang"))
 	doc.append("qaytarishlar", {"sabab": sabab, "izoh": izoh, "kim": frappe.session.user, "sana": now_datetime()})
 	return _move(doc, QOSHIMCHA, LOGISTIKA, _("broker qo'shimcha hujjat so'radi: {0}").format(sabab))
@@ -257,21 +241,7 @@ def approve(name, tolov_hisobi):
 	)
 
 
-@contextmanager
-def _as_system():
-	"""Tizim (Administrator) nomidan bajarish. frappe.set_user sessiyani o'z joyida o'zgartiradi
-	(csrf_token, muddat va h.k. o'chadi) — shuning uchun nusxa ustida ishlaymiz va oxirida asl
-	sessiya obyektini o'zgarishsiz qaytaramiz."""
-	local = frappe.local
-	original_session, original_form = local.session, local.form_dict
-	local.session = frappe._dict(original_session)
-	try:
-		frappe.set_user("Administrator")
-		yield
-	finally:
-		local.session, local.form_dict = original_session, original_form
-		local.cache, local.role_permissions, local.new_doc_templates, local.user_perms = {}, {}, {}, None
-		local.jenv_restricted = local.jenv_unrestricted = None
+_as_system = topshiriq.as_system
 
 
 def _release_export_file(doc):
@@ -279,20 +249,7 @@ def _release_export_file(doc):
 	source = frappe.db.get_value(HOLDER, doc.eksport_hujjat, "fayl") if doc.eksport_hujjat else None
 	if not source:
 		frappe.throw(_("Ichki eksport hujjati topilmadi"))
-	src = frappe.get_doc("File", {"file_url": source, "attached_to_doctype": HOLDER})
-	copy = frappe.get_doc(
-		{
-			"doctype": "File",
-			"file_name": src.file_name,
-			"file_url": src.file_url,
-			"is_private": 1,
-			"attached_to_doctype": DOCTYPE,
-			"attached_to_name": doc.name,
-			"attached_to_field": "eksport_hujjat_natija",
-		}
-	)
-	copy.insert(ignore_permissions=True)
-	return copy.file_url
+	return topshiriq.release_file(source, HOLDER, DOCTYPE, doc.name, "eksport_hujjat_natija")
 
 
 def _create_sale_and_payment(doc, account, approver):
@@ -372,12 +329,20 @@ def order_trucks(order, current=None):
 	return [plate for plate in furalar.plates(on_road=True, order=order) if plate not in taken]
 
 
+def _reasons():
+	"""Faqat XEH ro'yxati (Settings'da LD uchun ham shu child doctype'li jadval bor)."""
+	return frappe.get_all(
+		"Broker Qaytarish Sababi",
+		filters={"parenttype": "Logistika Settings", "parentfield": "broker_qaytarish_sabablari"},
+		pluck="sabab",
+		order_by="idx asc",
+	)
+
+
 @frappe.whitelist()
 def return_reasons():
 	_require_role(BROKER)
-	return frappe.get_all(
-		"Broker Qaytarish Sababi", filters={"parenttype": "Logistika Settings"}, pluck="sabab", order_by="idx asc"
-	)
+	return _reasons()
 
 
 @frappe.whitelist()

@@ -25,5 +25,23 @@
   "disabled": 0,
   "is_custom": 0,
   "modified": "2026-11-22 10:00:00.000000"
+ },
+ {
+  "doctype": "Role",
+  "name": "Tashqi logistika bo'limi",
+  "role_name": "Tashqi logistika bo'limi",
+  "desk_access": 1,
+  "disabled": 0,
+  "is_custom": 0,
+  "modified": "2026-11-23 10:00:00.000000"
+ },
+ {
+  "doctype": "Role",
+  "name": "Tashqi broker",
+  "role_name": "Tashqi broker",
+  "desk_access": 1,
+  "disabled": 0,
+  "is_custom": 0,
+  "modified": "2026-11-23 10:00:00.000000"
  }
 ]

@@ -48,13 +48,13 @@ class TestDocumentsPipeline(FrappeTestCase):
 			}
 		).insert(ignore_permissions=True).submit()
 
-	def test_ld_peregruz_check_and_kz_transit_arrival(self):
+	def test_transit_done_and_kz_transit_arrival(self):
+		# Tranzit bosqichini endi LD'dagi broker "Tayyor"i suradi (test_ld_jarayon) — bu yerda
+		# shu bosqichdan KZ Transit yetib borishigacha.
+		from logistika.erp_for_logistics.pipeline_status import advance_order_detail_status
+
 		self._load_onto_kz()
-		ld = frappe.get_doc(
-			{"doctype": "Logistic Documentation", "sana": today(), "order": self.order.name, "kz_truck": KZ}
-		).insert(ignore_permissions=True)
-		ld.tranzit_check = 1
-		ld.save()
+		advance_order_detail_status([self.od.name], "Транзитний оформеления")
 		self.assertEqual(frappe.db.get_value("Order Detail", self.od.name, "status"), "Транзитний оформеления")
 
 		kzt = frappe.get_doc(

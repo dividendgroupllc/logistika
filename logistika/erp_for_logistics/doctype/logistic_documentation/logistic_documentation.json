@@ -7,52 +7,38 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "tab_main",
   "sec_top",
   "sana",
   "order",
   "cb_top",
   "kz_truck",
-  "tab_per",
+  "status",
   "sec_per",
   "peregruz_hujjat",
-  "peregruz_check",
-  "cb_per",
-  "send_peregruz_hujjat",
   "peregruz_sent",
-  "sec_ichki_dek",
-  "ichki_deklaratsiya",
-  "ichki_deklaratsiya_summa",
-  "ichki_deklaratsiya_tolovchi",
-  "tab_cl",
-  "sec_cl",
+  "cb_per",
   "pekin_invoice",
-  "eksport_deklaratsiya",
-  "eksport_deklaratsiya_summa",
-  "cb_cl",
-  "send_eksport_deklaratsiya",
-  "eksport_sent",
-  "sec_cl_cmr",
-  "cl_go_to_transit",
-  "cl_cmr_preview_html",
-  "cl_cmr_tasdiqlandi",
-  "tab_tr",
-  "sec_tr",
+  "sec_hujjat",
+  "ed",
+  "cmr",
+  "ed_cmr_tayyor",
+  "cb_hujjat",
+  "co",
+  "co_tayyor",
+  "sec_info",
   "tr_docs_preview_html",
+  "cb_info",
   "tr_driver_preview_html",
-  "tr_docs_tasdiqlandi",
-  "tranzit_check",
+  "sec_qaytarish",
+  "qaytarishlar",
+  "sec_tranzit",
+  "broker",
+  "broker_fayl",
+  "cb_tranzit",
   "tranzit_hujjat",
-  "tr_hujjat_turi",
-  "tranzit_matn",
-  "tranzit_xarajat"
+  "tr_hujjat_turi"
  ],
  "fields": [
-  {
-   "fieldname": "tab_main",
-   "fieldtype": "Tab Break",
-   "label": "Asosiy"
-  },
   {
    "fieldname": "sec_top",
    "fieldtype": "Section Break",
@@ -85,146 +71,102 @@
    "label": "KZ fura raqami"
   },
   {
-   "fieldname": "tab_per",
-   "fieldtype": "Tab Break",
-   "label": "Перегруз данный"
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Holat",
+   "options": "Qoralama\nInvoice kutilmoqda\nHujjatlar tayyorlanmoqda\nBrokerda\nHujjat yetishmaydi\nYakunlandi",
+   "default": "Qoralama",
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "no_copy": 1
   },
   {
    "fieldname": "sec_per",
    "fieldtype": "Section Break",
-   "label": "Перегруз данный"
+   "label": "Перегруз данный va Pekin invoice"
   },
   {
    "fieldname": "peregruz_hujjat",
    "fieldtype": "Attach",
-   "label": "Перегруз данный — hujjat",
-   "permlevel": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "peregruz_check",
-   "fieldtype": "Check",
-   "label": "Перегруз данный ✓"
-  },
-  {
-   "fieldname": "cb_per",
-   "fieldtype": "Column Break"
-  },
-  {
-   "depends_on": "eval:doc.peregruz_hujjat",
-   "fieldname": "send_peregruz_hujjat",
-   "fieldtype": "Button",
-   "label": "📤 Kliyentga yuborish (Telegram)"
+   "label": "Перегруз данный — hujjat"
   },
   {
    "default": "0",
    "fieldname": "peregruz_sent",
    "fieldtype": "Check",
    "label": "Kliyentga yuborilgan ✓",
-   "read_only": 1
+   "read_only": 1,
+   "no_copy": 1
   },
   {
-   "fieldname": "sec_ichki_dek",
-   "fieldtype": "Section Break",
-   "label": "Ichki deklaratsiya"
-  },
-  {
-   "fieldname": "ichki_deklaratsiya",
-   "fieldtype": "Attach",
-   "label": "Ichki deklaratsiya"
-  },
-  {
-   "fieldname": "ichki_deklaratsiya_summa",
-   "fieldtype": "Currency",
-   "label": "Summa"
-  },
-  {
-   "fieldname": "ichki_deklaratsiya_tolovchi",
-   "fieldtype": "Select",
-   "label": "Kim to'ladi",
-   "options": "\nCustomer\nZavod"
-  },
-  {
-   "fieldname": "tab_cl",
-   "fieldtype": "Tab Break",
-   "label": "Kliyent hujjatlari"
-  },
-  {
-   "fieldname": "sec_cl",
-   "fieldtype": "Section Break",
-   "label": "Kliyent hujjatlari"
+   "fieldname": "cb_per",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "pekin_invoice",
    "fieldtype": "Attach",
    "label": "Pekin invoice (kliyentdan)",
-   "permlevel": 1
+   "no_copy": 1
   },
   {
-   "fieldname": "eksport_deklaratsiya",
+   "fieldname": "sec_hujjat",
+   "fieldtype": "Section Break",
+   "label": "ED, CMR, CO",
+   "depends_on": "eval:!['Qoralama','Invoice kutilmoqda'].includes(doc.status)"
+  },
+  {
+   "fieldname": "ed",
    "fieldtype": "Attach",
-   "label": "Eksport deklaratsiya (ED/CO)",
-   "permlevel": 1
+   "label": "ED (eksport deklaratsiya)",
+   "no_copy": 1
   },
   {
-   "description": "Avtomatik: shu Order'ning pekin list'i bor Order Detail'lari soni × $100 — kerak bo'lsa qo'lda o'zgartiring",
-   "fieldname": "eksport_deklaratsiya_summa",
-   "fieldtype": "Currency",
-   "label": "Eksport deklaratsiya summasi"
+   "fieldname": "cmr",
+   "fieldtype": "Attach",
+   "label": "CMR",
+   "no_copy": 1
   },
   {
-   "fieldname": "cb_cl",
+   "fieldname": "ed_cmr_tayyor",
+   "fieldtype": "Check",
+   "label": "ED va CMR tayyor ✓",
+   "read_only": 1,
+   "default": "0",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "cb_hujjat",
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.eksport_deklaratsiya",
-   "fieldname": "send_eksport_deklaratsiya",
-   "fieldtype": "Button",
-   "label": "📤 Kliyentga yuborish (Telegram)"
+   "fieldname": "co",
+   "fieldtype": "Attach",
+   "label": "CO (kelib chiqish sertifikati)",
+   "no_copy": 1
   },
   {
-   "default": "0",
-   "fieldname": "eksport_sent",
+   "fieldname": "co_tayyor",
    "fieldtype": "Check",
-   "label": "Kliyentga yuborilgan ✓",
-   "read_only": 1
-  },
-  {
-   "fieldname": "sec_cl_cmr",
-   "fieldtype": "Section Break",
-   "label": "CMR (Transit bo'limidan)"
-  },
-  {
-   "fieldname": "cl_go_to_transit",
-   "fieldtype": "Button",
-   "label": "→ Transit bo'limiga o'tish"
-  },
-  {
-   "fieldname": "cl_cmr_preview_html",
-   "fieldtype": "HTML",
-   "label": "CMR"
-  },
-  {
+   "label": "CO tayyor ✓",
+   "read_only": 1,
    "default": "0",
-   "description": "Transit bo'limida biriktirilgan CMR hujjatini ko'rib, to'g'riligini tasdiqlash",
-   "fieldname": "cl_cmr_tasdiqlandi",
-   "fieldtype": "Check",
-   "label": "CMR ko'rib tasdiqlandi ✓"
+   "no_copy": 1
   },
   {
-   "fieldname": "tab_tr",
-   "fieldtype": "Tab Break",
-   "label": "Транзит"
-  },
-  {
-   "fieldname": "sec_tr",
+   "fieldname": "sec_info",
    "fieldtype": "Section Break",
-   "label": "Транзит"
+   "label": "Pekin list va haydovchi",
+   "collapsible": 1
   },
   {
    "fieldname": "tr_docs_preview_html",
    "fieldtype": "HTML",
-   "label": "Документы клиента"
+   "label": "Pekin list"
+  },
+  {
+   "fieldname": "cb_info",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "tr_driver_preview_html",
@@ -232,45 +174,67 @@
    "label": "Haydovchi / mashina"
   },
   {
-   "default": "0",
-   "description": "Pekin invoice и Pekin list (Order Detail) проверены",
-   "fieldname": "tr_docs_tasdiqlandi",
-   "fieldtype": "Check",
-   "label": "Документы проверены ✓"
+   "fieldname": "sec_qaytarish",
+   "fieldtype": "Section Break",
+   "label": "Broker qaytarishlari",
+   "depends_on": "eval:(doc.qaytarishlar || []).length"
   },
   {
-   "default": "0",
-   "fieldname": "tranzit_check",
-   "fieldtype": "Check",
-   "label": "Транзитний оформеления ✓"
+   "fieldname": "qaytarishlar",
+   "fieldtype": "Table",
+   "options": "Xitoy Eksport Qaytarish",
+   "label": "Qaytarishlar tarixi",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "sec_tranzit",
+   "fieldtype": "Section Break",
+   "label": "Tranzit rasmiylashtiruvi (tashqi broker)",
+   "depends_on": "eval:['Brokerda','Hujjat yetishmaydi','Yakunlandi'].includes(doc.status)"
+  },
+  {
+   "fieldname": "broker",
+   "fieldtype": "Link",
+   "options": "User",
+   "label": "Tashqi broker",
+   "read_only": 1,
+   "no_copy": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "broker_fayl",
+   "fieldtype": "Link",
+   "options": "LD Yopiq Fayl",
+   "label": "Broker yopiq fayli",
+   "read_only": 1,
+   "hidden": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "cb_tranzit",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "tranzit_hujjat",
    "fieldtype": "Attach",
-   "label": "CMR",
-   "permlevel": 1
+   "label": "Tranzit hujjati",
+   "read_only": 1,
+   "no_copy": 1
   },
   {
    "fieldname": "tr_hujjat_turi",
    "fieldtype": "Select",
-   "label": "Тип документа",
-   "options": "Тир карнет\nАкт перегруза"
-  },
-  {
-   "fieldname": "tranzit_matn",
-   "fieldtype": "Data",
-   "label": "Примечание"
-  },
-  {
-   "fieldname": "tranzit_xarajat",
-   "fieldtype": "Currency",
-   "label": "Сумма расходов"
+   "label": "Hujjat turi",
+   "options": "\nАкт перегруза\nТир карнет",
+   "read_only": 1,
+   "no_copy": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-19 16:00:00.000000",
+ "modified": "2026-11-23 13:10:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Logistic Documentation",
@@ -290,10 +254,18 @@
    "write": 1
   },
   {
-   "permlevel": 1,
+   "create": 1,
+   "delete": 1,
+   "print": 1,
    "read": 1,
-   "role": "System Manager",
+   "report": 1,
+   "role": "Tashqi logistika bo'limi",
    "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Tashqi broker",
+   "print": 1
   }
  ],
  "row_format": "Dynamic",

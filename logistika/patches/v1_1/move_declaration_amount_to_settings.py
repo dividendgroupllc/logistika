@@ -7,6 +7,9 @@ from frappe.utils import flt
 
 
 def execute():
+	# Sozlama keyinroq olib tashlandi (2026-11-23) — yangi o'rnatishlarda ko'chiradigan joy yo'q.
+	if not frappe.get_meta("Logistika Settings").get_field("ichki_deklaratsiya_summa"):
+		return
 	if flt(frappe.db.get_single_value("Logistika Settings", "ichki_deklaratsiya_summa")):
 		return
 	if not frappe.db.has_column("Ichki Deklaratsiya", "ichki_deklaratsiya_summa"):
