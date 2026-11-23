@@ -184,6 +184,10 @@ doc_events = {
 		"on_update": "logistika.erp_for_logistics.kurs.sync_inverse",
 		"on_trash": "logistika.erp_for_logistics.kurs.delete_inverse",
 	},
+	# Company → Delete Transactions: logistika hujjatlari ham tozalanadi (tozalash.py).
+	"Transaction Deletion Record": {
+		"on_submit": "logistika.erp_for_logistics.tozalash.on_transaction_deletion_submit",
+	},
 	"Supplier": {
 		"validate": "logistika.erp_for_logistics.quick_create.validate_supplier",
 	},
