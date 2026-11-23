@@ -17,7 +17,7 @@ from logistika.erp_for_logistics.cn_validators import validate_cn_phone
 from logistika.erp_for_logistics.doctype.internal_logistics_item.internal_logistics_item import dims_to_cm
 from logistika.erp_for_logistics.pipeline_status import PIPELINE_STAGES
 from logistika.telegram.keyboards import open_button, route
-from logistika.telegram.sender import send_file
+from logistika.telegram.sender import send_file, send_message
 
 # Yuk hali Xitoy furasida (omborga kirmagan) bo'lgan bosqichlar.
 ON_CHINA_TRUCK_STAGES = PIPELINE_STAGES[: PIPELINE_STAGES.index("Таможния склад")]
@@ -274,7 +274,8 @@ def driver_query(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 def send_dispatched(order_detail, row_name=None, row_names=None, dates=None):
 	""""Zavoddan chiqdi" tugmasi — tanlangan fura qatorlari (bitta, bir nechta yoki hammasi)
-	uchun mijozga "yo'lga chiqdi" xabarini nakladnoyi (rasm yoki PDF) bilan yuboradi. Tekshiruv
+	uchun mijozga "yo'lga chiqdi" xabarini yuboradi — nakladnoyi (rasm yoki PDF) bo'lsa ilova
+	qilib, bo'lmasa faqat matn (keyin yuklangan nakladnoy/pekin list kabinetda ko'rinadi). Tekshiruv
 	shu yerda, yuborish — fon vazifasida (telegram_jobs): sayt qotmaydi."""
 	from logistika.erp_for_logistics import telegram_jobs
 
@@ -297,9 +298,6 @@ def send_dispatched(order_detail, row_name=None, row_names=None, dates=None):
 			frappe.throw(_("Fura qatori topilmadi"))
 		if not row.jonatish_xabari_yuborildi:
 			rows.append(row)
-	missing = [f"{r.idx}-qator ({r.xitoy_mashina_nomeri or '-'})" for r in rows if not r.nakladnoy]
-	if missing:
-		frappe.throw(_("Avval nakladnoyni (rasm yoki PDF) yuklang: {0}").format(", ".join(missing)))
 	# Chiqqan sana — oynada tanlanadi (esdan chiqsa ertasi kuni kechagi sana bilan); bugundan
 	# keyin va Order Detail sanasidan oldin bo'lmaydi. Xabar yuborilishidan oldin yoziladi.
 	dates = frappe.parse_json(dates) if isinstance(dates, str) else (dates or {})
@@ -324,11 +322,11 @@ def send_dispatched(order_detail, row_name=None, row_names=None, dates=None):
 
 
 def dispatch_rows(order_detail, row_names):
-	"""Fon vazifasi: har bir tanlangan (hali yuborilmagan, nakladnoyi bor) qator uchun xabar."""
+	"""Fon vazifasi: har bir tanlangan (hali yuborilmagan) qator uchun xabar."""
 	doc = frappe.get_doc("Order Detail", order_detail)
 	sent = rows = 0
 	for row in doc.furalar:
-		if row.name in row_names and not row.jonatish_xabari_yuborildi and row.nakladnoy:
+		if row.name in row_names and not row.jonatish_xabari_yuborildi:
 			delivered = _dispatch_row(doc, row)
 			sent += delivered
 			rows += 1 if delivered else 0
@@ -341,18 +339,19 @@ def _dispatch_row(doc, row):
 	from logistika.erp_for_logistics import tracking
 	from logistika.telegram.messages import ORDER_DISPATCHED, render
 
-	# Qisqa xabar (nakladnoy ilova): qaysi yuk va qaysi fura — tafsilotlar kabinetda.
+	# Qisqa xabar: qaysi yuk va qaysi fura — tafsilotlar kabinetda. Nakladnoy bo'lsa ilova,
+	# bo'lmasa faqat matn (keyin yuklangan nakladnoy va pekin list kabinetda ko'rinadi).
 	values = dict(order_detail=doc.name, fura=row.xitoy_mashina_nomeri or "-")
-	sent = sum(
-		1
-		for chat_id in tracking.get_order_chat_ids(doc.order)
-		if send_file(
-			chat_id,
-			row.nakladnoy,
-			caption=render(ORDER_DISPATCHED, tracking.chat_language(chat_id), **values),
-			reply_markup=open_button(tracking.chat_language(chat_id), route("yuk", doc.name)),
-		)
-	)
+
+	def deliver(chat_id):
+		lang = tracking.chat_language(chat_id)
+		text = render(ORDER_DISPATCHED, lang, **values)
+		markup = open_button(lang, route("yuk", doc.name))
+		if row.nakladnoy:
+			return send_file(chat_id, row.nakladnoy, caption=text, reply_markup=markup)
+		return send_message(chat_id, text, reply_markup=markup)
+
+	sent = sum(1 for chat_id in tracking.get_order_chat_ids(doc.order) if deliver(chat_id))
 	if sent:
 		frappe.db.set_value(
 			furalar.CHILD,

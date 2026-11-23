@@ -49,13 +49,12 @@ class TestFonYuborish(FrappeTestCase):
 		self.assertEqual(method, "logistika.erp_for_logistics.doctype.order_detail.order_detail.dispatch_rows")
 		self.assertEqual(kwargs, {"order_detail": self.od.name, "row_names": names})
 
-	def test_send_dispatched_checks_nakladnoy_before_queue(self):
-		self.nakladnoy(self.od.furalar[0])
+	def test_send_dispatched_queues_rows_without_nakladnoy(self):
+		self.nakladnoy(self.od.furalar[0])  # ikkinchisida nakladnoy yo'q — baribir yuboriladi
 		names = [r.name for r in self.od.furalar]
 		with patch("frappe.enqueue") as enqueue:
-			with self.assertRaisesRegex(frappe.ValidationError, "_T F2"):
-				od_module.send_dispatched(self.od.name, row_names=frappe.as_json(names))
-		enqueue.assert_not_called()
+			self.assertEqual(od_module.send_dispatched(self.od.name, row_names=frappe.as_json(names)), {"queued": 2})
+		self.assertEqual(queued(enqueue)[1]["row_names"], names)
 
 	def test_dispatch_rows_sends_each_selected(self):
 		self.nakladnoy(*self.od.furalar)

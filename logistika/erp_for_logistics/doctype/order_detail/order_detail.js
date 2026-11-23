@@ -96,10 +96,10 @@ function choose_row(frm, rows, callback) {
 	dialog.show();
 }
 
-// "Zavoddan chiqdi": bitta, bir nechta yoki hamma fura — nakladnoysizlari tanlanmaydi.
+// "Zavoddan chiqdi": bitta, bir nechta yoki hamma fura — nakladnoysiz fura uchun xabar faqat
+// matn bo'lib ketadi (nakladnoy keyin yuklansa kabinetda ko'rinadi).
 // Yuborish fonda; natija bildirishnoma bo'lib keladi va forma yangilanadi.
 function choose_dispatch_rows(frm, rows) {
-	const ready = rows.filter((r) => r.nakladnoy);
 	// Har bir fura: belgilash + chiqqan sana (standart — bugun; esdan chiqsa kechagi sana).
 	const fields = [];
 	rows.forEach((r, i) => {
@@ -108,11 +108,10 @@ function choose_dispatch_rows(frm, rows) {
 			{
 				fieldname: `row_${r.idx}`,
 				fieldtype: "Check",
-				label: r.nakladnoy
-					? `${r.xitoy_mashina_nomeri} — ${flt(r.taxminiy_tonna)} t / ${flt(r.taxminiy_kub)} m³`
-					: `${r.xitoy_mashina_nomeri} — ${__("nakladnoy yuklanmagan")}`,
-				default: rows.length === 1 && r.nakladnoy ? 1 : 0,
-				read_only: r.nakladnoy ? 0 : 1,
+				label:
+					`${r.xitoy_mashina_nomeri} — ${flt(r.taxminiy_tonna)} t / ${flt(r.taxminiy_kub)} m³` +
+					(r.nakladnoy ? "" : ` (${__("nakladnoysiz — faqat xabar")})`),
+				default: rows.length === 1 ? 1 : 0,
 			},
 			{ fieldtype: "Column Break" },
 			{
@@ -129,7 +128,7 @@ function choose_dispatch_rows(frm, rows) {
 		fields,
 		primary_action_label: __("Mijozga yuborish"),
 		primary_action(values) {
-			const chosen = rows.filter((r) => r.nakladnoy && values[`row_${r.idx}`]);
+			const chosen = rows.filter((r) => values[`row_${r.idx}`]);
 			const names = chosen.map((r) => r.name);
 			const dates = {};
 			chosen.forEach((r) => (dates[r.name] = values[`sana_${r.idx}`] || frappe.datetime.get_today()));
@@ -145,16 +144,9 @@ function choose_dispatch_rows(frm, rows) {
 			if (frm.is_dirty()) frm.save().then(run);
 			else run();
 		},
-		secondary_action_label: ready.length > 1 ? __("Hammasi") : null,
-		secondary_action:
-			ready.length > 1
-				? () => rows.forEach((r) => r.nakladnoy && dialog.set_value(`row_${r.idx}`, 1))
-				: null,
+		secondary_action_label: rows.length > 1 ? __("Hammasi") : null,
+		secondary_action: rows.length > 1 ? () => rows.forEach((r) => dialog.set_value(`row_${r.idx}`, 1)) : null,
 	});
-	if (!ready.length) {
-		frappe.msgprint(__("Avval furalar qatoriga nakladnoyni (rasm yoki PDF) yuklang."));
-		return;
-	}
 	dialog.show();
 }
 

@@ -885,3 +885,4 @@ tranzit rasmiylashtiruvi uchun hujjatlar yuborildi,已发送文件办理过境�
 Перегруз данный va Pekin invoice,转运数据和北京发票
 """Yo'lda"" holati faqat ""Yo'lga chiqdi"" tugmasi orqali qo'yiladi",“在途”状态只能通过“已出发”按钮设置
 "Fura yo'lga chiqdi, lekin GPS joylashuvi hozircha olinmadi",货车已出发，但暂未获取GPS位置
+nakladnoysiz — faqat xabar,无运单——仅发送消息

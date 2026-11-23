@@ -76,10 +76,22 @@ class TestNakladnoyDispatch(FrappeTestCase):
 			sent = order_detail.send_dispatched(self.od.name)
 		return sent, send
 
-	def test_dispatch_requires_nakladnoy(self):
-		with self.assertRaises(frappe.ValidationError):
-			self.dispatch()
-		self.assertFalse(frappe.db.get_value("Order Detail Fura", self.row.name, "jonatish_xabari_yuborildi"))
+	def test_dispatch_without_nakladnoy_sends_text(self):
+		# 2026-11-23: nakladnoy bo'lmasa ham xabar (faqat matn) ketadi; keyin yuklangan
+		# nakladnoy va pekin list mijoz kabinetida ko'rinadi.
+		from logistika.erp_for_logistics import tracking
+		from logistika.erp_for_logistics.doctype.order_detail import order_detail
+
+		with patch.object(tracking, "get_order_chat_ids", return_value=["1"]), patch.object(
+			tracking, "chat_language", return_value="uz"
+		), patch.object(order_detail, "send_file", return_value=True) as send_file, patch.object(
+			order_detail, "send_message", return_value=True
+		) as send_message:
+			self.assertEqual(order_detail.send_dispatched(self.od.name), {"queued": 1})
+		send_file.assert_not_called()
+		self.assertEqual(send_message.call_args.args[:2], ("1", f"🚚 <b>{self.od.name}</b> zavoddan yo'lga chiqdi · 🚛 粤B12345"))
+		self.assertIn("web_app", str(send_message.call_args.kwargs["reply_markup"]))
+		self.assertEqual(frappe.db.get_value("Order Detail Fura", self.row.name, "jonatish_xabari_yuborildi"), 1)
 
 	def test_dispatch_sends_nakladnoy_with_truck_and_load(self):
 		url = self.attach()

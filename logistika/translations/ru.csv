@@ -944,3 +944,4 @@ tranzit rasmiylashtiruvi uchun hujjatlar yuborildi,документы отпра
 Перегруз данный va Pekin invoice,Перегруз данный и Pekin invoice
 """Yo'lda"" holati faqat ""Yo'lga chiqdi"" tugmasi orqali qo'yiladi",Статус «В пути» ставится только кнопкой «Выехал»
 "Fura yo'lga chiqdi, lekin GPS joylashuvi hozircha olinmadi","Фура выехала, но GPS-местоположение пока не получено"
+nakladnoysiz — faqat xabar,без накладной — только сообщение
