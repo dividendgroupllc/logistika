@@ -560,3 +560,66 @@ class TestLdChetlabOtish(FrappeTestCase):
 		result = yolga_chiqdi(kzt.name)
 		self.assertEqual(frappe.local.message_log, [])
 		self.assertEqual((result["holati"], result["gps"]), ("Yo'lda", False))
+
+
+class TestOmborchigaKorinsin(FrappeTestCase):
+	"""Order Detail fura qatoridagi belgi — WI'da faqat belgilangan furalar (2026-11-23)."""
+
+	def setUp(self):
+		from logistika.erp_for_logistics.doctype.order_detail.test_order_detail import make_order_detail
+		from logistika.erp_for_logistics.tests.utils import make_order, setup_logistika_settings
+
+		frappe.db.savepoint("ombor_belgi")
+		setup_logistika_settings()
+		order = make_order(kliyent="_T OB Mijoz").name
+		self.od = make_order_detail(
+			order, furalar=[{"xitoy_mashina_nomeri": "_T BELGILI", "omborga_korinsin": 1}, {"xitoy_mashina_nomeri": "_T BELGISIZ", "omborga_korinsin": 0}]
+		)
+
+	def tearDown(self):
+		frappe.db.rollback(save_point="ombor_belgi")
+
+	def intake(self, plate):
+		from frappe.utils import today
+
+		from logistika.erp_for_logistics.tests.test_warehouse_chain import ensure_ombor
+
+		return frappe.get_doc(
+			{
+				"doctype": "Warehouse Intake",
+				"sana": today(),
+				"fura": plate,
+				"ombor": ensure_ombor(),
+				"items": [{"order": self.od.name, "part_name": "P0", "quantity": 1, "fakt_qty": 1}],
+			}
+		).insert(ignore_permissions=True)
+
+	def test_field_and_window_setting_removed(self):
+		self.assertEqual(frappe.get_meta("Order Detail Fura").get_field("omborga_korinsin").fieldtype, "Check")
+		self.assertIsNone(frappe.get_meta("Logistika Settings").get_field("wi_kutish_kunlari"))
+
+	def test_only_marked_trucks_for_warehouse(self):
+		from logistika.erp_for_logistics.api import china_plates_on_road
+
+		self.assertIn("_T BELGILI", china_plates_on_road())
+		self.assertNotIn("_T BELGISIZ", china_plates_on_road())
+		self.assertNotIn("_T BELGISIZ", china_plates_on_road(txt="BELGISIZ"))
+		with self.assertRaises(frappe.ValidationError):
+			self.intake("_T BELGISIZ")
+		self.intake("_T BELGILI")
+
+	def test_cannot_unmark_after_arrival(self):
+		from frappe.utils import today
+
+		row = self.od.furalar[0]
+		frappe.db.set_value("Order Detail Fura", row.name, "fakt_kelish_sanasi", today())
+		doc = frappe.get_doc("Order Detail", self.od.name)
+		doc.furalar[0].omborga_korinsin = 0
+		with self.assertRaises(frappe.ValidationError):
+			doc.save(ignore_permissions=True)
+
+	def test_patch_marks_existing_rows(self):
+		from logistika.patches.v1_1 import omborga_korinsin
+
+		omborga_korinsin.execute()
+		self.assertEqual(frappe.db.get_value("Order Detail Fura", self.od.furalar[1].name, "omborga_korinsin"), 1)

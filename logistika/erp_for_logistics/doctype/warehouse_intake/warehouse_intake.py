@@ -14,11 +14,11 @@ class WarehouseIntake(Document):
 		xodimlar.fill_employee(self, "tushirgan_xodim", required=True)
 
 	def validate(self):
-		# Faqat yo'ldagi (hali omborga kelmagan) Order Detail furasini qabul qilish mumkin.
-		# Istalgan yo'ldagi fura (kelish sanasi oynasi faqat tanlov ro'yxatini qisqartiradi).
-		if (self.is_new() or self.has_value_changed("fura")) and self.fura not in furalar.plates(on_road=True):
+		# Faqat yo'ldagi (hali omborga kelmagan) va "Omborchiga ko'rinsin" belgisi qo'yilgan
+		# Order Detail furasini qabul qilish mumkin.
+		if (self.is_new() or self.has_value_changed("fura")) and self.fura not in furalar.plates(on_road=True, for_warehouse=True):
 			frappe.throw(
-				_("\"{0}\" — yo'ldagi Order Detail'larda bunday fura yo'q (yoki u allaqachon omborga kelgan).").format(
+				_("\"{0}\" — yo'ldagi, \"Omborchiga ko'rinsin\" belgisi qo'yilgan fura emas (yoki u allaqachon omborga kelgan).").format(
 					self.fura
 				)
 			)

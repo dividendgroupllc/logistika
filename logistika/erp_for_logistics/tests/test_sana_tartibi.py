@@ -1,10 +1,9 @@
-"""Hujjatlar orasidagi sanalar ketma-ketligi, WI'dagi fura oynasi (±N kun), eski ma'lumot rejimi."""
+"""Hujjatlar orasidagi sanalar ketma-ketligi va eski ma'lumot rejimi."""
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, today
 
-from logistika.erp_for_logistics.api import china_plates_on_road
 from logistika.erp_for_logistics.doctype.order_detail.test_order_detail import make_order_detail
 from logistika.erp_for_logistics.tests.mini_app_utils import make_ld, raw_insert
 from logistika.erp_for_logistics.tests.test_warehouse_chain import ensure_ombor
@@ -30,53 +29,10 @@ class TestSanaTartibi(FrappeTestCase):
 	def eski(self, on=1):
 		frappe.db.set_single_value("Logistika Settings", "eski_malumot_rejimi", on)
 
-	def window(self, days):
-		frappe.db.set_single_value("Logistika Settings", "wi_kutish_kunlari", days)
-
 	# ---------- sozlama ----------
 	def test_settings_fields(self):
 		meta = frappe.get_meta("Logistika Settings")
-		self.assertEqual(meta.get_field("wi_kutish_kunlari").fieldtype, "Int")
-		self.assertEqual(meta.get_field("wi_kutish_kunlari").default, "3")
 		self.assertEqual(meta.get_field("eski_malumot_rejimi").fieldtype, "Check")
-
-	def test_wi_trucks_within_window(self):
-		self.window(3)
-		make_order_detail(self.order.name, xitoy_mashina_nomeri="_T YAQIN", kelish_sanasi=d(2))
-		make_order_detail(self.order.name, xitoy_mashina_nomeri="_T UZOQ", kelish_sanasi=d(10))
-		make_order_detail(self.order.name, xitoy_mashina_nomeri="_T SANASIZ", kelish_sanasi=None)
-		# Bo'sh maydon (bosilganda) — faqat yaqin kunlardagilar; ro'yxatni qisqartiradi xolos.
-		plates = china_plates_on_road()
-		self.assertIn("_T YAQIN", plates)
-		self.assertIn("_T SANASIZ", plates)
-		self.assertNotIn("_T UZOQ", plates)
-		# Raqam yozilsa — barcha yo'ldagi furalar orasidan qidiradi (fura hech qachon "yo'qolmaydi").
-		self.assertIn("_T UZOQ", china_plates_on_road(txt="UZOQ"))
-		self.eski()
-		self.assertIn("_T UZOQ", china_plates_on_road())
-		self.eski(0)
-		self.window(0)  # 0 — filtr yo'q
-		self.assertIn("_T UZOQ", china_plates_on_road())
-
-	def test_wi_accepts_on_road_truck_outside_window(self):
-		self.window(3)
-		od = make_order_detail(self.order.name, xitoy_mashina_nomeri="_T UZOQ", kelish_sanasi=d(10))
-		frappe.get_doc(
-			{
-				"doctype": "Warehouse Intake",
-				"sana": today(),
-				"fura": "_T UZOQ",
-				"ombor": ensure_ombor(),
-				"items": [{"order": od.name, "part_name": "P0", "quantity": 1, "fakt_qty": 1}],
-			}
-		).insert(ignore_permissions=True)
-
-	def test_wi_window_includes_recent_past(self):
-		self.window(3)
-		self.eski()
-		make_order_detail(self.order.name, sana=d(-7), xitoy_mashina_nomeri="_T KECHIKKAN", zavoddan_chiqish_sanasi=d(-6), kelish_sanasi=d(-2))
-		self.eski(0)
-		self.assertIn("_T KECHIKKAN", china_plates_on_road())
 
 	def test_past_departure_allowed_only_in_old_data_mode(self):
 		with self.assertRaises(frappe.ValidationError):
@@ -170,22 +126,3 @@ class TestSanaTartibi(FrappeTestCase):
 			frappe.get_doc({**data, "sana": d(-4)}).insert(ignore_permissions=True)
 		with self.assertRaisesRegex(frappe.ValidationError, ORDER):
 			frappe.get_doc({**data, "sana": d(-3), "fakt_yetib_borgan": d(-4)}).insert(ignore_permissions=True)
-
-
-class TestWindowPatch(FrappeTestCase):
-	def setUp(self):
-		frappe.db.savepoint("wpatch")
-
-	def tearDown(self):
-		frappe.db.rollback(save_point="wpatch")
-
-	def test_patch_sets_default_only_when_empty(self):
-		from logistika.patches.v1_1 import set_wi_kutish_kunlari
-
-		frappe.db.delete("Singles", {"doctype": "Logistika Settings", "field": "wi_kutish_kunlari"})
-		frappe.clear_cache(doctype="Logistika Settings")
-		set_wi_kutish_kunlari.execute()
-		self.assertEqual(frappe.db.get_single_value("Logistika Settings", "wi_kutish_kunlari"), 3)
-		frappe.db.set_single_value("Logistika Settings", "wi_kutish_kunlari", 5)
-		set_wi_kutish_kunlari.execute()
-		self.assertEqual(frappe.db.get_single_value("Logistika Settings", "wi_kutish_kunlari"), 5)

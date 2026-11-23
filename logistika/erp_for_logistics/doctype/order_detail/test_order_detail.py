@@ -44,6 +44,7 @@ def make_order_detail(order, save=True, **overrides):
 		"xitoy_mashina_nomeri": "粤B12345",
 		"zavoddan_chiqish_sanasi": today(),
 		"kelish_sanasi": add_days(today(), 10),
+		"omborga_korinsin": 1,
 	}
 	for field in FURA_FIELDS:
 		if field in overrides:
@@ -51,6 +52,10 @@ def make_order_detail(order, save=True, **overrides):
 	data = {"doctype": "Order Detail", "order": order}
 	data.update(overrides)
 	data.setdefault("furalar", [row])
+	# Testlarda furalar omborchiga ko'rinadi (belgisiz holat o'z testida beriladi).
+	for r in data["furalar"]:
+		if isinstance(r, dict):
+			r.setdefault("omborga_korinsin", 1)
 	pekin_list = data.pop("pekin_list", None)
 	doc = frappe.get_doc(data)
 	if save:

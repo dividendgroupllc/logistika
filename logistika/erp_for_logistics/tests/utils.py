@@ -97,7 +97,6 @@ def setup_logistika_settings():
 	settings = frappe.get_single("Logistika Settings")
 	settings.postavshik_customer_group = ensure_customer_group("_T Xitoy postavshik")
 	settings.haydovchi_supplier_group = ensure_supplier_group("_T Xitoy haydovchi")
-	settings.wi_kutish_kunlari = 0  # testlarda WI fura oynasi filtrlanmaydi (o'z testida yoqiladi)
 	settings.eski_malumot_rejimi = 0
 	settings.save(ignore_permissions=True)
 	return settings

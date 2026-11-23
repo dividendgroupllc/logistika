@@ -44,15 +44,11 @@ def truck_plate_autocomplete(txt=None, **kwargs):
 
 @frappe.whitelist()
 def china_plates_on_road(txt=None, **kwargs):
-	"""Yo'ldagi (hali omborga yetib kelmagan) Order Detail'larning Xitoy fura raqamlari —
-	Warehouse Intake'da faqat shu furalarni tanlash uchun."""
-	from logistika.erp_for_logistics import furalar, sana_tartibi
+	"""Yo'ldagi (hali omborga yetib kelmagan) va "Omborchiga ko'rinsin" belgisi qo'yilgan
+	Order Detail furalarining raqamlari — Warehouse Intake'da faqat shular tanlanadi."""
+	from logistika.erp_for_logistics import furalar
 
-	# Kelish sanasi oynasi (±N kun) faqat bo'sh maydonda chiqadigan ro'yxatni qisqartiradi:
-	# raqam yozilsa barcha yo'ldagi furalar orasidan qidiriladi — fura hech qachon yashirinmaydi.
-	days = frappe.db.get_single_value("Logistika Settings", "wi_kutish_kunlari")
-	use_window = not (txt or "").strip() and not sana_tartibi.old_data_mode() and days
-	return sorted(furalar.plates(on_road=True, txt=txt, arrival_window=int(days) if use_window else None))
+	return sorted(furalar.plates(on_road=True, txt=txt, for_warehouse=True))
 
 
 @frappe.whitelist()

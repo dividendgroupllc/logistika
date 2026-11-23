@@ -86,6 +86,10 @@ class OrderDetail(Document):
 						label, old.xitoy_mashina_nomeri
 					)
 				)
+			if old and old.omborga_korinsin and not row.omborga_korinsin and old.fakt_kelish_sanasi:
+				frappe.throw(
+					_('{0}: "{1}" omborga kelgan — "Omborchiga ko\'rinsin" belgisini olib bo\'lmaydi').format(label, row.xitoy_mashina_nomeri)
+				)
 			if row.xitoy_mashina_nomeri in seen:
 				frappe.throw(_('{0}: "{1}" furasi jadvalda ikki marta').format(label, row.xitoy_mashina_nomeri))
 			seen.add(row.xitoy_mashina_nomeri)
