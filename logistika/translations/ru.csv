@@ -949,3 +949,5 @@ Omborchiga ko'rinsin,Видно складу
 Belgi qo'yilgandan keyin fura raqami omborchiga (Warehouse Intake'da) ko'rinadi,После отметки номер фуры виден складу (в Warehouse Intake)
 "{0}: ""{1}"" omborga kelgan — ""Omborchiga ko'rinsin"" belgisini olib bo'lmaydi",{0}: «{1}» уже прибыла на склад — нельзя снять отметку «Видно складу»
 """{0}"" — yo'ldagi, ""Omborchiga ko'rinsin"" belgisi qo'yilgan fura emas (yoki u allaqachon omborga kelgan).",«{0}» — не фура в пути с отметкой «Видно складу» (или уже прибыла на склад).
+"Javob kelmadi — sahifani yangilab, qayta urinib ko'ring",Ответ не пришёл — обновите страницу и попробуйте снова
+Kimi orqali o'qilmoqda: {0}/{1} bo'lak...,Читается через Kimi: часть {0}/{1}...

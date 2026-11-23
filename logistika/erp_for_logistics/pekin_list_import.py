@@ -123,37 +123,80 @@ MAX_FILE_CHARS = 100_000
 _CSV_IMPORT_TIMEOUT = 100
 
 
-@frappe.whitelist()
-def smart_parse_pekin_list(file_content):
-	"""Qattiq shablonli parser handi bo'lgan (yoki umuman mos kelmagan) fayl matnini
-	Kimi orqali o'qib, Internal Logistics Item maydonlariga mos qatorlar ro'yxatini
-	qaytaradi."""
-	if not file_content or not file_content.strip():
-		frappe.throw("Fayl bo'sh")
+# Bitta so'rovga ~30 qator: Kimi javobi (JSON) ~3–4 ming token — 100 s ichida bemalol.
+# Katta fayl (masalan 32 sahifa, ~160 qator) bitta so'rovda yuborilsa javob 15 ming tokendan
+# oshib, Kimi ham, veb-so'rov ham vaqtga sig'maydi — shuning uchun bo'laklab, fonda o'qiladi.
+CHUNK_CHARS = 3000
+DONE_EVENT = "logistika_pekin_parsed"
+PROGRESS_EVENT = "logistika_pekin_progress"
 
-	truncated = len(file_content) > MAX_FILE_CHARS
-	if truncated:
-		frappe.msgprint(
-			f"Fayl juda katta ({len(file_content):,} belgi) — faqat birinchi {MAX_FILE_CHARS:,} belgi "
-			"o'qildi, oxirgi qatorlar tushib qolgan bo'lishi mumkin."
-		)
 
+PAGE_BREAK = "\n\f\n"
+
+
+def split_chunks(text, max_chars=CHUNK_CHARS):
+	"""Matnni bo'laklarga bo'ladi. PDF matni (sahifalar PAGE_BREAK bilan) — butun sahifalar
+	bo'yicha: PDF'da nomlar ko'pincha sahifa oxirida, qatorlardan alohida turadi, sahifa
+	kesilsa nom o'z qatoridan ajraladi. Boshqa matn — qatorlar bo'yicha, har bo'lak boshiga
+	birinchi qator (sarlavha) qo'yiladi — Kimi ustunlar ma'nosini har bo'lakda ko'rsin."""
+	if "\f" in text:
+		header, blocks = None, [b.strip() for b in text.split("\f") if b.strip()]
+		joiner = "\n"
+	else:
+		lines = [line for line in text.splitlines() if line.strip()]
+		if not lines:
+			return []
+		header, blocks, joiner = lines[0], lines[1:], "\n"
+	chunks, current, size = [], [], 0
+	for block in blocks:
+		if current and size + len(block) + 1 > max_chars:
+			chunks.append(current)
+			current, size = [], 0
+		current.append(block)
+		size += len(block) + 1
+	if current:
+		chunks.append(current)
+	if header is None:
+		return [joiner.join(chunk) for chunk in chunks]
+	return [joiner.join([header, *chunk]) for chunk in chunks] or [header]
+
+
+def _parse_chunk(text):
 	content = kimi_chat(
-		[
-			{"role": "system", "content": SYSTEM_PROMPT},
-			{"role": "user", "content": file_content[:MAX_FILE_CHARS]},
-		],
+		[{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": text}],
 		timeout=_CSV_IMPORT_TIMEOUT,
 	)
 	parsed = _extract_json(content)
 	rows = parsed.get("rows") if isinstance(parsed, dict) else parsed
 	if not isinstance(rows, list):
 		frappe.throw("Kimi javobi kutilgan formatda emas")
+	return [c for c in (_clean_row(r) for r in rows if isinstance(r, dict)) if c]
 
-	cleaned = [c for c in (_clean_row(r) for r in rows if isinstance(r, dict)) if c]
-	if not cleaned:
+
+def parse_text(file_content, progress=None):
+	"""Fayl matnini bo'laklab Kimi orqali o'qiydi; qatorlar ro'yxati. `progress(i, n)` —
+	har bo'lakdan oldin."""
+	if not file_content or not file_content.strip():
+		frappe.throw("Fayl bo'sh")
+	if len(file_content) > MAX_FILE_CHARS:
+		frappe.throw(f"Fayl juda katta ({len(file_content):,} belgi) — {MAX_FILE_CHARS:,} belgigacha bo'lishi kerak")
+	chunks = split_chunks(file_content)
+	rows = []
+	for index, chunk in enumerate(chunks, 1):
+		if progress:
+			progress(index, len(chunks))
+		rows.extend(_parse_chunk(chunk))
+	if not rows:
 		frappe.throw("Faylda mahsulot qatorlari topilmadi")
-	return cleaned
+	return rows
+
+
+@frappe.whitelist()
+def smart_parse_pekin_list(file_content):
+	"""Qattiq shablonli parser handi bo'lgan (yoki umuman mos kelmagan) fayl matnini
+	Kimi orqali o'qib, Internal Logistics Item maydonlariga mos qatorlar ro'yxatini
+	qaytaradi (sinxron — kichik fayllar uchun; forma start_pekin_parse'ni ishlatadi)."""
+	return parse_text(file_content)
 
 
 def _excel_rows_to_text(rows):
@@ -169,52 +212,95 @@ def _excel_rows_to_text(rows):
 	return "\n".join(lines)
 
 
-@frappe.whitelist()
-def smart_parse_pekin_list_excel(file_content_base64, file_extension="xlsx"):
-	"""Excel (.xlsx/.xls) faylini o'qiydi va qatorlarni matn ko'rinishiga o'girib,
-	xuddi CSV import bilan bir xil (o'zgarishsiz) smart_parse_pekin_list() orqali
-	Kimi'ga yuboradi — Kimi tomoni farq qilmaydi, faqat fayl formatini o'qish usuli
-	farqlanadi."""
+def _decode(file_content_base64):
 	try:
-		file_bytes = base64.b64decode(file_content_base64)
+		return base64.b64decode(file_content_base64)
 	except Exception:
 		frappe.throw("Fayl mazmunini o'qib bo'lmadi (noto'g'ri fayl formati)")
 
+
+def _excel_text(file_bytes, file_extension="xlsx"):
 	ext = (file_extension or "").lower().lstrip(".")
 	if ext == "xls":
 		rows = read_xls_file_from_attached_file(file_bytes)
 	else:
 		rows = read_xlsx_file_from_attached_file(fcontent=file_bytes)
-
 	if not rows:
 		frappe.throw("Excel faylida ma'lumot topilmadi")
+	return _excel_rows_to_text(rows)
 
-	return smart_parse_pekin_list(_excel_rows_to_text(rows))
 
-
-@frappe.whitelist()
-def smart_parse_pekin_list_pdf(file_content_base64):
-	"""PDF faylidan matnni chiqarib olib, xuddi CSV/Excel import bilan bir xil
-	(o'zgarishsiz) smart_parse_pekin_list() orqali Kimi'ga yuboradi. PDF'dan
-	chiqarilgan matn ko'pincha buzilgan/tartibsiz bo'ladi (ustunlar bir-biridan
-	uzilib, boshqa joyga tushib qolishi mumkin) — bu SYSTEM_PROMPT'dagi "fayl bir
-	nechta bo'limdan iborat, tartib bo'yicha mosla" ko'rsatmasi bilan allaqachon
-	hisobga olingan (real hujjatlar bilan sinovdan o'tgan)."""
-	try:
-		file_bytes = base64.b64decode(file_content_base64)
-	except Exception:
-		frappe.throw("Fayl mazmunini o'qib bo'lmadi (noto'g'ri fayl formati)")
-
+def _pdf_text(file_bytes):
+	"""PDF'dan chiqarilgan matn ko'pincha buzilgan/tartibsiz bo'ladi (ustunlar uzilib, boshqa
+	joyga tushib qolishi mumkin) — SYSTEM_PROMPT'dagi "fayl bir nechta bo'limdan iborat,
+	tartib bo'yicha mosla" ko'rsatmasi buni hisobga oladi."""
 	try:
 		reader = PdfReader(BytesIO(file_bytes))
-		text = "\n".join(page.extract_text() or "" for page in reader.pages)
+		text = PAGE_BREAK.join(page.extract_text() or "" for page in reader.pages)
 	except Exception:
 		frappe.throw("PDF faylini o'qib bo'lmadi — fayl buzilgan yoki himoyalangan bo'lishi mumkin")
-
 	if not text.strip():
 		frappe.throw(
 			"PDF faylidan matn chiqarib bo'lmadi — bu skanerlangan rasm (matn qatlamisiz PDF) "
 			"bo'lishi mumkin, bunday fayllar hozircha qo'llab-quvvatlanmaydi"
 		)
+	return text
 
-	return smart_parse_pekin_list(text)
+
+def _to_text(kind, content, file_extension=None):
+	if kind == "pdf":
+		return _pdf_text(_decode(content))
+	if kind == "excel":
+		return _excel_text(_decode(content), file_extension)
+	return content
+
+
+@frappe.whitelist()
+def smart_parse_pekin_list_excel(file_content_base64, file_extension="xlsx"):
+	return parse_text(_to_text("excel", file_content_base64, file_extension))
+
+
+@frappe.whitelist()
+def smart_parse_pekin_list_pdf(file_content_base64):
+	return parse_text(_to_text("pdf", file_content_base64))
+
+
+@frappe.whitelist()
+def start_pekin_parse(kind, content, file_extension=None, token=None):
+	"""Fon vazifasi: fayl (kind: "pdf" | "excel" | "text") bo'laklab o'qiladi; jarayon va
+	natija foydalanuvchiga realtime (PROGRESS_EVENT, DONE_EVENT) bilan keladi."""
+	if kind not in ("pdf", "excel", "text"):
+		frappe.throw("Fayl turi noma'lum")
+	# Token brauzerdan (tinglovchi so'rovdan oldin ulanadi); yo'q yoki noto'g'ri bo'lsa — yangisi.
+	if not (token and re.fullmatch(r"[A-Za-z0-9]{8,40}", token)):
+		token = frappe.generate_hash(length=12)
+	frappe.enqueue(
+		"logistika.erp_for_logistics.pekin_list_import.run_pekin_parse",
+		queue="long",
+		timeout=1800,
+		now=bool(frappe.flags.in_test),
+		token=token,
+		user=frappe.session.user,
+		kind=kind,
+		content=content,
+		file_extension=file_extension,
+	)
+	return {"token": token}
+
+
+def run_pekin_parse(token, user, kind, content, file_extension=None):
+	def publish(event, data):
+		frappe.publish_realtime(event, {"token": token, **data}, user=user)
+
+	try:
+		text = _to_text(kind, content, file_extension)
+		rows = parse_text(text, progress=lambda i, n: publish(PROGRESS_EVENT, {"chunk": i, "chunks": n}))
+	except frappe.ValidationError as e:
+		frappe.clear_messages()
+		publish(DONE_EVENT, {"error": str(e)})
+		return
+	except Exception:
+		frappe.log_error(title="Pekin list fon o'qish xatosi")
+		publish(DONE_EVENT, {"error": "Pekin list'ni o'qishda kutilmagan xato — Error Log'ga yozildi"})
+		return
+	publish(DONE_EVENT, {"rows": rows})

@@ -890,3 +890,5 @@ Omborchiga ko'rinsin,仓库可见
 Belgi qo'yilgandan keyin fura raqami omborchiga (Warehouse Intake'da) ko'rinadi,勾选后，货车车牌对仓库可见（入库单中）
 "{0}: ""{1}"" omborga kelgan — ""Omborchiga ko'rinsin"" belgisini olib bo'lmaydi",{0}：“{1}”已到仓库——不能取消“仓库可见”
 """{0}"" — yo'ldagi, ""Omborchiga ko'rinsin"" belgisi qo'yilgan fura emas (yoki u allaqachon omborga kelgan).",“{0}”不是已勾选“仓库可见”的在途货车（或已到仓库）。
+"Javob kelmadi — sahifani yangilab, qayta urinib ko'ring",未收到响应——请刷新页面后重试
+Kimi orqali o'qilmoqda: {0}/{1} bo'lak...,正在通过Kimi读取：第{0}/{1}部分...

@@ -68,17 +68,27 @@ logistika.pekin_import.handle_file = function (frm, table_fieldname, file, $stat
 		$status.text("");
 		logistika.pekin_import.add_rows(frm, table_fieldname, rows || []);
 	};
-	const on_error = () =>
-		$status.css("color", "#dc2626").text(__("Kimi orqali o'qib bo'lmadi — tafsilot yuqoridagi xabarda"));
-	const call_kimi = (method, args) =>
-		frappe.call({
-			method: `logistika.erp_for_logistics.pekin_list_import.${method}`,
-			args,
-			freeze: true,
-			freeze_message: __("Kimi orqali o'qilmoqda..."),
-			callback: (r) => on_rows(r.message),
-			error: on_error,
-		});
+	const on_error = (message) =>
+		$status
+			.css("color", "#dc2626")
+			.text(message || __("Kimi orqali o'qib bo'lmadi — tafsilot yuqoridagi xabarda"));
+	// Fayl fonda bo'laklab o'qiladi (katta PDF bir so'rovga sig'maydi) — jarayon va natija
+	// realtime orqali keladi; sahifa qotmaydi.
+	const call_kimi = (kind, content, file_extension) => {
+		$status.css("color", "").text(__("Kimi orqali o'qilmoqda..."));
+		// Tinglovchi so'rovdan OLDIN ulanadi (tez tugagan vazifa natijasi yo'qolmasin).
+		const token = frappe.utils.get_random(16);
+		const stop = logistika.pekin_import.wait(token, $status, on_rows, on_error);
+		frappe
+			.call({
+				method: "logistika.erp_for_logistics.pekin_list_import.start_pekin_parse",
+				args: { kind, content, file_extension, token },
+			})
+			.catch(() => {
+				stop();
+				on_error();
+			});
+	};
 
 	const ext = (file.name.split(".").pop() || "").toLowerCase();
 	const reader = new FileReader();
@@ -86,8 +96,8 @@ logistika.pekin_import.handle_file = function (frm, table_fieldname, file, $stat
 		$status.css("color", "").text(__("Kimi orqali o'qilmoqda..."));
 		reader.onload = (ev) => {
 			const base64 = ev.target.result.split(",", 2)[1] || "";
-			if (ext === "pdf") call_kimi("smart_parse_pekin_list_pdf", { file_content_base64: base64 });
-			else call_kimi("smart_parse_pekin_list_excel", { file_content_base64: base64, file_extension: ext });
+			if (ext === "pdf") call_kimi("pdf", base64);
+			else call_kimi("excel", base64, ext);
 		};
 		reader.readAsDataURL(file);
 		return;
@@ -99,12 +109,43 @@ logistika.pekin_import.handle_file = function (frm, table_fieldname, file, $stat
 			rows = logistika.pekin_import.parse_csv(text);
 		} catch (err) {
 			$status.css("color", "").text(__("Andoza mos kelmadi, Kimi orqali o'qilmoqda..."));
-			call_kimi("smart_parse_pekin_list", { file_content: text });
+			call_kimi("text", text);
 			return;
 		}
 		on_rows(rows);
 	};
 	reader.readAsText(file, "UTF-8");
+};
+
+// Fon vazifasi natijasini kutish (token bo'yicha): "3/8 bo'lak" jarayoni, so'ng qatorlar
+// yoki xato. 15 daqiqada javob kelmasa — xabar.
+logistika.pekin_import.wait = function (token, $status, on_rows, on_error) {
+	const off = () => {
+		frappe.realtime.off("logistika_pekin_progress", on_progress);
+		frappe.realtime.off("logistika_pekin_parsed", on_done);
+		clearTimeout(timer);
+	};
+	const on_progress = (data) => {
+		if (data.token !== token) return;
+		$status.css("color", "").text(__("Kimi orqali o'qilmoqda: {0}/{1} bo'lak...", [data.chunk, data.chunks]));
+	};
+	const on_done = (data) => {
+		if (data.token !== token) return;
+		off();
+		if (data.error) {
+			frappe.msgprint({ title: __("Pekin list"), message: frappe.utils.escape_html(data.error), indicator: "red" });
+			on_error();
+		} else {
+			on_rows(data.rows);
+		}
+	};
+	const timer = setTimeout(() => {
+		off();
+		on_error(__("Javob kelmadi — sahifani yangilab, qayta urinib ko'ring"));
+	}, 15 * 60 * 1000);
+	frappe.realtime.on("logistika_pekin_progress", on_progress);
+	frappe.realtime.on("logistika_pekin_parsed", on_done);
+	return off;
 };
 
 // Qattiq andoza: part_name... sarlavhali qator, ";" yoki "," ajratgich. Andozaga
