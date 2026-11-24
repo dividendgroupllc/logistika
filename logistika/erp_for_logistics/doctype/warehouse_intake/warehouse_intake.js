@@ -9,6 +9,11 @@ frappe.ui.form.on("Warehouse Intake", {
 		frm.set_query("order", "items", () => {
 			return frm.doc.fura ? { filters: [["Order Detail Fura", "xitoy_mashina_nomeri", "=", frm.doc.fura]] } : {};
 		});
+		// Tushirish xarajati — faqat "Yuk tushirib olish xarajatlari" papkasidagi hisoblar.
+		frm.set_query("harajat_turi", "tushirish_xarajatlari", () => ({
+			query: "logistika.erp_for_logistics.xarajat_guruhlari.xarajat_hisoblari",
+			filters: { guruh: "tushirish" },
+		}));
 	},
 	refresh(frm) {
 		if (frm.doc.docstatus === 0) {

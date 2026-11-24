@@ -9,16 +9,26 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-GROUP_FIELDS = ("ichki_logistika_xarajat_guruhi", "yuklash_xarajat_guruhi")
+GROUP_FIELDS = (
+	"ichki_logistika_xarajat_guruhi",
+	"tushirish_xarajat_guruhi",
+	"yuklash_xarajat_guruhi",
+	"dokument_xarajat_guruhi",
+	"tashqi_xarajat_guruhi",
+	"kutilmagan_xarajat_guruhi",
+)
 PAYMENT_ACCOUNT_TYPES = ("Cash", "Bank")
 # Tannarx hisoblari: maydon -> talab qilinadigan root_type (oddiy, papka emas).
 TANNARX_ACCOUNT_FIELDS = {
-	"wip_sugurta_hisobi": "Asset",
-	"wip_fura_hisobi": "Asset",
-	"wip_ombor_hisobi": "Asset",
-	"wip_kz_hisobi": "Asset",
+	"wip_ichki_hisobi": "Asset",
+	"wip_tushirish_hisobi": "Asset",
+	"wip_ortish_hisobi": "Asset",
+	"wip_dokument_hisobi": "Asset",
+	"wip_tashqi_hisobi": "Asset",
+	"wip_kutilmagan_hisobi": "Asset",
 	"fura_xarajat_hisobi": "Expense",
 	"kz_xarajat_hisobi": "Expense",
+	"sarf_xarajat_hisobi": "Expense",
 	"daromad_hisobi": "Income",
 }
 LEAF_GROUP_FIELDS = {

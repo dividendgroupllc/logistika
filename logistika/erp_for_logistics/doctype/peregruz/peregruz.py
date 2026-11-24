@@ -27,3 +27,4 @@ class Peregruz(Document):
 		for plate, order_details in tannarx.peregruz_trucks(self).items():
 			furalar.unmark_arrived(order_details, plate, self.sana, self)
 		tannarx.on_source_cancel(self)
+		tannarx.resync_ld_costs(self.order, self.kz_truck)

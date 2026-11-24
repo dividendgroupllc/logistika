@@ -10,15 +10,10 @@ from frappe import _
 from frappe.utils import flt
 
 from logistika.erp_for_logistics import tannarx
+from logistika.erp_for_logistics.xarajat_guruhlari import GROUPS
 
-CATEGORIES = {
-	"Sug'urta": "sugurta",
-	"Qo'shimcha rasxod": "qoshimcha",
-	"Konteyner": "konteyner",
-	"Fura olib kelish": "fura",
-	"Ombor": "ombor",
-	"KZ": "kz",
-}
+# Kategoriya (Tannarx Harakati) -> ustun: 6 ta xarajat guruhi (2026-11-24).
+CATEGORIES = {g.kategoriya: g.key for g in GROUPS}
 
 
 def execute(filters=None):

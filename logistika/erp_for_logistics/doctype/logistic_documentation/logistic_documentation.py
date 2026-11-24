@@ -12,7 +12,8 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cstr, now_datetime
 
-from logistika.erp_for_logistics import sana_tartibi, topshiriq
+from logistika.erp_for_logistics import sana_tartibi, tannarx, topshiriq
+from logistika.erp_for_logistics import xarajat_guruhlari as xg
 from logistika.erp_for_logistics.api import assert_no_duplicate_document
 
 DOCTYPE = "Logistic Documentation"
@@ -31,7 +32,7 @@ STEPS = {
 }
 SYSTEM_FIELDS = (
 	"status", "broker", "broker_fayl", "tranzit_hujjat", "tr_hujjat_turi", "ed_cmr_tayyor", "co_tayyor",
-	"peregruz_sent", "pekin_invoice",
+	"peregruz_sent", "pekin_invoice", "tannarx_je",
 )
 # maydon → (qaysi qadam o'zgartiradi, qaysi holatlarda)
 EDITABLE = {
@@ -49,6 +50,9 @@ class LogisticDocumentation(Document):
 	def validate(self):
 		assert_no_duplicate_document(self, ["order", "kz_truck"], "Bu order+fura uchun Logistic Documentation")
 		sana_tartibi.logistic_documentation(self)
+		for row in self.get("xarajatlar") or []:
+			if row.harajat_turi:
+				xg.assert_in_group(row.harajat_turi, "dokument")
 		if not self.flags.status_transition:
 			self.validate_manual_changes()
 
@@ -78,9 +82,16 @@ class LogisticDocumentation(Document):
 				frappe.throw(_("\"{0}\" faqat {1} holatida o'zgartiriladi").format(_(self.meta.get_label(field)), ", ".join(_(s) for s in statuses)))
 			require_step(self, step)
 
+	def on_update(self):
+		# Holat tugmalari (_move) xarajatlarni o'zgartirmaydi — qayta yozilmaydi.
+		if not self.flags.status_transition:
+			tannarx.sync_ld_costs(self)
+
 	def on_trash(self):
 		if self.status != QORALAMA:
 			frappe.throw(_("Faqat Qoralama holatidagi hujjatni o'chirish mumkin"))
+		tannarx.cancel_source_costs(self.doctype, self.name)
+		tannarx.release_source_ledger(self)
 		for holder in frappe.get_all(HOLDER, filters={"hujjat": self.name}, pluck="name"):
 			frappe.delete_doc(HOLDER, holder, ignore_permissions=True)
 

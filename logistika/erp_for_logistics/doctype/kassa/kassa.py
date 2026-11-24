@@ -53,6 +53,8 @@ class Kassa(Document):
                 self.create_payment_entry()
             elif is_dividend_party_type(self.party_type):
                 self.create_dividend_journal_entry()
+            elif self.party_type == "Расходы" and self.order:
+                self.create_kutilmagan_tannarx()
             elif self.party_type == "Расходы":
                 self.create_expense_journal_entry()
         elif self.transaction_type == "Перемещения":
@@ -63,6 +65,28 @@ class Kassa(Document):
     def on_cancel(self):
         """Cancel bo'lganda bog'langan Payment Entry yoki Journal Entry ni cancel qilish"""
         self.cancel_linked_entries()
+        if self.is_tannarx_expense():
+            # Kutilmagan xarajat — tannarx teskari yozuvi (Tannarx Harakati bilan birga).
+            from logistika.erp_for_logistics import tannarx
+
+            tannarx.on_source_cancel(self)
+
+    def on_trash(self):
+        if self.is_tannarx_expense():
+            from logistika.erp_for_logistics import tannarx
+
+            tannarx.release_source_ledger(self)
+
+    def is_tannarx_expense(self):
+        return self.party_type == "Расходы" and bool(self.order)
+
+    def create_kutilmagan_tannarx(self):
+        """Order bilan xarajat — "Kutilmagan" guruhi: Order'ning yuklari tannarxiga (aktiv,
+        yetkazilganda xarajatga), kredit — kassa hisobi."""
+        from logistika.erp_for_logistics import tannarx
+
+        je = tannarx.sync_kassa_costs(self)
+        self.set_linked_document("Journal Entry", je)
 
     def create_payment_entry(self):
         """Customer/Supplier/Employee uchun Payment Entry yaratish"""
@@ -532,6 +556,16 @@ class Kassa(Document):
         tozalanadi. Tanlangan bo'lsa, order haqiqatan ham shu kontragentga
         tegishli ekanini tekshiradi (masalan, order tanlangandan keyin
         kontragent boshqasiga almashtirilgan bo'lishi mumkin)."""
+        if self.party_type == "Расходы":
+            # Order bilan xarajat — kutilmagan xarajat sifatida shu Order tannarxiga yoziladi.
+            if self.order:
+                from logistika.erp_for_logistics import xarajat_guruhlari as xg
+
+                if self.transaction_type != "Расход":
+                    frappe.throw(_("Order bilan xarajat faqat \"Расход\" operatsiyasida bo'ladi"))
+                xg.assert_in_group(self.expense_account, "kutilmagan")
+            return
+
         if self.party_type != "Customer" or not self.party:
             self.order = None
             return

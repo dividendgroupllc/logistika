@@ -30,51 +30,51 @@
   {
    "fieldname": "sana",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Sana",
-   "reqd": 1,
-   "in_list_view": 1
+   "reqd": 1
   },
   {
    "fieldname": "order_detail",
    "fieldtype": "Link",
-   "options": "Order Detail",
-   "label": "Order Detail",
-   "reqd": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
+   "label": "Order Detail",
+   "options": "Order Detail",
+   "reqd": 1,
    "search_index": 1
   },
   {
+   "fetch_from": "order_detail.order",
    "fieldname": "mijoz_order",
    "fieldtype": "Link",
-   "options": "Order",
+   "in_standard_filter": 1,
    "label": "Order",
-   "fetch_from": "order_detail.order",
-   "in_standard_filter": 1
+   "options": "Order"
   },
   {
    "fieldname": "kz_fura",
    "fieldtype": "Data",
-   "label": "KZ fura",
-   "in_standard_filter": 1
+   "in_standard_filter": 1,
+   "label": "KZ fura"
   },
   {
    "fieldname": "turi",
    "fieldtype": "Select",
-   "options": "Kirim\nChiqim\nXarajat",
-   "label": "Turi",
-   "reqd": 1,
    "in_list_view": 1,
-   "in_standard_filter": 1
+   "in_standard_filter": 1,
+   "label": "Turi",
+   "options": "Kirim\nChiqim\nXarajat",
+   "reqd": 1
   },
   {
    "fieldname": "kategoriya",
    "fieldtype": "Select",
-   "options": "Sug'urta\nQo'shimcha rasxod\nKonteyner\nFura olib kelish\nOmbor\nKZ",
-   "label": "Kategoriya",
-   "reqd": 1,
    "in_list_view": 1,
-   "in_standard_filter": 1
+   "in_standard_filter": 1,
+   "label": "Kategoriya",
+   "options": "Ichki logistika\nYuk tushirib olish\nYuk ortish\nDokument\nTashqi logistika\nKutilmagan",
+   "reqd": 1
   },
   {
    "fieldname": "cb1",
@@ -83,22 +83,22 @@
   {
    "fieldname": "wip_hisob",
    "fieldtype": "Link",
-   "options": "Account",
-   "label": "Aktiv hisob"
+   "label": "Aktiv hisob",
+   "options": "Account"
   },
   {
    "fieldname": "xarajat_hisob",
    "fieldtype": "Link",
-   "options": "Account",
    "label": "Xarajat hisobi",
+   "options": "Account",
    "reqd": 1
   },
   {
    "fieldname": "summa",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Summa (kompaniya valyutasida)",
-   "reqd": 1,
-   "in_list_view": 1
+   "reqd": 1
   },
   {
    "fieldname": "summa_valyutada",
@@ -109,14 +109,14 @@
   {
    "fieldname": "valyuta",
    "fieldtype": "Link",
-   "options": "Currency",
-   "label": "Valyuta"
+   "label": "Valyuta",
+   "options": "Currency"
   },
   {
    "fieldname": "kredit_hisob",
    "fieldtype": "Link",
-   "options": "Account",
-   "label": "Kredit (to'lov) hisobi"
+   "label": "Kredit (to'lov) hisobi",
+   "options": "Account"
   },
   {
    "fieldname": "tonna",
@@ -132,15 +132,15 @@
   {
    "fieldname": "manba_doctype",
    "fieldtype": "Link",
-   "options": "DocType",
    "label": "Manba turi",
+   "options": "DocType",
    "reqd": 1
   },
   {
    "fieldname": "manba_name",
    "fieldtype": "Dynamic Link",
-   "options": "manba_doctype",
    "label": "Manba",
+   "options": "manba_doctype",
    "reqd": 1,
    "search_index": 1
   },
@@ -151,35 +151,45 @@
   {
    "fieldname": "voucher_type",
    "fieldtype": "Link",
-   "options": "DocType",
-   "label": "Buxgalteriya hujjati turi"
+   "label": "Buxgalteriya hujjati turi",
+   "options": "DocType"
   },
   {
    "fieldname": "voucher_no",
    "fieldtype": "Dynamic Link",
-   "options": "voucher_type",
-   "label": "Buxgalteriya hujjati"
+   "label": "Buxgalteriya hujjati",
+   "options": "voucher_type"
   }
  ],
  "in_create": 1,
  "links": [],
- "modified": "2026-11-18 21:00:00.000000",
+ "modified": "2026-11-24 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Tannarx Harakati",
  "owner": "Administrator",
  "permissions": [
   {
+   "export": 1,
    "read": 1,
    "report": 1,
-   "export": 1,
    "role": "System Manager"
   },
   {
+   "export": 1,
    "read": 1,
    "report": 1,
-   "export": 1,
    "role": "Accounts Manager"
+  },
+  {
+   "email": 1,
+   "export": 0,
+   "permlevel": 0,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Buxgalter yordamchisi",
+   "share": 1
   }
  ],
  "sort_field": "creation",

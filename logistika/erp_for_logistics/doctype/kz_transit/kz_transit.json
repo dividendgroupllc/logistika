@@ -103,19 +103,19 @@
    "label": "Sug'urta va to'lov"
   },
   {
+   "default": "USD",
    "fieldname": "valyuta",
    "fieldtype": "Link",
-   "options": "Currency",
-   "default": "USD",
    "label": "Xarajatlar valyutasi",
+   "options": "Currency",
    "reqd": 1
   },
   {
+   "description": "Bo'sh bo'lsa — Logistika Settings'dagi standart hisob",
    "fieldname": "tolov_hisobi",
    "fieldtype": "Link",
-   "options": "Account",
    "label": "To'lov hisobi",
-   "description": "Bo'sh bo'lsa — Logistika Settings'dagi standart hisob"
+   "options": "Account"
   },
   {
    "fieldname": "sugurta_summa",
@@ -153,8 +153,8 @@
    "fieldname": "jami_boshqa",
    "fieldtype": "Currency",
    "label": "Jami boshqa harajat",
-   "read_only": 1,
-   "options": "valyuta"
+   "options": "valyuta",
+   "read_only": 1
   },
   {
    "fieldname": "sec_ovqat",
@@ -192,26 +192,26 @@
   {
    "fieldname": "tannarx_je",
    "fieldtype": "Link",
-   "options": "Journal Entry",
    "label": "Xarajatlar Journal Entry",
-   "read_only": 1,
-   "no_copy": 1
+   "no_copy": 1,
+   "options": "Journal Entry",
+   "read_only": 1
   },
   {
    "fieldname": "yetkazish_je",
    "fieldtype": "Link",
-   "options": "Journal Entry",
    "label": "Tannarx (COGS) Journal Entry",
-   "read_only": 1,
-   "no_copy": 1
+   "no_copy": 1,
+   "options": "Journal Entry",
+   "read_only": 1
   },
   {
    "fieldname": "sales_invoice",
    "fieldtype": "Link",
-   "options": "Sales Invoice",
    "label": "Sales Invoice",
-   "read_only": 1,
-   "no_copy": 1
+   "no_copy": 1,
+   "options": "Sales Invoice",
+   "read_only": 1
   },
   {
    "fieldname": "kliyent_oldi_hujjat",
@@ -250,6 +250,29 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 0,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Tashqi logistika bo'limi",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 0,
+   "permlevel": 0,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Xitoy Ichki Logistikasi",
+   "share": 1
   }
  ],
  "row_format": "Dynamic",

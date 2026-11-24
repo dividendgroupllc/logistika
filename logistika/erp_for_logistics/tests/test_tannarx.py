@@ -63,13 +63,15 @@ class TestTannarx(FrappeTestCase):
 	def _row(self, od, plate=PLATE):
 		return next(r for r in od.furalar if r.xitoy_mashina_nomeri == plate)
 
-	def _intake(self, items, submit=True, plate=PLATE):
+	def _intake(self, items, submit=True, plate=PLATE, costs=0, account=None):
 		doc = frappe.get_doc(
 			{
 				"doctype": "Warehouse Intake",
 				"sana": today(),
 				"fura": plate,
 				"ombor": self.ombor,
+				"valyuta": "USD",
+				"tushirish_xarajatlari": [{"harajat_turi": account or self.acc.tushirish_leaf, "summa": costs}] if costs else [],
 				"items": [
 					{"order": od.name, "part_name": "P0", "quantity": 100, "fakt_qty": fakt, "net_weight": self._row(od, plate).fakt_tonna * 1000, "volume_cbm": self._row(od, plate).fakt_kub}
 					for od, fakt in items
@@ -111,19 +113,19 @@ class TestTannarx(FrappeTestCase):
 	def test_truck_row_insurance_to_wip(self):
 		od = self._od(sugurta=700)
 		rows = {r.kategoriya: r for r in self._rows(od.name)}
-		self.assertAlmostEqual(rows["Sug'urta"].summa, 700 * CNY_RATE)
-		self.assertEqual(rows["Sug'urta"].wip_hisob, self.acc.wip_sugurta_hisobi)
+		self.assertAlmostEqual(rows["Ichki logistika"].summa, 700 * CNY_RATE)
+		self.assertEqual(rows["Ichki logistika"].wip_hisob, self.acc.wip_ichki_hisobi)
 		od.reload()
 		self.assertFalse(od.tannarx_je)  # Order Detail'ning o'z xarajati yo'q
 		je = frappe.get_doc("Journal Entry", fura(od).tannarx_je)
 		debit = [a for a in je.accounts if a.debit]
 		self.assertTrue(all(a.order_detail == od.name for a in debit))
-		self.assertEqual({a.account for a in debit}, {self.acc.wip_sugurta_hisobi})
+		self.assertEqual({a.account for a in debit}, {self.acc.wip_ichki_hisobi})
 
 		fura(od).sugurta = 1400
 		od.save()
 		self.assertEqual(frappe.db.get_value("Journal Entry", je.name, "docstatus"), 1)  # tarix saqlanadi
-		self.assertAlmostEqual(self._sum(od.name, "Sug'urta"), 1400 * CNY_RATE)
+		self.assertAlmostEqual(self._sum(od.name, "Ichki logistika"), 1400 * CNY_RATE)
 
 		od.reload()
 		fura(od).sugurta = 0
@@ -141,7 +143,7 @@ class TestTannarx(FrappeTestCase):
 		od.reload()
 		self.assertTrue(fura(od, 0).tannarx_je and fura(od, 1).tannarx_je)
 		self.assertNotEqual(fura(od, 0).tannarx_je, fura(od, 1).tannarx_je)
-		self.assertAlmostEqual(self._sum(od.name, "Sug'urta"), 300 * CNY_RATE)
+		self.assertAlmostEqual(self._sum(od.name, "Ichki logistika"), 300 * CNY_RATE)
 
 		frappe.db.value_cache.clear()  # yangi so'rovdagidek — havola tekshiruvi keshdan o'tmasin
 		od.furalar = [od.furalar[0]]  # ikkinchi fura olib tashlandi — uning xarajati teskari yoziladi
@@ -150,7 +152,7 @@ class TestTannarx(FrappeTestCase):
 
 	def test_container_cost_on_order_detail(self):
 		od = self._od(container=1, konteyner_summasi=500)
-		self.assertAlmostEqual(self._sum(od.name, "Konteyner"), 500 * CNY_RATE)
+		self.assertAlmostEqual(self._sum(od.name, "Ichki logistika"), 500 * CNY_RATE)
 		self.assertTrue(od.reload().tannarx_je)
 
 	def test_status_change_does_not_repost(self):
@@ -167,13 +169,12 @@ class TestTannarx(FrappeTestCase):
 
 		pi = frappe.get_doc("Purchase Invoice", fura(od1.reload()).fura_pi)
 		self.assertEqual((pi.docstatus, pi.supplier), (1, self.driver))
-		self.assertEqual(pi.items[0].expense_account, self.acc.wip_fura_hisobi)
+		self.assertEqual(pi.items[0].expense_account, self.acc.wip_ichki_hisobi)
 		self.assertAlmostEqual(pi.base_grand_total, 1400 * CNY_RATE)
 		self.assertFalse(fura(od2.reload()).fura_pi)
 
-		# Tushirish xarajatlari Warehouse Intake'da yo'q (2026-11-19) — "Ombor" yozuvi yo'q.
-		self.assertEqual(self._rows(od1.name, kategoriya="Ombor"), [])
-		self.assertFalse(wi.meta.has_field("tannarx_je"))
+		# Tushirish xarajati kiritilmagan — "Yuk tushirib olish" yozuvi yo'q.
+		self.assertEqual(self._rows(od1.name, kategoriya="Yuk tushirib olish"), [])
 
 		wi.cancel()
 		self.assertEqual(frappe.db.get_value("Purchase Invoice", pi.name, "docstatus"), 2)
@@ -258,7 +259,7 @@ class TestTannarx(FrappeTestCase):
 		od.container = 1
 		od.konteyner_summasi = 70
 		od.save()
-		late = self._rows(od.name, kategoriya="Konteyner")
+		late = self._rows(od.name, xarajat_hisob=self.acc.fura_xarajat_hisobi)
 		self.assertEqual([r.turi for r in late], ["Xarajat"])
 		self.assertAlmostEqual(self._wip_balance(od.name), 0)
 
@@ -274,7 +275,7 @@ class TestTannarx(FrappeTestCase):
 		od.save()
 		self.assertAlmostEqual(self._wip_balance(od.name), 0)
 		expense = sum(
-			r.summa for r in self._rows(od.name, kategoriya="Sug'urta") if r.turi in ("Chiqim", "Xarajat")
+			r.summa for r in self._rows(od.name, xarajat_hisob=self.acc.sugurta_xarajat_hisobi) if r.turi in ("Chiqim", "Xarajat")
 		)
 		self.assertAlmostEqual(expense, 500 * CNY_RATE)
 
@@ -286,10 +287,227 @@ class TestTannarx(FrappeTestCase):
 		self._intake([(od, 100)])
 		_cols, data = execute({"order_detail": od.name})
 		self.assertEqual(len(data), 1)
-		self.assertAlmostEqual(data[0].sugurta, 1000 * CNY_RATE)
+		self.assertAlmostEqual(data[0].ichki, 1000 * CNY_RATE)
 		self.assertAlmostEqual(data[0].aktivda, 1000 * CNY_RATE)
 		self.assertAlmostEqual(data[0].qabul_tonna, 20)
 		self.assertAlmostEqual(data[0].tonna_tannarxi, 7)
+
+	# ---------- xarajat guruhlari (2026-11-24) ----------
+	def test_groups_per_source(self):
+		od = self._od(20, sugurta=1000)
+		self._intake([(od, 100)])
+		self._loading(od, 100, KZ_A, costs=100)
+		self._transit(KZ_A, sugurta_summa=50)
+		groups = {(r.kategoriya, r.wip_hisob, r.kz_fura or None) for r in self._rows(od.name, turi="Kirim")}
+		self.assertEqual(
+			groups,
+			{
+				("Ichki logistika", self.acc.wip_ichki_hisobi, None),
+				("Yuk ortish", self.acc.wip_ortish_hisobi, KZ_A),
+				("Tashqi logistika", self.acc.wip_tashqi_hisobi, KZ_A),
+			},
+		)
+
+	def test_peregruz_costs_to_yuk_ortish_with_kz_truck(self):
+		od = self._od(20)
+		doc = frappe.get_doc(
+			{
+				"doctype": "Peregruz",
+				"sana": today(),
+				"order": self.order.name,
+				"kz_truck": KZ_A,
+				"manba_china_truck": PLATE,
+				"valyuta": "USD",
+				"yuklar": [{"order": od.name, "china_truck": PLATE, "part_name": "P0", "quantity": 100, "fakt_transload": 100, "net_weight": 20000, "volume_cbm": 60}],
+				"yuklash_xarajatlari": [{"harajat_turi": self.acc.ombor_leaf, "summa": 200}],
+			}
+		).insert(ignore_permissions=True)
+		doc.submit()
+		rows = self._rows(od.name, turi="Kirim", voucher_type="Journal Entry")
+		self.assertEqual(
+			[(r.kategoriya, r.wip_hisob, r.kz_fura, r.summa) for r in rows],
+			[("Yuk ortish", self.acc.wip_ortish_hisobi, KZ_A, 200)],
+		)
+
+	def test_intake_unloading_costs_to_yuk_tushirib_olish(self):
+		od = self._od(20)
+		wi = self._intake([(od, 100)], costs=300)
+		rows = self._rows(od.name, turi="Kirim", voucher_type="Journal Entry")
+		self.assertEqual(
+			[(r.kategoriya, r.wip_hisob, r.kz_fura, r.summa) for r in rows],
+			[("Yuk tushirib olish", self.acc.wip_tushirish_hisobi, None, 300)],
+		)
+		self.assertTrue(wi.reload().tannarx_je)
+		wi.cancel()
+		self.assertAlmostEqual(self._wip_balance(od.name), 0)
+		self.assertFalse(wi.reload().tannarx_je)
+
+	def test_intake_cost_account_must_be_in_tushirish_group(self):
+		od = self._od(20)
+		with self.assertRaises(frappe.ValidationError):
+			self._intake([(od, 100)], costs=300, account=self.acc.ombor_leaf)
+
+	def _ld(self, kz, costs, account=None):
+		return frappe.get_doc(
+			{
+				"doctype": "Logistic Documentation",
+				"order": self.order.name,
+				"kz_truck": kz,
+				"valyuta": "USD",
+				"xarajatlar": [{"harajat_turi": account or self.acc.dokument_leaf, "summa": c} for c in costs],
+			}
+		).insert(ignore_permissions=True)
+
+	def test_ld_costs_to_dokument_after_loading(self):
+		od = self._od(20)
+		self._intake([(od, 100)])
+		self._loading(od, 100, KZ_A)
+		ld = self._ld(KZ_A, [150])
+		rows = self._rows(od.name, turi="Kirim", kategoriya="Dokument")
+		self.assertEqual([(r.wip_hisob, r.kz_fura, r.summa) for r in rows], [(self.acc.wip_dokument_hisobi, KZ_A, 150)])
+		self.assertTrue(ld.reload().tannarx_je)
+		kzt = self._transit(KZ_A)
+		kzt.fakt_yetib_borgan = today()
+		kzt.save()
+		self.assertAlmostEqual(self._wip_balance(od.name), 0)
+
+	def test_ld_costs_posted_when_loading_submitted_later(self):
+		od = self._od(20)
+		self._ld(KZ_A, [150])  # yuk hali ortilmagan — ogohlantirish, yozuv yo'q
+		self.assertEqual(self._rows(od.name, kategoriya="Dokument"), [])
+		self._intake([(od, 100)])
+		self._loading(od, 100, KZ_A)
+		self.assertAlmostEqual(self._sum(od.name, "Dokument"), 150)
+
+	def test_ld_cost_account_must_be_dokument(self):
+		with self.assertRaises(frappe.ValidationError):
+			self._ld(KZ_A, [150], account=self.acc.ombor_leaf)
+
+	def test_ld_costs_hidden_from_tashqi_broker(self):
+		meta = frappe.get_meta("Logistic Documentation")
+		self.assertEqual(meta.get_field("xarajatlar").permlevel, 1)
+		perms = {(p.role, p.permlevel) for p in meta.permissions}
+		self.assertNotIn(("Tashqi broker", 1), perms)
+		self.assertIn(("Tashqi logistika bo'limi", 1), perms)
+
+	def _kassa(self, amount, account=None, order=True, submit=True):
+		from logistika.erp_for_logistics.tests.utils import TEST_COMPANY, _abbr
+
+		mop = "_T Naqd tannarx"
+		if not frappe.db.exists("Mode of Payment", mop):
+			frappe.get_doc(
+				{"doctype": "Mode of Payment", "mode_of_payment": mop, "type": "Cash", "accounts": [{"company": TEST_COMPANY, "default_account": f"Cash - {_abbr()}"}]}
+			).insert(ignore_permissions=True)
+		doc = frappe.get_doc(
+			{
+				"doctype": "Kassa",
+				"date": today(),
+				"transaction_type": "Расход",
+				"mode_of_payment": mop,
+				"company": TEST_COMPANY,
+				"party_type": "Расходы",
+				"expense_account": account or self.acc.kutilmagan_leaf,
+				"order": self.order.name if order else None,
+				"amount": amount,
+			}
+		).insert(ignore_permissions=True)
+		if submit:
+			doc.submit()
+		return doc
+
+	def test_kassa_unexpected_cost_split_over_order(self):
+		od1 = self._od(30)
+		od2 = self._od(10, xitoy_mashina_nomeri="_T K2")
+		kassa = self._kassa(400)
+		rows = frappe.get_all(
+			"Tannarx Harakati",
+			filters={"manba_doctype": "Kassa", "manba_name": kassa.name, "turi": "Kirim"},
+			fields=["order_detail", "kategoriya", "wip_hisob", "kredit_hisob", "summa"],
+		)
+		self.assertEqual({r.kategoriya for r in rows}, {"Kutilmagan"})
+		self.assertEqual({r.wip_hisob for r in rows}, {self.acc.wip_kutilmagan_hisobi})
+		self.assertEqual({r.kredit_hisob for r in rows}, {kassa.cash_account})
+		self.assertEqual({r.order_detail: r.summa for r in rows}, {od1.name: 300, od2.name: 100})
+		kassa.cancel()
+		self.assertAlmostEqual(self._wip_balance(od1.name), 0)
+		self.assertAlmostEqual(self._wip_balance(od2.name), 0)
+
+	def test_kassa_order_needs_kutilmagan_account(self):
+		self._od(20)
+		with self.assertRaises(frappe.ValidationError):
+			self._kassa(100, account=self.acc.ombor_leaf, submit=False)
+
+	def test_kassa_without_order_stays_plain_expense(self):
+		self._od(20)
+		kassa = self._kassa(100, account=self.acc.kutilmagan_leaf, order=False)
+		self.assertFalse(frappe.db.exists("Tannarx Harakati", {"manba_doctype": "Kassa", "manba_name": kassa.name}))
+		self.assertTrue(kassa.reload().linked_entry)
+
+	def test_ld_costs_not_readable_by_broker_via_child_list(self):
+		from logistika.erp_for_logistics.tests.test_ld_jarayon import ensure_user
+
+		self._ld(KZ_A, [150])
+		frappe.set_user(ensure_user("_t_tn_broker@example.com", "Tashqi broker"))
+		try:
+			try:
+				rows = frappe.client.get_list(
+					frappe.get_meta("Logistic Documentation").get_field("xarajatlar").options,
+					parent="Logistic Documentation",
+					fields=["parent", "summa"],
+				)
+			except frappe.PermissionError:
+				rows = []
+		finally:
+			frappe.set_user("Administrator")
+		self.assertFalse(any(r.get("summa") for r in rows))
+
+	def test_late_ld_cost_after_truck_delivery_goes_to_expense(self):
+		od = self._two_truck_od()
+		self._intake([(od, 100)])
+		self._loading(od, 100, KZ_A)
+		kzt = self._transit(KZ_A)
+		kzt.fakt_yetib_borgan = today()
+		kzt.save()
+		before = self._wip_balance(od.name)
+		self._ld(KZ_A, [150])  # broker hisobi kech keldi — KZ_A allaqachon yetkazilgan
+		self.assertEqual([r.turi for r in self._rows(od.name, kategoriya="Dokument")], ["Xarajat"])
+		self.assertAlmostEqual(self._wip_balance(od.name), before)
+
+	def test_cancelled_loading_releases_ld_costs(self):
+		od = self._od(20)
+		self._intake([(od, 100)])
+		kzl = self._loading(od, 100, KZ_A)
+		self._ld(KZ_A, [150])
+		kzl.cancel()
+		rows = self._rows(od.name, kategoriya="Dokument")
+		self.assertAlmostEqual(sum(r.summa for r in rows), 0)
+
+	def test_loading_submit_survives_ld_sync_failure(self):
+		from unittest.mock import patch
+
+		od = self._od(20)
+		self._intake([(od, 100)])
+		self._ld(KZ_A, [150])
+		with patch.object(tannarx, "sync_ld_costs", side_effect=frappe.ValidationError("LD xato")):
+			kzl = self._loading(od, 100, KZ_A)
+		self.assertEqual(kzl.docstatus, 1)
+
+	def test_ld_status_move_does_not_resync_costs(self):
+		from unittest.mock import patch
+
+		ld = self._ld(KZ_A, [150])
+		ld.flags.status_transition = True
+		with patch.object(tannarx, "sync_ld_costs") as sync:
+			ld.save()
+		sync.assert_not_called()
+
+	def test_report_has_six_group_columns(self):
+		from logistika.erp_for_logistics.report.order_tannarxi.order_tannarxi import get_columns
+
+		names = [c["fieldname"] for c in get_columns()]
+		for field in ("ichki", "tushirish", "ortish", "dokument", "tashqi", "kutilmagan"):
+			self.assertIn(field, names)
+		self.assertNotIn("sugurta", names)
 
 	# ---------- bir nechta furali yuk ----------
 	def _two_truck_od(self):
@@ -385,7 +603,8 @@ class TestTannarx(FrappeTestCase):
 		frappe.get_doc("Ichki Deklaratsiya", fura(od.reload()).ichki_deklaratsiya).delete()
 		with self.assertRaises(frappe.ValidationError) as ctx:
 			frappe.delete_doc("Order Detail", od.name)
-		self.assertIn("Warehouse Intake", str(ctx.exception))
+		# Frappe bog'langan hujjatlarni tartibsiz tekshiradi — WI yoki uning ombor yozuvi (Ombor Harakati).
+		self.assertRegex(str(ctx.exception), "Warehouse Intake|Ombor Harakati")
 		self.assertTrue(frappe.db.exists("Order Detail", od.name))
 
 	def test_order_detail_can_be_deleted_after_intake_cancelled(self):
@@ -408,7 +627,7 @@ class TestTannarx(FrappeTestCase):
 				"company": tannarx.get_company(),
 				"posting_date": today(),
 				"accounts": [
-					{"account": self.acc.wip_sugurta_hisobi, "debit_in_account_currency": 10, "order_detail": od.name},
+					{"account": self.acc.wip_ichki_hisobi, "debit_in_account_currency": 10, "order_detail": od.name},
 					{"account": frappe.db.get_single_value("Logistika Settings", "sugurta_tolov_hisobi"), "credit_in_account_currency": 10},
 				],
 			}

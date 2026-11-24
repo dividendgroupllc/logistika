@@ -39,7 +39,8 @@ class TestLdSxema(FrappeTestCase):
 		holder = frappe.get_meta("LD Yopiq Fayl")
 		self.assertEqual(holder.get_field("hujjat").options, "Logistic Documentation")
 		self.assertNotIn(TL, [p.role for p in holder.permissions])
-		self.assertEqual({p.role for p in meta.permissions}, {"System Manager", TL, TB})
+		# Ichki logistika bo'limi — Settings'dagi Peregruz xodimi (Li Jee Mee) shu rolda.
+		self.assertEqual({p.role for p in meta.permissions}, {"System Manager", TL, TB, "Ichki logistika bo'limi"})
 
 	def test_client_sees_only_peregruz_and_invoice(self):
 		from logistika.mini_app.documents import VISIBLE

@@ -951,3 +951,45 @@ Belgi qo'yilgandan keyin fura raqami omborchiga (Warehouse Intake'da) ko'rinadi,
 """{0}"" — yo'ldagi, ""Omborchiga ko'rinsin"" belgisi qo'yilgan fura emas (yoki u allaqachon omborga kelgan).",«{0}» — не фура в пути с отметкой «Видно складу» (или уже прибыла на склад).
 "Javob kelmadi — sahifani yangilab, qayta urinib ko'ring",Ответ не пришёл — обновите страницу и попробуйте снова
 Kimi orqali o'qilmoqda: {0}/{1} bo'lak...,Читается через Kimi: часть {0}/{1}...
+Omborchi,Кладовщик
+Xitoy Ichki Logistikasi,Внутренняя логистика Китая
+Zakaz oluvchi,Приёмщик заказов
+"""{0}"" hisobi ""{1}"" papkasida emas — Logistika Settings'dagi papka ichidan tanlang","Счёт «{0}» не входит в папку «{1}» — выберите счёт из папки, указанной в Logistika Settings"
+Dokument,Документы
+Dokument xarajatlari,Расходы на документы
+Dokument xarajatlari hali tannarxga yozilmadi: shu KZ furaga yuk ortilmagan. Yuk ortilganda avtomatik yoziladi.,Расходы на документы ещё не учтены в себестоимости: на эту KZ фуру груз не загружен. Будут записаны автоматически после загрузки.
+Dokument xarajatlari papkasi,Папка расходов на документы
+"Har bir guruh: xarajat papkasi (jadvallardagi ""Harajat turi"" shu papka ichidan) va yo'ldagi (aktiv) hisob — xarajat yuk mijozga yetib borguncha shu aktivda turadi","Каждая группа: папка расходов («Вид расхода» в таблицах выбирается из неё) и счёт «в пути» (актив) — расход хранится в активе, пока груз не доставлен клиенту"
+"Harajat turi — Logistika Settings'dagi ""Dokument xarajatlari"" papkasidan. Summa shu KZ furadagi yuklarga tonna/kub bo'yicha bo'linadi.",Вид расхода — из папки «Расходы на документы» в Logistika Settings. Сумма распределяется на грузы этой KZ фуры по тоннам/кубам.
+"Harajat turi — Logistika Settings'dagi ""Yuk tushirib olish xarajatlari"" papkasidan",Вид расхода — из папки «Расходы на разгрузку» в Logistika Settings
+Ichki logistika,Внутренняя логистика
+"KZ Truck Loading, Peregruz: yuklash xarajatlari va sarf materiallari","KZ Truck Loading, Peregruz: расходы на погрузку и расходные материалы"
+KZ yuklashdagi sarf materiallari yetkazilganda shu xarajat hisobiga o'tadi (aktivda — Yuk ortish),Расходные материалы при погрузке KZ после доставки списываются на этот счёт расходов (в активе — Погрузка)
+Kassa: Order bilan xarajat,Касса: расход с заказом
+Kutilmagan,Непредвиденные
+Kutilmagan xarajatlar papkasi,Папка непредвиденных расходов
+Logistic Documentation: xarajatlar,Logistic Documentation: расходы
+Noma'lum xarajat guruhi: {0},Неизвестная группа расходов: {0}
+"Order Detail: Xitoy furasi, konteyner, sug'urta","Order Detail: китайская фура, контейнер, страховка"
+"Order bilan xarajat faqat ""Расход"" operatsiyasida bo'ladi",Расход с заказом возможен только в операции «Расход»
+Sarf materiallari xarajati (Expense),Расход на расходные материалы (Expense)
+Tashqi logistika,Внешняя логистика
+Tashqi logistika xarajatlari papkasi,Папка расходов внешней логистики
+Tushirish xarajatlari,Расходы на разгрузку
+Warehouse Intake: tushirish xarajatlari,Warehouse Intake: расходы на разгрузку
+Xarajat guruhlari,Группы расходов
+Xarajatlar,Расходы
+Yo'ldagi: Dokument (aktiv),В пути: Документы (актив)
+Yo'ldagi: Ichki logistika (aktiv),В пути: Внутренняя логистика (актив)
+Yo'ldagi: Kutilmagan (aktiv),В пути: Непредвиденные (актив)
+Yo'ldagi: Tashqi logistika (aktiv),В пути: Внешняя логистика (актив)
+Yo'ldagi: Yuk ortish (aktiv),В пути: Погрузка (актив)
+Yo'ldagi: Yuk tushirib olish (aktiv),В пути: Разгрузка (актив)
+Yuk ortish,Погрузка
+Yuk ortish xarajatlari papkasi,Папка расходов на погрузку
+Yuk tushirib olish,Разгрузка
+Yuk tushirib olish xarajatlari papkasi,Папка расходов на разгрузку
+{0}: Order'da tonna/kub kiritilgan yuk yo'q — xarajatni bo'lib bo'lmaydi,{0}: в заказе нет груза с тоннами/кубами — расход нельзя распределить
+Расходы uchun: xarajat shu Order yuklari tannarxiga (Kutilmagan xarajatlar) yoziladi,Для «Расходы»: расход записывается в себестоимость грузов этого заказа (непредвиденные расходы)
+LD Xarajat,Расход LD
+{0} dokument xarajatlari tannarxga yozilmadi — LD'ni ochib saqlang (Error Log'da tafsilot).,Расходы на документы {0} не записаны в себестоимость — откройте LD и сохраните (подробности в Error Log).

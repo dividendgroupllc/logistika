@@ -1,7 +1,6 @@
 {
  "actions": [],
  "autoname": "format:ID-{order_detail}-{##}",
- "naming_rule": "Expression",
  "creation": "2026-11-18 19:00:00.000000",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -30,20 +29,20 @@
   {
    "fieldname": "order_detail",
    "fieldtype": "Link",
-   "options": "Order Detail",
-   "label": "Order Detail",
-   "reqd": 1,
    "in_list_view": 1,
-   "in_standard_filter": 1
+   "in_standard_filter": 1,
+   "label": "Order Detail",
+   "options": "Order Detail",
+   "reqd": 1
   },
   {
    "fetch_from": "order_detail.order",
    "fieldname": "order",
    "fieldtype": "Link",
-   "options": "Order",
+   "in_standard_filter": 1,
    "label": "Order",
-   "read_only": 1,
-   "in_standard_filter": 1
+   "options": "Order",
+   "read_only": 1
   },
   {
    "fieldname": "cb_asosiy",
@@ -53,24 +52,24 @@
    "fetch_from": "order_detail.kliyent",
    "fieldname": "kliyent",
    "fieldtype": "Link",
-   "options": "Customer",
+   "in_list_view": 1,
    "label": "Kliyent",
-   "read_only": 1,
-   "in_list_view": 1
+   "options": "Customer",
+   "read_only": 1
   },
   {
    "fetch_from": "order_detail.xitoy_postavshik",
    "fieldname": "xitoy_postavshik",
    "fieldtype": "Link",
-   "options": "Customer",
    "label": "Xitoy postavshik",
+   "options": "Customer",
    "read_only": 1
   },
   {
    "fieldname": "xitoy_mashina_nomeri",
    "fieldtype": "Select",
-   "label": "Xitoy fura (Order Detail qatori)",
    "in_list_view": 1,
+   "label": "Xitoy fura (Order Detail qatori)",
    "reqd": 1
   },
   {
@@ -86,8 +85,8 @@
   {
    "fieldname": "pekin_list",
    "fieldtype": "Table",
-   "options": "Internal Logistics Item",
-   "label": "Pekin list"
+   "label": "Pekin list",
+   "options": "Internal Logistics Item"
   },
   {
    "fieldname": "sec_pekin_jami",
@@ -96,10 +95,10 @@
   {
    "fieldname": "jami_tonna",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Jami tonna",
-   "read_only": 1,
    "precision": "3",
-   "in_list_view": 1
+   "read_only": 1
   },
   {
    "fieldname": "cb_pekin",
@@ -109,18 +108,17 @@
    "fieldname": "jami_kub",
    "fieldtype": "Float",
    "label": "Jami kub",
-   "read_only": 1,
-   "precision": "3"
+   "precision": "3",
+   "read_only": 1
   }
  ],
  "links": [],
- "modified": "2026-11-19 10:00:00.000000",
+ "modified": "2026-11-23 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Ichki Deklaratsiya",
+ "naming_rule": "Expression",
  "owner": "Administrator",
- "track_changes": 1,
- "title_field": "order_detail",
  "permissions": [
   {
    "create": 1,
@@ -133,9 +131,37 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 0,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Ichki logistika bo'limi",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 0,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Xitoy Ichki Logistikasi",
+   "share": 1,
+   "write": 1
   }
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "order_detail",
+ "track_changes": 1
 }

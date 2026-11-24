@@ -19,6 +19,12 @@ frappe.ui.form.on("Kassa", {
 
         // Set expense account query
         frm.set_query("expense_account", function() {
+            if (frm.doc.party_type === "Расходы" && frm.doc.order) {
+                return {
+                    query: "logistika.erp_for_logistics.xarajat_guruhlari.xarajat_hisoblari",
+                    filters: { guruh: "kutilmagan" }
+                };
+            }
             return {
                 query: "logistika.erp_for_logistics.doctype.kassa.kassa.get_expense_accounts",
                 filters: {
@@ -27,13 +33,10 @@ frappe.ui.form.on("Kassa", {
             };
         });
 
-        // Order faqat tanlangan kliyentga (Customer) tegishli buyurtmalar bilan filtrlanadi.
+        // Order: Customer uchun — shu kliyentning buyurtmalari; Расходы uchun — istalgan Order
+        // (xarajat "Kutilmagan xarajatlar" sifatida shu Order tannarxiga yoziladi).
         frm.set_query("order", function() {
-            return {
-                filters: {
-                    kliyent: frm.doc.party
-                }
-            };
+            return frm.doc.party_type === "Расходы" ? {} : { filters: { kliyent: frm.doc.party } };
         });
 
         // Set mode_of_payment query

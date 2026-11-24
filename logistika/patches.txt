@@ -17,3 +17,5 @@ logistika.patches.v1_1.truck_dispatch_order_level
 logistika.patches.v1_1.teskari_kurslar
 logistika.patches.v1_1.ld_jarayon
 logistika.patches.v1_1.omborga_korinsin
+logistika.patches.v1_1.ruxsatlar_kodga
+logistika.patches.v1_1.xarajat_guruhlari

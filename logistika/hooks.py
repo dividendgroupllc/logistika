@@ -25,7 +25,7 @@ fixtures = [
 			]
 		],
 	},
-	{"dt": "Role", "filters": [["name", "in", ["Ichki logistika bo'limi", "Broker", "Buxgalter yordamchisi", "Tashqi logistika bo'limi", "Tashqi broker"]]]},
+	{"dt": "Role", "filters": [["name", "in", ["Ichki logistika bo'limi", "Broker", "Buxgalter yordamchisi", "Tashqi logistika bo'limi", "Tashqi broker", "Xitoy Ichki Logistikasi", "Zakaz oluvchi", "Omborchi"]]]},
 	{
 		"dt": "Property Setter",
 		"filters": [["doc_type", "=", "Account"], ["property", "=", "translated_doctype"]],
@@ -52,21 +52,32 @@ fixtures = [
 # ------------------
 
 # include js, css files in header of desk.html
-app_include_css = "/assets/logistika/css/internal_logistics.css"
-# `?v=N` — bu fayl to'g'ridan-to'g'ri (esbuild bundle'siz) statik xizmat qilinadi,
-# nginx uni "Cache-Control: max-age=31536000" (1 yil!) bilan yuboradi — fayl
-# o'zgarganda ham brauzer/oraliq keshlar buni sezmasligi mumkin edi (aynan shu holat
-# 2026-07-18'da sodir bo'ldi). Shuning uchun har safar bu faylga MUHIM o'zgarish
-# kiritilganda shu raqamni oshirish kerak — URL o'zgarishi barcha keshlarni majburan
-# chetlab o'tadi.
+# Statik fayllar (esbuild bundle'siz) nginx'da "Cache-Control: max-age=31536000" (1 yil!)
+# bilan beriladi — fayl o'zgarsa ham brauzer eskisini ishlatadi (2026-07-18 va 2026-11-24:
+# pekin list eski JS bilan "vaqt tugadi" berishda davom etdi, ?v=1 o'zgartirilmagan edi).
+# Shuning uchun ?v= fayl mazmunidan olinadi: fayl o'zgarsa manzil ham o'zgaradi.
+def _asset(path):
+	import hashlib
+	import os
+
+	full = os.path.join(os.path.dirname(__file__), "public", path)
+	try:
+		with open(full, "rb") as f:
+			version = hashlib.md5(f.read()).hexdigest()[:10]
+	except OSError:
+		version = "0"
+	return f"/assets/logistika/{path}?v={version}"
+
+
+app_include_css = [_asset("css/internal_logistics.css")]
 app_include_js = [
-	"/assets/logistika/js/order_chat_widget.js?v=11",
-	"/assets/logistika/js/duplicate_warning.js?v=2",
-	"/assets/logistika/js/logistika_quick_create.js?v=4",
-	"/assets/logistika/js/pekin_list_import.js?v=1",
-	"/assets/logistika/js/truck_options.js?v=1",
-	"/assets/logistika/js/bugungi_joylashuv.js?v=2",
-	"/assets/logistika/js/telegram_jobs.js?v=2",
+	_asset("js/order_chat_widget.js"),
+	_asset("js/duplicate_warning.js"),
+	_asset("js/logistika_quick_create.js"),
+	_asset("js/pekin_list_import.js"),
+	_asset("js/truck_options.js"),
+	_asset("js/bugungi_joylashuv.js"),
+	_asset("js/telegram_jobs.js"),
 ]
 
 # include js, css files in header of web template
@@ -125,6 +136,9 @@ app_include_js = [
 
 # before_install = "logistika.install.before_install"
 # after_install = "logistika.install.after_install"
+
+# ERPNext doctype'lari uchun logistika rollari ruxsatlari (ilova doctype'lari — o'z JSON'ida).
+after_migrate = ["logistika.erp_for_logistics.ruxsatlar.apply"]
 
 # Uninstallation
 # ------------

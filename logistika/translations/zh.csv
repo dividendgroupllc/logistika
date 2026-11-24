@@ -892,3 +892,45 @@ Belgi qo'yilgandan keyin fura raqami omborchiga (Warehouse Intake'da) ko'rinadi,
 """{0}"" — yo'ldagi, ""Omborchiga ko'rinsin"" belgisi qo'yilgan fura emas (yoki u allaqachon omborga kelgan).",“{0}”不是已勾选“仓库可见”的在途货车（或已到仓库）。
 "Javob kelmadi — sahifani yangilab, qayta urinib ko'ring",未收到响应——请刷新页面后重试
 Kimi orqali o'qilmoqda: {0}/{1} bo'lak...,正在通过Kimi读取：第{0}/{1}部分...
+Omborchi,仓库管理员
+Xitoy Ichki Logistikasi,中国国内物流
+Zakaz oluvchi,接单员
+"""{0}"" hisobi ""{1}"" papkasida emas — Logistika Settings'dagi papka ichidan tanlang",账户“{0}”不在“{1}”文件夹中——请从Logistika Settings中指定的文件夹选择
+Dokument,单证
+Dokument xarajatlari,单证费用
+Dokument xarajatlari hali tannarxga yozilmadi: shu KZ furaga yuk ortilmagan. Yuk ortilganda avtomatik yoziladi.,单证费用尚未计入成本：该KZ货车还未装货。装货后将自动记入。
+Dokument xarajatlari papkasi,单证费用文件夹
+"Har bir guruh: xarajat papkasi (jadvallardagi ""Harajat turi"" shu papka ichidan) va yo'ldagi (aktiv) hisob — xarajat yuk mijozga yetib borguncha shu aktivda turadi",每组：费用文件夹（表格中的“费用类型”从此文件夹选择）和在途（资产）账户——货物送达客户前费用保留在该资产中
+"Harajat turi — Logistika Settings'dagi ""Dokument xarajatlari"" papkasidan. Summa shu KZ furadagi yuklarga tonna/kub bo'yicha bo'linadi.",费用类型——来自Logistika Settings中的“单证费用”文件夹。金额按吨/立方分摊到该KZ货车的货物。
+"Harajat turi — Logistika Settings'dagi ""Yuk tushirib olish xarajatlari"" papkasidan",费用类型——来自Logistika Settings中的“卸货费用”文件夹
+Ichki logistika,国内物流
+"KZ Truck Loading, Peregruz: yuklash xarajatlari va sarf materiallari",KZ Truck Loading、Peregruz：装货费用和耗材
+KZ yuklashdagi sarf materiallari yetkazilganda shu xarajat hisobiga o'tadi (aktivda — Yuk ortish),KZ装货的耗材在送达后转入此费用账户（资产中——装货）
+Kassa: Order bilan xarajat,现金：带订单的费用
+Kutilmagan,意外费用
+Kutilmagan xarajatlar papkasi,意外费用文件夹
+Logistic Documentation: xarajatlar,Logistic Documentation：费用
+Noma'lum xarajat guruhi: {0},未知费用组：{0}
+"Order Detail: Xitoy furasi, konteyner, sug'urta",Order Detail：中国货车、集装箱、保险
+"Order bilan xarajat faqat ""Расход"" operatsiyasida bo'ladi",带订单的费用只能用于“Расход”操作
+Sarf materiallari xarajati (Expense),耗材费用（Expense）
+Tashqi logistika,国际物流
+Tashqi logistika xarajatlari papkasi,国际物流费用文件夹
+Tushirish xarajatlari,卸货费用
+Warehouse Intake: tushirish xarajatlari,Warehouse Intake：卸货费用
+Xarajat guruhlari,费用组
+Xarajatlar,费用
+Yo'ldagi: Dokument (aktiv),在途：单证（资产）
+Yo'ldagi: Ichki logistika (aktiv),在途：国内物流（资产）
+Yo'ldagi: Kutilmagan (aktiv),在途：意外费用（资产）
+Yo'ldagi: Tashqi logistika (aktiv),在途：国际物流（资产）
+Yo'ldagi: Yuk ortish (aktiv),在途：装货（资产）
+Yo'ldagi: Yuk tushirib olish (aktiv),在途：卸货（资产）
+Yuk ortish,装货
+Yuk ortish xarajatlari papkasi,装货费用文件夹
+Yuk tushirib olish,卸货
+Yuk tushirib olish xarajatlari papkasi,卸货费用文件夹
+{0}: Order'da tonna/kub kiritilgan yuk yo'q — xarajatni bo'lib bo'lmaydi,{0}：订单中没有填写吨/立方的货物——无法分摊费用
+Расходы uchun: xarajat shu Order yuklari tannarxiga (Kutilmagan xarajatlar) yoziladi,“Расходы”时：费用计入该订单货物成本（意外费用）
+LD Xarajat,LD费用
+{0} dokument xarajatlari tannarxga yozilmadi — LD'ni ochib saqlang (Error Log'da tafsilot).,{0} 的单证费用未计入成本——请打开LD并保存（详情见Error Log）。

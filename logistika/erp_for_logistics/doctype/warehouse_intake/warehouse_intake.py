@@ -7,6 +7,7 @@ from frappe.model.document import Document
 from frappe.utils import flt
 
 from logistika.erp_for_logistics import bosqich_xabar, furalar, ombor_ledger, sana_tartibi, tannarx, xodimlar
+from logistika.erp_for_logistics import xarajat_guruhlari as xg
 
 
 class WarehouseIntake(Document):
@@ -24,6 +25,9 @@ class WarehouseIntake(Document):
 			)
 		self.compute_farq()
 		sana_tartibi.warehouse_intake(self)
+		for row in self.tushirish_xarajatlari:
+			if row.harajat_turi:
+				xg.assert_in_group(row.harajat_turi, "tushirish")
 		for row in self.items:
 			if row.order and not furalar.find_row(row.order, self.fura):
 				frappe.throw(

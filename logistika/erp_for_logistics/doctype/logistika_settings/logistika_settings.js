@@ -3,7 +3,14 @@
 
 frappe.ui.form.on("Logistika Settings", {
 	setup(frm) {
-		["ichki_logistika_xarajat_guruhi", "yuklash_xarajat_guruhi"].forEach((field) => {
+		[
+			"ichki_logistika_xarajat_guruhi",
+			"tushirish_xarajat_guruhi",
+			"yuklash_xarajat_guruhi",
+			"dokument_xarajat_guruhi",
+			"tashqi_xarajat_guruhi",
+			"kutilmagan_xarajat_guruhi",
+		].forEach((field) => {
 			frm.set_query(field, () => ({ filters: { root_type: "Expense", is_group: 1 } }));
 		});
 		frm.set_query("sugurta_xarajat_hisobi", () => ({
@@ -16,12 +23,15 @@ frappe.ui.form.on("Logistika Settings", {
 			frm.set_query(field, () => ({ filters: { is_group: 0 } }));
 		});
 		const tannarx = {
-			wip_sugurta_hisobi: "Asset",
-			wip_fura_hisobi: "Asset",
-			wip_ombor_hisobi: "Asset",
-			wip_kz_hisobi: "Asset",
+			wip_ichki_hisobi: "Asset",
+			wip_tushirish_hisobi: "Asset",
+			wip_ortish_hisobi: "Asset",
+			wip_dokument_hisobi: "Asset",
+			wip_tashqi_hisobi: "Asset",
+			wip_kutilmagan_hisobi: "Asset",
 			fura_xarajat_hisobi: "Expense",
 			kz_xarajat_hisobi: "Expense",
+			sarf_xarajat_hisobi: "Expense",
 			daromad_hisobi: "Income",
 		};
 		Object.entries(tannarx).forEach(([field, root_type]) => {

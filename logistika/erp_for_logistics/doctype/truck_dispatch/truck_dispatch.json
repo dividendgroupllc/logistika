@@ -44,13 +44,13 @@
    "reqd": 1
   },
   {
+   "description": "KZ fura butun Order'ga umumiy qo'yiladi — qaysi yuk ketishi ortishda aniqlanadi",
    "fieldname": "order",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Order",
    "options": "Order",
-   "reqd": 1,
-   "description": "KZ fura butun Order'ga umumiy qo'yiladi — qaysi yuk ketishi ortishda aniqlanadi"
+   "reqd": 1
   },
   {
    "fieldname": "china_truck",
@@ -101,11 +101,11 @@
    "options": "Supplier"
   },
   {
+   "fetch_from": "haydovchi_ismi.mobile_no",
+   "fetch_if_empty": 1,
    "fieldname": "haydovchi_telefon",
    "fieldtype": "Data",
    "label": "Haydovchi telefon raqami",
-   "fetch_from": "haydovchi_ismi.mobile_no",
-   "fetch_if_empty": 1,
    "read_only": 1
   },
   {
@@ -114,11 +114,11 @@
    "label": "Kim orqali (vositachi)"
   },
   {
+   "fetch_from": "haydovchi_ismi.kz_mashina_raqami",
    "fieldname": "mashina_raqami",
    "fieldtype": "Data",
    "label": "Mashina raqami",
-   "read_only": 1,
-   "fetch_from": "haydovchi_ismi.kz_mashina_raqami"
+   "read_only": 1
   },
   {
    "fieldname": "omborga_kirish_sanasi",
@@ -158,7 +158,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-19 18:00:00.000000",
+ "modified": "2026-11-23 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Truck Dispatch",
@@ -176,6 +176,39 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 0,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Tashqi logistika bo'limi",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 0,
+   "permlevel": 0,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Xitoy Ichki Logistikasi",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 0,
+   "permlevel": 0,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Omborchi",
+   "share": 1
   }
  ],
  "row_format": "Dynamic",

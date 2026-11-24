@@ -40,6 +40,13 @@ function only_broker() {
 }
 
 frappe.ui.form.on("Logistic Documentation", {
+	setup(frm) {
+		// Dokument xarajati — faqat "Dokument xarajatlari" papkasidagi hisoblar.
+		frm.set_query("harajat_turi", "xarajatlar", () => ({
+			query: "logistika.erp_for_logistics.xarajat_guruhlari.xarajat_hisoblari",
+			filters: { guruh: "dokument" },
+		}));
+	},
 	refresh(frm) {
 		const s = frm.doc.status || S.qoralama;
 		if (s === S.qoralama) logistika.truck_options.apply(frm, { kz: "kz_truck" });

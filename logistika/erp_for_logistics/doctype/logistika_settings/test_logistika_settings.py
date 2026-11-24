@@ -167,6 +167,47 @@ class TestLogistikaSettings(FrappeTestCase):
 		self.assertEqual(frappe.get_single("Logistika Settings").yuklash_xarajat_guruhi, self.group)
 
 
+class TestXarajatGuruhlari(TestLogistikaSettings):
+	"""6 ta guruh: papka (Expense guruh) + yo'ldagi aktiv hisob (Asset, oddiy)."""
+
+	def test_six_groups_with_fields(self):
+		from logistika.erp_for_logistics import xarajat_guruhlari as xg
+
+		self.assertEqual(
+			[g.kategoriya for g in xg.GROUPS],
+			["Ichki logistika", "Yuk tushirib olish", "Yuk ortish", "Dokument", "Tashqi logistika", "Kutilmagan"],
+		)
+		meta = frappe.get_meta("Logistika Settings")
+		for g in xg.GROUPS:
+			self.assertTrue(meta.get_field(g.group_field), g.group_field)
+			self.assertTrue(meta.get_field(g.wip_field), g.wip_field)
+		for gone in ("wip_sugurta_hisobi", "wip_fura_hisobi", "wip_ombor_hisobi", "wip_kz_hisobi"):
+			self.assertIsNone(meta.get_field(gone), gone)
+
+	def test_wip_must_be_asset_leaf(self):
+		with self.assertRaises(frappe.ValidationError):
+			self._settings(wip_dokument_hisobi=self.leaf).save()
+
+	def test_new_group_field_must_be_expense_group(self):
+		with self.assertRaises(frappe.ValidationError):
+			self._settings(kutilmagan_xarajat_guruhi=self.leaf).save()
+
+	def test_query_by_guruh(self):
+		from logistika.erp_for_logistics import xarajat_guruhlari as xg
+
+		self._settings(dokument_xarajat_guruhi=self.sub_group).save()
+		names = [r[0] for r in xg.xarajat_hisoblari("Account", "", "name", 0, 50, {"guruh": "dokument"})]
+		self.assertEqual(names, [self.nested_leaf])
+
+	def test_assert_in_group(self):
+		from logistika.erp_for_logistics import xarajat_guruhlari as xg
+
+		self._settings(tushirish_xarajat_guruhi=self.sub_group).save()
+		xg.assert_in_group(self.nested_leaf, "tushirish")
+		with self.assertRaises(frappe.ValidationError):
+			xg.assert_in_group(self.other_leaf, "tushirish")
+
+
 class TestFixtureFilter(FrappeTestCase):
 	def test_every_custom_field_fixture_is_exported(self):
 		import json

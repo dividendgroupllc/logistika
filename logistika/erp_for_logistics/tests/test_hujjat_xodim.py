@@ -32,9 +32,11 @@ class TestDoctypeFields(FrappeTestCase):
 		self.assertEqual(field("Order Detail Fura", "taxminiy_kub").label, "Kub")
 		self.assertEqual(field("Order Detail Fura", "nakladnoy").fieldtype, "Attach")
 
-	def test_warehouse_intake_has_no_unloading_costs(self):
-		for name in ("yuklash_xarajatlari", "valyuta", "tolov_hisobi", "tannarx_je"):
-			self.assertIsNone(field("Warehouse Intake", name), name)
+	def test_warehouse_intake_unloading_costs(self):
+		# 2026-11-24: tushirish xarajatlari qaytdi ("Yuk tushirib olish" guruhi).
+		self.assertEqual(field("Warehouse Intake", "tushirish_xarajatlari").options, "Ombor Xarajati Item")
+		for name in ("valyuta", "tolov_hisobi", "tannarx_je"):
+			self.assertTrue(field("Warehouse Intake", name), name)
 		xodim = field("Warehouse Intake", "tushirgan_xodim")
 		self.assertEqual((xodim.fieldtype, xodim.options, xodim.reqd), ("Link", "Employee", 1))
 

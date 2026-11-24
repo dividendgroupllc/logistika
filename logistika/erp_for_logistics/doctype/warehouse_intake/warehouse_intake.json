@@ -16,6 +16,11 @@
   "holati",
   "sec_items",
   "items",
+  "sec_tushirish_xarajati",
+  "tushirish_xarajatlari",
+  "valyuta",
+  "tolov_hisobi",
+  "tannarx_je",
   "amended_from"
  ],
  "fields": [
@@ -61,12 +66,12 @@
    "reqd": 1
   },
   {
+   "description": "Avtomatik — hujjatni kiritgan foydalanuvchining Employee'si",
    "fieldname": "tushirgan_xodim",
    "fieldtype": "Link",
-   "options": "Employee",
    "label": "Tushirgan xodim",
-   "reqd": 1,
-   "description": "Avtomatik — hujjatni kiritgan foydalanuvchining Employee'si"
+   "options": "Employee",
+   "reqd": 1
   },
   {
    "default": "Yangi",
@@ -96,13 +101,50 @@
    "options": "Warehouse Intake",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "collapsible": 0,
+   "fieldname": "sec_tushirish_xarajati",
+   "fieldtype": "Section Break",
+   "label": "Tushirish xarajatlari"
+  },
+  {
+   "description": "Harajat turi — Logistika Settings'dagi \"Yuk tushirib olish xarajatlari\" papkasidan",
+   "fieldname": "tushirish_xarajatlari",
+   "fieldtype": "Table",
+   "label": "Tushirish xarajatlari",
+   "options": "Ombor Xarajati Item"
+  },
+  {
+   "default": "CNY",
+   "fieldname": "valyuta",
+   "fieldtype": "Link",
+   "label": "Xarajatlar valyutasi",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "description": "Bo'sh bo'lsa — Logistika Settings'dagi standart hisob",
+   "fieldname": "tolov_hisobi",
+   "fieldtype": "Link",
+   "label": "To'lov hisobi",
+   "options": "Account"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "tannarx_je",
+   "fieldtype": "Link",
+   "label": "Xarajatlar Journal Entry",
+   "no_copy": 1,
+   "options": "Journal Entry",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-19 10:00:00.000000",
+ "modified": "2026-11-24 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Warehouse Intake",
@@ -123,6 +165,29 @@
    "share": 1,
    "submit": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 0,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Omborchi",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 0,
+   "permlevel": 0,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Xitoy Ichki Logistikasi",
+   "share": 1
   }
  ],
  "row_format": "Dynamic",

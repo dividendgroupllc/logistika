@@ -105,8 +105,8 @@
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Компания",
-   "options": "Company",
-   "mandatory_depends_on": "eval:doc.transaction_type !== 'Перемещения'"
+   "mandatory_depends_on": "eval:doc.transaction_type !== 'Перемещения'",
+   "options": "Company"
   },
   {
    "depends_on": "eval:in_list(['Перемещения', 'Конвертация'], doc.transaction_type)",
@@ -233,7 +233,8 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.party_type === 'Customer' && doc.party",
+   "depends_on": "eval:(doc.party_type === 'Customer' && doc.party) || doc.party_type === 'Расходы'",
+   "description": "Расходы uchun: xarajat shu Order yuklari tannarxiga (Kutilmagan xarajatlar) yoziladi",
    "fieldname": "order",
    "fieldtype": "Link",
    "label": "Заказ",
@@ -279,8 +280,8 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Сумма",
-   "options": "cash_account_currency",
-   "mandatory_depends_on": "eval:doc.transaction_type !== 'Конвертация'"
+   "mandatory_depends_on": "eval:doc.transaction_type !== 'Конвертация'",
+   "options": "cash_account_currency"
   },
   {
    "fieldname": "section_break_details",
@@ -335,7 +336,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-07 10:00:00.000000",
+ "modified": "2026-11-24 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Kassa",
@@ -380,6 +381,19 @@
    "read": 1,
    "report": 1,
    "role": "Accounts User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 0,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Buxgalter yordamchisi",
    "share": 1,
    "submit": 1,
    "write": 1

@@ -79,8 +79,8 @@ class TestSarfMateriallari(FrappeTestCase):
 	def _kz_rows(self):
 		return frappe.get_all(
 			"Tannarx Harakati",
-			filters={"order_detail": self.od.name, "kategoriya": "KZ", "kz_fura": KZ},
-			fields=["turi", "summa", "voucher_type"],
+			filters={"order_detail": self.od.name, "kategoriya": "Yuk ortish", "kz_fura": KZ},
+			fields=["turi", "summa", "voucher_type", "wip_hisob", "xarajat_hisob"],
 		)
 
 	def test_fields(self):
@@ -97,6 +97,10 @@ class TestSarfMateriallari(FrappeTestCase):
 		self.assertEqual(se.items[0].expense_account, self.clearing)
 		self.assertEqual((flt(doc.sarf_materiallari[0].narx), flt(doc.sarf_materiallari[0].summa)), (5, 20))
 		self.assertAlmostEqual(sum(r.summa for r in self._kz_rows() if r.turi == "Kirim"), 20)
+		settings = frappe.get_single("Logistika Settings")
+		self.assertEqual(
+			{(r.wip_hisob, r.xarajat_hisob) for r in self._kz_rows()}, {(settings.wip_ortish_hisobi, settings.sarf_xarajat_hisobi)}
+		)
 		# Oraliq hisob nolga tushadi (Stock Entry debet, JE kredit).
 		balance = frappe.db.sql(
 			"select sum(debit) - sum(credit) from `tabGL Entry` where account = %s and is_cancelled = 0", self.clearing

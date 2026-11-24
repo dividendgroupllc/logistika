@@ -1,7 +1,6 @@
 {
  "actions": [],
  "autoname": "{order}.-.#",
- "naming_rule": "Expression (old style)",
  "creation": "2026-11-17 10:00:00.000000",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -40,28 +39,28 @@
    "default": "Today",
    "fieldname": "sana",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Sana",
-   "reqd": 1,
-   "in_list_view": 1
+   "reqd": 1
   },
   {
    "fieldname": "order",
    "fieldtype": "Link",
-   "options": "Order",
-   "label": "Order",
-   "reqd": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
+   "label": "Order",
+   "options": "Order",
+   "reqd": 1,
    "search_index": 1
   },
   {
    "fetch_from": "order.kliyent",
    "fieldname": "kliyent",
    "fieldtype": "Link",
-   "options": "Customer",
+   "in_standard_filter": 1,
    "label": "Kliyent",
-   "read_only": 1,
-   "in_standard_filter": 1
+   "options": "Customer",
+   "read_only": 1
   },
   {
    "fetch_from": "order.brand",
@@ -85,8 +84,8 @@
    "fetch_from": "order.xitoy_postavshik",
    "fieldname": "xitoy_postavshik",
    "fieldtype": "Link",
-   "options": "Customer",
    "label": "Xitoy postavshik",
+   "options": "Customer",
    "read_only": 1
   },
   {
@@ -107,11 +106,11 @@
    "default": "Внутринний фура",
    "fieldname": "status",
    "fieldtype": "Select",
-   "options": "Внутринний фура\nПодготовка фура КЗ\nТаможния склад\nТовар погружен КЗ\nПерегруз данный\nОжидания документа Клиент\nДокументация ED CO для клиента\nТранзитний оформеления\nДокументы проверены\nВ пути к доставке\nТаможенный процесс\nКлиент получил",
-   "label": "Status",
-   "read_only": 1,
    "in_list_view": 1,
-   "in_standard_filter": 1
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Внутринний фура\nПодготовка фура КЗ\nТаможния склад\nТовар погружен КЗ\nПерегруз данный\nОжидания документа Клиент\nДокументация ED CO для клиента\nТранзитний оформеления\nДокументы проверены\nВ пути к доставке\nТаможенный процесс\nКлиент получил",
+   "read_only": 1
   },
   {
    "fieldname": "sec_fura",
@@ -121,8 +120,8 @@
   {
    "fieldname": "furalar",
    "fieldtype": "Table",
-   "options": "Order Detail Fura",
-   "label": "Furalar"
+   "label": "Furalar",
+   "options": "Order Detail Fura"
   },
   {
    "fieldname": "sec_container",
@@ -147,16 +146,16 @@
    "label": "Konteyner zavodi"
   },
   {
+   "collapsible": 1,
    "fieldname": "sec_kuzatuv",
    "fieldtype": "Section Break",
-   "label": "Kunlik kuzatuv (omborga yetib kelguncha)",
-   "collapsible": 1
+   "label": "Kunlik kuzatuv (omborga yetib kelguncha)"
   },
   {
    "fieldname": "kunlik_kuzatuv",
    "fieldtype": "Table",
-   "options": "Internal Logistics Tracking",
-   "label": "Kunlik kuzatuv"
+   "label": "Kunlik kuzatuv",
+   "options": "Internal Logistics Tracking"
   },
   {
    "fieldname": "sec_xarajat",
@@ -167,82 +166,83 @@
    "default": "CNY",
    "fieldname": "valyuta",
    "fieldtype": "Link",
-   "options": "Currency",
    "label": "Valyuta",
+   "options": "Currency",
    "read_only": 1
   },
   {
    "fieldname": "tannarx_je",
    "fieldtype": "Link",
-   "options": "Journal Entry",
    "label": "Xarajatlar Journal Entry",
-   "read_only": 1,
-   "no_copy": 1
+   "no_copy": 1,
+   "options": "Journal Entry",
+   "read_only": 1
   },
   {
    "depends_on": "container",
    "fieldname": "konteyner_summasi",
    "fieldtype": "Currency",
-   "options": "valyuta",
    "label": "Konteyner summasi",
-   "non_negative": 1
+   "non_negative": 1,
+   "options": "valyuta"
   }
  ],
  "links": [
   {
+   "group": "Fura",
    "link_doctype": "Ichki Deklaratsiya",
-   "link_fieldname": "order_detail",
-   "group": "Fura"
+   "link_fieldname": "order_detail"
   },
   {
+   "group": "Fura",
    "link_doctype": "Truck Dispatch",
-   "link_fieldname": "order",
-   "group": "Fura"
+   "link_fieldname": "order"
   },
   {
+   "group": "Ombor",
+   "is_child_table": 1,
    "link_doctype": "Warehouse Intake",
    "link_fieldname": "order",
    "parent_doctype": "Warehouse Intake",
-   "table_fieldname": "items",
-   "is_child_table": 1,
-   "group": "Ombor"
+   "table_fieldname": "items"
   },
   {
+   "group": "Ombor",
+   "is_child_table": 1,
    "link_doctype": "KZ Truck Loading",
    "link_fieldname": "order",
    "parent_doctype": "KZ Truck Loading",
-   "table_fieldname": "yuklar",
-   "is_child_table": 1,
-   "group": "Ombor"
+   "table_fieldname": "yuklar"
   },
   {
+   "group": "Ombor",
+   "is_child_table": 1,
    "link_doctype": "Peregruz",
    "link_fieldname": "order",
    "parent_doctype": "Peregruz",
-   "table_fieldname": "yuklar",
-   "is_child_table": 1,
-   "group": "Ombor"
+   "table_fieldname": "yuklar"
   },
   {
+   "group": "Ombor",
    "link_doctype": "Ombor Harakati",
-   "link_fieldname": "order",
-   "group": "Ombor"
+   "link_fieldname": "order"
   },
   {
+   "group": "Tarix",
    "link_doctype": "Order Item Status Log",
-   "link_fieldname": "order",
-   "group": "Tarix"
+   "link_fieldname": "order"
   },
   {
+   "group": "Tannarx",
    "link_doctype": "Tannarx Harakati",
-   "link_fieldname": "order_detail",
-   "group": "Tannarx"
+   "link_fieldname": "order_detail"
   }
  ],
- "modified": "2026-11-22 11:00:00.000000",
+ "modified": "2026-11-23 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Order Detail",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -258,22 +258,65 @@
    "write": 1
   },
   {
-   "role": "Ichki logistika bo'limi",
+   "print": 1,
    "read": 1,
    "report": 1,
-   "print": 1
+   "role": "Ichki logistika bo'limi"
   },
   {
-   "role": "Broker",
+   "print": 1,
    "read": 1,
    "report": 1,
-   "print": 1
+   "role": "Broker"
   },
   {
-   "role": "Buxgalter yordamchisi",
+   "print": 1,
    "read": 1,
    "report": 1,
-   "print": 1
+   "role": "Buxgalter yordamchisi"
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 0,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Xitoy Ichki Logistikasi",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 0,
+   "permlevel": 0,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Tashqi logistika bo'limi",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 0,
+   "permlevel": 0,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Omborchi",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 0,
+   "permlevel": 0,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Zakaz oluvchi",
+   "share": 1
   }
  ],
  "search_fields": "kliyent,brand",

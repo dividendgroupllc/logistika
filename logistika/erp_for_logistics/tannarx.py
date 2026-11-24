@@ -23,6 +23,7 @@ from erpnext.accounts.party import get_party_account_currency
 from frappe.utils import flt, today
 
 from logistika.erp_for_logistics import furalar
+from logistika.erp_for_logistics import xarajat_guruhlari as xg
 from logistika.erp_for_logistics.doctype.kassa.kassa import get_account_currency_amount, get_exchange_rate
 from logistika.erp_for_logistics.doctype.logistika_settings.logistika_settings import get_required_setting
 from logistika.erp_for_logistics.ombor_ledger import _prorate_kub_tonna
@@ -296,7 +297,9 @@ def _post_deltas(doc, wanted, existing_keys, existing_rows, posting_date, ignore
 		order_detail, kategoriya, wip, expense, currency, kz_fura, credit = key
 		amount = to_company_amount(abs(delta), currency, posting_date)
 		if delta > 0:
-			to_expense = is_fully_delivered(order_detail)
+			# Yuk yetkazilgan (Order Detail to'liq, yoki shu KZ fura) — kech kelgan xarajat
+			# aktivda osilib qolmasin, to'g'ridan xarajatga.
+			to_expense = is_fully_delivered(order_detail) or _kz_truck_delivered(order_detail, kz_fura)
 			parts = [(expense if to_expense else wip, amount, "Xarajat" if to_expense else "Kirim")]
 		else:
 			# Kamaytirish: avval aktivdagi qoldiqdan, yetmasa (allaqachon COGS'ga o'tgan) xarajatdan.
@@ -330,6 +333,21 @@ def _post_deltas(doc, wanted, existing_keys, existing_rows, posting_date, ignore
 	return je
 
 
+def _kz_truck_delivered(order_detail, kz_fura):
+	"""Shu Order Detail Order'ining shu KZ furasi mijozga yetkazilganmi (KZ Transit yetkazish
+	yozuvi bor)."""
+	if not kz_fura:
+		return False
+	order = frappe.db.get_value("Order Detail", order_detail, "order")
+	return bool(
+		frappe.db.sql(
+			"""select name from `tabKZ Transit` where `order` = %s and kz_truck = %s
+			and (ifnull(sales_invoice, '') != '' or ifnull(yetkazish_je, '') != '') limit 1""",
+			(order, kz_fura),
+		)
+	)
+
+
 def _insert_ledger(row, manba_doctype, manba_name, voucher_type, voucher_no, posting_date, ignore_links=False):
 	frappe.get_doc(
 		{
@@ -347,13 +365,18 @@ def _insert_ledger(row, manba_doctype, manba_name, voucher_type, voucher_no, pos
 # ---------------------------------------------------------------- manbalar -------------
 
 
+def _wip_value(key):
+	"""Guruhning yo'ldagi (aktiv) hisobi — tanlanmagan bo'lsa None (talab _require_wip_settings'da)."""
+	return frappe.db.get_single_value("Logistika Settings", xg.get(key).wip_field)
+
+
 def order_detail_lines(od):
 	settings = frappe.get_single("Logistika Settings")
 	return [
 		{
 			"order_detail": od.name,
-			"kategoriya": "Konteyner",
-			"wip_account": settings.wip_fura_hisobi,
+			"kategoriya": xg.kategoriya("ichki"),
+			"wip_account": _wip_value("ichki"),
 			"expense_account": settings.fura_xarajat_hisobi,
 			"amount": od.konteyner_summasi if od.container else 0,
 		},
@@ -365,8 +388,8 @@ def fura_row_lines(od, row):
 	return [
 		{
 			"order_detail": od.name,
-			"kategoriya": "Sug'urta",
-			"wip_account": settings.wip_sugurta_hisobi,
+			"kategoriya": xg.kategoriya("ichki"),
+			"wip_account": _wip_value("ichki"),
 			"expense_account": settings.sugurta_xarajat_hisobi,
 			"amount": row.sugurta,
 		},
@@ -551,23 +574,25 @@ def _assert_no_active_accounting(order_detail):
 		)
 
 
-def _require_wip_settings():
-	for field in ("wip_sugurta_hisobi", "wip_fura_hisobi", "wip_ombor_hisobi", "wip_kz_hisobi"):
-		get_required_setting(field)
+def _require_wip_settings(*keys):
+	for key in keys or ("ichki",):
+		get_required_setting(xg.get(key).wip_field)
 
 
-def _loading_cost_lines(doc, measures_by_od, kategoriya, wip_field, kz_fura=None):
-	"""Hujjatdagi har bir yuklash xarajati qatorini Order Detail'larga Xizmat o'lchovi
-	(tonna yoki kub) bo'yicha bo'ladi."""
-	wip = get_required_setting(wip_field)
+def _loading_cost_lines(doc, measures_by_od, key, kz_fura=None, table="yuklash_xarajatlari"):
+	"""Hujjatdagi har bir xarajat qatorini (Harajat turi — guruh papkasidan) Order Detail'larga
+	Xizmat o'lchovi (tonna yoki kub) bo'yicha bo'ladi; aktiv — `key` guruhining yo'ldagi hisobi."""
+	wip = xg.wip(key)
 	weights = allocation_weights(measures_by_od)
 	lines = []
-	for cost in doc.yuklash_xarajatlari:
+	for cost in doc.get(table) or []:
+		if cost.harajat_turi:
+			xg.assert_in_group(cost.harajat_turi, key)
 		for od, amount in allocate_by_tonnage(cost.summa, weights).items():
 			lines.append(
 				{
 					"order_detail": od,
-					"kategoriya": kategoriya,
+					"kategoriya": xg.kategoriya(key),
 					"wip_account": wip,
 					"expense_account": cost.harajat_turi,
 					"amount": amount,
@@ -589,10 +614,14 @@ def _ledger_measures(reference_doctype, reference_name, harakat_turi):
 
 
 def on_warehouse_intake_submit(doc):
-	"""Fura kelgani — fura PI. Tushirish xarajatlari Warehouse Intake'da kiritilmaydi
-	(2026-11-19: hujjatni tushirgan xodim o'zi kiritadi, xarajat yo'q)."""
+	"""Fura kelgani — fura PI; tushirish xarajatlari (2026-11-24 qaytdi) — "Yuk tushirib olish"
+	aktiviga, qabul qilingan yuk bo'yicha bo'linib."""
 	measures = _ledger_measures("Warehouse Intake", doc.name, "Kirim")
 	create_fura_purchase_invoices(doc, list(measures), doc.fura)
+	if doc.get("tushirish_xarajatlari"):
+		lines = _loading_cost_lines(doc, measures, "tushirish", table="tushirish_xarajatlari")
+		je = sync_source_costs(doc, lines, doc.valyuta, doc.tolov_hisobi, doc.sana)
+		doc.db_set("tannarx_je", je, update_modified=False)
 
 
 def peregruz_measures(doc):
@@ -607,11 +636,13 @@ def peregruz_measures(doc):
 
 
 def on_peregruz_submit(doc):
+	resync_ld_costs(doc.order, doc.kz_truck)
 	measures = peregruz_measures(doc)
 	for plate, order_details in peregruz_trucks(doc).items():
 		create_fura_purchase_invoices(doc, order_details, plate)
 	if doc.yuklash_xarajatlari:
-		je = sync_source_costs(doc, _loading_cost_lines(doc, measures, "Ombor", "wip_ombor_hisobi"), doc.valyuta, doc.tolov_hisobi, doc.sana)
+		lines = _loading_cost_lines(doc, measures, "ortish", kz_fura=doc.kz_truck)
+		je = sync_source_costs(doc, lines, doc.valyuta, doc.tolov_hisobi, doc.sana)
 		doc.db_set("tannarx_je", je, update_modified=False)
 
 
@@ -627,10 +658,11 @@ def peregruz_trucks(doc):
 
 
 def on_kz_truck_loading_submit(doc):
+	resync_ld_costs(doc.order, doc.kz_truck)
 	if not doc.yuklash_xarajatlari and not doc.get("sarf_materiallari"):
 		return
 	measures = _ledger_measures("KZ Truck Loading", doc.name, "Chiqim")
-	lines = _loading_cost_lines(doc, measures, "KZ", "wip_kz_hisobi", kz_fura=doc.kz_truck) if doc.yuklash_xarajatlari else []
+	lines = _loading_cost_lines(doc, measures, "ortish", kz_fura=doc.kz_truck) if doc.yuklash_xarajatlari else []
 	lines += _consumable_lines(doc, measures)
 	je = sync_source_costs(doc, lines, doc.valyuta or company_currency(), doc.tolov_hisobi, doc.sana)
 	doc.db_set("tannarx_je", je, update_modified=False)
@@ -675,12 +707,12 @@ def _consumable_lines(doc, measures_by_od):
 			row.doctype, row.name, {"narx": flt(item.valuation_rate, 4), "summa": flt(item.amount, 2)}, update_modified=False
 		)
 	total = flt(sum(flt(item.amount) for item in se.items), 2)
-	wip = get_required_setting("wip_kz_hisobi")
-	expense = get_required_setting("kz_xarajat_hisobi")
+	wip = xg.wip("ortish")
+	expense = get_required_setting("sarf_xarajat_hisobi")
 	return [
 		{
 			"order_detail": od,
-			"kategoriya": "KZ",
+			"kategoriya": xg.kategoriya("ortish"),
 			"wip_account": wip,
 			"expense_account": expense,
 			"amount": amount,
@@ -754,7 +786,7 @@ def create_fura_purchase_invoices(source_doc, order_details, plate):
 				"item_code": get_required_setting("fura_xizmat_item"),
 				"qty": 1,
 				"rate": amount,
-				"expense_account": settings.wip_fura_hisobi,
+				"expense_account": xg.wip("ichki"),
 				"order_detail": name,
 				"description": pi.remarks,
 			},
@@ -767,8 +799,8 @@ def create_fura_purchase_invoices(source_doc, order_details, plate):
 		_insert_ledger(
 			{
 				"order_detail": name,
-				"kategoriya": "Fura olib kelish",
-				"wip_hisob": settings.wip_fura_hisobi,
+				"kategoriya": xg.kategoriya("ichki"),
+				"wip_hisob": xg.wip("ichki"),
 				"xarajat_hisob": settings.fura_xarajat_hisobi,
 				"summa": flt(pi.base_grand_total, 2),
 				"summa_valyutada": flt(row.xitoy_fura_summasi, 2),
@@ -822,12 +854,12 @@ def sync_kz_transit_costs(doc):
 			alert=True,
 		)
 		return
-	wip = get_required_setting("wip_kz_hisobi")
+	wip = xg.wip("tashqi")
 	expense = get_required_setting("kz_xarajat_hisobi")
 	lines = [
 		{
 			"order_detail": od,
-			"kategoriya": "KZ",
+			"kategoriya": xg.kategoriya("tashqi"),
 			"wip_account": wip,
 			"expense_account": expense,
 			"amount": amount,
@@ -838,6 +870,92 @@ def sync_kz_transit_costs(doc):
 	je = sync_source_costs(doc, lines, doc.valyuta or company_currency(), doc.tolov_hisobi)
 	if je != doc.tannarx_je:
 		doc.db_set("tannarx_je", je, update_modified=False)
+
+
+# ---------------------------------------------------------------- Kassa (Kutilmagan) ----
+
+
+def order_measures(order):
+	"""{Order Detail: (tonna, kub)} — Order'ning kutilayotgan yuki (fura qatorlari: pekin list
+	bo'lsa fakt, bo'lmasa taxminiy)."""
+	result = {}
+	for od in frappe.get_all("Order Detail", filters={"order": order}, pluck="name"):
+		rows = frappe.get_all(
+			furalar.CHILD,
+			filters={"parent": od, "parenttype": "Order Detail"},
+			fields=["fakt_tonna", "taxminiy_tonna", "fakt_kub", "taxminiy_kub"],
+		)
+		loads = [furalar.row_load(r) for r in rows]
+		result[od] = (sum(t for t, _k in loads), sum(k for _t, k in loads))
+	return result
+
+
+def sync_kassa_costs(doc):
+	"""Kassa "Расход" + "Расходы" + Order: summa Order'ning Order Detail'lariga tonna/kub
+	bo'yicha "Kutilmagan" aktiviga (to'liq yetkazilganiga — to'g'ridan xarajatga)."""
+	xg.assert_in_group(doc.expense_account, "kutilmagan")
+	weights = allocation_weights(order_measures(doc.order))
+	if not any(flt(w) > 0 for w in weights.values()):
+		frappe.throw(_("{0}: Order'da tonna/kub kiritilgan yuk yo'q — xarajatni bo'lib bo'lmaydi").format(doc.order))
+	wip = xg.wip("kutilmagan")
+	lines = [
+		{
+			"order_detail": od,
+			"kategoriya": xg.kategoriya("kutilmagan"),
+			"wip_account": wip,
+			"expense_account": doc.expense_account,
+			"amount": amount,
+		}
+		for od, amount in allocate_by_tonnage(doc.amount, weights).items()
+	]
+	return sync_source_costs(doc, lines, doc.cash_account_currency, doc.cash_account, doc.date)
+
+
+# ---------------------------------------------------------------- LD (Dokument) ---------
+
+
+def sync_ld_costs(doc):
+	"""Logistic Documentation xarajatlari — "Dokument" aktiviga, shu Order + KZ furaga ortilgan
+	yuklar bo'yicha (KZ Transit kabi). Yuk hali ortilmagan bo'lsa — ogohlantirish; KZ Truck
+	Loading / Peregruz submit qilinganda resync_ld_costs() qayta yozadi."""
+	rows = [r for r in doc.get("xarajatlar") or [] if flt(r.summa) > 0]
+	posted = _source_rows(doc.doctype, doc.name)
+	if not rows and not posted:
+		return
+	measures = kz_transit_order_details(doc)
+	if rows and not any(flt(w) > 0 for w in allocation_weights(measures).values()):
+		frappe.msgprint(
+			_("Dokument xarajatlari hali tannarxga yozilmadi: shu KZ furaga yuk ortilmagan. Yuk ortilganda avtomatik yoziladi."),
+			indicator="orange",
+			alert=True,
+		)
+		if not posted:
+			return
+		lines = []  # yuklash bekor qilingan — avval yozilgani teskari
+	else:
+		lines = _loading_cost_lines(doc, measures, "dokument", kz_fura=doc.kz_truck, table="xarajatlar")
+	je = sync_source_costs(doc, lines, doc.valyuta or company_currency(), doc.tolov_hisobi)
+	if je != doc.tannarx_je:
+		doc.db_set("tannarx_je", je, update_modified=False)
+
+
+def resync_ld_costs(order, kz_truck):
+	if not order or not kz_truck:
+		return
+	# Ombor hujjati LD xatosi (kurs, hisob) tufayli to'xtamasin — xato yoziladi va ogohlantiriladi.
+	for name in frappe.get_all("Logistic Documentation", filters={"order": order, "kz_truck": kz_truck}, pluck="name"):
+		frappe.db.savepoint("ld_resync")
+		try:
+			sync_ld_costs(frappe.get_doc("Logistic Documentation", name))
+		except Exception:
+			frappe.db.rollback(save_point="ld_resync")
+			frappe.clear_last_message()
+			frappe.log_error(title=f"LD xarajatlari qayta yozilmadi: {name}")
+			frappe.msgprint(
+				_("{0} dokument xarajatlari tannarxga yozilmadi — LD'ni ochib saqlang (Error Log'da tafsilot).").format(name),
+				indicator="orange",
+				alert=True,
+			)
 
 
 def _balances(order_detail, kz_fura):
@@ -902,7 +1020,7 @@ def deliver_kz_transit(doc):
 		# Xarajatsiz yetkazish ham hisobga olinsin (keyingi ulushlar to'g'ri bo'lishi uchun).
 		for od, tonna, _kub in si_rows:
 			_insert_ledger(
-				{"order_detail": od, "kategoriya": "KZ", "xarajat_hisob": get_required_setting("kz_xarajat_hisobi"), "summa": 0, "tonna": tonna, "turi": "Chiqim"},
+				{"order_detail": od, "kategoriya": xg.kategoriya("tashqi"), "xarajat_hisob": get_required_setting("kz_xarajat_hisobi"), "summa": 0, "tonna": tonna, "turi": "Chiqim"},
 				doc.doctype,
 				doc.name,
 				None,

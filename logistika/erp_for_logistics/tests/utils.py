@@ -172,30 +172,33 @@ def ensure_cny_rate():
 
 def setup_tannarx_settings():
 	"""Tannarx testlari uchun hisoblar, Item'lar, kurs va Logistika Settings."""
+	from logistika.erp_for_logistics.xarajat_guruhlari import GROUPS
+
 	abbr = _abbr()
 	ensure_cny_rate()
 	wip = ensure_account("_T Yo'ldagi buyurtmalar", f"Current Assets - {abbr}", is_group=1)
 	exp = f"Direct Expenses - {abbr}"
-	ichki_group = ensure_account("_T Ichki rasxodlar", exp, is_group=1)
-	ombor_group = ensure_account("_T Ombor rasxodlar", exp, is_group=1)
-	accounts = {
-		"wip_sugurta_hisobi": ensure_account("_T WIP Sugurta", wip),
-		"wip_fura_hisobi": ensure_account("_T WIP Fura", wip),
-		"wip_ombor_hisobi": ensure_account("_T WIP Ombor", wip),
-		"wip_kz_hisobi": ensure_account("_T WIP KZ", wip),
-		"sugurta_xarajat_hisobi": ensure_account("_T Sugurta xarajati", exp),
-		"fura_xarajat_hisobi": ensure_account("_T Fura xarajati", exp),
-		"kz_xarajat_hisobi": ensure_account("_T KZ xarajati", exp),
-		"daromad_hisobi": ensure_account("_T Logistika daromadi", f"Direct Income - {abbr}"),
-		"sugurta_tolov_hisobi": f"Cash - {abbr}",
-		"ichki_logistika_xarajat_guruhi": ichki_group,
-		"yuklash_xarajat_guruhi": ombor_group,
-		"fura_xizmat_item": ensure_service_item("_T Fura olib kelish xizmati"),
-		"logistika_xizmat_item": ensure_service_item("_T Logistika xizmati"),
-	}
+	groups = {g.key: ensure_account(f"_T G {g.papka}", exp, is_group=1) for g in GROUPS}
+	accounts = {g.group_field: groups[g.key] for g in GROUPS}
+	accounts.update({g.wip_field: ensure_account(f"_T G Yo'ldagi {g.kategoriya}", wip) for g in GROUPS})
+	accounts.update(
+		{
+			"sugurta_xarajat_hisobi": ensure_account("_T G Sugurta xarajati", groups["ichki"]),
+			"fura_xarajat_hisobi": ensure_account("_T G Fura xarajati", groups["ichki"]),
+			"kz_xarajat_hisobi": ensure_account("_T G KZ xarajati", groups["tashqi"]),
+			"sarf_xarajat_hisobi": ensure_account("_T G Sarf xarajati", groups["ortish"]),
+			"daromad_hisobi": ensure_account("_T Logistika daromadi", f"Direct Income - {abbr}"),
+			"sugurta_tolov_hisobi": f"Cash - {abbr}",
+			"fura_xizmat_item": ensure_service_item("_T Fura olib kelish xizmati"),
+			"logistika_xizmat_item": ensure_service_item("_T Logistika xizmati"),
+		}
+	)
 	settings = setup_logistika_settings()
 	settings.update(accounts)
 	settings.save(ignore_permissions=True)
-	accounts["ichki_leaf"] = ensure_account("_T Ichki rasxod", ichki_group)
-	accounts["ombor_leaf"] = ensure_account("_T Yuklash rasxod", ombor_group)
+	accounts["ichki_leaf"] = ensure_account("_T G Ichki rasxod", groups["ichki"])
+	accounts["ombor_leaf"] = ensure_account("_T G Yuklash rasxod", groups["ortish"])
+	accounts["tushirish_leaf"] = ensure_account("_T G Tushirish rasxod", groups["tushirish"])
+	accounts["dokument_leaf"] = ensure_account("_T G Dokument rasxod", groups["dokument"])
+	accounts["kutilmagan_leaf"] = ensure_account("_T G Kutilmagan rasxod", groups["kutilmagan"])
 	return frappe._dict(accounts)

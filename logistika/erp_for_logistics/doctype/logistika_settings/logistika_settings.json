@@ -6,8 +6,18 @@
  "field_order": [
   "xarajatlar_section",
   "ichki_logistika_xarajat_guruhi",
-  "column_break_xarajat",
+  "tushirish_xarajat_guruhi",
   "yuklash_xarajat_guruhi",
+  "dokument_xarajat_guruhi",
+  "tashqi_xarajat_guruhi",
+  "kutilmagan_xarajat_guruhi",
+  "cb_guruh_wip",
+  "wip_ichki_hisobi",
+  "wip_tushirish_hisobi",
+  "wip_ortish_hisobi",
+  "wip_dokument_hisobi",
+  "wip_tashqi_hisobi",
+  "wip_kutilmagan_hisobi",
   "sugurta_section",
   "sugurta_xarajat_hisobi",
   "column_break_sugurta",
@@ -26,6 +36,7 @@
   "sarf_materiallari_ombori",
   "cb_sarf",
   "sarf_materiallari_hisobi",
+  "sarf_xarajat_hisobi",
   "broker_section",
   "broker_xizmat_item",
   "broker_xizmat_summa",
@@ -40,12 +51,6 @@
   "ld_qaytarish_sabablari",
   "chat_section",
   "tayyor_javoblar",
-  "tannarx_section",
-  "wip_sugurta_hisobi",
-  "wip_fura_hisobi",
-  "cb_tannarx",
-  "wip_ombor_hisobi",
-  "wip_kz_hisobi",
   "cogs_section",
   "fura_xarajat_hisobi",
   "kz_xarajat_hisobi",
@@ -56,26 +61,91 @@
  ],
  "fields": [
   {
+   "description": "Har bir guruh: xarajat papkasi (jadvallardagi \"Harajat turi\" shu papka ichidan) va yo'ldagi (aktiv) hisob — xarajat yuk mijozga yetib borguncha shu aktivda turadi",
    "fieldname": "xarajatlar_section",
    "fieldtype": "Section Break",
-   "label": "Xarajat papkalari"
+   "label": "Xarajat guruhlari"
   },
   {
-   "description": "Order → mahsulotlar jadvalidagi \"Qo'shimcha rasxod turi\" shu papka ichidagi hisoblardan tanlanadi",
+   "description": "Order Detail: Xitoy furasi, konteyner, sug'urta",
    "fieldname": "ichki_logistika_xarajat_guruhi",
    "fieldtype": "Link",
    "label": "Ichki logistika xarajatlari papkasi",
    "options": "Account"
   },
   {
-   "fieldname": "column_break_xarajat",
+   "description": "Warehouse Intake: tushirish xarajatlari",
+   "fieldname": "tushirish_xarajat_guruhi",
+   "fieldtype": "Link",
+   "label": "Yuk tushirib olish xarajatlari papkasi",
+   "options": "Account"
+  },
+  {
+   "description": "KZ Truck Loading, Peregruz: yuklash xarajatlari va sarf materiallari",
+   "fieldname": "yuklash_xarajat_guruhi",
+   "fieldtype": "Link",
+   "label": "Yuk ortish xarajatlari papkasi",
+   "options": "Account"
+  },
+  {
+   "description": "Logistic Documentation: xarajatlar",
+   "fieldname": "dokument_xarajat_guruhi",
+   "fieldtype": "Link",
+   "label": "Dokument xarajatlari papkasi",
+   "options": "Account"
+  },
+  {
+   "description": "KZ Transit",
+   "fieldname": "tashqi_xarajat_guruhi",
+   "fieldtype": "Link",
+   "label": "Tashqi logistika xarajatlari papkasi",
+   "options": "Account"
+  },
+  {
+   "description": "Kassa: Order bilan xarajat",
+   "fieldname": "kutilmagan_xarajat_guruhi",
+   "fieldtype": "Link",
+   "label": "Kutilmagan xarajatlar papkasi",
+   "options": "Account"
+  },
+  {
+   "fieldname": "cb_guruh_wip",
    "fieldtype": "Column Break"
   },
   {
-   "description": "Warehouse Intake, KZ Truck Loading va Peregruz'dagi \"Yuklash xarajatlari\" shu papka ichidagi hisoblardan tanlanadi",
-   "fieldname": "yuklash_xarajat_guruhi",
+   "fieldname": "wip_ichki_hisobi",
    "fieldtype": "Link",
-   "label": "Yuklash xarajatlari papkasi",
+   "label": "Yo'ldagi: Ichki logistika (aktiv)",
+   "options": "Account"
+  },
+  {
+   "fieldname": "wip_tushirish_hisobi",
+   "fieldtype": "Link",
+   "label": "Yo'ldagi: Yuk tushirib olish (aktiv)",
+   "options": "Account"
+  },
+  {
+   "fieldname": "wip_ortish_hisobi",
+   "fieldtype": "Link",
+   "label": "Yo'ldagi: Yuk ortish (aktiv)",
+   "options": "Account"
+  },
+  {
+   "fieldname": "wip_dokument_hisobi",
+   "fieldtype": "Link",
+   "label": "Yo'ldagi: Dokument (aktiv)",
+   "options": "Account"
+  },
+  {
+   "fieldname": "wip_tashqi_hisobi",
+   "fieldtype": "Link",
+   "label": "Yo'ldagi: Tashqi logistika (aktiv)",
+   "options": "Account"
+  },
+  {
+   "fieldname": "wip_kutilmagan_hisobi",
+   "fieldtype": "Link",
+   "label": "Yo'ldagi: Kutilmagan (aktiv)",
    "options": "Account"
   },
   {
@@ -107,131 +177,43 @@
    "label": "Guruhlar"
   },
   {
+   "description": "Order'dagi \"Kliyent\" shu guruhdan tanlanadi va yangi mijoz shu guruhda yaratiladi",
    "fieldname": "mijoz_customer_group",
    "fieldtype": "Link",
-   "options": "Customer Group",
    "label": "Mijozlar guruhi",
-   "description": "Order'dagi \"Kliyent\" shu guruhdan tanlanadi va yangi mijoz shu guruhda yaratiladi"
+   "options": "Customer Group"
   },
   {
+   "description": "Telegram kabinetida \"Bog'lanish\" bo'limida ko'rinadi",
    "fieldname": "mijoz_aloqa_telefoni",
    "fieldtype": "Data",
-   "options": "Phone",
    "label": "Mijoz aloqa telefoni",
-   "description": "Telegram kabinetida \"Bog'lanish\" bo'limida ko'rinadi"
+   "options": "Phone"
   },
   {
+   "description": "Order'dagi \"Xitoy postavshik\" (Customer) shu guruhdan tanlanadi va yangisi shu guruhda yaratiladi",
    "fieldname": "postavshik_customer_group",
    "fieldtype": "Link",
-   "options": "Customer Group",
    "label": "Xitoy postavshiklar guruhi",
-   "description": "Order'dagi \"Xitoy postavshik\" (Customer) shu guruhdan tanlanadi va yangisi shu guruhda yaratiladi"
+   "options": "Customer Group"
   },
   {
+   "description": "Order Detail'dagi \"Xitoy haydovchi\" shu guruhdan tanlanadi va yangisi shu guruhda yaratiladi",
    "fieldname": "haydovchi_supplier_group",
    "fieldtype": "Link",
-   "options": "Supplier Group",
    "label": "Xitoy haydovchilar guruhi",
-   "description": "Order Detail'dagi \"Xitoy haydovchi\" shu guruhdan tanlanadi va yangisi shu guruhda yaratiladi"
+   "options": "Supplier Group"
   },
   {
    "fieldname": "column_break_guruh",
    "fieldtype": "Column Break"
   },
   {
+   "description": "Truck Dispatch'dagi \"Haydovchi\" shu guruhdagi supplier'lardan tanlanadi",
    "fieldname": "kz_haydovchi_supplier_group",
    "fieldtype": "Link",
-   "options": "Supplier Group",
    "label": "KZ haydovchilar guruhi",
-   "description": "Truck Dispatch'dagi \"Haydovchi\" shu guruhdagi supplier'lardan tanlanadi"
-  },
-  {
-   "fieldname": "chat_section",
-   "fieldtype": "Section Break",
-   "label": "Chat"
-  },
-  {
-   "fieldname": "tayyor_javoblar",
-   "fieldtype": "Table",
-   "options": "Tayyor Javob",
-   "label": "Tayyor javoblar",
-   "description": "Chat oynasida bitta bosish bilan qo'yiladigan matnlar"
-  },
-  {
-   "fieldname": "tannarx_section",
-   "fieldtype": "Section Break",
-   "label": "Tannarx — yo'ldagi buyurtmalar (aktiv) hisoblari",
-   "description": "Xarajatlar yuk mijozga yetib borguncha shu aktiv hisoblarda turadi"
-  },
-  {
-   "fieldname": "wip_sugurta_hisobi",
-   "fieldtype": "Link",
-   "options": "Account",
-   "label": "Sug'urta (aktiv)"
-  },
-  {
-   "fieldname": "wip_fura_hisobi",
-   "fieldtype": "Link",
-   "options": "Account",
-   "label": "Fura olib kelish va konteyner (aktiv)"
-  },
-  {
-   "fieldname": "cb_tannarx",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "wip_ombor_hisobi",
-   "fieldtype": "Link",
-   "options": "Account",
-   "label": "Ombor yuklash-tushirish (aktiv)"
-  },
-  {
-   "fieldname": "wip_kz_hisobi",
-   "fieldtype": "Link",
-   "options": "Account",
-   "label": "KZ tashish xarajatlari (aktiv)"
-  },
-  {
-   "fieldname": "cogs_section",
-   "fieldtype": "Section Break",
-   "label": "Yetkazilganda — xarajat va daromad",
-   "description": "Qo'shimcha rasxod va yuklash xarajatlari o'z qatoridagi \"Harajat turi\" hisobiga o'tadi"
-  },
-  {
-   "fieldname": "fura_xarajat_hisobi",
-   "fieldtype": "Link",
-   "options": "Account",
-   "label": "Fura olib kelish xarajati (Expense)"
-  },
-  {
-   "fieldname": "kz_xarajat_hisobi",
-   "fieldtype": "Link",
-   "options": "Account",
-   "label": "KZ tashish xarajati (Expense)"
-  },
-  {
-   "fieldname": "cb_cogs",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "daromad_hisobi",
-   "fieldtype": "Link",
-   "options": "Account",
-   "label": "Logistika xizmati daromadi (Income)"
-  },
-  {
-   "fieldname": "fura_xizmat_item",
-   "fieldtype": "Link",
-   "options": "Item",
-   "label": "Fura olib kelish xizmati (Item)",
-   "description": "Haydovchidan Purchase Invoice qatori uchun"
-  },
-  {
-   "fieldname": "logistika_xizmat_item",
-   "fieldtype": "Link",
-   "options": "Item",
-   "label": "Logistika xizmati (Item)",
-   "description": "Mijozga Sales Invoice qatori uchun"
+   "options": "Supplier Group"
   },
   {
    "fieldname": "ombor_section",
@@ -243,11 +225,11 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "0",
+   "description": "Yoqilsa: Warehouse Intake'da barcha yo'ldagi furalar chiqadi va o'tgan sanalarni kiritish mumkin. Hujjatlar orasidagi sanalar ketma-ketligi baribir tekshiriladi.",
    "fieldname": "eski_malumot_rejimi",
    "fieldtype": "Check",
-   "label": "Eski ma'lumot kiritish rejimi",
-   "default": "0",
-   "description": "Yoqilsa: Warehouse Intake'da barcha yo'ldagi furalar chiqadi va o'tgan sanalarni kiritish mumkin. Hujjatlar orasidagi sanalar ketma-ketligi baribir tekshiriladi."
+   "label": "Eski ma'lumot kiritish rejimi"
   },
   {
    "fieldname": "sarf_section",
@@ -255,22 +237,29 @@
    "label": "Sarf materiallari (KZ yuklash)"
   },
   {
+   "description": "Zanjir, kamar, paddon va h.k. shu ERPNext omboridan chiqim qilinadi",
    "fieldname": "sarf_materiallari_ombori",
    "fieldtype": "Link",
-   "options": "Warehouse",
    "label": "Sarf materiallari ombori",
-   "description": "Zanjir, kamar, paddon va h.k. shu ERPNext omboridan chiqim qilinadi"
+   "options": "Warehouse"
   },
   {
    "fieldname": "cb_sarf",
    "fieldtype": "Column Break"
   },
   {
+   "description": "Ombordan chiqim avval shu hisobga, so'ng KZ fura yuklarining tannarxiga (WIP) o'tkaziladi — qoldig'i doim 0",
    "fieldname": "sarf_materiallari_hisobi",
    "fieldtype": "Link",
-   "options": "Account",
    "label": "Sarf materiallari (oraliq) hisobi",
-   "description": "Ombordan chiqim avval shu hisobga, so'ng KZ fura yuklarining tannarxiga (WIP) o'tkaziladi — qoldig'i doim 0"
+   "options": "Account"
+  },
+  {
+   "description": "KZ yuklashdagi sarf materiallari yetkazilganda shu xarajat hisobiga o'tadi (aktivda — Yuk ortish)",
+   "fieldname": "sarf_xarajat_hisobi",
+   "fieldtype": "Link",
+   "label": "Sarf materiallari xarajati (Expense)",
+   "options": "Account"
   },
   {
    "fieldname": "broker_section",
@@ -278,53 +267,53 @@
    "label": "Xitoy eksport hujjati (broker)"
   },
   {
+   "description": "To'lov tasdiqlanganda zavodga shu xizmat sotiladi (Sales Invoice)",
    "fieldname": "broker_xizmat_item",
    "fieldtype": "Link",
-   "options": "Item",
    "label": "Broker xizmati (Item)",
-   "description": "To'lov tasdiqlanganda zavodga shu xizmat sotiladi (Sales Invoice)"
+   "options": "Item"
   },
   {
-   "fieldname": "broker_qaytarish_sabablari",
-   "fieldtype": "Table",
-   "options": "Broker Qaytarish Sababi",
-   "label": "Broker qaytarish sabablari",
-   "description": "Broker qo'shimcha hujjat so'raganda shu ro'yxatdan tanlaydi"
-  },
-  {
+   "default": "600",
+   "description": "Chek buxgalterga yuborilganda summa avtomatik shu bo'ladi",
    "fieldname": "broker_xizmat_summa",
    "fieldtype": "Currency",
-   "options": "broker_xizmat_valyuta",
    "label": "Broker xizmati narxi",
-   "default": "600",
-   "description": "Chek buxgalterga yuborilganda summa avtomatik shu bo'ladi"
+   "options": "broker_xizmat_valyuta"
   },
   {
+   "default": "CNY",
    "fieldname": "broker_xizmat_valyuta",
    "fieldtype": "Link",
-   "options": "Currency",
    "label": "Broker xizmati valyutasi",
-   "default": "CNY"
+   "options": "Currency"
   },
   {
+   "description": "Broker qo'shimcha hujjat so'raganda shu ro'yxatdan tanlaydi",
+   "fieldname": "broker_qaytarish_sabablari",
+   "fieldtype": "Table",
+   "label": "Broker qaytarish sabablari",
+   "options": "Broker Qaytarish Sababi"
+  },
+  {
+   "collapsible": 1,
    "fieldname": "ld_section",
    "fieldtype": "Section Break",
-   "label": "Tashqi logistika (Logistic Documentation)",
-   "collapsible": 1
+   "label": "Tashqi logistika (Logistic Documentation)"
   },
   {
+   "description": "Peregruz danniy yuklaydi va mijozga jo'natadi",
    "fieldname": "ld_peregruz_xodimi",
    "fieldtype": "Link",
-   "options": "User",
    "label": "Peregruz danniy xodimi",
-   "description": "Peregruz danniy yuklaydi va mijozga jo'natadi"
+   "options": "User"
   },
   {
+   "description": "ED va CMR yuklaydi, tashqi brokerga jo'natadi",
    "fieldname": "ld_ed_cmr_xodimi",
    "fieldtype": "Link",
-   "options": "User",
    "label": "ED va CMR xodimi",
-   "description": "ED va CMR yuklaydi, tashqi brokerga jo'natadi"
+   "options": "User"
   },
   {
    "fieldname": "cb_ld",
@@ -333,26 +322,80 @@
   {
    "fieldname": "ld_co_xodimi",
    "fieldtype": "Link",
-   "options": "User",
-   "label": "CO xodimi"
+   "label": "CO xodimi",
+   "options": "User"
   },
   {
+   "description": "Tranzit rasmiylashtiruvi (Akt peregruza / TIR karnet)",
    "fieldname": "ld_tashqi_broker",
    "fieldtype": "Link",
-   "options": "User",
    "label": "Tashqi broker",
-   "description": "Tranzit rasmiylashtiruvi (Akt peregruza / TIR karnet)"
+   "options": "User"
   },
   {
    "fieldname": "ld_qaytarish_sabablari",
    "fieldtype": "Table",
-   "options": "Broker Qaytarish Sababi",
-   "label": "Tashqi broker qaytarish sabablari"
+   "label": "Tashqi broker qaytarish sabablari",
+   "options": "Broker Qaytarish Sababi"
+  },
+  {
+   "fieldname": "chat_section",
+   "fieldtype": "Section Break",
+   "label": "Chat"
+  },
+  {
+   "description": "Chat oynasida bitta bosish bilan qo'yiladigan matnlar",
+   "fieldname": "tayyor_javoblar",
+   "fieldtype": "Table",
+   "label": "Tayyor javoblar",
+   "options": "Tayyor Javob"
+  },
+  {
+   "description": "Qo'shimcha rasxod va yuklash xarajatlari o'z qatoridagi \"Harajat turi\" hisobiga o'tadi",
+   "fieldname": "cogs_section",
+   "fieldtype": "Section Break",
+   "label": "Yetkazilganda — xarajat va daromad"
+  },
+  {
+   "fieldname": "fura_xarajat_hisobi",
+   "fieldtype": "Link",
+   "label": "Fura olib kelish xarajati (Expense)",
+   "options": "Account"
+  },
+  {
+   "fieldname": "kz_xarajat_hisobi",
+   "fieldtype": "Link",
+   "label": "KZ tashish xarajati (Expense)",
+   "options": "Account"
+  },
+  {
+   "fieldname": "cb_cogs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "daromad_hisobi",
+   "fieldtype": "Link",
+   "label": "Logistika xizmati daromadi (Income)",
+   "options": "Account"
+  },
+  {
+   "description": "Haydovchidan Purchase Invoice qatori uchun",
+   "fieldname": "fura_xizmat_item",
+   "fieldtype": "Link",
+   "label": "Fura olib kelish xizmati (Item)",
+   "options": "Item"
+  },
+  {
+   "description": "Mijozga Sales Invoice qatori uchun",
+   "fieldname": "logistika_xizmat_item",
+   "fieldtype": "Link",
+   "label": "Logistika xizmati (Item)",
+   "options": "Item"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-11-23 15:00:00.000000",
+ "modified": "2026-11-24 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Logistika Settings",
@@ -363,6 +406,22 @@
    "read": 1,
    "role": "System Manager",
    "write": 1
+  },
+  {
+   "email": 1,
+   "permlevel": 0,
+   "print": 1,
+   "read": 1,
+   "role": "Xitoy Ichki Logistikasi",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "permlevel": 0,
+   "print": 1,
+   "read": 1,
+   "role": "Zakaz oluvchi",
+   "share": 1
   }
  ],
  "sort_field": "modified",
