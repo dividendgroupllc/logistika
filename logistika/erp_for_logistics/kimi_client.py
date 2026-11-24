@@ -25,6 +25,11 @@ class KimiTimeoutError(frappe.ValidationError):
 	"""Kimi `timeout` ichida javob bermadi — chaqiruvchi qayta urinishi mumkin."""
 
 
+class KimiEmptyAnswerError(frappe.ValidationError):
+	"""Kimi bo'sh javob qaytardi (o'ylaydigan model tokenlarni mulohazaga sarflab qo'ygan —
+	reasoning + content <= max_tokens) — chaqiruvchi qayta urinishi mumkin."""
+
+
 def _get_settings():
 	settings = frappe.get_single("Kimi Settings")
 	if not settings.is_active:
@@ -37,14 +42,14 @@ def _get_settings():
 	return api_key, settings.base_url or DEFAULT_BASE_URL, settings.model or DEFAULT_MODEL
 
 
-def chat(messages, timeout=60):
+def chat(messages, timeout=60, max_tokens=None):
 	"""Kimi chat completions endpointiga so'rov yuboradi, javob matnini (content)
 	qaytaradi. Ba'zi Kimi modellari faqat temperature=1 (default) ni qo'llab-quvvatlaydi
 	— shuning uchun temperature parametri ataylab yuborilmaydi."""
 	api_key, base_url, model = _get_settings()
 
 	for attempt in range(RATE_LIMIT_RETRIES + 1):
-		response = _post(base_url, api_key, model, messages, timeout)
+		response = _post(base_url, api_key, model, messages, timeout, max_tokens)
 		if not _is_rate_limited(response) or attempt == RATE_LIMIT_RETRIES:
 			break
 		time.sleep(max(_retry_after(response), RATE_LIMIT_WAITS[min(attempt, len(RATE_LIMIT_WAITS) - 1)]))
@@ -55,7 +60,14 @@ def chat(messages, timeout=60):
 			frappe.throw("Kimi band (tarif chegarasi: bir vaqtda 1 ta so'rov) — birozdan keyin qayta urinib ko'ring")
 		frappe.throw(f"Kimi API xatosi ({response.status_code}): {response.text[:500]}")
 
-	return response.json()["choices"][0]["message"]["content"]
+	choice = response.json()["choices"][0]
+	content = (choice.get("message") or {}).get("content") or ""
+	if not content.strip():
+		frappe.throw(
+			f"Kimi bo'sh javob qaytardi (finish_reason: {choice.get('finish_reason') or '-'}) — qayta urinib ko'ring",
+			KimiEmptyAnswerError,
+		)
+	return content
 
 
 def _is_rate_limited(response):
@@ -67,12 +79,15 @@ def _retry_after(response):
 	return int(match.group(1)) if match else 0
 
 
-def _post(base_url, api_key, model, messages, timeout):
+def _post(base_url, api_key, model, messages, timeout, max_tokens=None):
+	payload = {"model": model, "messages": messages}
+	if max_tokens:
+		payload["max_tokens"] = max_tokens
 	try:
 		return requests.post(
 			f"{base_url}/chat/completions",
 			headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
-			json={"model": model, "messages": messages},
+			json=payload,
 			timeout=timeout,
 		)
 	except requests.exceptions.Timeout:

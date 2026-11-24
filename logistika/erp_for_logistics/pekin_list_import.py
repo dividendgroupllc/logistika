@@ -18,7 +18,7 @@ from frappe.utils.xlsxutils import read_xls_file_from_attached_file
 from openpyxl import load_workbook
 from pypdf import PdfReader
 
-from logistika.erp_for_logistics.kimi_client import KimiTimeoutError
+from logistika.erp_for_logistics.kimi_client import KimiEmptyAnswerError, KimiTimeoutError
 from logistika.erp_for_logistics.kimi_client import chat as kimi_chat
 
 FIELDS = [
@@ -85,8 +85,11 @@ def _extract_json(content):
 	text = re.sub(r"\s*```$", "", text)
 	start, end = text.find("{"), text.rfind("}")
 	if start == -1 or end == -1 or end < start:
-		frappe.throw("Kimi javobidan JSON topilmadi")
-	return json.loads(text[start : end + 1])
+		frappe.throw("Kimi javobidan JSON topilmadi", PekinJsonError)
+	try:
+		return json.loads(text[start : end + 1])
+	except ValueError:
+		frappe.throw("Kimi javobidagi JSON buzilgan (to'liq kelmagan bo'lishi mumkin)", PekinJsonError)
 
 
 def _clean_row(raw):
@@ -134,6 +137,13 @@ CHUNK_CHARS = 3000
 # kattaroq chegara va vaqt tugasa bir marta qayta urinish.
 CHUNK_TIMEOUT = 240
 CHUNK_TIMEOUT_RETRIES = 1
+# Mulohaza (reasoning) va javob tokenlari birga shu chegaraga sig'adi; Kimi o'ylaydigan modellar
+# uchun >= 16000 tavsiya qiladi (2026-11-24: 2/3 bo'lakda javob bo'sh/JSON'siz keldi).
+CHUNK_MAX_TOKENS = 32768
+
+
+class PekinJsonError(frappe.ValidationError):
+	pass
 DONE_EVENT = "logistika_pekin_parsed"
 PROGRESS_EVENT = "logistika_pekin_progress"
 
@@ -169,16 +179,21 @@ def split_chunks(text, max_chars=CHUNK_CHARS):
 
 
 def _parse_chunk(text):
+	"""Bitta bo'lak: vaqt tugasa, bo'sh yoki JSON'siz javob kelsa — bir marta qayta urinadi;
+	oxirgi muvaffaqiyatsiz javobning boshi Error Log'ga yoziladi (sababini ko'rish uchun)."""
 	messages = [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": text}]
 	for attempt in range(CHUNK_TIMEOUT_RETRIES + 1):
+		content = None
 		try:
-			content = kimi_chat(messages, timeout=CHUNK_TIMEOUT)
+			content = kimi_chat(messages, timeout=CHUNK_TIMEOUT, max_tokens=CHUNK_MAX_TOKENS)
+			parsed = _extract_json(content)
 			break
-		except KimiTimeoutError:
+		except (KimiTimeoutError, KimiEmptyAnswerError, PekinJsonError) as e:
 			if attempt == CHUNK_TIMEOUT_RETRIES:
+				if content is not None:
+					frappe.log_error(title="Kimi javobi JSON emas", message=f"{e}\n\n{content[:3000]}")
 				raise
 			frappe.clear_last_message()
-	parsed = _extract_json(content)
 	rows = parsed.get("rows") if isinstance(parsed, dict) else parsed
 	if not isinstance(rows, list):
 		frappe.throw("Kimi javobi kutilgan formatda emas")

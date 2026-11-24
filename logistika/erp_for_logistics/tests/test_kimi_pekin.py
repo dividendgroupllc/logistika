@@ -17,7 +17,7 @@ def big_list(n=160):
 	return HEADER + "\n" + "\n".join(f"SMT-{i} WY{i}A 2 24 48 0.185 0.37 15 30\n1:16惯性导弹车（四键带灯光音乐）{i}" for i in range(1, n + 1))
 
 
-def fake_kimi(messages, timeout=None):
+def fake_kimi(messages, timeout=None, max_tokens=None):
 	"""Bo'lakdagi har "SMT-" qatori uchun bitta mahsulot qaytaradi."""
 	text = messages[-1]["content"]
 	rows = [
@@ -75,7 +75,7 @@ class TestPekinChunks(FrappeTestCase):
 	def test_long_list_parsed_in_chunks(self):
 		calls = []
 
-		def record(messages, timeout=None):
+		def record(messages, timeout=None, max_tokens=None):
 			calls.append(messages[-1]["content"])
 			return fake_kimi(messages, timeout)
 
@@ -96,7 +96,7 @@ class TestPekinChunks(FrappeTestCase):
 		pages = [page(p) for p in range(1, 33)]
 		calls = []
 
-		def record(messages, timeout=None):
+		def record(messages, timeout=None, max_tokens=None):
 			calls.append(messages[-1]["content"])
 			return fake_kimi(messages, timeout)
 
@@ -130,7 +130,7 @@ class TestPekinChunks(FrappeTestCase):
 		# 2026-11-24: foydalanuvchi xato ko'rdi, Error Log'da hech narsa yo'q edi — sababni bilib bo'lmadi.
 		calls = {"n": 0}
 
-		def fail_second(messages, timeout=None):
+		def fail_second(messages, timeout=None, max_tokens=None):
 			calls["n"] += 1
 			if calls["n"] == 2:
 				frappe.throw("Kimi band (tarif chegarasi)")
@@ -163,7 +163,7 @@ class TestKimiTimeout(FrappeTestCase):
 	def test_chunk_uses_long_timeout(self):
 		seen = []
 
-		def record(messages, timeout=None):
+		def record(messages, timeout=None, max_tokens=None):
 			seen.append(timeout)
 			return fake_kimi(messages, timeout)
 
@@ -174,7 +174,7 @@ class TestKimiTimeout(FrappeTestCase):
 	def test_chunk_retried_once_after_timeout(self):
 		calls = {"n": 0}
 
-		def slow_then_ok(messages, timeout=None):
+		def slow_then_ok(messages, timeout=None, max_tokens=None):
 			calls["n"] += 1
 			if calls["n"] == 1:
 				frappe.throw("vaqt tugadi", kimi_client.KimiTimeoutError)
@@ -219,4 +219,43 @@ class TestExcelBirinchiSheet(FrappeTestCase):
 	def test_empty_columns_and_trailing_cells_dropped(self):
 		data = xlsx_bytes([("P", [["part_name", None, "qty", None, None], ["SMT-1", None, 10, None, None], [None, None, None, None, None]])])
 		self.assertEqual(pli._excel_text(data, "xlsx"), "part_name\tqty\nSMT-1\t10")
+
+
+class TestKimiBoshJavob(FrappeTestCase):
+	"""2026-11-24 prod: 2/3 bo'lakda "Kimi javobidan JSON topilmadi" — o'ylaydigan model tokenlarni
+	mulohazaga sarflab bo'sh javob qaytarishi mumkin (reasoning + content <= max_tokens)."""
+
+	def setUp(self):
+		patch.object(kimi_client, "_get_settings", return_value=("k", "https://kimi.test/v1", "m")).start()
+
+	def tearDown(self):
+		patch.stopall()
+
+	def test_max_tokens_sent(self):
+		with patch.object(kimi_client.requests, "post", return_value=response(200, OK)) as post:
+			kimi_client.chat([{"role": "user", "content": "x"}], max_tokens=32768)
+		self.assertEqual(post.call_args.kwargs["json"]["max_tokens"], 32768)
+
+	def test_empty_answer_raises_with_reason(self):
+		empty = {"choices": [{"message": {"content": "", "reasoning_content": "uzoq o'y..."}, "finish_reason": "length"}]}
+		with patch.object(kimi_client.requests, "post", return_value=response(200, empty)):
+			with self.assertRaises(kimi_client.KimiEmptyAnswerError) as ctx:
+				kimi_client.chat([{"role": "user", "content": "x"}])
+		self.assertIn("length", str(ctx.exception))
+
+	def test_chunk_asks_enough_tokens_and_retries_bad_answer(self):
+		answers = iter(["kechirasiz, tushunmadim", None])
+		seen = []
+
+		def kimi(messages, timeout=None, max_tokens=None):
+			seen.append(max_tokens)
+			text = next(answers)
+			return text if text is not None else fake_kimi(messages)
+
+		patch.object(frappe, "log_error").start()
+		with patch.object(pli, "kimi_chat", side_effect=kimi):
+			rows = pli.parse_text(big_list(5))
+		self.assertEqual(len(rows), 5)
+		self.assertEqual(len(seen), 2)
+		self.assertTrue(all(t >= 16000 for t in seen))
 
