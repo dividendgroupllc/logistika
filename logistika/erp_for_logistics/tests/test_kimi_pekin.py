@@ -125,3 +125,24 @@ class TestPekinChunks(FrappeTestCase):
 		done = [c for c in publish.call_args_list if c.args[0] == pli.DONE_EVENT][0].args[1]
 		self.assertIn("vaqt tugadi", done["error"])
 		self.assertNotIn("rows", done)
+
+	def test_background_failure_is_logged_with_context(self):
+		# 2026-11-24: foydalanuvchi xato ko'rdi, Error Log'da hech narsa yo'q edi — sababni bilib bo'lmadi.
+		calls = {"n": 0}
+
+		def fail_second(messages, timeout=None):
+			calls["n"] += 1
+			if calls["n"] == 2:
+				frappe.throw("Kimi band (tarif chegarasi)")
+			return fake_kimi(messages, timeout)
+
+		patch.object(pli, "kimi_chat", side_effect=fail_second).start()
+		patch("frappe.publish_realtime").start()
+		log = patch.object(frappe, "log_error").start()
+		pli.start_pekin_parse("text", big_list(160))
+		self.assertEqual(log.call_count, 1)
+		kwargs = log.call_args.kwargs
+		self.assertEqual(kwargs["title"], "Pekin list o'qilmadi")
+		for part in ("Kimi band", "2/", "text"):
+			self.assertIn(part, kwargs["message"])
+

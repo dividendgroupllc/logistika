@@ -292,11 +292,27 @@ def run_pekin_parse(token, user, kind, content, file_extension=None):
 	def publish(event, data):
 		frappe.publish_realtime(event, {"token": token, **data}, user=user)
 
+	state = {"chars": None, "chunk": 0, "chunks": 0}
+
+	def progress(i, n):
+		state.update(chunk=i, chunks=n)
+		publish(PROGRESS_EVENT, {"chunk": i, "chunks": n})
+
 	try:
 		text = _to_text(kind, content, file_extension)
-		rows = parse_text(text, progress=lambda i, n: publish(PROGRESS_EVENT, {"chunk": i, "chunks": n}))
+		state["chars"] = len(text or "")
+		rows = parse_text(text, progress=progress)
 	except frappe.ValidationError as e:
 		frappe.clear_messages()
+		# Foydalanuvchi ko'rgan xato Error Log'da ham bo'lsin — sababini keyin aniqlash uchun.
+		frappe.log_error(
+			title="Pekin list o'qilmadi",
+			message=(
+				f"Xato: {e}\nFoydalanuvchi: {user}\nTur: {kind} ({file_extension or '-'})\n"
+				f"Matn: {state['chars'] if state['chars'] is not None else '-'} belgi\n"
+				f"Bo'lak: {state['chunk']}/{state['chunks']}"
+			),
+		)
 		publish(DONE_EVENT, {"error": str(e)})
 		return
 	except Exception:

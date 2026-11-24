@@ -453,6 +453,20 @@ def _source_is_active(doctype, name):
 	return not frappe.get_meta(doctype).is_submittable or frappe.db.get_value(doctype, name, "docstatus") == 1
 
 
+def resync_order_details(names=None):
+	"""Order Detail'larning o'z xarajatlarini joriy sozlamalar bo'yicha qayta yozadi (faqat
+	farq). Xato bergani Error Log'ga yoziladi, qolganlari davom etadi."""
+	if not frappe.db.get_single_value("Logistika Settings", xg.get("ichki").wip_field):
+		return
+	for name in names or frappe.get_all("Order Detail", pluck="name"):
+		frappe.db.savepoint("od_resync")
+		try:
+			sync_order_detail(frappe.get_doc("Order Detail", name))
+		except Exception:
+			frappe.db.rollback(save_point="od_resync")
+			frappe.log_error(title=f"Tannarx qayta yozilmadi: {name}")
+
+
 def delete_order_detail_costs(od):
 	"""Order Detail o'chirilmoqda — unga bog'langan buxgalteriya izlarini bo'shatadi.
 

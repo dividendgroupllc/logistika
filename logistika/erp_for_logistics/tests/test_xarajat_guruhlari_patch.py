@@ -76,6 +76,26 @@ class TestXarajatGuruhlariPatch(FrappeTestCase):
 		patch.execute()
 		left = frappe.get_all("Tannarx Harakati", filters={"order_detail": self.od.name, "wip_hisob": cash}, pluck="name")
 		self.assertEqual(left, [])
+		# ...va yangi aktivga qayta yozildi (2026-11-24 prod: yozilmay qolgan edi).
+		new = frappe.get_all(
+			"Tannarx Harakati", filters={"order_detail": self.od.name, "wip_hisob": self._setting("wip_ichki_hisobi"), "turi": "Kirim"}, pluck="summa"
+		)
+		self.assertGreater(sum(new), 0)
+
+	def test_repost_patch_restores_lost_costs(self):
+		from logistika.patches.v1_1 import tannarx_qayta_yozish
+
+		patch.execute()
+		# prod holati: eski JE bekor, yozuvlar o'chgan, yangisi yozilmagan.
+		frappe.db.delete("Tannarx Harakati", {"order_detail": self.od.name})
+		frappe.db.sql("update `tabOrder Detail Fura` set tannarx_je = null where parent = %s", self.od.name)
+		tannarx_qayta_yozish.execute()
+		rows = frappe.get_all("Tannarx Harakati", filters={"order_detail": self.od.name, "turi": "Kirim"}, fields=["wip_hisob", "summa"])
+		self.assertEqual({r.wip_hisob for r in rows}, {self._setting("wip_ichki_hisobi")})
+		self.assertGreater(sum(r.summa for r in rows), 0)
+		jes = frappe.db.count("Journal Entry")
+		tannarx_qayta_yozish.execute()
+		self.assertEqual(frappe.db.count("Journal Entry"), jes)
 
 	def test_linked_old_wip_is_kept(self):
 		frappe.get_doc(

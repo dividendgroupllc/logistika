@@ -192,19 +192,9 @@ def _drop_noop_postings():
 
 
 def _resync_order_details():
-	"""Order Detail'ning o'z xarajatlari (konteyner, sug'urta) — yangi aktiv hisobiga."""
+	"""Order Detail'ning o'z xarajatlari (konteyner, sug'urta) — yangi aktiv hisobiga. Barcha
+	Order Detail'lar: _drop_noop_postings yozuvlarini o'chirgan bo'lishi mumkin (faqat farq
+	yoziladi — qayta ishga tushsa hech narsa o'zgarmaydi)."""
 	from logistika.erp_for_logistics import tannarx
 
-	names = frappe.db.sql_list(
-		"""select distinct order_detail from `tabTannarx Harakati`
-		where manba_doctype in ('Order Detail', 'Order Detail Fura') and voucher_type = 'Journal Entry'"""
-	)
-	for name in names:
-		if not frappe.db.exists("Order Detail", name):
-			continue
-		frappe.db.savepoint("xg_resync")
-		try:
-			tannarx.sync_order_detail(frappe.get_doc("Order Detail", name))
-		except Exception:
-			frappe.db.rollback(save_point="xg_resync")
-			frappe.log_error(title=f"Xarajat guruhlari: {name} qayta yozilmadi")
+	tannarx.resync_order_details()
