@@ -1,0 +1,70 @@
+{
+ "actions": [],
+ "creation": "2026-11-24 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "traccar_url",
+  "cb",
+  "api_user",
+  "api_password",
+  "sec_help",
+  "yordam"
+ ],
+ "fields": [
+  {
+   "default": "https://gps.erpcontrol.uz",
+   "description": "Traccar sayti manzili (oxirida / siz)",
+   "fieldname": "traccar_url",
+   "fieldtype": "Data",
+   "label": "Traccar manzili"
+  },
+  {
+   "fieldname": "cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Traccar'dagi ERP uchun ochilgan foydalanuvchi (barcha furalarga ruxsati bo'lsin)",
+   "fieldname": "api_user",
+   "fieldtype": "Data",
+   "label": "Traccar login"
+  },
+  {
+   "fieldname": "api_password",
+   "fieldtype": "Password",
+   "label": "Traccar parol"
+  },
+  {
+   "fieldname": "sec_help",
+   "fieldtype": "Section Break",
+   "label": "Qanday ishlaydi"
+  },
+  {
+   "fieldname": "yordam",
+   "fieldtype": "HTML",
+   "options": "<p>Har bir KZ furaning GPS qurilmasi (Traccar Identifier) <b>Truck Dispatch</b> hujjatida, \"GPS Device ID\" maydonida biriktiriladi. KZ Transit'da \"Yo'lga chiqdi\" bosilganda va har kuni joylashuv shu yerdan olinadi.</p>"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-11-24 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "Traccar Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -54,5 +54,5 @@ class TestTozalash(FrappeTestCase):
 		# Ma'lumotnoma va sozlamalar qoladi; Kassa — ERPNext o'zi (company bo'yicha) o'chiradi.
 		self.assertTrue(frappe.db.exists("Truck Type", "_T Tozalash Turi"))
 		self.assertNotIn("Kassa", tozalash.TRANSACTION_DOCTYPES)
-		for keep in ("Transport Vositasi", "Ombor", "Truck Type", "Expense Cost Center", "Logistika Settings"):
+		for keep in ("Ombor", "Truck Type", "Expense Cost Center", "Logistika Settings"):
 			self.assertNotIn(keep, tozalash.TRANSACTION_DOCTYPES)

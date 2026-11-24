@@ -397,6 +397,7 @@ class TestKzTransitJonash(FrappeTestCase):
 		self.depart()
 		self.assertEqual(self.holati(), "Yo'lda")
 		self.assertEqual(frappe.db.get_value("Order Detail", self.od.name, "status"), "В пути к доставке")
+		self.assertTrue(frappe.db.get_value("KZ Transit", self.kzt.name, "yolga_chiqqan_vaqt"))  # xarita yo'li shundan
 		refresh.assert_called_once_with(self.kzt.name)
 		with self.assertRaises(frappe.ValidationError):
 			self.depart()  # ikkinchi marta emas

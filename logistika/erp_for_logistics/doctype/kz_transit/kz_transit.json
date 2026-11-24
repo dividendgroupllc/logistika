@@ -14,6 +14,7 @@
   "kz_truck",
   "haydovchi_ismi",
   "holati",
+  "yolga_chiqqan_vaqt",
   "gps_offline",
   "sec_sug",
   "valyuta",
@@ -227,12 +228,20 @@
    "fieldname": "customer_chat_html",
    "fieldtype": "HTML",
    "label": "Mijoz bilan suhbat"
+  },
+  {
+   "description": "\"Yo'lga chiqdi\" bosilgan vaqt — mijoz xaritasidagi yo'l shundan boshlanadi",
+   "fieldname": "yolga_chiqqan_vaqt",
+   "fieldtype": "Datetime",
+   "label": "Yo'lga chiqqan vaqt",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-23 12:00:00.000000",
+ "modified": "2026-11-24 18:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "KZ Transit",

@@ -7,20 +7,32 @@ from frappe.utils import get_datetime
 FRESHNESS_THRESHOLD_SECONDS = 3 * 60 * 60
 
 
+def _settings_credentials():
+	"""Traccar Settings formasi (2026-11-24) — admin brauzerdan kiritadi, parol shifrlangan."""
+	from frappe.utils.password import get_decrypted_password
+
+	if not frappe.db.exists("DocType", "Traccar Settings"):
+		return (None, None, None)
+	url = (frappe.db.get_single_value("Traccar Settings", "traccar_url") or "").strip().rstrip("/")
+	user = frappe.db.get_single_value("Traccar Settings", "api_user")
+	password = get_decrypted_password("Traccar Settings", "Traccar Settings", "api_password", raise_exception=False)
+	return (url or None, user or None, password or None)
+
+
 def get_credentials(required=False):
-	"""Traccar URL/login/parol'ni site_config'dan o'qiydi — sozlanmagan bo'lsa
-	(None, None, None) qaytaradi. `required=True` bo'lsa, sozlanmagan taqdirda
-	aniq xato chiqaradi — bu holat qurilma offline bo'lishidan farqli, sayt
-	sozlamasi muammosi, shuning uchun alohida xabar bilan ko'rsatilishi kerak."""
-	creds = (
-		frappe.conf.get("traccar_url"),
-		frappe.conf.get("traccar_api_user"),
-		frappe.conf.get("traccar_api_password"),
-	)
+	"""Traccar URL/login/parol: avval Traccar Settings formasidan, to'liq bo'lmasa —
+	site_config.json'dan (eski usul). Sozlanmagan bo'lsa (None, None, None); `required=True`
+	bo'lsa aniq xato — bu qurilma offline bo'lishidan farqli, sozlama muammosi."""
+	creds = _settings_credentials()
+	if not all(creds):
+		creds = (
+			frappe.conf.get("traccar_url"),
+			frappe.conf.get("traccar_api_user"),
+			frappe.conf.get("traccar_api_password"),
+		)
 	if required and not all(creds):
 		frappe.throw(
-			"Traccar ulanish ma'lumotlari (traccar_url / traccar_api_user / traccar_api_password) "
-			"site_config.json'da sozlanmagan — administratorga murojaat qiling."
+			"Traccar ulanishi sozlanmagan — Traccar Settings'da manzil, login va parolni kiriting."
 		)
 	return creds
 
@@ -97,3 +109,36 @@ def find_device_position(traccar_url, auth, gps_device_id):
 
 	position_by_device_id = {p["deviceId"]: p for p in positions}
 	return position_by_device_id.get(traccar_device_id)
+
+
+def to_utc_iso(value):
+	"""Sayt vaqtidagi (naive) sana-vaqt → Traccar API kutadigan UTC ISO ("...Z")."""
+	from zoneinfo import ZoneInfo
+
+	from frappe.utils import get_system_timezone
+
+	dt = get_datetime(value)
+	if dt.tzinfo is None:
+		dt = dt.replace(tzinfo=ZoneInfo(get_system_timezone()))
+	return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def device_route(traccar_url, auth, unique_id, since, until=None):
+	"""Qurilmaning (Traccar uniqueId) `since`dan buyongi joylashuvlari, vaqt bo'yicha.
+	Xato bo'lsa exception otadi — chaqiruvchi yumshoq ushlaydi."""
+	devices = traccar_get(traccar_url, f"/api/devices?uniqueId={requests.utils.quote(unique_id)}", auth)
+	if not devices:
+		return []
+	response = requests.get(
+		f"{traccar_url}/api/positions",
+		params={
+			"deviceId": devices[0]["id"],
+			"from": to_utc_iso(since),
+			"to": to_utc_iso(until or datetime.now(timezone.utc)),
+		},
+		headers={"Accept": "application/json"},
+		auth=auth,
+		timeout=20,
+	)
+	response.raise_for_status()
+	return response.json()

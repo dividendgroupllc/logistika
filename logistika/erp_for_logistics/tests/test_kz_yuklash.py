@@ -74,8 +74,11 @@ class TestKzYuklashTortish(FrappeTestCase):
 		with self.assertRaises(frappe.ValidationError):
 			pull_for_kz_loading(self.order.name, "01KZ999")
 
-	def test_china_truck_field_hidden(self):
-		self.assertTrue(frappe.get_meta("KZ Truck Loading").get_field("manba_china_truck").hidden)
+	def test_china_truck_field_is_optional_filter(self):
+		# 2026-11-24: yashirin maydon endi ixtiyoriy filtr — tanlansa faqat shu furaning yuklari.
+		field = frappe.get_meta("KZ Truck Loading").get_field("manba_china_truck")
+		self.assertFalse(field.hidden)
+		self.assertFalse(field.reqd)
 
 	def test_order_choice_only_with_goods_in_warehouse(self):
 		from logistika.erp_for_logistics.api import orders_with_stock

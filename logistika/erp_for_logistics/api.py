@@ -36,7 +36,7 @@ def assert_no_duplicate_document(doc, key_fields, label=None, extra_filters=None
 @frappe.whitelist()
 def truck_plate_autocomplete(txt=None, **kwargs):
 	"""Order Detail'lardagi "Xitoy mashina nomeri"dan takrorlanmas fura raqamlari —
-	Transport Vositasi / Warehouse Intake'da avtomatik tavsiya uchun."""
+	Warehouse Intake'da avtomatik tavsiya uchun."""
 	from logistika.erp_for_logistics import furalar
 
 	return sorted(furalar.plates(txt=txt))[:20]

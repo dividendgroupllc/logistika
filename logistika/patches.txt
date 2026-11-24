@@ -20,3 +20,4 @@ logistika.patches.v1_1.omborga_korinsin
 logistika.patches.v1_1.ruxsatlar_kodga
 logistika.patches.v1_1.xarajat_guruhlari
 logistika.patches.v1_1.tannarx_qayta_yozish
+logistika.patches.v1_1.transport_vositasi_truck_dispatch

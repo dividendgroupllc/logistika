@@ -21,6 +21,7 @@
   "haydovchi_telefon",
   "vositachi",
   "mashina_raqami",
+  "gps_device_id",
   "omborga_kirish_sanasi",
   "cb_driver",
   "prava",
@@ -153,12 +154,18 @@
    "fieldname": "sec_yuklar",
    "fieldtype": "Section Break",
    "label": "Order yuklari (yo'lda / omborda)"
+  },
+  {
+   "description": "Haydovchi telefonidagi Traccar Client \"Device identifier\" — Traccar'dagi Identifier bilan bir xil. KZ Transit joylashuvni shu qurilmadan oladi.",
+   "fieldname": "gps_device_id",
+   "fieldtype": "Data",
+   "label": "GPS Device ID (Traccar)"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-23 12:00:00.000000",
+ "modified": "2026-11-24 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Truck Dispatch",

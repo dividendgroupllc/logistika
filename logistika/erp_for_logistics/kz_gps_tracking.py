@@ -17,8 +17,7 @@ def daily_gps_update_kz():
 	if not all(traccar_client.get_credentials()):
 		frappe.log_error(
 			title="Kunlik KZ GPS yangilash: Traccar sozlanmagan",
-			message="traccar_url/traccar_api_user/traccar_api_password site_config.json'da yo'q — "
-			"kunlik yangilash butunlay o'tkazib yuborildi.",
+			message="Traccar Settings'da manzil/login/parol kiritilmagan — kunlik yangilash o'tkazib yuborildi.",
 		)
 		return
 
@@ -154,17 +153,17 @@ def _send_row_to_client(doc, row):
 def _refresh_row_with_fresh_position(doc, row) -> bool:
 	traccar_url, traccar_api_user, traccar_api_password = traccar_client.get_credentials(required=True)
 
-	vehicle = frappe.db.get_value(
-		"Transport Vositasi",
-		{"mashina_raqami": doc.kz_truck, "faol": 1},
-		["gps_device_id"],
-		as_dict=True,
+	# GPS qurilma shu Order + KZ fura Truck Dispatch'ida biriktiriladi (2026-11-24).
+	device_id = frappe.db.get_value(
+		"Truck Dispatch",
+		{"order": doc.order, "mashina_raqami": doc.kz_truck, "gps_device_id": ["is", "set"]},
+		"gps_device_id",
 	)
-	if not vehicle:
+	if not device_id:
 		return _mark_offline(doc, row)
 
 	auth = (traccar_api_user, traccar_api_password)
-	position = traccar_client.find_device_position(traccar_url, auth, vehicle.gps_device_id)
+	position = traccar_client.find_device_position(traccar_url, auth, device_id.strip())
 	if not position or not traccar_client.is_fresh(position):
 		return _mark_offline(doc, row)
 

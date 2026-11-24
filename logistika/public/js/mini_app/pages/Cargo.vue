@@ -2,6 +2,7 @@
 	<div class="scr">
 		<div v-if="!data" class="empty">{{ error ? t("error") : t("loading") }}</div>
 		<template v-else>
+			<TrackMap v-if="track && track.trucks.length" :track="track" />
 			<div class="card">
 				<div class="row"><span class="h">{{ data.name }}</span><span class="chip" :class="{ ok: data.stage === 6 }">{{ store.me.labels[data.stage] }}</span></div>
 				<div v-if="data.mahsulot" class="muted">{{ data.mahsulot }}</div>
@@ -71,8 +72,9 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { onBeforeUnmount, onMounted, reactive, ref } from "vue";
 import { call, fmtDate, fmtNum, openMap } from "../api";
+import TrackMap from "../TrackMap.vue";
 import { t } from "../i18n";
 import { store } from "../store";
 
@@ -80,6 +82,20 @@ const props = defineProps({ name: String });
 const data = ref(null);
 const error = ref(false);
 const opened = reactive({});
+const track = ref(null);
+let timer = null;
+
+// Xarita: KZ fura yo'lda bo'lsa har daqiqada yangilanadi (sahifa ochiq turganda).
+async function loadTrack() {
+	try {
+		track.value = await call("track", { order_detail: props.name });
+	} catch (e) {
+		/* xarita ixtiyoriy — xato yukni ko'rsatishga xalaqit bermaydi */
+	}
+	clearTimeout(timer);
+	if (track.value && track.value.trucks.some((tr) => tr.state === "yolda")) timer = setTimeout(loadTrack, 60000);
+}
+onBeforeUnmount(() => clearTimeout(timer));
 
 function locs(i) {
 	return data.value ? data.value.locations.filter((l) => l.bosqich === i) : [];
@@ -103,5 +119,6 @@ onMounted(async () => {
 	} catch (e) {
 		error.value = true;
 	}
+	if (data.value) loadTrack();
 });
 </script>

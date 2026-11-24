@@ -5,7 +5,7 @@
 # logistika hujjatlarida esa bu maydon yo'q. Transaction Deletion Record tasdiqlanganda shu
 # yerdagi ro'yxat fonda tozalanadi: hujjatlar, jadval qatorlari, biriktirilgan fayllar,
 # izoh/tarix/bildirishnomalar va raqamlash ketma-ketligi (yangi hujjatlar yana 00001 dan).
-# Ma'lumotnomalar (Transport Vositasi, Ombor, Truck Type, Expense Cost Center) va
+# Ma'lumotnomalar (Ombor, Truck Type, Expense Cost Center) va
 # sozlamalar qoladi; Kassa'da company bor — uni ERPNext o'zi o'chiradi.
 
 import os

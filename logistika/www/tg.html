@@ -75,6 +75,18 @@ td,th{padding:6px 4px;border-top:1px solid var(--line);text-align:left} th{color
 .center{text-align:center;padding:40px 16px}
 .err{color:var(--bad);font-size:13px;margin-top:6px}
 .empty{color:var(--hint);text-align:center;padding:24px 8px}
+/* Yuk xaritasi (TrackMap.vue) */
+.trk-map{position:relative;height:340px;border-radius:14px;overflow:hidden;margin-bottom:10px;background:var(--bg)}
+.trk-canvas{position:absolute;inset:0}
+.trk-live{position:absolute;left:10px;top:10px;z-index:500;display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:16px;background:var(--bg);color:var(--text);font-size:12px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.trk-dot{width:8px;height:8px;border-radius:50%;background:var(--ok)} .trk-dot.off{background:var(--warn)}
+.trk-center{position:absolute;right:10px;top:10px;z-index:500;width:44px;height:44px;border:0;border-radius:12px;background:var(--bg);color:var(--text);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.trk-bar{position:relative;height:10px;border-radius:5px;background:var(--line);margin:8px 0 6px}
+.trk-bar div{height:10px;border-radius:5px;background:var(--btn)}
+.trk-bar span{position:absolute;top:-6px;width:22px;height:22px;border-radius:50%;background:var(--bg);border:3px solid var(--btn)}
+.trk-eta{display:flex;gap:10px;align-items:center;margin-top:10px;padding:10px 12px;border-radius:12px;background:var(--sec);color:var(--link)}
+.trk-eta b{color:var(--text)}
+.trk-truck{width:34px;height:34px;border-radius:50%;background:#fff;border:3px solid var(--c);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 8px rgba(36,129,204,.18)}
 </style>
 </head>
 <body>

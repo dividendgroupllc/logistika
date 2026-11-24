@@ -197,7 +197,6 @@ DOCTYPE_TITLE_TRANSLATIONS = {
 	"Peregruz": "直接换装",
 	"Peregruz Item": "直接换装项目",
 	"Telegram Bot Settings": "Telegram机器人设置",
-	"Transport Vositasi": "运输工具",
 	"Truck Dispatch": "车辆调度",
 	"Truck Type": "车辆类型",
 	"Warehouse Intake": "入库单",

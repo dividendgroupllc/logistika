@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe.utils import now_datetime
 from frappe import _
 from frappe.model.document import Document
 
@@ -52,6 +53,7 @@ def yolga_chiqdi(name):
 	if not frappe.db.exists("Logistic Documentation", {"order": doc.order, "kz_truck": doc.kz_truck, "status": "Yakunlandi"}):
 		frappe.throw(_("Avval tranzit rasmiylashtirilsin (Logistic Documentation yakunlanmagan)"))
 	doc.holati = "Yo'lda"
+	doc.yolga_chiqqan_vaqt = now_datetime()
 	doc.flags.departure = True
 	doc.save()
 	advance_order_detail_status(resolve_order_details_for_kz_truck(doc.order, doc.kz_truck), "В пути к доставке")

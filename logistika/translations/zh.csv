@@ -934,3 +934,21 @@ Yuk tushirib olish xarajatlari papkasi,卸货费用文件夹
 Расходы uchun: xarajat shu Order yuklari tannarxiga (Kutilmagan xarajatlar) yoziladi,“Расходы”时：费用计入该订单货物成本（意外费用）
 LD Xarajat,LD费用
 {0} dokument xarajatlari tannarxga yozilmadi — LD'ni ochib saqlang (Error Log'da tafsilot).,{0} 的单证费用未计入成本——请打开LD并保存（详情见Error Log）。
+"""{0}"" Xitoy furasidan omborda yuk qolmagan.",仓库中已没有来自中国货车“{0}”的货物。
+"<p>Har bir KZ furaning GPS qurilmasi (Traccar Identifier) <b>Truck Dispatch</b> hujjatida, ""GPS Device ID"" maydonida biriktiriladi. KZ Transit'da ""Yo'lga chiqdi"" bosilganda va har kuni joylashuv shu yerdan olinadi.</p>",<p>每辆KZ货车的GPS设备（Traccar Identifier）在<b>Truck Dispatch</b>单据的“GPS Device ID”字段中绑定。在KZ Transit点击“Yo'lga chiqdi”时及每天从这里获取位置。</p>
+"Haydovchi telefonidagi Traccar Client ""Device identifier"" — Traccar'dagi Identifier bilan bir xil. KZ Transit joylashuvni shu qurilmadan oladi.",司机手机Traccar Client中的“Device identifier”——与Traccar中的Identifier相同。KZ Transit从该设备获取位置。
+Qanday ishlaydi,如何运作
+"Tanlansa, ""Yuklarni tortish"" faqat shu Xitoy furadan kelgan yuklarni oladi; bo'sh — hammasi",选择后，“Yuklarni tortish”只提取来自该中国货车的货物；为空则全部
+Traccar Settings,Traccar设置
+Traccar login,Traccar登录名
+Traccar manzili,Traccar地址
+Traccar parol,Traccar密码
+Traccar sayti manzili (oxirida / siz),Traccar网站地址（末尾不带/）
+Traccar'dagi ERP uchun ochilgan foydalanuvchi (barcha furalarga ruxsati bo'lsin),为ERP创建的Traccar用户（需有所有货车的权限）
+Xitoy fura (ixtiyoriy),中国货车（可选）
+"""Yo'lga chiqdi"" bosilgan vaqt — mijoz xaritasidagi yo'l shundan boshlanadi",点击“Yo'lga chiqdi”的时间——客户地图上的路线从此开始
+Mijoz kabinetidagi xaritada ko'rinadi,显示在客户账户的地图上
+"Xaritada bosib belgilang — mijoz xaritasida qizil nuqta, foiz va qolgan masofa shunga qarab hisoblanadi",在地图上点击标记——客户地图上的红点、百分比和剩余距离据此计算
+Yetkazish manzili,送货地址
+Yetkazish nuqtasi,送货地点
+Yo'lga chiqqan vaqt,出发时间

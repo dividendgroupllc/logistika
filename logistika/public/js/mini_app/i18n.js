@@ -25,6 +25,10 @@ const M = {
 		share_phone: "Raqamni ulashish", link_wait: "Tekshirilmoqda…", link_fail: "Raqam topilmadi. Menejeringizga murojaat qiling.",
 		open_in_tg: "Kabinetni Telegram'dagi bot orqali oching.", open_from_button: "Kabinetni bot chatidagi «📱 Kabinet» tugmasini bosib, so'ng xabar ostidagi «📱 Kabinet» tugmasi orqali yoki chap pastdagi menyu tugmasi orqali oching.", close: "Yopish", error: "Xatolik. Qayta urinib ko'ring.", retry: "Qayta urinish",
 		loading: "Yuklanmoqda…", kz_truck: "KZ fura", expected: "Yetib kelishi kutilayotgan sana", locations_n: "ta joylashuv",
+		map_label: "Fura xaritada", live: "Jonli", gps_wait: "GPS kutilmoqda", recenter: "Furaga qaytish", on_the_way: "Yo'lda",
+		delivered_state: "Yetkazildi", waiting: "Jo'nashga tayyorlanmoqda", origin: "Xorgos ombori", destination: "Yetkazish manzili",
+		passed: "Bosib o'tildi", kz_waiting: "KZ fura yo'lga chiqqach, shu yerda xaritada ko'rinadi.", about: "Taxminan",
+		eta_label: "yetib borish", min_ago: "daqiqa oldin", hours_ago: "soat oldin",
 	},
 	ru: {
 		orders: "Заказы", documents: "Документы", chat: "Чат", profile: "Профиль",
@@ -47,6 +51,10 @@ const M = {
 		share_phone: "Поделиться номером", link_wait: "Проверяем…", link_fail: "Номер не найден. Обратитесь к менеджеру.",
 		open_in_tg: "Откройте кабинет через бота в Telegram.", open_from_button: "Откройте кабинет: нажмите «📱 Кабинет» в чате бота, затем кнопку «📱 Кабинет» под сообщением — или кнопку меню слева внизу.", close: "Закрыть", error: "Ошибка. Попробуйте ещё раз.", retry: "Повторить",
 		loading: "Загрузка…", kz_truck: "Фура KZ", expected: "Ожидаемая дата прибытия", locations_n: "мест",
+		map_label: "Фура на карте", live: "Онлайн", gps_wait: "Ожидаем GPS", recenter: "К фуре", on_the_way: "В пути",
+		delivered_state: "Доставлено", waiting: "Готовится к отправке", origin: "Склад Хоргос", destination: "Адрес доставки",
+		passed: "Пройдено", kz_waiting: "Когда фура KZ выедет, она появится здесь на карте.", about: "Примерно",
+		eta_label: "прибытие", min_ago: "мин назад", hours_ago: "ч назад",
 	},
 	en: {
 		orders: "Orders", documents: "Documents", chat: "Chat", profile: "Profile",
@@ -69,6 +77,10 @@ const M = {
 		share_phone: "Share number", link_wait: "Checking…", link_fail: "Number not found. Please contact your manager.",
 		open_in_tg: "Open the cabinet from the bot in Telegram.", open_from_button: "Open the cabinet: tap «📱 Cabinet» in the bot chat, then the «📱 Cabinet» button under the message — or the menu button at the bottom left.", close: "Close", error: "Something went wrong. Try again.", retry: "Retry",
 		loading: "Loading…", kz_truck: "KZ truck", expected: "Expected arrival", locations_n: "locations",
+		map_label: "Truck on the map", live: "Live", gps_wait: "Waiting for GPS", recenter: "Back to truck", on_the_way: "On the way",
+		delivered_state: "Delivered", waiting: "Preparing to depart", origin: "Khorgos warehouse", destination: "Delivery address",
+		passed: "Covered", kz_waiting: "Once the KZ truck departs, it will appear here on the map.", about: "About",
+		eta_label: "arrival", min_ago: "min ago", hours_ago: "h ago",
 	},
 };
 

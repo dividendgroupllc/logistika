@@ -30,6 +30,8 @@
   "narxlar",
   "sec_yetkazish",
   "yetkazish_sanasi",
+  "yetkazish_manzili",
+  "yetkazish_nuqtasi",
   "amended_from",
   "sec_chat",
   "javob_kutilmoqda",
@@ -216,6 +218,20 @@
    "fieldname": "yetkazish_sanasi",
    "fieldtype": "Date",
    "label": "Mijozga yetkazish sanasi"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Mijoz kabinetidagi xaritada ko'rinadi",
+   "fieldname": "yetkazish_manzili",
+   "fieldtype": "Data",
+   "label": "Yetkazish manzili"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Xaritada bosib belgilang — mijoz xaritasida qizil nuqta, foiz va qolgan masofa shunga qarab hisoblanadi",
+   "fieldname": "yetkazish_nuqtasi",
+   "fieldtype": "Geolocation",
+   "label": "Yetkazish nuqtasi"
   }
  ],
  "grid_page_length": 50,
@@ -247,7 +263,7 @@
    "link_fieldname": "order"
   }
  ],
- "modified": "2026-11-23 12:00:00.000000",
+ "modified": "2026-11-24 18:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Order",

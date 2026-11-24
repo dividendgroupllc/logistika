@@ -993,3 +993,21 @@ Yuk tushirib olish xarajatlari papkasi,Папка расходов на разг
 Расходы uchun: xarajat shu Order yuklari tannarxiga (Kutilmagan xarajatlar) yoziladi,Для «Расходы»: расход записывается в себестоимость грузов этого заказа (непредвиденные расходы)
 LD Xarajat,Расход LD
 {0} dokument xarajatlari tannarxga yozilmadi — LD'ni ochib saqlang (Error Log'da tafsilot).,Расходы на документы {0} не записаны в себестоимость — откройте LD и сохраните (подробности в Error Log).
+"""{0}"" Xitoy furasidan omborda yuk qolmagan.",На складе не осталось груза из китайской фуры «{0}».
+"<p>Har bir KZ furaning GPS qurilmasi (Traccar Identifier) <b>Truck Dispatch</b> hujjatida, ""GPS Device ID"" maydonida biriktiriladi. KZ Transit'da ""Yo'lga chiqdi"" bosilganda va har kuni joylashuv shu yerdan olinadi.</p>","<p>GPS-устройство каждой KZ фуры (Traccar Identifier) привязывается в документе <b>Truck Dispatch</b>, в поле «GPS Device ID». Местоположение берётся отсюда при нажатии «Yo'lga chiqdi» в KZ Transit и ежедневно.</p>"
+"Haydovchi telefonidagi Traccar Client ""Device identifier"" — Traccar'dagi Identifier bilan bir xil. KZ Transit joylashuvni shu qurilmadan oladi.",«Device identifier» в Traccar Client на телефоне водителя — совпадает с Identifier в Traccar. KZ Transit берёт местоположение с этого устройства.
+Qanday ishlaydi,Как это работает
+"Tanlansa, ""Yuklarni tortish"" faqat shu Xitoy furadan kelgan yuklarni oladi; bo'sh — hammasi","Если выбрано, «Yuklarni tortish» берёт только грузы из этой китайской фуры; пусто — все"
+Traccar Settings,Настройки Traccar
+Traccar login,Логин Traccar
+Traccar manzili,Адрес Traccar
+Traccar parol,Пароль Traccar
+Traccar sayti manzili (oxirida / siz),Адрес сайта Traccar (без / в конце)
+Traccar'dagi ERP uchun ochilgan foydalanuvchi (barcha furalarga ruxsati bo'lsin),"Пользователь Traccar, созданный для ERP (с доступом ко всем фурам)"
+Xitoy fura (ixtiyoriy),Китайская фура (необязательно)
+"""Yo'lga chiqdi"" bosilgan vaqt — mijoz xaritasidagi yo'l shundan boshlanadi",Время нажатия «Yo'lga chiqdi» — путь на карте клиента начинается отсюда
+Mijoz kabinetidagi xaritada ko'rinadi,Отображается на карте в кабинете клиента
+"Xaritada bosib belgilang — mijoz xaritasida qizil nuqta, foiz va qolgan masofa shunga qarab hisoblanadi","Отметьте на карте — по этой точке считаются красная метка, процент и оставшееся расстояние на карте клиента"
+Yetkazish manzili,Адрес доставки
+Yetkazish nuqtasi,Точка доставки
+Yo'lga chiqqan vaqt,Время выезда

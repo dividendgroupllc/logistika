@@ -29,7 +29,7 @@ EXPECTED = [
 	(TLB, "Order Detail", "read", True),
 	(TLB, "Truck Dispatch", "create", True),
 	(TLB, "KZ Transit", "create", True),
-	(TLB, "Transport Vositasi", "create", True),
+	(TLB, "Truck Dispatch", "write", True),
 	(TLB, "Customer", "read", True),
 	(OM, "Warehouse Intake", "submit", True),
 	(OM, "KZ Truck Loading", "submit", True),

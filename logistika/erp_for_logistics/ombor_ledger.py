@@ -218,7 +218,26 @@ def pull_for_warehouse_intake(fura):
 
 
 @frappe.whitelist()
-def pull_for_kz_loading(order, kz_truck=None, kz_truck_loading=None):
+def china_trucks_with_stock(order, kz_truck_loading=None):
+	"""Order'ning omborda qoldig'i bor yuklari kelgan Xitoy furalari — KZ Truck Loading'dagi
+	"Xitoy fura (ixtiyoriy)" ro'yxati."""
+	frappe.has_permission("KZ Truck Loading", "read", throw=True)
+	order_details = frappe.get_all("Order Detail", filters={"order": order}, pluck="name") if order else []
+	if not order_details:
+		return []
+	return frappe.db.sql_list(
+		"""select fura from `tabOmbor Harakati`
+		where `order` in %(ods)s and ifnull(fura, '') != ''
+			and not (reference_doctype = 'KZ Truck Loading' and reference_name = %(self)s)
+		group by fura
+		having sum(if(harakat_turi = 'Kirim', miqdor, -miqdor)) > 0.000001
+		order by fura""",
+		{"ods": tuple(order_details), "self": kz_truck_loading or ""},
+	)
+
+
+@frappe.whitelist()
+def pull_for_kz_loading(order, kz_truck=None, kz_truck_loading=None, china_truck=None):
 	"""KZ Truck Loading'dagi "Yuklarni tortish": mijoz Order'ining omborda qoldig'i bor BARCHA
 	yuklari (qaysi Xitoy furadan kelganidan qat'i nazar), (ombor, Order Detail, mahsulot, Xitoy
 	fura) bo'yicha — joriy qoldiq, uning kub va og'irligi bilan. KZ fura shu Order'ga Truck
@@ -240,10 +259,11 @@ def pull_for_kz_loading(order, kz_truck=None, kz_truck_loading=None):
 			sum(if(harakat_turi = 'Kirim', tonna, -tonna)) as tonna
 		from `tabOmbor Harakati`
 		where `order` in %(ods)s and not (reference_doctype = 'KZ Truck Loading' and reference_name = %(self)s)
+			and (%(fura)s = '' or fura = %(fura)s)
 		group by ombor, `order`, part_name, fura
 		having qoldiq > 0.000001
 		order by fura, `order`, part_name""",
-		{"ods": tuple(order_details), "self": kz_truck_loading or ""},
+		{"ods": tuple(order_details), "self": kz_truck_loading or "", "fura": china_truck or ""},
 		as_dict=True,
 	)
 	return [

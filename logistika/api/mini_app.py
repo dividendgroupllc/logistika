@@ -151,6 +151,16 @@ def cargo(order_detail):
 	}
 
 
+@frappe.whitelist(allow_guest=True)
+@mini_app_endpoint
+def track(order_detail):
+	"""Yuk xaritasi: KZ fura(lar) qayerda, bosib o'tilgan yo'l, yetkazish nuqtasigacha foiz."""
+	from logistika.mini_app import xarita
+
+	order_name = assert_order_detail(_ctx(), order_detail)
+	return xarita.track(order_detail, order_name)
+
+
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @mini_app_endpoint
 def set_language(lang):

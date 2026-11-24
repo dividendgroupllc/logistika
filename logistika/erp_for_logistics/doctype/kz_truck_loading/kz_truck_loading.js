@@ -21,9 +21,12 @@ frappe.ui.form.on("KZ Truck Loading", {
 	},
 	order(frm) {
 		set_kz_truck_options(frm);
+		frm.set_value("manba_china_truck", "");
+		set_china_truck_options(frm);
 	},
 	refresh(frm) {
 		set_kz_truck_options(frm);
+		set_china_truck_options(frm);
 		if (frm.doc.docstatus === 0) {
 			frm.add_custom_button(__("📥 Yuklarni tortish"), () => pull_loads(frm), __("Yuklar"));
 			frm.add_custom_button(__("✅ Hammasini ortish"), () => load_all(frm), __("Yuklar"));
@@ -73,13 +76,22 @@ function pull_loads(frm) {
 	}
 	frappe.call({
 		method: "logistika.erp_for_logistics.ombor_ledger.pull_for_kz_loading",
-		args: { order: frm.doc.order, kz_truck: frm.doc.kz_truck, kz_truck_loading: frm.is_new() ? null : frm.doc.name },
+		args: {
+			order: frm.doc.order,
+			kz_truck: frm.doc.kz_truck,
+			kz_truck_loading: frm.is_new() ? null : frm.doc.name,
+			china_truck: frm.doc.manba_china_truck || null,
+		},
 		freeze: true,
 		freeze_message: __("Tortilmoqda..."),
 		callback: (r) => {
 			const items = r.message || [];
 			if (!items.length) {
-				frappe.msgprint(__("Bu Order'ning omborda yuki yo'q."));
+				frappe.msgprint(
+					frm.doc.manba_china_truck
+						? __("\"{0}\" Xitoy furasidan omborda yuk qolmagan.", [frm.doc.manba_china_truck])
+						: __("Bu Order'ning omborda yuki yo'q.")
+				);
 				return;
 			}
 			if (!frm.doc.ombor) frm.set_value("ombor", items[0].ombor);
@@ -127,5 +139,24 @@ function set_kz_truck_options(frm) {
 			const options = [""].concat(r.message || []);
 			if (frm.doc.kz_truck && !options.includes(frm.doc.kz_truck)) options.push(frm.doc.kz_truck);
 			frm.set_df_property("kz_truck", "options", options.join("\n"));
+		});
+}
+
+// "Xitoy fura (ixtiyoriy)": Order'ning omborda yuki qolgan Xitoy furalari — tanlansa,
+// "Yuklarni tortish" faqat shu furadan kelgan yuklarni oladi.
+function set_china_truck_options(frm) {
+	if (!frm.doc.order || frm.doc.docstatus !== 0) {
+		frm.set_df_property("manba_china_truck", "options", ["", frm.doc.manba_china_truck || ""].filter((v, i) => i === 0 || v));
+		return;
+	}
+	frappe
+		.call({
+			method: "logistika.erp_for_logistics.ombor_ledger.china_trucks_with_stock",
+			args: { order: frm.doc.order, kz_truck_loading: frm.is_new() ? null : frm.doc.name },
+		})
+		.then((r) => {
+			const plates = r.message || [];
+			if (frm.doc.manba_china_truck && !plates.includes(frm.doc.manba_china_truck)) plates.push(frm.doc.manba_china_truck);
+			frm.set_df_property("manba_china_truck", "options", [""].concat(plates));
 		});
 }
