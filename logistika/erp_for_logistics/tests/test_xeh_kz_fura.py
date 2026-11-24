@@ -45,3 +45,10 @@ class TestXehKzFura(FrappeTestCase):
 
 	def test_labels_say_kz(self):
 		self.assertEqual(frappe.get_meta("Xitoy Eksport Fura").get_field("fura").label, "KZ fura")
+
+	def test_form_method_is_whitelisted(self):
+		# 2026-11-24 prod: "order_trucks is not whitelisted" — forma chaqira olmadi.
+		frappe.is_whitelisted(xeh.order_trucks)  # PermissionError bo'lmasligi kerak
+		with self.assertRaises(frappe.PermissionError):
+			frappe.is_whitelisted(xeh.loaded_kz_trucks)  # ichki yordamchi — tashqariga ochilmaydi
+

@@ -316,7 +316,6 @@ def _create_sale_and_payment(doc, account, approver):
 # ---------------------------------------------------------------- forma uchun ----------
 
 
-@frappe.whitelist()
 def loaded_kz_trucks(order):
 	"""Order yuki ortilgan KZ furalar — submit qilingan KZ Truck Loading / Peregruz."""
 	trucks = set()
@@ -327,6 +326,7 @@ def loaded_kz_trucks(order):
 	return sorted(trucks)
 
 
+@frappe.whitelist()
 def order_trucks(order, current=None):
 	"""Order yuki ortilgan KZ furalar — boshqa eksport hujjatida bo'lmaganlari."""
 	frappe.has_permission("Order", "read", doc=order, throw=True)
