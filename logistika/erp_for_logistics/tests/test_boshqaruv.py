@@ -85,6 +85,14 @@ class TestBoshqaruv(FrappeTestCase):
 		self.assertTrue({"services", "checks", "errors"} <= set(data))
 		self.assertIn("traccar", [s["key"] for s in data["services"]])
 
+	def test_telegram_ok_by_active_bot_token(self):
+		tg = frappe.get_single("Telegram Bot Settings")
+		tg.update({"is_active": 1, "bot_token": "123:TEST", "mini_app_url": ""})
+		tg.flags.ignore_validate = True
+		tg.save(ignore_permissions=True)
+		telegram = next(s for s in boshqaruv.tizim()["services"] if s["key"] == "telegram")
+		self.assertTrue(telegram["ok"])
+
 	def test_kimi_not_ok_when_pekin_failed_today(self):
 		frappe.get_doc({"doctype": "Error Log", "method": "Pekin list o'qilmadi", "error": "x"}).insert(ignore_permissions=True)
 		kimi = next(s for s in boshqaruv.tizim()["services"] if s["key"] == "kimi")

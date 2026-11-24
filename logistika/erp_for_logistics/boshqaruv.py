@@ -478,7 +478,7 @@ def tizim():
 			"note": _("GPS biriktirilgan Truck Dispatch: {0}").format(frappe.db.count("Truck Dispatch", {"gps_device_id": ["is", "set"]}))},
 		{"key": "email", "name": "Email", "ok": bool(frappe.db.exists("Email Account", {"enable_outgoing": 1})),
 			"state": _("sozlangan") if frappe.db.exists("Email Account", {"enable_outgoing": 1}) else _("sozlanmagan"), "note": _("parol va bildirishnoma xatlari")},
-		{"key": "telegram", "name": "Telegram bot", "ok": bool(frappe.db.get_single_value("Telegram Bot Settings", "mini_app_url")),
+		{"key": "telegram", "name": "Telegram bot", "ok": _telegram_ok(),
 			"state": "", "note": _("ulangan mijoz kontaktlari: {0}").format(frappe.db.count("Contact", {"telegram_chat_id": ["is", "set"]}))},
 		{"key": "workers", "name": _("Fon ishchilari"), "ok": True, "state": "", "note": _("navbatdagi vazifalar: {0}").format(_queued_jobs())},
 	]
@@ -507,3 +507,13 @@ def _queued_jobs():
 		return sum(len(get_queue(q)) for q in ("short", "default", "long"))
 	except Exception:
 		return "?"
+
+
+def _telegram_ok():
+	"""Bot yoqilgan va token kiritilgan (mini_app_url ixtiyoriy)."""
+	from frappe.utils.password import get_decrypted_password
+
+	if not cint(frappe.db.get_single_value("Telegram Bot Settings", "is_active")):
+		return False
+	return bool(get_decrypted_password("Telegram Bot Settings", "Telegram Bot Settings", "bot_token", raise_exception=False))
+
