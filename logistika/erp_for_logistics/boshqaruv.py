@@ -470,9 +470,10 @@ def tizim():
 
 	today_errors = lambda pattern: frappe.db.count("Error Log", {"creation": [">=", today()], "method": ["like", pattern]})  # noqa: E731
 	kimi_active = cint(frappe.db.get_single_value("Kimi Settings", "is_active"))
+	kimi_errors = today_errors("%Kimi%") + today_errors("%Pekin list%")
 	services = [
-		{"key": "kimi", "name": "Kimi API", "ok": bool(kimi_active) and not today_errors("%Kimi%"), "state": _("faol") if kimi_active else _("o'chiq"),
-			"note": _("bugun {0} xato").format(today_errors("%Kimi%") + today_errors("%Pekin list%"))},
+		{"key": "kimi", "name": "Kimi API", "ok": bool(kimi_active) and not kimi_errors, "state": _("faol") if kimi_active else _("o'chiq"),
+			"note": _("bugun {0} xato").format(kimi_errors)},
 		{"key": "traccar", "name": "Traccar GPS", "ok": all(traccar_client.get_credentials()), "state": _("ulangan") if all(traccar_client.get_credentials()) else _("ulanmagan"),
 			"note": _("GPS biriktirilgan Truck Dispatch: {0}").format(frappe.db.count("Truck Dispatch", {"gps_device_id": ["is", "set"]}))},
 		{"key": "email", "name": "Email", "ok": bool(frappe.db.exists("Email Account", {"enable_outgoing": 1})),
