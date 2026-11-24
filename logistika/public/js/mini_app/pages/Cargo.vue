@@ -3,6 +3,8 @@
 		<div v-if="!data" class="empty">{{ error ? t("error") : t("loading") }}</div>
 		<template v-else>
 			<TrackMap v-if="track && track.trucks.length" :track="track" />
+			<ChinaRoute v-else-if="data.stage < 3" :cargo="data" :destination="track && track.destination ? track.destination.text : ''" />
+			<router-link class="btn trk-history" :to="`/yuk/${encodeURIComponent(data.name)}/tarix`">{{ t("history") }}</router-link>
 			<div class="card">
 				<div class="row"><span class="h">{{ data.name }}</span><span class="chip" :class="{ ok: data.stage === 6 }">{{ store.me.labels[data.stage] }}</span></div>
 				<div v-if="data.mahsulot" class="muted">{{ data.mahsulot }}</div>
@@ -75,6 +77,7 @@
 import { onBeforeUnmount, onMounted, reactive, ref } from "vue";
 import { call, fmtDate, fmtNum, openMap } from "../api";
 import TrackMap from "../TrackMap.vue";
+import ChinaRoute from "../ChinaRoute.vue";
 import { t } from "../i18n";
 import { store } from "../store";
 

@@ -22,7 +22,14 @@ def _read_csv(lang):
 
 def _app_messages():
 	"""logistika UI matnlari (doctype nomi, label, select qiymatlari, JS __(), Python _())."""
-	return {m[1] for m in get_messages_for_app("logistika") if m[1] and m[1].strip() and not (len(m) > 2 and m[2])}
+	return {
+		m[1]
+		for m in get_messages_for_app("logistika")
+		if m[1] and m[1].strip() and not (len(m) > 2 and m[2])
+		# public/dist — yig'ilgan (minified) bundle: esbuild funksiyaga `_` nomini berishi mumkin,
+		# `_("div")` kabi chaqiruvlar tarjima matni emas. Manbalar (.vue/.js) alohida o'qiladi.
+		and "/public/dist/" not in (m[0] or "")
+	}
 
 
 class TestTranslations(FrappeTestCase):

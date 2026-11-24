@@ -69,7 +69,7 @@ def _asset(path):
 	return f"/assets/logistika/{path}?v={version}"
 
 
-app_include_css = [_asset("css/internal_logistics.css")]
+app_include_css = [_asset("css/internal_logistics.css"), _asset("css/boshqaruv.css")]
 app_include_js = [
 	_asset("js/order_chat_widget.js"),
 	_asset("js/duplicate_warning.js"),

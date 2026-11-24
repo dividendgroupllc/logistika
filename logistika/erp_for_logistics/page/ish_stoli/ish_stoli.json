@@ -1,0 +1,47 @@
+{
+ "content": null,
+ "creation": "2026-11-24 22:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-11-24 22:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "ish-stoli",
+ "owner": "Administrator",
+ "page_name": "ish-stoli",
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Xitoy Ichki Logistikasi"
+  },
+  {
+   "role": "Omborchi"
+  },
+  {
+   "role": "Ichki logistika bo'limi"
+  },
+  {
+   "role": "Tashqi logistika bo'limi"
+  },
+  {
+   "role": "Broker"
+  },
+  {
+   "role": "Tashqi broker"
+  },
+  {
+   "role": "Buxgalter yordamchisi"
+  },
+  {
+   "role": "Zakaz oluvchi"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Mening ishim"
+}

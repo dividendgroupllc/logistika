@@ -29,6 +29,10 @@ const M = {
 		delivered_state: "Yetkazildi", waiting: "Jo'nashga tayyorlanmoqda", origin: "Xorgos ombori", destination: "Yetkazish manzili",
 		passed: "Bosib o'tildi", kz_waiting: "KZ fura yo'lga chiqqach, shu yerda xaritada ko'rinadi.", about: "Taxminan",
 		eta_label: "yetib borish", min_ago: "daqiqa oldin", hours_ago: "soat oldin",
+		history: "Yo'l tarixi", kz_gps: "KZ yo'l (GPS)", china: "Xitoy", gps_point: "GPS nuqtasi", daily_note: "kunlik xabar",
+		gps_from_kz: "GPS KZ furada boshlanadi", route_label: "Yo'nalish: zavod, Xitoy yo'li, Xorgos ombori, yetkazish manzili",
+		factory: "Zavod", china_road: "Xitoy ichida yo'lda", horgos: "Xorgos", in_warehouse_now: "Xorgos omborida",
+		arrival_pending: "Omborga kelishi aniqlanmoqda", plan_was: "reja", warehouse_arrival: "omborga kelishi", at_factory: "Zavodda",
 	},
 	ru: {
 		orders: "Заказы", documents: "Документы", chat: "Чат", profile: "Профиль",
@@ -55,6 +59,10 @@ const M = {
 		delivered_state: "Доставлено", waiting: "Готовится к отправке", origin: "Склад Хоргос", destination: "Адрес доставки",
 		passed: "Пройдено", kz_waiting: "Когда фура KZ выедет, она появится здесь на карте.", about: "Примерно",
 		eta_label: "прибытие", min_ago: "мин назад", hours_ago: "ч назад",
+		history: "История пути", kz_gps: "Путь KZ (GPS)", china: "Китай", gps_point: "Точка GPS", daily_note: "ежедневное сообщение",
+		gps_from_kz: "GPS начинается на фуре KZ", route_label: "Маршрут: завод, путь по Китаю, склад Хоргос, адрес доставки",
+		factory: "Завод", china_road: "В пути по Китаю", horgos: "Хоргос", in_warehouse_now: "На складе Хоргос",
+		arrival_pending: "Дата прибытия на склад уточняется", plan_was: "план", warehouse_arrival: "прибытие на склад", at_factory: "На заводе",
 	},
 	en: {
 		orders: "Orders", documents: "Documents", chat: "Chat", profile: "Profile",
@@ -81,6 +89,10 @@ const M = {
 		delivered_state: "Delivered", waiting: "Preparing to depart", origin: "Khorgos warehouse", destination: "Delivery address",
 		passed: "Covered", kz_waiting: "Once the KZ truck departs, it will appear here on the map.", about: "About",
 		eta_label: "arrival", min_ago: "min ago", hours_ago: "h ago",
+		history: "Route history", kz_gps: "KZ route (GPS)", china: "China", gps_point: "GPS point", daily_note: "daily update",
+		gps_from_kz: "GPS starts on the KZ truck", route_label: "Route: factory, China road, Khorgos warehouse, delivery address",
+		factory: "Factory", china_road: "On the road in China", horgos: "Khorgos", in_warehouse_now: "At Khorgos warehouse",
+		arrival_pending: "Warehouse arrival being confirmed", plan_was: "planned", warehouse_arrival: "warehouse arrival", at_factory: "At the factory",
 	},
 };
 

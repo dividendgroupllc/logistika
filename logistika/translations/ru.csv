@@ -1013,3 +1013,142 @@ Yetkazish nuqtasi,Точка доставки
 Yo'lga chiqqan vaqt,Время выезда
 """{0}"" — ""{1}"" Order'i yuki ortilgan KZ fura emas","«{0}» — не KZ фура, на которую загружен груз заказа «{1}»"
 Shu Order yuki ombordan ortilgan KZ furalar (KZ Truck Loading / Peregruz submit qilingan),"KZ фуры, на которые со склада загружен груз этого заказа (KZ Truck Loading / Peregruz проведены)"
+Boshqaruv markazi,Центр управления
+Yuklanmoqda…,Загрузка…
+Buyurtmalar,Заказы
+Faol buyurtmalar,Активные заказы
+Order Detail: {0} · mijoz: {1},Order Detail: {0} · клиентов: {1}
+Kechikayotgan furalar,Опаздывающие фуры
+eng ko'pi {0} kun,максимум {0} дн.
+kechikish yo'q,опозданий нет
+Xitoyda yo'lda,В пути по Китаю
+fura,фура
+Omborda / KZ furada,На складе / в фуре KZ
+Yo'ldagi tannarx,Себестоимость в пути
+aktivda · 6 guruh,в активе · 6 групп
+Tizim xatolari,Ошибки системы
+so'nggi 7 kun,за 7 дней
+Yuk oqimi — bosqichga bosib ichiga kiring,Поток грузов — нажмите на этап
+Diqqat talab qiladi,Требует внимания
+Jiddiy,Серьёзные
+Hammasi joyida,Всё в порядке
+Bo'limlar navbati,Очереди отделов
+Hisobot,Отчёт
+Kechikayotgan,Опаздывающие
+{0} ta ko'rsatilmoqda · jami {1},Показано {0} · всего {1}
+Order,Заказ
+Xitoy furalari,Китайские фуры
+Tonna (reja / fakt),Тонны (план / факт)
+Bosqich,Этап
+Omborga kelishi,Прибытие на склад
+Tannarx,Себестоимость
+kelmagan,не прибыло
++{0} kun,+{0} дн.
+Bu bosqichda buyurtma yo'q,На этом этапе заказов нет
+Yuklar ({0}),Грузы ({0})
+Hujjatlar,Документы
+Yuk (Order Detail),Груз (Order Detail)
+Tannarx (aktiv),Себестоимость (актив)
+{0} kechikkan,{0} опаздывает
+Yaratilmagan,Не создан
+Xitoy eksport hujjati,Экспортный документ Китая
+ta hujjat,док.
+Tarix yo'q,Истории нет
+yuklar,грузы
+ERP'da ochish,Открыть в ERP
+Guruh,Группа
+Aktivda,В активе
+Xarajatga o'tgan,Списано в расход
+{0} fura kechikmoqda,{0} фур опаздывает
+Reja (taxminiy),План (примерно)
+Pekin list bo'yicha,По пекин-листу
+{0} / {1} furada,в {0} из {1} фур
+Omborga kelgan,Прибыло на склад
+"Xitoy furalari — tanlang, tafsiloti o'ngda","Китайские фуры — выберите, детали справа"
+Kutilgan,Ожидается
+bor,есть
+yo'q,нет
+omborda,на складе
+kechikkan,опаздывает
+yo'lda,в пути
+Kutilgan kelish,Ожидаемое прибытие
+{0} kun o'tdi,прошло {0} дн.
+Omborga keldi,Прибыла на склад
+Omborchiga,Кладовщику
+ko'rinadi,видна
+ko'rinmaydi,не видна
+Order Detail'ni ochish,Открыть Order Detail
+Boshqaruv paneli faqat System Manager uchun,Панель управления только для System Manager
+{0}: {1} fura {2} kun kechikmoqda,{0}: {1} фур опаздывают на {2} дн.
+Kutilgan kelish: {0},Ожидаемое прибытие: {0}
+Omborchi foydalanuvchisi yo'q,Нет пользователя-кладовщика
+Fura kelsa Warehouse Intake qabul qilinmaydi,"Когда прибудет фура, Warehouse Intake не будет принят"
+Employee'ga bog'lanmagan xodimlar: {0}/{1},Сотрудники без Employee: {0}/{1}
+WI va KZ yuklashda mas'ul xodim to'lmaydi,В WI и погрузке KZ ответственный не заполняется
+LD qaytarish sabablari bo'sh,Причины возврата LD пусты
+"Tashqi broker ""Hujjat yetishmaydi"" bosa olmaydi",Внешний брокер не может нажать «Hujjat yetishmaydi»
+Eski ma'lumot rejimi yoqiq,Включён режим старых данных
+Sana tekshiruvlari o'chiq,Проверки дат отключены
+Traccar ulanmagan,Traccar не подключён
+KZ furalar GPS bilan kuzatilmaydi,KZ фуры не отслеживаются по GPS
+Email sozlanmagan,Email не настроен
+Parol xatlari ketmaydi,Письма с паролем не отправляются
+Kimi: bugun {0} xato,Kimi: сегодня {0} ошибок
+Pekin list / tarjima,Пекин-лист / перевод
+Xitoy ichki logistikasi,Внутренняя логистика Китая
+yo'ldagi furalar,фуры в пути
+draft Warehouse Intake,черновики Warehouse Intake
+broker va qaytarilgan,у брокера и возвращённые
+Tashqi logistika (LD),Внешняя логистика (LD)
+yakunlanmagan,не завершены
+Buxgalteriya,Бухгалтерия
+tasdiq kutmoqda,ждут подтверждения
+javobsiz chat,чаты без ответа
+Order topilmadi,Заказ не найден
+Order Detail topilmadi,Order Detail не найден
+Mening ishim,Моя работа
+Sizning rolingiz uchun ish bo'limi yo'q. Administratorga murojaat qiling.,Для вашей роли нет рабочего раздела. Обратитесь к администратору.
+Navbat bo'sh,Очередь пуста
++ {0},+ {0}
+"Qaysi fura chiqdi, qaysi kechikyapti?","Какая фура выехала, какая опаздывает?"
+Yo'ldagi furalar,Фуры в пути
+2 kun ichida keladi,Прибудут за 2 дня
+Pekin listsiz,Без пекин-листа
+Kechikish,Опоздание
+"Bugun nima keladi, nima ortiladi?","Что сегодня прибудет, что грузится?"
+Bugun-ertaga keladi,Прибудут сегодня-завтра
+Omborda yuki bor Order,Заказы с грузом на складе
+Tugallanmagan hujjat,Незавершённые документы
+Keladigan furalar,Ожидаемые фуры
+Omborda turgan yuklar,Грузы на складе
+{0} kun,{0} дн.
+Eksport hujjatlari — mening navbatim,Экспортные документы — моя очередь
+Kutmoqda,Ожидает
+Peregruz danniy — mijozga yuborish,Данные перегруза — отправить клиенту
+LD,LD
+Qaysi hujjat menda turibdi?,Какой документ у меня?
+Broker qaytardi,Брокер вернул
+ED va CMR,ED и CMR
+CO,CO
+Mening qadamim,Мой шаг
+Mening navbatim (LD),Моя очередь (LD)
+Qadam,Шаг
+KZ furalar,KZ фуры
+offline,офлайн
+Nimani rasmiylashtirishim kerak?,Что мне нужно оформить?
+Ko'rib chiqish kerak,Нужно рассмотреть
+30 kunda bajarilgan,Выполнено за 30 дней
+Navbat (eng eskisi tepada),Очередь (старые сверху)
+Bajarilgan,Выполнено
+Menga yuborilgan hujjatlar,"Документы, отправленные мне"
+Nimani tasdiqlashim kerak?,Что мне нужно подтвердить?
+Tasdiq kutmoqda (XEH),Ожидают подтверждения (XEH)
+Draft Sales Invoice,Черновики Sales Invoice
+Oxirgi kurs,Последний курс
+Tasdiqlash navbati,Очередь подтверждения
+Mijozlarim kutayotgan javoblar,"Ответы, которых ждут мои клиенты"
+Javobsiz xabarlar,Сообщения без ответа
+Yetkazish sanasi o'tgan,Срок доставки прошёл
+Javob kutayotgan chatlar,"Чаты, ожидающие ответа"
+Rahbar,Руководитель
+Butun tizim: Boshqaruv markazi,Вся система: Центр управления

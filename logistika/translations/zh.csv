@@ -954,3 +954,142 @@ Yetkazish nuqtasi,送货地点
 Yo'lga chiqqan vaqt,出发时间
 """{0}"" — ""{1}"" Order'i yuki ortilgan KZ fura emas",“{0}”——不是已装载订单“{1}”货物的KZ货车
 Shu Order yuki ombordan ortilgan KZ furalar (KZ Truck Loading / Peregruz submit qilingan),已从仓库装载该订单货物的KZ货车（KZ Truck Loading / Peregruz 已提交）
+Boshqaruv markazi,管理中心
+Yuklanmoqda…,加载中…
+Buyurtmalar,订单
+Faol buyurtmalar,进行中的订单
+Order Detail: {0} · mijoz: {1},Order Detail：{0} · 客户：{1}
+Kechikayotgan furalar,延误的货车
+eng ko'pi {0} kun,最多 {0} 天
+kechikish yo'q,无延误
+Xitoyda yo'lda,在中国途中
+fura,货车
+Omborda / KZ furada,在仓库 / 在KZ货车上
+Yo'ldagi tannarx,在途成本
+aktivda · 6 guruh,在资产中 · 6 组
+Tizim xatolari,系统错误
+so'nggi 7 kun,最近 7 天
+Yuk oqimi — bosqichga bosib ichiga kiring,货物流程——点击阶段查看
+Diqqat talab qiladi,需要关注
+Jiddiy,严重
+Hammasi joyida,一切正常
+Bo'limlar navbati,部门待办
+Hisobot,报表
+Kechikayotgan,延误
+{0} ta ko'rsatilmoqda · jami {1},显示 {0} · 共 {1}
+Order,订单
+Xitoy furalari,中国货车
+Tonna (reja / fakt),吨（计划 / 实际）
+Bosqich,阶段
+Omborga kelishi,到仓日期
+Tannarx,成本
+kelmagan,未到
++{0} kun,+{0} 天
+Bu bosqichda buyurtma yo'q,该阶段没有订单
+Yuklar ({0}),货物（{0}）
+Hujjatlar,单证
+Yuk (Order Detail),货物（Order Detail）
+Tannarx (aktiv),成本（资产）
+{0} kechikkan,{0} 辆延误
+Yaratilmagan,未创建
+Xitoy eksport hujjati,中国出口单证
+ta hujjat,份单证
+Tarix yo'q,无记录
+yuklar,货物
+ERP'da ochish,在ERP中打开
+Guruh,组
+Aktivda,在资产中
+Xarajatga o'tgan,已转入费用
+{0} fura kechikmoqda,{0} 辆货车延误
+Reja (taxminiy),计划（估计）
+Pekin list bo'yicha,按装箱单
+{0} / {1} furada,{1} 辆中的 {0} 辆
+Omborga kelgan,已到仓
+"Xitoy furalari — tanlang, tafsiloti o'ngda",中国货车——选择后在右侧查看详情
+Kutilgan,预计
+bor,有
+yo'q,无
+omborda,在仓库
+kechikkan,延误
+yo'lda,途中
+Kutilgan kelish,预计到达
+{0} kun o'tdi,已过 {0} 天
+Omborga keldi,已到仓
+Omborchiga,对仓库管理员
+ko'rinadi,可见
+ko'rinmaydi,不可见
+Order Detail'ni ochish,打开 Order Detail
+Boshqaruv paneli faqat System Manager uchun,管理面板仅限 System Manager
+{0}: {1} fura {2} kun kechikmoqda,{0}：{1} 辆货车延误 {2} 天
+Kutilgan kelish: {0},预计到达：{0}
+Omborchi foydalanuvchisi yo'q,没有仓库管理员用户
+Fura kelsa Warehouse Intake qabul qilinmaydi,货车到达时无法办理 Warehouse Intake
+Employee'ga bog'lanmagan xodimlar: {0}/{1},未关联 Employee 的员工：{0}/{1}
+WI va KZ yuklashda mas'ul xodim to'lmaydi,WI 和 KZ 装货中的负责人不会自动填写
+LD qaytarish sabablari bo'sh,LD 退回原因为空
+"Tashqi broker ""Hujjat yetishmaydi"" bosa olmaydi",外部报关员无法点击“Hujjat yetishmaydi”
+Eski ma'lumot rejimi yoqiq,旧数据模式已开启
+Sana tekshiruvlari o'chiq,日期检查已关闭
+Traccar ulanmagan,Traccar 未连接
+KZ furalar GPS bilan kuzatilmaydi,KZ货车未进行GPS跟踪
+Email sozlanmagan,邮件未配置
+Parol xatlari ketmaydi,密码邮件无法发送
+Kimi: bugun {0} xato,Kimi：今天 {0} 个错误
+Pekin list / tarjima,装箱单 / 翻译
+Xitoy ichki logistikasi,中国国内物流
+yo'ldagi furalar,在途货车
+draft Warehouse Intake,Warehouse Intake 草稿
+broker va qaytarilgan,在报关员处及退回
+Tashqi logistika (LD),国际物流（LD）
+yakunlanmagan,未完成
+Buxgalteriya,会计
+tasdiq kutmoqda,待确认
+javobsiz chat,未回复的聊天
+Order topilmadi,未找到订单
+Order Detail topilmadi,未找到 Order Detail
+Mening ishim,我的工作
+Sizning rolingiz uchun ish bo'limi yo'q. Administratorga murojaat qiling.,您的角色没有工作区。请联系管理员。
+Navbat bo'sh,队列为空
++ {0},+ {0}
+"Qaysi fura chiqdi, qaysi kechikyapti?",哪辆车已出发，哪辆延误？
+Yo'ldagi furalar,在途货车
+2 kun ichida keladi,2天内到达
+Pekin listsiz,无装箱单
+Kechikish,延误
+"Bugun nima keladi, nima ortiladi?",今天到什么、装什么？
+Bugun-ertaga keladi,今明两天到达
+Omborda yuki bor Order,仓库有货的订单
+Tugallanmagan hujjat,未完成单据
+Keladigan furalar,即将到达的货车
+Omborda turgan yuklar,仓库中的货物
+{0} kun,{0} 天
+Eksport hujjatlari — mening navbatim,出口单证——我的待办
+Kutmoqda,等待
+Peregruz danniy — mijozga yuborish,转运数据——发送给客户
+LD,LD
+Qaysi hujjat menda turibdi?,哪份单证在我这里？
+Broker qaytardi,报关员退回
+ED va CMR,ED 和 CMR
+CO,CO
+Mening qadamim,我的步骤
+Mening navbatim (LD),我的待办（LD）
+Qadam,步骤
+KZ furalar,KZ货车
+offline,离线
+Nimani rasmiylashtirishim kerak?,我需要办理什么？
+Ko'rib chiqish kerak,需要处理
+30 kunda bajarilgan,30天内完成
+Navbat (eng eskisi tepada),队列（最早的在上）
+Bajarilgan,已完成
+Menga yuborilgan hujjatlar,发给我的单证
+Nimani tasdiqlashim kerak?,我需要确认什么？
+Tasdiq kutmoqda (XEH),待确认（XEH）
+Draft Sales Invoice,Sales Invoice 草稿
+Oxirgi kurs,最新汇率
+Tasdiqlash navbati,确认队列
+Mijozlarim kutayotgan javoblar,我的客户等待的回复
+Javobsiz xabarlar,未回复消息
+Yetkazish sanasi o'tgan,已过交货日期
+Javob kutayotgan chatlar,等待回复的聊天
+Rahbar,负责人
+Butun tizim: Boshqaruv markazi,整个系统：管理中心

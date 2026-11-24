@@ -86,6 +86,21 @@ td,th{padding:6px 4px;border-top:1px solid var(--line);text-align:left} th{color
 .trk-bar span{position:absolute;top:-6px;width:22px;height:22px;border-radius:50%;background:var(--bg);border:3px solid var(--btn)}
 .trk-eta{display:flex;gap:10px;align-items:center;margin-top:10px;padding:10px 12px;border-radius:12px;background:var(--sec);color:var(--link)}
 .trk-eta b{color:var(--text)}
+.trk-history{background:var(--bg);color:var(--link);margin:0 0 10px}
+.cr-svg{display:block;width:100%;height:auto;margin:10px 0 4px}
+/* Yo'l tarixi (Tarix.vue) */
+.tl{list-style:none;margin:0;padding:0}
+.tl li{display:grid;grid-template-columns:58px 22px minmax(0,1fr);column-gap:8px}
+.tl-when{display:flex;flex-direction:column;align-items:flex-end;padding-top:12px;font-size:13px}
+.tl-line{display:flex;flex-direction:column;align-items:center}
+.tl-dot{width:14px;height:14px;border-radius:50%;margin-top:14px;flex:none;box-sizing:border-box;background:var(--bg);border:3px solid var(--hint)}
+.tl li.kz .tl-dot{border-color:var(--btn)}
+.tl li.now .tl-dot{background:var(--btn);box-shadow:0 0 0 5px var(--chip)}
+.tl-bar{width:2px;flex:1;min-height:18px;background:var(--line)}
+.tl li.kz .tl-bar{background:var(--btn)}
+.tl li:last-child .tl-bar{background:transparent}
+.tl-card{background:var(--bg);border-radius:12px;padding:10px 12px;margin:6px 0;display:flex;flex-direction:column;gap:3px}
+.tl li.now .tl-card{box-shadow:inset 0 0 0 1px var(--btn)}
 .trk-truck{width:34px;height:34px;border-radius:50%;background:#fff;border:3px solid var(--c);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 8px rgba(36,129,204,.18)}
 </style>
 </head>
