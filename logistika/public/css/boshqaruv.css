@@ -101,3 +101,6 @@ a.bsh-kpi:hover, a.bsh-stage:hover, a.bsh-queue:hover, a.bsh-doc:hover { border-
 .bsh-table tr.amber td:first-child { box-shadow: inset 3px 0 0 var(--orange-500); }
 .bsh-table tbody tr[data-route] { cursor: pointer; }
 .bsh-table tbody tr[data-route]:hover td { background: var(--subtle-fg); }
+.bsh-stages.bsh-stages6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.bsh-queue.on { border-color: var(--blue-500); background: var(--bg-blue); }
+@media (max-width: 900px) { .bsh-stages.bsh-stages6 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

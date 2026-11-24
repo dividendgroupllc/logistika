@@ -1093,3 +1093,48 @@ Yetkazish sanasi o'tgan,已过交货日期
 Javob kutayotgan chatlar,等待回复的聊天
 Rahbar,负责人
 Butun tizim: Boshqaruv markazi,整个系统：管理中心
+Moliya va tannarx,财务与成本
+Hujjatlar oqimi,单证流程
+Xodimlar va rollar,员工与角色
+Tizim holati,系统状态
+Yo'ldagi tannarx (aktiv),在途成本（资产）
+Mijozlar qarzi,客户欠款
+6 ta xarajat guruhi — bosib ichiga kiring,6 个费用组——点击查看
+xarajatga,转入费用
+Bu guruhda hozircha summa yo'q,该组暂无金额
+Kassa va bank qoldiqlari,现金和银行余额
+Hisob,账户
+Eng katta qarzdorlar,最大债务人
+Qarz yo'q,无欠款
+Ochiq hujjatlar (eng eskisi tepada),未完成单据（最早的在上）
+Ochiq hujjat yo'q,无未完成单据
+LD qadam egalari,LD 步骤负责人
+Faol foydalanuvchilar,活跃用户
+Employee'ga bog'lanmagan,未关联 Employee
+Hech kirmagan,从未登录
+Logistika rollari,物流角色
+Oxirgi kirish,最后登录
+Employee,员工
+Jami rollar,角色总数
+hech qachon,从未
+Error Log — so'nggi 7 kun: {0},Error Log——最近 7 天：{0}
+Oxirgisi,最近一次
+Xato yo'q,无错误
+Sozlamalar tekshiruvi,设置检查
+faol,已启用
+o'chiq,已关闭
+bugun {0} xato,今天 {0} 个错误
+ulangan,已连接
+ulanmagan,未连接
+GPS biriktirilgan Truck Dispatch: {0},已绑定GPS的 Truck Dispatch：{0}
+sozlangan,已配置
+sozlanmagan,未配置
+parol va bildirishnoma xatlari,密码和通知邮件
+ulangan mijoz kontaktlari: {0},已连接的客户联系人：{0}
+Fon ishchilari,后台进程
+navbatdagi vazifalar: {0},队列中的任务：{0}
+Eski ma'lumot rejimi o'chiq,旧数据模式已关闭
+LD qaytarish sabablari,LD 退回原因
+XEH qaytarish sabablari,XEH 退回原因
+LD qadam egalari tanlangan,已选择 LD 步骤负责人
+Valyuta kursi 3 kundan yangi,汇率在 3 天内更新

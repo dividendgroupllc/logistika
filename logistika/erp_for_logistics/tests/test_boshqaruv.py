@@ -29,7 +29,10 @@ class TestBoshqaruv(FrappeTestCase):
 
 	def test_only_system_manager(self):
 		frappe.set_user(ensure_user("_t_bsh_zo@example.com", "Zakaz oluvchi"))
-		for fn, args in ((boshqaruv.markaz, ()), (boshqaruv.buyurtmalar, ()), (boshqaruv.buyurtma, (self.order.name,)), (boshqaruv.yuk, (self.od.name,))):
+		for fn, args in (
+			(boshqaruv.markaz, ()), (boshqaruv.buyurtmalar, ()), (boshqaruv.buyurtma, (self.order.name,)), (boshqaruv.yuk, (self.od.name,)),
+			(boshqaruv.moliya, ()), (boshqaruv.hujjatlar, ()), (boshqaruv.xodimlar, ()), (boshqaruv.tizim, ()),
+		):
 			with self.assertRaises(frappe.PermissionError):
 				fn(*args)
 		self.assertEqual([r.role for r in frappe.get_doc("Page", "boshqaruv").roles], ["System Manager"])
@@ -57,3 +60,38 @@ class TestBoshqaruv(FrappeTestCase):
 		self.assertEqual(plates["_T BL1"]["late_days"], 7)
 		self.assertEqual(plates["_T BL2"]["late_days"], 0)
 		self.assertEqual(yuk["order"], self.order.name)
+
+	def test_moliya(self):
+		data = boshqaruv.moliya()
+		self.assertEqual([g["name"] for g in data["groups"]][:2], ["Ichki logistika", "Yuk tushirib olish"])
+		self.assertTrue({"wip", "exp", "items"} <= set(data["groups"][0]))
+		self.assertTrue({"receivable", "cash", "rate", "approve", "draft_si"} <= set(data))
+
+	def test_hujjatlar(self):
+		data = boshqaruv.hujjatlar()
+		self.assertEqual(len(data["xeh"]["statuses"]), 6)
+		self.assertEqual(len(data["ld"]["statuses"]), 6)
+		self.assertIn("open", data["xeh"])
+
+	def test_xodimlar(self):
+		user = ensure_user("_t_bsh_xodim@example.com", "Omborchi")
+		row = next(u for u in boshqaruv.xodimlar()["users"] if u["name"] == user)
+		self.assertIn("Omborchi", row["roles"])
+		self.assertFalse(row["employee"])
+		self.assertTrue(row["never"])
+
+	def test_tizim(self):
+		data = boshqaruv.tizim()
+		self.assertTrue({"services", "checks", "errors"} <= set(data))
+		self.assertIn("traccar", [s["key"] for s in data["services"]])
+
+
+class TestWorkspaces(FrappeTestCase):
+	def test_workspaces_link_pages(self):
+		ish = frappe.get_doc("Workspace", "Mening ishim")
+		self.assertIn("ish-stoli", [s.link_to for s in ish.shortcuts])
+		self.assertIn("Omborchi", [r.role for r in ish.roles])
+		bsh = frappe.get_doc("Workspace", "Boshqaruv")
+		self.assertIn("boshqaruv", [s.link_to for s in bsh.shortcuts])
+		self.assertEqual([r.role for r in bsh.roles], ["System Manager"])
+

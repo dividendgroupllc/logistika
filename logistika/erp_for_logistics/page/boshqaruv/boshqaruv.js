@@ -25,12 +25,13 @@ logistika.ui.BoshqaruvPage = class BoshqaruvPage {
 		this.page = frappe.ui.make_app_page({ parent: wrapper, title: __("Boshqaruv markazi"), single_column: true });
 		this.page.set_secondary_action(__("Yangilash"), () => this.show(), "refresh");
 		this.$body = $('<div class="bsh"></div>').appendTo(this.page.main);
-		this.state = { alertFilter: "all", stage: "all", orderTab: "yuklar", truck: null };
+		this.state = { alertFilter: "all", stage: "all", orderTab: "yuklar", truck: null, group: null, docKind: "xeh" };
 		this.$body.on("click", "[data-route]", (e) => {
 			e.preventDefault();
 			frappe.set_route(...JSON.parse(e.currentTarget.dataset.route));
 		});
 		this.$body.on("click", "[data-set]", (e) => {
+			if (!e.currentTarget.dataset.route) e.preventDefault();
 			const [key, value] = JSON.parse(e.currentTarget.dataset.set);
 			this.state[key] = value;
 			this.render();
@@ -42,7 +43,10 @@ logistika.ui.BoshqaruvPage = class BoshqaruvPage {
 		this.view = view || "markaz";
 		this.name = name ? decodeURIComponent(name) : null;
 		this.state.truck = null;
-		const method = { markaz: "markaz", buyurtmalar: "buyurtmalar", order: "buyurtma", yuk: "yuk" }[this.view] || "markaz";
+		const method =
+			{ markaz: "markaz", buyurtmalar: "buyurtmalar", order: "buyurtma", yuk: "yuk", moliya: "moliya", hujjatlar: "hujjatlar", xodimlar: "xodimlar", tizim: "tizim" }[
+				this.view
+			] || "markaz";
 		this.$body.html(`<div class="bsh-empty">${__("Yuklanmoqda…")}</div>`);
 		frappe
 			.call({ method: `${BSH}.${method}`, args: this.name ? { name: this.name } : {} })
@@ -53,7 +57,16 @@ logistika.ui.BoshqaruvPage = class BoshqaruvPage {
 	}
 
 	render() {
-		const views = { markaz: () => this.markaz(), buyurtmalar: () => this.buyurtmalar(), order: () => this.order(), yuk: () => this.yuk() };
+		const views = {
+			markaz: () => this.markaz(),
+			buyurtmalar: () => this.buyurtmalar(),
+			order: () => this.order(),
+			yuk: () => this.yuk(),
+			moliya: () => this.moliya(),
+			hujjatlar: () => this.hujjatlar(),
+			xodimlar: () => this.xodimlar(),
+			tizim: () => this.tizim(),
+		};
 		this.$body.html(this.nav() + (views[this.view] || views.markaz)());
 	}
 
@@ -63,6 +76,10 @@ logistika.ui.BoshqaruvPage = class BoshqaruvPage {
 		const tabs = [
 			["markaz", __("Boshqaruv markazi"), ["boshqaruv"]],
 			["buyurtmalar", __("Buyurtmalar"), ["boshqaruv", "buyurtmalar"]],
+			["moliya", __("Moliya va tannarx"), ["boshqaruv", "moliya"]],
+			["hujjatlar", __("Hujjatlar oqimi"), ["boshqaruv", "hujjatlar"]],
+			["xodimlar", __("Xodimlar va rollar"), ["boshqaruv", "xodimlar"]],
+			["tizim", __("Tizim holati"), ["boshqaruv", "tizim"]],
 		];
 		const active = this.view === "order" || this.view === "yuk" ? "buyurtmalar" : this.view;
 		return `<nav class="bsh-tabs">${tabs
@@ -239,6 +256,122 @@ logistika.ui.BoshqaruvPage = class BoshqaruvPage {
 				</aside>
 			</div>
 			${this.costTable(d.costs)}`;
+	}
+	// ---------------------------------------------------------------- 5. Moliya
+
+	moliya() {
+		const d = this.data;
+		const g = d.groups.find((x) => x.name === this.state.group) || d.groups[0];
+		const rate = d.rate ? `${d.rate.from_currency}→${d.rate.to_currency} ${flt(d.rate.exchange_rate, 4)}` : "—";
+		return `
+			<section class="bsh-kpis">
+				<div class="bsh-card bsh-kpi blue"><span>${__("Yo'ldagi tannarx (aktiv)")}</span><b>${this.money(d.wip)}</b></div>
+				<div class="bsh-card bsh-kpi"><span>${__("Xarajatga o'tgan")}</span><b>${this.money(d.exp)}</b></div>
+				<a href="#" class="bsh-card bsh-kpi" ${r(["query-report", "Accounts Receivable"])}><span>${__("Mijozlar qarzi")}</span><b>${this.money(d.receivable.total)}</b></a>
+				<a href="#" class="bsh-card bsh-kpi ${d.approve ? "amber" : ""}" ${r(["boshqaruv", "hujjatlar"])}><span>${__("Tasdiq kutmoqda (XEH)")}</span><b>${d.approve}</b></a>
+				<a href="#" class="bsh-card bsh-kpi" ${r(["List", "Sales Invoice", { docstatus: 0 }])}><span>${__("Draft Sales Invoice")}</span><b>${d.draft_si}</b></a>
+				<a href="#" class="bsh-card bsh-kpi" ${r(["List", "Currency Exchange"])}><span>${__("Oxirgi kurs")}</span><b style="font-size:16px">${esc(rate)}</b><small>${d.rate ? frappe.datetime.str_to_user(d.rate.date) : ""}</small></a>
+			</section>
+			<div class="bsh-cols">
+				<section class="bsh-card bsh-main">
+					<h3>${__("6 ta xarajat guruhi — bosib ichiga kiring")}</h3>
+					${d.groups
+						.map(
+							(x) => `<a href="#" class="bsh-queue ${g && x.name === g.name ? "on" : ""}" ${sv(["group", x.name])}><span><b>${esc(x.name)}</b><small>${__("xarajatga")}: ${this.money(x.exp)}</small></span><em>${this.money(x.wip)}</em></a>`
+						)
+						.join("")}
+				</section>
+				<aside class="bsh-card bsh-side">
+					<h3>${esc(g ? g.name : "")}</h3>
+					${g && g.items.length ? g.items.map((i) => `<a href="#" class="bsh-queue" ${r(["boshqaruv", "yuk", i.name])}><span><b>${esc(i.name)}</b></span><em>${this.money(i.wip)}</em></a>`).join("") : `<div class="bsh-empty">${__("Bu guruhda hozircha summa yo'q")}</div>`}
+				</aside>
+			</div>
+			<div class="bsh-cols">
+				<section class="bsh-card bsh-table bsh-main"><h3>${__("Kassa va bank qoldiqlari")}</h3><table>
+					<thead><tr><th>${__("Hisob")}</th><th>${__("Valyuta")}</th><th>${__("Qoldiq")}</th></tr></thead>
+					<tbody>${d.cash.map((c) => `<tr ${r(["query-report", "General Ledger", { account: c.name }])}><td><b>${esc(c.name)}</b></td><td>${esc(c.currency)}</td><td>${format_currency(c.balance, c.currency)}</td></tr>`).join("")}</tbody></table></section>
+				<section class="bsh-card bsh-table bsh-side"><h3>${__("Eng katta qarzdorlar")}</h3>${
+					d.receivable.rows.length
+						? `<table><tbody>${d.receivable.rows.map((x) => `<tr ${r(["query-report", "Accounts Receivable", { customer: x.customer }])}><td><b>${esc(x.customer)}</b></td><td>${this.money(x.amount)}</td></tr>`).join("")}</tbody></table>`
+						: `<div class="bsh-empty">${__("Qarz yo'q")}</div>`
+				}</section>
+			</div>`;
+	}
+
+	// ---------------------------------------------------------------- 6. Hujjatlar
+
+	hujjatlar() {
+		const d = this.data;
+		const kind = this.state.docKind;
+		const board = d[kind];
+		const doctype = kind === "xeh" ? "Xitoy Eksport Hujjati" : "Logistic Documentation";
+		const st = d.steps;
+		return `
+			<div class="bsh-row bsh-head"><h2>${__("Hujjatlar oqimi")}</h2>${this.chips("docKind", [["xeh", __("Xitoy eksport hujjati")], ["ld", __("Logistic Documentation")]])}</div>
+			<section class="bsh-card"><div class="bsh-stages bsh-stages6">${board.statuses
+				.map((x, i) => `<a href="#" class="bsh-stage ${/kerak|yetishmaydi/.test(x.status) && x.count ? "red" : ""}" ${r(["List", doctype, { status: x.status }])}><small>${i + 1}</small><span>${esc(__(x.status))}</span><b>${x.count}</b></a>`)
+				.join("")}</div></section>
+			<div class="bsh-cols">
+				<section class="bsh-card bsh-table bsh-main"><h3>${__("Ochiq hujjatlar (eng eskisi tepada)")}</h3>${
+					board.open.length
+						? `<table><thead><tr><th>${__("Hujjat")}</th><th>${__("Order")}</th><th>${__("Holat")}</th><th>${__("Kutmoqda")}</th></tr></thead><tbody>${board.open
+								.map((x) => `<tr class="${x.days > 3 ? "amber" : ""}" ${r(["Form", doctype, x.name])}><td><b>${esc(x.name)}</b>${x.kz_truck ? ` <small>${esc(x.kz_truck)}</small>` : ""}</td><td>${esc(x.order)}</td><td>${esc(__(x.status))}</td><td>${__("{0} kun", [x.days])}</td></tr>`)
+								.join("")}</tbody></table>`
+						: `<div class="bsh-empty">${__("Ochiq hujjat yo'q")}</div>`
+				}</section>
+				<aside class="bsh-side">
+					${d.reasons_empty ? `<a href="#" class="bsh-alert amber" ${r(["Form", "Logistika Settings"])}><i></i><span><b>${__("LD qaytarish sabablari bo'sh")}</b><small>${__("Tashqi broker \"Hujjat yetishmaydi\" bosa olmaydi")}</small></span><em>→</em></a>` : ""}
+					<section class="bsh-card"><h3>${__("LD qadam egalari")}</h3><dl class="bsh-dl">
+						<dt>${__("Peregruz")}</dt><dd>${esc(st.peregruz || "—")}</dd><dt>${__("ED va CMR")}</dt><dd>${esc(st.ed_cmr || "—")}</dd>
+						<dt>${__("CO")}</dt><dd>${esc(st.co || "—")}</dd><dt>${__("Tashqi broker")}</dt><dd>${esc(st.broker || "—")}</dd></dl>
+						<small>${__("Ichki deklaratsiya")}: ${d.ichki_deklaratsiya}</small></section>
+				</aside>
+			</div>`;
+	}
+
+	// ---------------------------------------------------------------- 7. Xodimlar
+
+	xodimlar() {
+		const d = this.data;
+		return `
+			<section class="bsh-kpis bsh-kpis4">
+				<div class="bsh-card bsh-kpi"><span>${__("Faol foydalanuvchilar")}</span><b>${d.users.length}</b></div>
+				<div class="bsh-card bsh-kpi ${d.no_omborchi ? "red" : ""}"><span>${__("Omborchi")}</span><b>${d.no_omborchi ? __("yo'q") : __("bor")}</b></div>
+				<a href="#" class="bsh-card bsh-kpi ${d.unlinked ? "amber" : ""}" ${r(["List", "Employee"])}><span>${__("Employee'ga bog'lanmagan")}</span><b>${d.unlinked}</b></a>
+				<div class="bsh-card bsh-kpi ${d.never ? "amber" : ""}"><span>${__("Hech kirmagan")}</span><b>${d.never}</b></div>
+			</section>
+			<section class="bsh-card bsh-table"><table>
+				<thead><tr><th>${__("Xodim")}</th><th>${__("Logistika rollari")}</th><th>${__("Oxirgi kirish")}</th><th>${__("Employee")}</th><th>${__("Jami rollar")}</th></tr></thead>
+				<tbody>${d.users
+					.map(
+						(u) => `<tr class="${u.never ? "amber" : ""}" ${r(["Form", "User", u.name])}><td><b>${esc(u.full_name)}</b><br><small>${esc(u.name)}</small></td>
+						<td>${u.roles.map((x) => `<span class="bsh-pill">${esc(__(x))}</span>`).join(" ") || "—"}</td>
+						<td class="${u.never ? "bsh-amber" : ""}">${u.last_login ? frappe.datetime.str_to_user(u.last_login) : __("hech qachon")}</td>
+						<td class="${u.employee ? "bsh-green" : "bsh-amber"}">${u.employee ? "✓" : __("yo'q")}</td><td>${u.roles_total}</td></tr>`
+					)
+					.join("")}</tbody></table></section>`;
+	}
+
+	// ---------------------------------------------------------------- 8. Tizim
+
+	tizim() {
+		const d = this.data;
+		return `
+			<section class="bsh-kpis auto">${d.services
+				.map((x) => `<div class="bsh-card bsh-kpi ${x.ok ? "" : "amber"}"><span>${esc(x.name)}</span><b style="font-size:18px">${x.ok ? "✓" : "!"} ${esc(x.state)}</b><small>${esc(x.note)}</small></div>`)
+				.join("")}</section>
+			<div class="bsh-cols">
+				<section class="bsh-card bsh-table bsh-main"><h3>${__("Error Log — so'nggi 7 kun: {0}", [d.errors_total])}</h3>${
+					d.errors.length
+						? `<table><thead><tr><th>${__("Turi")}</th><th>${__("Soni")}</th><th>${__("Oxirgisi")}</th></tr></thead><tbody>${d.errors
+								.map((e) => `<tr ${r(["List", "Error Log", { method: e.method }])}><td><b>${esc(e.method)}</b></td><td>${e.count}</td><td>${frappe.datetime.str_to_user(e.last)}</td></tr>`)
+								.join("")}</tbody></table>`
+						: `<div class="bsh-empty">${__("Xato yo'q")}</div>`
+				}</section>
+				<aside class="bsh-card bsh-side"><h3>${__("Sozlamalar tekshiruvi")}</h3>${d.checks
+					.map((c) => `<a href="#" class="bsh-alert ${c.ok ? "" : "red"}" ${r(c.route)}><i></i><span><b>${esc(c.label)}</b></span><em>${c.ok ? "✓" : "→"}</em></a>`)
+					.join("")}</aside>
+			</div>`;
 	}
 };
 

@@ -1,0 +1,154 @@
+{
+ "charts": [],
+ "content": "[{\"id\": \"hdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Mening ishim</b></span>\", \"col\": 12}}, {\"id\": \"sc0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Mening ishim\", \"col\": 4}}, {\"id\": \"sc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Order\", \"col\": 3}}, {\"id\": \"sc2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Order Detail\", \"col\": 3}}, {\"id\": \"sc3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Warehouse Intake\", \"col\": 3}}, {\"id\": \"sc4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"KZ Truck Loading\", \"col\": 3}}, {\"id\": \"sc5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Peregruz\", \"col\": 3}}, {\"id\": \"sc6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Xitoy Eksport Hujjati\", \"col\": 3}}, {\"id\": \"sc7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Logistic Documentation\", \"col\": 3}}, {\"id\": \"sc8\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Truck Dispatch\", \"col\": 3}}, {\"id\": \"sc9\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"KZ Transit\", \"col\": 3}}, {\"id\": \"sc10\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Kassa\", \"col\": 3}}, {\"id\": \"sc11\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Currency Exchange\", \"col\": 3}}]",
+ "creation": "2026-11-24 23:00:00.000000",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "users",
+ "idx": 0,
+ "indicator_color": "",
+ "is_hidden": 0,
+ "label": "Mening ishim",
+ "links": [],
+ "modified": "2026-11-24 23:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "Mening ishim",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "restrict_to_domain": "",
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Xitoy Ichki Logistikasi"
+  },
+  {
+   "role": "Omborchi"
+  },
+  {
+   "role": "Ichki logistika bo'limi"
+  },
+  {
+   "role": "Tashqi logistika bo'limi"
+  },
+  {
+   "role": "Broker"
+  },
+  {
+   "role": "Tashqi broker"
+  },
+  {
+   "role": "Buxgalter yordamchisi"
+  },
+  {
+   "role": "Zakaz oluvchi"
+  }
+ ],
+ "sequence_id": 0.5,
+ "shortcuts": [
+  {
+   "color": "Blue",
+   "doc_view": "",
+   "label": "Mening ishim",
+   "link_to": "ish-stoli",
+   "type": "Page"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Order",
+   "link_to": "Order",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Order Detail",
+   "link_to": "Order Detail",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Warehouse Intake",
+   "link_to": "Warehouse Intake",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "KZ Truck Loading",
+   "link_to": "KZ Truck Loading",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Peregruz",
+   "link_to": "Peregruz",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Xitoy Eksport Hujjati",
+   "link_to": "Xitoy Eksport Hujjati",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Logistic Documentation",
+   "link_to": "Logistic Documentation",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Truck Dispatch",
+   "link_to": "Truck Dispatch",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "KZ Transit",
+   "link_to": "KZ Transit",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Kassa",
+   "link_to": "Kassa",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Currency Exchange",
+   "link_to": "Currency Exchange",
+   "stats_filter": "[]",
+   "type": "DocType"
+  }
+ ],
+ "title": "Mening ishim"
+}

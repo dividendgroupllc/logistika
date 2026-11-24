@@ -1152,3 +1152,48 @@ Yetkazish sanasi o'tgan,Срок доставки прошёл
 Javob kutayotgan chatlar,"Чаты, ожидающие ответа"
 Rahbar,Руководитель
 Butun tizim: Boshqaruv markazi,Вся система: Центр управления
+Moliya va tannarx,Финансы и себестоимость
+Hujjatlar oqimi,Поток документов
+Xodimlar va rollar,Сотрудники и роли
+Tizim holati,Состояние системы
+Yo'ldagi tannarx (aktiv),Себестоимость в пути (актив)
+Mijozlar qarzi,Долг клиентов
+6 ta xarajat guruhi — bosib ichiga kiring,6 групп расходов — нажмите для деталей
+xarajatga,в расход
+Bu guruhda hozircha summa yo'q,В этой группе пока нет сумм
+Kassa va bank qoldiqlari,Остатки кассы и банка
+Hisob,Счёт
+Eng katta qarzdorlar,Крупнейшие должники
+Qarz yo'q,Долгов нет
+Ochiq hujjatlar (eng eskisi tepada),Открытые документы (старые сверху)
+Ochiq hujjat yo'q,Открытых документов нет
+LD qadam egalari,Ответственные за шаги LD
+Faol foydalanuvchilar,Активные пользователи
+Employee'ga bog'lanmagan,Не связаны с Employee
+Hech kirmagan,Ни разу не входили
+Logistika rollari,Роли логистики
+Oxirgi kirish,Последний вход
+Employee,Сотрудник
+Jami rollar,Всего ролей
+hech qachon,никогда
+Error Log — so'nggi 7 kun: {0},Error Log — за 7 дней: {0}
+Oxirgisi,Последний
+Xato yo'q,Ошибок нет
+Sozlamalar tekshiruvi,Проверка настроек
+faol,активен
+o'chiq,выключен
+bugun {0} xato,сегодня {0} ошибок
+ulangan,подключён
+ulanmagan,не подключён
+GPS biriktirilgan Truck Dispatch: {0},Truck Dispatch с GPS: {0}
+sozlangan,настроен
+sozlanmagan,не настроен
+parol va bildirishnoma xatlari,письма с паролем и уведомления
+ulangan mijoz kontaktlari: {0},подключённых контактов клиентов: {0}
+Fon ishchilari,Фоновые обработчики
+navbatdagi vazifalar: {0},задач в очереди: {0}
+Eski ma'lumot rejimi o'chiq,Режим старых данных выключен
+LD qaytarish sabablari,Причины возврата LD
+XEH qaytarish sabablari,Причины возврата XEH
+LD qadam egalari tanlangan,Ответственные за шаги LD выбраны
+Valyuta kursi 3 kundan yangi,Курс валют свежее 3 дней

@@ -338,3 +338,171 @@ def yuk(name):
 		],
 		"costs": _groups(ledger, {name}),
 	}
+
+
+# ---------------------------------------------------------------- 5. Moliya -------------
+
+
+@frappe.whitelist()
+def moliya():
+	_require_admin()
+	ledger = _ledger()
+	groups = _groups(ledger)
+	for g in groups:
+		items = sorted(
+			({"name": od, "wip": flt(v.wip, 2)} for (od, kat), v in ledger.items() if kat == g["name"] and abs(flt(v.wip)) > 0.005),
+			key=lambda x: -abs(x["wip"]),
+		)
+		g["items"] = items[:20]
+	receivable = frappe.db.sql(
+		"""select customer, sum(outstanding_amount) as amount from `tabSales Invoice`
+		where docstatus = 1 and outstanding_amount > 0 group by customer order by amount desc limit 10""",
+		as_dict=True,
+	)
+	cash = frappe.db.sql(
+		"""select a.name, a.account_currency as currency,
+			coalesce(sum(g.debit_in_account_currency - g.credit_in_account_currency), 0) as balance
+		from `tabAccount` a left join `tabGL Entry` g on g.account = a.name and g.is_cancelled = 0
+		where a.account_type in ('Cash', 'Bank') and a.is_group = 0 and a.disabled = 0
+		group by a.name, a.account_currency order by a.name""",
+		as_dict=True,
+	)
+	rate = frappe.get_all("Currency Exchange", fields=["date", "from_currency", "to_currency", "exchange_rate"], order_by="date desc, creation desc", limit=1)
+	return {
+		"currency": _currency(),
+		"groups": groups,
+		"wip": flt(sum(g["wip"] for g in groups), 2),
+		"exp": flt(sum(g["exp"] for g in groups), 2),
+		"receivable": {"total": flt(sum(flt(r.amount) for r in receivable), 2), "rows": receivable},
+		"cash": cash,
+		"rate": rate[0] if rate else None,
+		"approve": frappe.db.count("Xitoy Eksport Hujjati", {"status": "Buxgalter tasdig'ida"}),
+		"draft_si": frappe.db.count("Sales Invoice", {"docstatus": 0}),
+	}
+
+
+# ---------------------------------------------------------------- 6. Hujjatlar ----------
+
+
+def _status_board(doctype, statuses, fields):
+	counts = {s: frappe.db.count(doctype, {"status": s}) for s in statuses}
+	open_docs = frappe.get_all(
+		doctype, filters={"status": ["in", statuses[:-1]]}, fields=["name", "order", "status", "modified", *fields], order_by="modified asc", limit=50
+	)
+	for d in open_docs:
+		d.days = date_diff(today(), d.modified)
+	return {"statuses": [{"status": s, "count": counts[s]} for s in statuses], "open": open_docs}
+
+
+@frappe.whitelist()
+def hujjatlar():
+	_require_admin()
+	settings = frappe.get_single("Logistika Settings")
+	return {
+		"xeh": _status_board(
+			"Xitoy Eksport Hujjati", ["Qoralama", "Brokerda", "Qo'shimcha hujjat kerak", "To'lov kutilmoqda", "Buxgalter tasdig'ida", "Yakunlandi"], []
+		),
+		"ld": _status_board(
+			"Logistic Documentation", ["Qoralama", "Invoice kutilmoqda", "Hujjatlar tayyorlanmoqda", "Brokerda", "Hujjat yetishmaydi", "Yakunlandi"], ["kz_truck"]
+		),
+		"ichki_deklaratsiya": frappe.db.count("Ichki Deklaratsiya"),
+		"steps": {
+			"peregruz": settings.ld_peregruz_xodimi,
+			"ed_cmr": settings.ld_ed_cmr_xodimi,
+			"co": settings.ld_co_xodimi,
+			"broker": settings.ld_tashqi_broker,
+		},
+		"reasons_empty": not settings.get("ld_qaytarish_sabablari"),
+	}
+
+
+# ---------------------------------------------------------------- 7. Xodimlar -----------
+
+LOGISTIKA_ROLES = (
+	"System Manager", "Xitoy Ichki Logistikasi", "Omborchi", "Ichki logistika bo'limi", "Tashqi logistika bo'limi",
+	"Broker", "Tashqi broker", "Buxgalter yordamchisi", "Zakaz oluvchi", "Accounts Manager", "Accounts User",
+)
+
+
+@frappe.whitelist()
+def xodimlar():
+	_require_admin()
+	users = frappe.get_all(
+		"User",
+		filters={"enabled": 1, "user_type": "System User", "name": ["not in", ["Administrator", "Guest"]]},
+		fields=["name", "full_name", "last_login"],
+		order_by="full_name",
+	)
+	names = [u.name for u in users] or [""]
+	roles = {}
+	for r in frappe.get_all("Has Role", filters={"parent": ["in", names], "parenttype": "User"}, fields=["parent", "role"]):
+		roles.setdefault(r.parent, []).append(r.role)
+	employees = set(frappe.get_all("Employee", filters={"user_id": ["in", names], "status": "Active"}, pluck="user_id"))
+	rows = []
+	for u in users:
+		own = roles.get(u.name, [])
+		rows.append(
+			{
+				"name": u.name,
+				"full_name": u.full_name or u.name,
+				"roles": [r for r in own if r in LOGISTIKA_ROLES],
+				"roles_total": len(own),
+				"last_login": str(u.last_login)[:16] if u.last_login else None,
+				"never": not u.last_login,
+				"employee": u.name in employees,
+			}
+		)
+	return {
+		"users": rows,
+		"no_omborchi": not any("Omborchi" in r["roles"] for r in rows),
+		"unlinked": sum(1 for r in rows if not r["employee"]),
+		"never": sum(1 for r in rows if r["never"]),
+	}
+
+
+# ---------------------------------------------------------------- 8. Tizim --------------
+
+
+@frappe.whitelist()
+def tizim():
+	_require_admin()
+	from logistika.erp_for_logistics import traccar_client
+
+	today_errors = lambda pattern: frappe.db.count("Error Log", {"creation": [">=", today()], "method": ["like", pattern]})  # noqa: E731
+	kimi_active = cint(frappe.db.get_single_value("Kimi Settings", "is_active"))
+	services = [
+		{"key": "kimi", "name": "Kimi API", "ok": bool(kimi_active) and not today_errors("%Kimi%"), "state": _("faol") if kimi_active else _("o'chiq"),
+			"note": _("bugun {0} xato").format(today_errors("%Kimi%") + today_errors("%Pekin list%"))},
+		{"key": "traccar", "name": "Traccar GPS", "ok": all(traccar_client.get_credentials()), "state": _("ulangan") if all(traccar_client.get_credentials()) else _("ulanmagan"),
+			"note": _("GPS biriktirilgan Truck Dispatch: {0}").format(frappe.db.count("Truck Dispatch", {"gps_device_id": ["is", "set"]}))},
+		{"key": "email", "name": "Email", "ok": bool(frappe.db.exists("Email Account", {"enable_outgoing": 1})),
+			"state": _("sozlangan") if frappe.db.exists("Email Account", {"enable_outgoing": 1}) else _("sozlanmagan"), "note": _("parol va bildirishnoma xatlari")},
+		{"key": "telegram", "name": "Telegram bot", "ok": bool(frappe.db.get_single_value("Telegram Bot Settings", "mini_app_url")),
+			"state": "", "note": _("ulangan mijoz kontaktlari: {0}").format(frappe.db.count("Contact", {"telegram_chat_id": ["is", "set"]}))},
+		{"key": "workers", "name": _("Fon ishchilari"), "ok": True, "state": "", "note": _("navbatdagi vazifalar: {0}").format(_queued_jobs())},
+	]
+	settings = frappe.get_single("Logistika Settings")
+	checks = [
+		{"label": _("Xarajat guruhlari"), "ok": bool(settings.get("wip_ichki_hisobi")), "route": ["Form", "Logistika Settings"]},
+		{"label": _("Eski ma'lumot rejimi o'chiq"), "ok": not cint(settings.eski_malumot_rejimi), "route": ["Form", "Logistika Settings"]},
+		{"label": _("LD qaytarish sabablari"), "ok": bool(settings.get("ld_qaytarish_sabablari")), "route": ["Form", "Logistika Settings"]},
+		{"label": _("XEH qaytarish sabablari"), "ok": bool(settings.get("broker_qaytarish_sabablari")), "route": ["Form", "Logistika Settings"]},
+		{"label": _("LD qadam egalari tanlangan"), "ok": all(settings.get(f) for f in ("ld_peregruz_xodimi", "ld_ed_cmr_xodimi", "ld_co_xodimi", "ld_tashqi_broker")), "route": ["Form", "Logistika Settings"]},
+		{"label": _("Valyuta kursi 3 kundan yangi"), "ok": bool(frappe.db.exists("Currency Exchange", {"date": [">=", add_days(today(), -3)]})), "route": ["List", "Currency Exchange"]},
+	]
+	errors = frappe.db.sql(
+		"""select method, count(*) as count, max(creation) as last from `tabError Log`
+		where creation >= %s group by method order by count desc limit 15""",
+		add_days(today(), -7),
+		as_dict=True,
+	)
+	return {"services": services, "checks": checks, "errors": errors, "errors_total": sum(e.count for e in errors)}
+
+
+def _queued_jobs():
+	try:
+		from frappe.utils.background_jobs import get_queue
+
+		return sum(len(get_queue(q)) for q in ("short", "default", "long"))
+	except Exception:
+		return "?"
