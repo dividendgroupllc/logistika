@@ -76,7 +76,7 @@ function run(frm, method, args = {}) {
 	return frm.is_dirty() ? frm.save().then(call) : call();
 }
 
-// Furalar — shu Order'ning yo'ldagi, boshqa eksport hujjatida bo'lmagan Xitoy furalari.
+// Furalar — shu Order yuki ortilgan, boshqa eksport hujjatida bo'lmagan KZ furalar.
 function set_truck_options(frm) {
 	if (!frm.doc.order || !frappe.perm.has_perm(frm.doctype, 3, "write")) return;
 	frappe

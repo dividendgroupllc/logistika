@@ -952,3 +952,5 @@ Mijoz kabinetidagi xaritada ko'rinadi,显示在客户账户的地图上
 Yetkazish manzili,送货地址
 Yetkazish nuqtasi,送货地点
 Yo'lga chiqqan vaqt,出发时间
+"""{0}"" — ""{1}"" Order'i yuki ortilgan KZ fura emas",“{0}”——不是已装载订单“{1}”货物的KZ货车
+Shu Order yuki ombordan ortilgan KZ furalar (KZ Truck Loading / Peregruz submit qilingan),已从仓库装载该订单货物的KZ货车（KZ Truck Loading / Peregruz 已提交）

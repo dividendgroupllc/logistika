@@ -22,7 +22,8 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cstr, flt, now_datetime, today
 
-from logistika.erp_for_logistics import furalar, topshiriq
+from logistika.erp_for_logistics.pipeline_status import resolve_order_details_for_kz_truck
+from logistika.erp_for_logistics import topshiriq
 
 DOCTYPE = "Xitoy Eksport Hujjati"
 HOLDER = "Xitoy Eksport Yopiq Fayl"
@@ -62,10 +63,10 @@ class XitoyEksportHujjati(Document):
 			seen.add(row.fura)
 			if row.fura in old:
 				continue
-			details = furalar.order_details_on_plate(row.fura, on_road=True, order=self.order)
-			if not details:
-				frappe.throw(_('"{0}" — "{1}" Order\'ining yo\'ldagi furasi emas').format(row.fura, self.order))
-			row.order_detail = details[0]
+			# 2026-11-24: eksport hujjati — yuk ombordan ortilgan KZ fura uchun.
+			if row.fura not in loaded_kz_trucks(self.order):
+				frappe.throw(_('"{0}" — "{1}" Order\'i yuki ortilgan KZ fura emas').format(row.fura, self.order))
+			row.order_detail = (resolve_order_details_for_kz_truck(self.order, row.fura) or [None])[0]
 			# Fura keyingi reyslarda boshqa Order bilan qaytadi — bandlik shu Order doirasida.
 			other = frappe.db.sql(
 				"""select p.name from `tabXitoy Eksport Fura` f inner join `tabXitoy Eksport Hujjati` p on p.name = f.parent
@@ -316,8 +317,18 @@ def _create_sale_and_payment(doc, account, approver):
 
 
 @frappe.whitelist()
+def loaded_kz_trucks(order):
+	"""Order yuki ortilgan KZ furalar — submit qilingan KZ Truck Loading / Peregruz."""
+	trucks = set()
+	for doctype in ("KZ Truck Loading", "Peregruz"):
+		trucks.update(
+			frappe.get_all(doctype, filters={"order": order, "docstatus": 1, "kz_truck": ["is", "set"]}, pluck="kz_truck")
+		)
+	return sorted(trucks)
+
+
 def order_trucks(order, current=None):
-	"""Order'ning yo'ldagi Xitoy furalari — boshqa eksport hujjatida bo'lmaganlari."""
+	"""Order yuki ortilgan KZ furalar — boshqa eksport hujjatida bo'lmaganlari."""
 	frappe.has_permission("Order", "read", doc=order, throw=True)
 	taken = set(
 		frappe.db.sql_list(
@@ -326,7 +337,7 @@ def order_trucks(order, current=None):
 			(order, current or ""),
 		)
 	)
-	return [plate for plate in furalar.plates(on_road=True, order=order) if plate not in taken]
+	return [plate for plate in loaded_kz_trucks(order) if plate not in taken]
 
 
 def _reasons():

@@ -1011,3 +1011,5 @@ Mijoz kabinetidagi xaritada ko'rinadi,Отображается на карте �
 Yetkazish manzili,Адрес доставки
 Yetkazish nuqtasi,Точка доставки
 Yo'lga chiqqan vaqt,Время выезда
+"""{0}"" — ""{1}"" Order'i yuki ortilgan KZ fura emas","«{0}» — не KZ фура, на которую загружен груз заказа «{1}»"
+Shu Order yuki ombordan ortilgan KZ furalar (KZ Truck Loading / Peregruz submit qilingan),"KZ фуры, на которые со склада загружен груз этого заказа (KZ Truck Loading / Peregruz проведены)"

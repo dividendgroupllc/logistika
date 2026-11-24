@@ -53,6 +53,10 @@ class TestXitoyEksport(FrappeTestCase):
 
 		self.cny_cash = ensure_account("_T Kassa CNY", f"Cash In Hand - {_abbr()}", account_type="Cash")
 		frappe.db.set_value("Account", self.cny_cash, "account_currency", "CNY")
+		# Furalar — yuk ortilgan KZ furalar (2026-11-24); bu yerda "_T E1/E2" shunday deb olinadi
+		# (haqiqiy yuklash bilan — test_xeh_kz_fura).
+		patch.object(xeh, "loaded_kz_trucks", return_value=["_T E1", "_T E2"]).start()
+		patch.object(xeh, "resolve_order_details_for_kz_truck", return_value=[self.od.name]).start()
 		self.publish = patch("frappe.publish_realtime").start()
 		self.notify = patch.object(topshiriq, "enqueue_create_notification").start()
 
