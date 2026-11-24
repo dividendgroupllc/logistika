@@ -14,9 +14,11 @@ import re
 from io import BytesIO
 
 import frappe
-from frappe.utils.xlsxutils import read_xls_file_from_attached_file, read_xlsx_file_from_attached_file
+from frappe.utils.xlsxutils import read_xls_file_from_attached_file
+from openpyxl import load_workbook
 from pypdf import PdfReader
 
+from logistika.erp_for_logistics.kimi_client import KimiTimeoutError
 from logistika.erp_for_logistics.kimi_client import chat as kimi_chat
 
 FIELDS = [
@@ -127,6 +129,11 @@ _CSV_IMPORT_TIMEOUT = 100
 # Katta fayl (masalan 32 sahifa, ~160 qator) bitta so'rovda yuborilsa javob 15 ming tokendan
 # oshib, Kimi ham, veb-so'rov ham vaqtga sig'maydi — shuning uchun bo'laklab, fonda o'qiladi.
 CHUNK_CHARS = 3000
+# Fonda (veb-so'rov chegarasi yo'q): prod'dagi kimi-k2.7-code-highspeed — "o'ylaydigan" model,
+# javob vaqti o'zgaruvchan; 2026-11-24 da 3000 belgilik bo'lak 100 s ga sig'madi. Bo'lak uchun
+# kattaroq chegara va vaqt tugasa bir marta qayta urinish.
+CHUNK_TIMEOUT = 240
+CHUNK_TIMEOUT_RETRIES = 1
 DONE_EVENT = "logistika_pekin_parsed"
 PROGRESS_EVENT = "logistika_pekin_progress"
 
@@ -162,10 +169,15 @@ def split_chunks(text, max_chars=CHUNK_CHARS):
 
 
 def _parse_chunk(text):
-	content = kimi_chat(
-		[{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": text}],
-		timeout=_CSV_IMPORT_TIMEOUT,
-	)
+	messages = [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": text}]
+	for attempt in range(CHUNK_TIMEOUT_RETRIES + 1):
+		try:
+			content = kimi_chat(messages, timeout=CHUNK_TIMEOUT)
+			break
+		except KimiTimeoutError:
+			if attempt == CHUNK_TIMEOUT_RETRIES:
+				raise
+			frappe.clear_last_message()
 	parsed = _extract_json(content)
 	rows = parsed.get("rows") if isinstance(parsed, dict) else parsed
 	if not isinstance(rows, list):
@@ -200,16 +212,35 @@ def smart_parse_pekin_list(file_content):
 
 
 def _excel_rows_to_text(rows):
-	"""Excel qatorlarini (list of cell values) Kimi allaqachon tushunadigan
-	jadval-matn ko'rinishiga o'giradi — TAB bilan ajratilgan (mahsulot nomlarida
-	vergul bo'lishi mumkin, TAB esa Excel katakchalarida deyarli uchramaydi,
-	shu sabab vergulga qaraganda xavfsizroq)."""
+	"""Excel qatorlarini Kimi tushunadigan jadval-matnga o'giradi — TAB bilan ajratilgan
+	(mahsulot nomlarida vergul bo'lishi mumkin, TAB esa katakchalarda deyarli uchramaydi).
+	Kimi'ga kichikroq so'rov ketishi uchun: bo'sh qatorlar, butunlay bo'sh ustunlar va qator
+	oxiridagi bo'sh kataklar tashlanadi."""
+	cells = [["" if cell is None else str(cell).strip() for cell in row] for row in rows]
+	cells = [row for row in cells if any(row)]
+	if not cells:
+		return ""
+	width = max(len(row) for row in cells)
+	keep = [i for i in range(width) if any(i < len(row) and row[i] for row in cells)]
 	lines = []
-	for row in rows:
-		cells = ["" if cell is None else str(cell) for cell in row]
-		if any(cell.strip() for cell in cells):
-			lines.append("\t".join(cells))
+	for row in cells:
+		values = [row[i] if i < len(row) else "" for i in keep]
+		while values and not values[-1]:
+			values.pop()
+		lines.append("\t".join(values))
 	return "\n".join(lines)
+
+
+def _first_sheet_rows(file_bytes, ext):
+	"""Faqat BIRINCHI sheet (Frappe'ning o'quvchisi .xlsx'da faol — saqlanganda ochiq turgan
+	sheet'ni oladi; boshqa sheet'lar, masalan invoice, Kimi'ga ketmasin)."""
+	if ext == "xls":
+		return read_xls_file_from_attached_file(file_bytes)  # xlrd — birinchi sheet
+	wb = load_workbook(filename=BytesIO(file_bytes), data_only=True, read_only=True)
+	try:
+		return [list(row) for row in wb.worksheets[0].iter_rows(values_only=True)]
+	finally:
+		wb.close()
 
 
 def _decode(file_content_base64):
@@ -221,13 +252,14 @@ def _decode(file_content_base64):
 
 def _excel_text(file_bytes, file_extension="xlsx"):
 	ext = (file_extension or "").lower().lstrip(".")
-	if ext == "xls":
-		rows = read_xls_file_from_attached_file(file_bytes)
-	else:
-		rows = read_xlsx_file_from_attached_file(fcontent=file_bytes)
-	if not rows:
+	try:
+		rows = _first_sheet_rows(file_bytes, ext)
+	except Exception:
+		frappe.throw("Excel faylini o'qib bo'lmadi — fayl buzilgan yoki boshqa formatda bo'lishi mumkin")
+	text = _excel_rows_to_text(rows or [])
+	if not text:
 		frappe.throw("Excel faylida ma'lumot topilmadi")
-	return _excel_rows_to_text(rows)
+	return text
 
 
 def _pdf_text(file_bytes):
@@ -277,7 +309,7 @@ def start_pekin_parse(kind, content, file_extension=None, token=None):
 	frappe.enqueue(
 		"logistika.erp_for_logistics.pekin_list_import.run_pekin_parse",
 		queue="long",
-		timeout=1800,
+		timeout=3600,
 		now=bool(frappe.flags.in_test),
 		token=token,
 		user=frappe.session.user,

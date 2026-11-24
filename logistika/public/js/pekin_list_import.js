@@ -118,7 +118,7 @@ logistika.pekin_import.handle_file = function (frm, table_fieldname, file, $stat
 };
 
 // Fon vazifasi natijasini kutish (token bo'yicha): "3/8 bo'lak" jarayoni, so'ng qatorlar
-// yoki xato. 15 daqiqada javob kelmasa — xabar.
+// yoki xato. 40 daqiqada javob kelmasa — xabar (Kimi bo'lagi 4 daqiqagacha, bir marta qayta).
 logistika.pekin_import.wait = function (token, $status, on_rows, on_error) {
 	const off = () => {
 		frappe.realtime.off("logistika_pekin_progress", on_progress);
@@ -142,7 +142,7 @@ logistika.pekin_import.wait = function (token, $status, on_rows, on_error) {
 	const timer = setTimeout(() => {
 		off();
 		on_error(__("Javob kelmadi — sahifani yangilab, qayta urinib ko'ring"));
-	}, 15 * 60 * 1000);
+	}, 40 * 60 * 1000);
 	frappe.realtime.on("logistika_pekin_progress", on_progress);
 	frappe.realtime.on("logistika_pekin_parsed", on_done);
 	return off;

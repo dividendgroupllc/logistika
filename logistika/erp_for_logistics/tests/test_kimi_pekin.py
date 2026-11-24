@@ -146,3 +146,77 @@ class TestPekinChunks(FrappeTestCase):
 		for part in ("Kimi band", "2/", "text"):
 			self.assertIn(part, kwargs["message"])
 
+
+class TestKimiTimeout(FrappeTestCase):
+	"""2026-11-24 prod: 3/3 bo'lakda "Kimi javob bermadi (vaqt tugadi)" — thinking model ba'zan
+	100 s dan uzoq o'ylaydi; fonda kutish chegarasi kattaroq va bir marta qayta urinish."""
+
+	def tearDown(self):
+		patch.stopall()
+
+	def test_timeout_raises_specific_error(self):
+		patch.object(kimi_client, "_get_settings", return_value=("k", "https://kimi.test/v1", "m")).start()
+		with patch.object(kimi_client.requests, "post", side_effect=kimi_client.requests.exceptions.Timeout):
+			with self.assertRaises(kimi_client.KimiTimeoutError):
+				kimi_client.chat([{"role": "user", "content": "x"}])
+
+	def test_chunk_uses_long_timeout(self):
+		seen = []
+
+		def record(messages, timeout=None):
+			seen.append(timeout)
+			return fake_kimi(messages, timeout)
+
+		with patch.object(pli, "kimi_chat", side_effect=record):
+			pli.parse_text(big_list(10))
+		self.assertTrue(seen and all(t >= 240 for t in seen))
+
+	def test_chunk_retried_once_after_timeout(self):
+		calls = {"n": 0}
+
+		def slow_then_ok(messages, timeout=None):
+			calls["n"] += 1
+			if calls["n"] == 1:
+				frappe.throw("vaqt tugadi", kimi_client.KimiTimeoutError)
+			return fake_kimi(messages, timeout)
+
+		with patch.object(pli, "kimi_chat", side_effect=slow_then_ok):
+			rows = pli.parse_text(big_list(10))
+		self.assertEqual(len(rows), 10)
+		self.assertEqual(calls["n"], 2)
+
+
+def xlsx_bytes(sheets, active=0):
+	"""sheets: [(nom, [qatorlar])] — xlsx fayl baytlari."""
+	from io import BytesIO
+
+	from openpyxl import Workbook
+
+	wb = Workbook()
+	wb.remove(wb.active)
+	for title, rows in sheets:
+		ws = wb.create_sheet(title)
+		for row in rows:
+			ws.append(row)
+	wb.active = active
+	out = BytesIO()
+	wb.save(out)
+	return out.getvalue()
+
+
+class TestExcelBirinchiSheet(FrappeTestCase):
+	"""Kimi'ga faqat birinchi sheet va faqat to'ldirilgan ustunlar ketsin (kichikroq so'rov)."""
+
+	def test_only_first_sheet_even_if_other_is_active(self):
+		data = xlsx_bytes(
+			[("Packing", [["part_name", "qty"], ["SMT-1", 10]]), ("Invoice", [["boshqa", "narx"], ["XYZ", 999]])],
+			active=1,
+		)
+		text = pli._excel_text(data, "xlsx")
+		self.assertIn("SMT-1", text)
+		self.assertNotIn("XYZ", text)
+
+	def test_empty_columns_and_trailing_cells_dropped(self):
+		data = xlsx_bytes([("P", [["part_name", None, "qty", None, None], ["SMT-1", None, 10, None, None], [None, None, None, None, None]])])
+		self.assertEqual(pli._excel_text(data, "xlsx"), "part_name\tqty\nSMT-1\t10")
+

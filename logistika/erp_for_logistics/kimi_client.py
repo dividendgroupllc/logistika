@@ -21,6 +21,10 @@ RATE_LIMIT_RETRIES = 5
 RATE_LIMIT_WAITS = (2, 5, 10, 20, 25)
 
 
+class KimiTimeoutError(frappe.ValidationError):
+	"""Kimi `timeout` ichida javob bermadi — chaqiruvchi qayta urinishi mumkin."""
+
+
 def _get_settings():
 	settings = frappe.get_single("Kimi Settings")
 	if not settings.is_active:
@@ -75,7 +79,9 @@ def _post(base_url, api_key, model, messages, timeout):
 		# Ayrim (juda chalkash tuzilgan) matnlarda Kimi `timeout`dan ancha uzoqroq
 		# javob berishi mumkin — bu holatda ham raw exception/traceback emas,
 		# tushunarli xabar chiqishi kerak (chaqiruvchi joyda try/except bo'lmasa ham).
-		frappe.throw("Kimi javob bermadi (vaqt tugadi) — fayl juda murakkab bo'lishi mumkin, qayta urinib ko'ring")
+		frappe.throw(
+			"Kimi javob bermadi (vaqt tugadi) — fayl juda murakkab bo'lishi mumkin, qayta urinib ko'ring", KimiTimeoutError
+		)
 	except requests.exceptions.RequestException as e:
 		# frappe.log_error(title, message) — argumentlar teskari berilsa, uzun matn
 		# "title"ga tushib (140 belgi limiti bor), xatoni logga yozishning o'zi
