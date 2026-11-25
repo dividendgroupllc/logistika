@@ -10,6 +10,7 @@ logistika.pekin_import.FIELDS = [
 	"quantity",
 	"total_boxes",
 	"net_weight",
+	"gross_weight",
 	"volume_cbm",
 	"uzunlik",
 	"kenglik",

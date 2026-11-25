@@ -79,6 +79,6 @@ def get_pekin_rows(order_detail, fura=None):
 	return frappe.get_all(
 		"Internal Logistics Item",
 		filters={"parenttype": "Ichki Deklaratsiya", "parent": ["in", names]},
-		fields=["part_name", "quantity", "total_boxes", "net_weight", "volume_cbm", "uzunlik", "kenglik", "balandlik", "birlik", "bir_dona_ogirlik"],
+		fields=["part_name", "quantity", "total_boxes", "net_weight", "gross_weight", "volume_cbm", "uzunlik", "kenglik", "balandlik", "birlik", "bir_dona_ogirlik"],
 		order_by="parent asc, idx asc",
 	)

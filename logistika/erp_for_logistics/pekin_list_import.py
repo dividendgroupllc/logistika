@@ -27,6 +27,7 @@ FIELDS = [
 	"quantity",
 	"total_boxes",
 	"net_weight",
+	"gross_weight",
 	"volume_cbm",
 	"uzunlik",
 	"kenglik",
@@ -45,7 +46,8 @@ umuman sarlavhasiz). Har bir mahsulot qatoridan quyidagi maydonlarni chiqarib ol
 - part_name: mahsulot nomi (matn)
 - quantity: soni (dona)
 - total_boxes: quti/karobka soni
-- net_weight: sof/net vazn (kg), JAMI (bitta emas)
+- net_weight: sof/net vazn (kg, 净重 / Net Weight / Нетто), JAMI (bitta emas)
+- gross_weight: brutto vazn (kg, 毛重 / Gross Weight / Брутто), JAMI (bitta emas)
 - volume_cbm: hajm / CBM (m³), JAMI
 - uzunlik, kenglik, balandlik: bitta quti/karobkaning o'lchamlari (sm)
 
@@ -76,7 +78,7 @@ ket. Javobni FAQAT quyidagi JSON formatida qaytar, boshqa hech qanday matn (izoh
 markdown) qo'shma:
 
 {"rows": [{"part_name": "...", "quantity": 0, "total_boxes": 0, "net_weight": 0, \
-"volume_cbm": 0, "uzunlik": 0, "kenglik": 0, "balandlik": 0}]}
+"gross_weight": 0, "volume_cbm": 0, "uzunlik": 0, "kenglik": 0, "balandlik": 0}]}
 """
 
 
