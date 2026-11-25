@@ -1181,3 +1181,5 @@ Telefon,电话
 Xarita,地图
 Xarita plitkalari manzili,地图瓦片地址
 ERP va mijoz kabinetidagi xaritalar fon manbai ({z}/{x}/{y}). Standart — Esri (Xitoy va O'zbekistonda ochiladi); OpenStreetMap Xitoyda ochilmaydi.,ERP 和客户门户地图的底图来源（{z}/{x}/{y}）。默认为 Esri（在中国和乌兹别克斯坦均可打开）；OpenStreetMap 在中国无法打开。
+Rasm o'qiydigan model,图像识别模型
+Skanerlangan (rasm) PDF pekin list'lar shu model bilan o'qiladi — rasm qabul qiladigan model bo'lishi kerak (kimi-k3.1-pro yoki kimi-k3).,扫描（图片）PDF 装箱单使用此模型读取——必须是支持图像输入的模型（kimi-k3.1-pro 或 kimi-k3）。

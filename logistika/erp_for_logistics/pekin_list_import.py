@@ -16,9 +16,10 @@ from io import BytesIO
 import frappe
 from frappe.utils.xlsxutils import read_xls_file_from_attached_file
 from openpyxl import load_workbook
+from PIL import Image
 from pypdf import PdfReader
 
-from logistika.erp_for_logistics.kimi_client import KimiEmptyAnswerError, KimiTimeoutError
+from logistika.erp_for_logistics.kimi_client import KimiEmptyAnswerError, KimiTimeoutError, vision_model
 from logistika.erp_for_logistics.kimi_client import chat as kimi_chat
 
 FIELDS = [
@@ -142,6 +143,22 @@ CHUNK_TIMEOUT_RETRIES = 1
 CHUNK_MAX_TOKENS = 32768
 
 
+# Skanerlangan PDF (matn qatlamisiz — 2026-11-25: 3 sahifali 报关资料 "matn chiqarib bo'lmadi"):
+# har sahifadagi rasm JPEG'ga o'girilib, rasm o'qiydigan Kimi modeliga yuboriladi. Uzun tomoni
+# SCAN_MAX_SIDE dan oshmaydi (Kimi 4K gacha tavsiya qiladi; jadval raqamlari uchun yetarli,
+# so'rov ham kichik). Bir so'rovga SCAN_PAGES_PER_CALL sahifa — invoice, pekin list va
+# bojxona deklaratsiyasi odatda shu ichida, takror tovarlarni Kimi bir marta oladi.
+SCAN_MAX_SIDE = 2048
+SCAN_MIN_SIDE = 200  # bundan kichik rasmlar (logo, muhr) — sahifa skani emas
+SCAN_PAGES_PER_CALL = 5
+SCAN_MAX_PAGES = 40
+SCAN_TIMEOUT = 300
+SCAN_PROMPT = """Quyidagi rasmlar — skanerlangan hujjat sahifalari. Ular orasida invoice (商业发票), \
+packing list (装箱单) va bojxona deklaratsiyasi (报关单) bo'lishi mumkin: bir xil tovar bir necha \
+hujjatda takrorlansa, uni FAQAT BIR MARTA ol — raqamlarni packing list'dan (bo'lmasa boshqasidan). \
+total_boxes — karobka/quti (箱, carton) soni; paddon/托/pallet soni emas. Muhr va imzolarni e'tiborsiz qoldir."""
+
+
 class PekinJsonError(frappe.ValidationError):
 	pass
 DONE_EVENT = "logistika_pekin_parsed"
@@ -178,14 +195,24 @@ def split_chunks(text, max_chars=CHUNK_CHARS):
 	return [joiner.join([header, *chunk]) for chunk in chunks] or [header]
 
 
-def _parse_chunk(text):
-	"""Bitta bo'lak: vaqt tugasa, bo'sh yoki JSON'siz javob kelsa — bir marta qayta urinadi;
-	oxirgi muvaffaqiyatsiz javobning boshi Error Log'ga yoziladi (sababini ko'rish uchun)."""
-	messages = [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": text}]
+def _parse_chunk(text, images=None):
+	"""Bitta bo'lak (matn yoki sahifa rasmlari): vaqt tugasa, bo'sh yoki JSON'siz javob kelsa —
+	bir marta qayta urinadi; oxirgi muvaffaqiyatsiz javobning boshi Error Log'ga yoziladi."""
+	kwargs = {"timeout": CHUNK_TIMEOUT, "max_tokens": CHUNK_MAX_TOKENS}
+	user = text
+	if images:
+		model = vision_model()
+		kwargs.update(timeout=SCAN_TIMEOUT, model=model)
+		if model.startswith("kimi-k3"):
+			kwargs["reasoning_effort"] = "low"  # K3 doim o'ylaydi; jadvalni ko'chirish uchun "low" yetarli
+		user = [{"type": "text", "text": text}] + [
+			{"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image}"}} for image in images
+		]
+	messages = [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": user}]
 	for attempt in range(CHUNK_TIMEOUT_RETRIES + 1):
 		content = None
 		try:
-			content = kimi_chat(messages, timeout=CHUNK_TIMEOUT, max_tokens=CHUNK_MAX_TOKENS)
+			content = kimi_chat(messages, **kwargs)
 			parsed = _extract_json(content)
 			break
 		except (KimiTimeoutError, KimiEmptyAnswerError, PekinJsonError) as e:
@@ -216,6 +243,26 @@ def parse_text(file_content, progress=None):
 	if not rows:
 		frappe.throw("Faylda mahsulot qatorlari topilmadi")
 	return rows
+
+
+def parse_images(images, progress=None):
+	"""Skanerlangan PDF sahifalari (base64 JPEG) — SCAN_PAGES_PER_CALL tadan Kimi'ga."""
+	parts = [images[i : i + SCAN_PAGES_PER_CALL] for i in range(0, len(images), SCAN_PAGES_PER_CALL)]
+	rows = []
+	for index, part in enumerate(parts, 1):
+		if progress:
+			progress(index, len(parts))
+		rows.extend(_parse_chunk(SCAN_PROMPT, images=part))
+	if not rows:
+		frappe.throw("Skanerlangan hujjatda mahsulot qatorlari topilmadi")
+	return rows
+
+
+def parse_document(content, progress=None):
+	"""Matn → parse_text; sahifa rasmlari ro'yxati (skanerlangan PDF) → parse_images."""
+	if isinstance(content, list):
+		return parse_images(content, progress)
+	return parse_text(content, progress)
 
 
 @frappe.whitelist()
@@ -277,8 +324,32 @@ def _excel_text(file_bytes, file_extension="xlsx"):
 	return text
 
 
-def _pdf_text(file_bytes):
-	"""PDF'dan chiqarilgan matn ko'pincha buzilgan/tartibsiz bo'ladi (ustunlar uzilib, boshqa
+def _jpeg_base64(image):
+	image = image.convert("RGB")
+	image.thumbnail((SCAN_MAX_SIDE, SCAN_MAX_SIDE))
+	buf = BytesIO()
+	image.save(buf, format="JPEG", quality=85)
+	return base64.b64encode(buf.getvalue()).decode()
+
+
+def _page_images(reader):
+	"""Har sahifadagi skan rasm(lar)i (logo/muhr kabi mayda rasmlarsiz) — base64 JPEG."""
+	if len(reader.pages) > SCAN_MAX_PAGES:
+		frappe.throw(f"Skanerlangan PDF juda katta ({len(reader.pages)} sahifa) — {SCAN_MAX_PAGES} sahifagacha bo'lishi kerak")
+	images = []
+	for page in reader.pages:
+		try:
+			found = [f.image for f in page.images]
+		except Exception:
+			frappe.log_error(title="Skanerlangan PDF: sahifa rasmi o'qilmadi")
+			continue
+		images.extend(_jpeg_base64(img) for img in found if img and min(img.size) >= SCAN_MIN_SIDE)
+	return images
+
+
+def _pdf_content(file_bytes):
+	"""PDF matni; matn qatlami bo'lmasa (skanerlangan) — sahifa rasmlari ro'yxati.
+	PDF'dan chiqarilgan matn ko'pincha buzilgan/tartibsiz bo'ladi (ustunlar uzilib, boshqa
 	joyga tushib qolishi mumkin) — SYSTEM_PROMPT'dagi "fayl bir nechta bo'limdan iborat,
 	tartib bo'yicha mosla" ko'rsatmasi buni hisobga oladi."""
 	try:
@@ -286,17 +357,17 @@ def _pdf_text(file_bytes):
 		text = PAGE_BREAK.join(page.extract_text() or "" for page in reader.pages)
 	except Exception:
 		frappe.throw("PDF faylini o'qib bo'lmadi — fayl buzilgan yoki himoyalangan bo'lishi mumkin")
-	if not text.strip():
-		frappe.throw(
-			"PDF faylidan matn chiqarib bo'lmadi — bu skanerlangan rasm (matn qatlamisiz PDF) "
-			"bo'lishi mumkin, bunday fayllar hozircha qo'llab-quvvatlanmaydi"
-		)
-	return text
+	if text.strip():
+		return text
+	images = _page_images(reader)
+	if not images:
+		frappe.throw("PDF faylida na matn, na skanerlangan sahifa rasmi topildi")
+	return images
 
 
 def _to_text(kind, content, file_extension=None):
 	if kind == "pdf":
-		return _pdf_text(_decode(content))
+		return _pdf_content(_decode(content))
 	if kind == "excel":
 		return _excel_text(_decode(content), file_extension)
 	return content
@@ -309,7 +380,7 @@ def smart_parse_pekin_list_excel(file_content_base64, file_extension="xlsx"):
 
 @frappe.whitelist()
 def smart_parse_pekin_list_pdf(file_content_base64):
-	return parse_text(_to_text("pdf", file_content_base64))
+	return parse_document(_to_text("pdf", file_content_base64))
 
 
 @frappe.whitelist()
@@ -347,8 +418,8 @@ def run_pekin_parse(token, user, kind, content, file_extension=None):
 
 	try:
 		text = _to_text(kind, content, file_extension)
-		state["chars"] = len(text or "")
-		rows = parse_text(text, progress=progress)
+		state["chars"] = f"{len(text)} sahifa rasmi" if isinstance(text, list) else len(text or "")
+		rows = parse_document(text, progress=progress)
 	except frappe.ValidationError as e:
 		frappe.clear_messages()
 		# Foydalanuvchi ko'rgan xato Error Log'da ham bo'lsin — sababini keyin aniqlash uchun.

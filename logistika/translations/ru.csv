@@ -1239,3 +1239,5 @@ Graph API versiyasi,Версия Graph API
 Xarita,Карта
 Xarita plitkalari manzili,Адрес тайлов карты
 ERP va mijoz kabinetidagi xaritalar fon manbai ({z}/{x}/{y}). Standart — Esri (Xitoy va O'zbekistonda ochiladi); OpenStreetMap Xitoyda ochilmaydi.,Источник подложки карт в ERP и кабинете клиента ({z}/{x}/{y}). По умолчанию — Esri (открывается в Китае и Узбекистане); OpenStreetMap в Китае не открывается.
+Rasm o'qiydigan model,Модель для изображений
+Skanerlangan (rasm) PDF pekin list'lar shu model bilan o'qiladi — rasm qabul qiladigan model bo'lishi kerak (kimi-k3.1-pro yoki kimi-k3).,Сканированные (изображения) PDF упаковочные листы читаются этой моделью — она должна принимать изображения (kimi-k3.1-pro или kimi-k3).

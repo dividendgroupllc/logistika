@@ -14,6 +14,9 @@ from frappe.utils.password import get_decrypted_password
 
 DEFAULT_BASE_URL = "https://api.moonshot.ai/v1"
 DEFAULT_MODEL = "kimi-k2.7-code-highspeed"
+# Rasm (skanerlangan hujjat) o'qiy oladigan model: kimi-k2.7-code rasm qabul qilmaydi, rasm
+# faqat K3 seriyasida (platform.kimi.ai, 2026-11-25: kimi-k3.1-pro, kimi-k3).
+DEFAULT_VISION_MODEL = "kimi-k3.1-pro"
 # Kimi tarifi chegarasi (429 rate_limit_reached_error: bir vaqtda 1 ta so'rov, daqiqasiga
 # 3 ta — eng quyi tarif) — xato emas, navbat: aytilgan soniya (yoki ortib boruvchi) kutib
 # qayta urinamiz. Daqiqalik chegara uchun oxirgi urinishlar ~20 s gacha kutadi.
@@ -42,14 +45,22 @@ def _get_settings():
 	return api_key, settings.base_url or DEFAULT_BASE_URL, settings.model or DEFAULT_MODEL
 
 
-def chat(messages, timeout=60, max_tokens=None):
+def vision_model():
+	"""Skanerlangan hujjat (rasm) uchun model — Kimi Settings "Rasm o'qiydigan model"."""
+	return (frappe.db.get_single_value("Kimi Settings", "vision_model") or "").strip() or DEFAULT_VISION_MODEL
+
+
+def chat(messages, timeout=60, max_tokens=None, model=None, reasoning_effort=None):
 	"""Kimi chat completions endpointiga so'rov yuboradi, javob matnini (content)
 	qaytaradi. Ba'zi Kimi modellari faqat temperature=1 (default) ni qo'llab-quvvatlaydi
-	— shuning uchun temperature parametri ataylab yuborilmaydi."""
-	api_key, base_url, model = _get_settings()
+	— shuning uchun temperature parametri ataylab yuborilmaydi. `model` — sozlamadagi
+	modelni almashtiradi (masalan rasm uchun); `reasoning_effort` — faqat K3 seriyasi uchun."""
+	api_key, base_url, default_model = _get_settings()
+	model = model or default_model
+	extra = {"reasoning_effort": reasoning_effort} if reasoning_effort else {}
 
 	for attempt in range(RATE_LIMIT_RETRIES + 1):
-		response = _post(base_url, api_key, model, messages, timeout, max_tokens)
+		response = _post(base_url, api_key, model, messages, timeout, max_tokens, **extra)
 		if not _is_rate_limited(response) or attempt == RATE_LIMIT_RETRIES:
 			break
 		time.sleep(max(_retry_after(response), RATE_LIMIT_WAITS[min(attempt, len(RATE_LIMIT_WAITS) - 1)]))
@@ -79,8 +90,8 @@ def _retry_after(response):
 	return int(match.group(1)) if match else 0
 
 
-def _post(base_url, api_key, model, messages, timeout, max_tokens=None):
-	payload = {"model": model, "messages": messages}
+def _post(base_url, api_key, model, messages, timeout, max_tokens=None, **extra):
+	payload = {"model": model, "messages": messages, **extra}
 	if max_tokens:
 		payload["max_tokens"] = max_tokens
 	try:
