@@ -57,13 +57,13 @@
 					<tr v-for="(r, i) in data.packing.rows" :key="i">
 						<td>{{ r.part_name }}<div v-if="r.kam" class="kam">{{ t("short") }}: {{ fmtNum(r.kam) }}</div></td>
 						<td class="num">{{ fmtNum(r.quantity) }}</td>
-						<td class="num">{{ fmtNum(r.net_weight) }}</td>
+						<td class="num">{{ fmtNum(r.weight) }}</td>
 						<td class="num">{{ fmtNum(r.volume_cbm) }}</td>
 					</tr>
 					<tr>
 						<th>{{ t("total") }}</th>
 						<th class="num">{{ fmtNum(data.packing.jami.quantity) }}</th>
-						<th class="num">{{ fmtNum(data.packing.jami.net_weight) }}</th>
+						<th class="num">{{ fmtNum(data.packing.jami.weight) }}</th>
 						<th class="num">{{ fmtNum(data.packing.jami.volume_cbm) }}</th>
 					</tr>
 				</table>

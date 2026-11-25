@@ -57,7 +57,7 @@
   },
   {
    "columns": 1,
-   "description": "= Net vazn / Karobka soni (avtomatik hisoblanadi)",
+   "description": "= Brutto vazn (bo'lmasa net) / Karobka soni (avtomatik hisoblanadi)",
    "fieldname": "bir_dona_ogirlik",
    "fieldtype": "Float",
    "label": "Bitta karobka og'irligi",
@@ -108,7 +108,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-11-25 19:00:00.000000",
+ "modified": "2026-11-25 20:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Internal Logistics Item",

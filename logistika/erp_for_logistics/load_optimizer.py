@@ -17,6 +17,7 @@ from frappe.utils import flt, now_datetime
 from py3dbp import Bin, Item, Packer
 
 from logistika.erp_for_logistics.doctype.internal_logistics_item.internal_logistics_item import dims_to_cm
+from logistika.erp_for_logistics.doctype.order_detail.order_detail import vazn_kg
 
 
 def resolve_truck_type_for_kz_truck(order, kz_truck):
@@ -116,7 +117,7 @@ def _resolve_box_dimensions(part_name, order_detail=None):
 	where_clause = " and ".join(conditions)
 	rows = frappe.db.sql(
 		f"""
-		select uzunlik, kenglik, balandlik, birlik, total_boxes, quantity, net_weight, bir_dona_ogirlik
+		select uzunlik, kenglik, balandlik, birlik, total_boxes, quantity, net_weight, gross_weight, bir_dona_ogirlik
 		from `tabInternal Logistics Item`
 		where {where_clause}
 		order by total_boxes desc, modified desc
@@ -175,7 +176,7 @@ def _expand_kz_rows(rows, qty_fieldname, order):
 			continue
 
 		uzunlik_cm, kenglik_cm, balandlik_cm = dims_to_cm(dims.uzunlik, dims.kenglik, dims.balandlik, dims.birlik)
-		weight_per_box = flt(dims.bir_dona_ogirlik) or (flt(dims.net_weight) / flt(dims.total_boxes))
+		weight_per_box = (vazn_kg(dims) / flt(dims.total_boxes)) or flt(dims.bir_dona_ogirlik)
 
 		for seq in range(total_boxes):
 			boxes.append(

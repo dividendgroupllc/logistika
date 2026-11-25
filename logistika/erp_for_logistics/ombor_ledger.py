@@ -194,6 +194,7 @@ def pull_for_warehouse_intake(fura):
 	raqamidagi, hali omborga kirmagan barcha Order Detail'larning pekin list qatorlari."""
 	from logistika.erp_for_logistics import furalar
 	from logistika.erp_for_logistics.doctype.ichki_deklaratsiya.ichki_deklaratsiya import get_pekin_rows
+	from logistika.erp_for_logistics.doctype.order_detail.order_detail import vazn_kg
 
 	frappe.has_permission("Order Detail", "read", throw=True)
 	if not fura:
@@ -210,7 +211,8 @@ def pull_for_warehouse_intake(fura):
 					"fakt_qty": row.quantity,
 					"farq": 0,
 					"total_boxes": row.total_boxes,
-					"net_weight": row.net_weight,
+					# Maydon nomi tarixiy (net_weight), qiymati — tonna vazni (brutto, bo'lmasa net).
+					"net_weight": vazn_kg(row),
 					"volume_cbm": row.volume_cbm,
 				}
 			)

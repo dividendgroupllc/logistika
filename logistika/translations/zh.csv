@@ -1184,3 +1184,5 @@ ERP va mijoz kabinetidagi xaritalar fon manbai ({z}/{x}/{y}). Standart — Esri 
 Rasm o'qiydigan model,图像识别模型
 Skanerlangan (rasm) PDF pekin list'lar shu model bilan o'qiladi — rasm qabul qiladigan model bo'lishi kerak (kimi-k3.1-pro yoki kimi-k3).,扫描（图片）PDF 装箱单使用此模型读取——必须是支持图像输入的模型（kimi-k3.1-pro 或 kimi-k3）。
 Brutto vazn — jami,毛重——合计
+Vazn (brutto),重量（毛重）
+"= Brutto vazn (bo'lmasa net) / Karobka soni (avtomatik hisoblanadi)",= 毛重（无则净重）/ 箱数（自动计算）

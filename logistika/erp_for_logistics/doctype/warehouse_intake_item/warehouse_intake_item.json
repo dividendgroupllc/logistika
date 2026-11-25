@@ -68,7 +68,7 @@
   {
    "fieldname": "net_weight",
    "fieldtype": "Float",
-   "label": "Net vazn",
+   "label": "Vazn (brutto)",
    "read_only": 1
   },
   {
@@ -83,7 +83,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-11-17 15:00:00.000000",
+ "modified": "2026-11-25 20:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Warehouse Intake Item",

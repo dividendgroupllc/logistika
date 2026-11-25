@@ -125,16 +125,23 @@ def _row_has_history(row):
 	return bool(row.ichki_deklaratsiya or row.fura_pi or row.fakt_kelish_sanasi)
 
 
+def vazn_kg(row):
+	"""Tonna uchun vazn (kg): brutto (gross); brutto kiritilmagan (eski) qatorda — net.
+	2026-11-25 dan tonna hamma joyda bruttodan (fura sig'imi, ombor, KZ yuklash, tannarx)."""
+	return flt(row.get("gross_weight")) or flt(row.get("net_weight"))
+
+
 def compute_pekin_totals(doc):
 	"""Pekin list'dan jami tonna/kub va har bir qatorning bitta karobka og'irligini
-	hisoblaydi; o'lchamlardan chiqqan hajm "Hajm/CBM"dan >15% farq qilsa ogohlantiradi."""
-	doc.jami_tonna = sum(flt(row.net_weight) for row in doc.pekin_list) / 1000
+	hisoblaydi (vazn — vazn_kg: brutto, bo'lmasa net); o'lchamlardan chiqqan hajm
+	"Hajm/CBM"dan >15% farq qilsa ogohlantiradi."""
+	doc.jami_tonna = sum(vazn_kg(row) for row in doc.pekin_list) / 1000
 	doc.jami_kub = sum(flt(row.volume_cbm) for row in doc.pekin_list)
 
 	mismatched = []
 	for row in doc.pekin_list:
 		boxes = flt(row.total_boxes)
-		row.bir_dona_ogirlik = flt(row.net_weight) / boxes if boxes else 0
+		row.bir_dona_ogirlik = vazn_kg(row) / boxes if boxes else 0
 		if not (row.uzunlik and row.kenglik and row.balandlik and boxes and row.volume_cbm):
 			continue
 		length, width, height = dims_to_cm(row.uzunlik, row.kenglik, row.balandlik, row.birlik)

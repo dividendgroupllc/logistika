@@ -1242,3 +1242,5 @@ ERP va mijoz kabinetidagi xaritalar fon manbai ({z}/{x}/{y}). Standart — Esri 
 Rasm o'qiydigan model,Модель для изображений
 Skanerlangan (rasm) PDF pekin list'lar shu model bilan o'qiladi — rasm qabul qiladigan model bo'lishi kerak (kimi-k3.1-pro yoki kimi-k3).,Сканированные (изображения) PDF упаковочные листы читаются этой моделью — она должна принимать изображения (kimi-k3.1-pro или kimi-k3).
 Brutto vazn — jami,Вес брутто — итого
+Vazn (brutto),Вес (брутто)
+"= Brutto vazn (bo'lmasa net) / Karobka soni (avtomatik hisoblanadi)","= Вес брутто (если нет — нетто) / Количество коробок (рассчитывается автоматически)"

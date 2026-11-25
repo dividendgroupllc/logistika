@@ -158,6 +158,7 @@ def stage_dates(order_detail, rows):
 
 def packing(order_detail):
 	from logistika.erp_for_logistics.doctype.ichki_deklaratsiya.ichki_deklaratsiya import get_pekin_rows
+	from logistika.erp_for_logistics.doctype.order_detail.order_detail import vazn_kg
 
 	shortage = {
 		r.part_name: -flt(r.farq)
@@ -170,9 +171,14 @@ def packing(order_detail):
 		)
 		if flt(r.farq) < 0
 	}
-	keys = ("quantity", "total_boxes", "net_weight", "volume_cbm")
+	keys = ("quantity", "total_boxes", "weight", "volume_cbm")
 	rows = [
-		{"part_name": r.part_name, **{k: flt(r.get(k), 3) for k in keys}, "kam": flt(shortage.get(r.part_name), 3)}
+		{
+			"part_name": r.part_name,
+			**{k: flt(r.get(k), 3) for k in keys if k != "weight"},
+			"weight": flt(vazn_kg(r), 3),  # brutto (bo'lmasa net), kg
+			"kam": flt(shortage.get(r.part_name), 3),
+		}
 		for r in get_pekin_rows(order_detail)
 	]
 	return {"rows": rows, "jami": {k: flt(sum(r[k] for r in rows), 3) for k in keys}}
