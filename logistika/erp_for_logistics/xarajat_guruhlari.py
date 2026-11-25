@@ -48,6 +48,28 @@ def wip(key):
 	return get_required_setting(get(key).wip_field)
 
 
+def pair_of(expense_account):
+	"""Xarajat hisobining "(aktiv)" jufti (2026-11-25): "Kran" → "Kran (aktiv)" — shu kompaniyada,
+	aktiv, papka emas. Yo'q bo'lsa None."""
+	if not expense_account:
+		return None
+	account_name, company = frappe.get_cached_value("Account", expense_account, ["account_name", "company"]) or (None, None)
+	if not account_name:
+		return None
+	return frappe.db.get_value(
+		"Account", {"account_name": f"{account_name} (aktiv)", "company": company, "is_group": 0, "root_type": "Asset"}
+	)
+
+
+def wip_for(key, expense_account, required=True):
+	"""Yo'ldagi (aktiv) hisob: xarajat hisobining "(aktiv)" jufti; jufti yo'q bo'lsa — guruhning
+	Logistika Settings'dagi yo'ldagi hisobi (`required=False` — sozlanmagan bo'lsa None)."""
+	pair = pair_of(expense_account)
+	if pair:
+		return pair
+	return wip(key) if required else frappe.db.get_single_value("Logistika Settings", get(key).wip_field)
+
+
 def leaf_accounts(key):
 	return [
 		a

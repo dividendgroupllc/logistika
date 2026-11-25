@@ -365,18 +365,13 @@ def _insert_ledger(row, manba_doctype, manba_name, voucher_type, voucher_no, pos
 # ---------------------------------------------------------------- manbalar -------------
 
 
-def _wip_value(key):
-	"""Guruhning yo'ldagi (aktiv) hisobi — tanlanmagan bo'lsa None (talab _require_wip_settings'da)."""
-	return frappe.db.get_single_value("Logistika Settings", xg.get(key).wip_field)
-
-
 def order_detail_lines(od):
 	settings = frappe.get_single("Logistika Settings")
 	return [
 		{
 			"order_detail": od.name,
 			"kategoriya": xg.kategoriya("ichki"),
-			"wip_account": _wip_value("ichki"),
+			"wip_account": xg.wip_for("ichki", settings.fura_xarajat_hisobi, required=False),
 			"expense_account": settings.fura_xarajat_hisobi,
 			"amount": od.konteyner_summasi if od.container else 0,
 		},
@@ -389,7 +384,7 @@ def fura_row_lines(od, row):
 		{
 			"order_detail": od.name,
 			"kategoriya": xg.kategoriya("ichki"),
-			"wip_account": _wip_value("ichki"),
+			"wip_account": xg.wip_for("ichki", settings.sugurta_xarajat_hisobi, required=False),
 			"expense_account": settings.sugurta_xarajat_hisobi,
 			"amount": row.sugurta,
 		},
@@ -595,8 +590,8 @@ def _require_wip_settings(*keys):
 
 def _loading_cost_lines(doc, measures_by_od, key, kz_fura=None, table="yuklash_xarajatlari"):
 	"""Hujjatdagi har bir xarajat qatorini (Harajat turi — guruh papkasidan) Order Detail'larga
-	Xizmat o'lchovi (tonna yoki kub) bo'yicha bo'ladi; aktiv — `key` guruhining yo'ldagi hisobi."""
-	wip = xg.wip(key)
+	Xizmat o'lchovi (tonna yoki kub) bo'yicha bo'ladi; aktiv — xarajat hisobining "(aktiv)" jufti
+	(bo'lmasa `key` guruhining yo'ldagi hisobi)."""
 	weights = allocation_weights(measures_by_od)
 	lines = []
 	for cost in doc.get(table) or []:
@@ -607,7 +602,7 @@ def _loading_cost_lines(doc, measures_by_od, key, kz_fura=None, table="yuklash_x
 				{
 					"order_detail": od,
 					"kategoriya": xg.kategoriya(key),
-					"wip_account": wip,
+					"wip_account": xg.wip_for(key, cost.harajat_turi),
 					"expense_account": cost.harajat_turi,
 					"amount": amount,
 					"kz_fura": kz_fura,
@@ -721,8 +716,8 @@ def _consumable_lines(doc, measures_by_od):
 			row.doctype, row.name, {"narx": flt(item.valuation_rate, 4), "summa": flt(item.amount, 2)}, update_modified=False
 		)
 	total = flt(sum(flt(item.amount) for item in se.items), 2)
-	wip = xg.wip("ortish")
 	expense = get_required_setting("sarf_xarajat_hisobi")
+	wip = xg.wip_for("ortish", expense)
 	return [
 		{
 			"order_detail": od,
@@ -800,7 +795,7 @@ def create_fura_purchase_invoices(source_doc, order_details, plate):
 				"item_code": get_required_setting("fura_xizmat_item"),
 				"qty": 1,
 				"rate": amount,
-				"expense_account": xg.wip("ichki"),
+				"expense_account": xg.wip_for("ichki", settings.fura_xarajat_hisobi),
 				"order_detail": name,
 				"description": pi.remarks,
 			},
@@ -814,7 +809,7 @@ def create_fura_purchase_invoices(source_doc, order_details, plate):
 			{
 				"order_detail": name,
 				"kategoriya": xg.kategoriya("ichki"),
-				"wip_hisob": xg.wip("ichki"),
+				"wip_hisob": xg.wip_for("ichki", settings.fura_xarajat_hisobi),
 				"xarajat_hisob": settings.fura_xarajat_hisobi,
 				"summa": flt(pi.base_grand_total, 2),
 				"summa_valyutada": flt(row.xitoy_fura_summasi, 2),
@@ -868,8 +863,8 @@ def sync_kz_transit_costs(doc):
 			alert=True,
 		)
 		return
-	wip = xg.wip("tashqi")
 	expense = get_required_setting("kz_xarajat_hisobi")
+	wip = xg.wip_for("tashqi", expense)
 	lines = [
 		{
 			"order_detail": od,
@@ -911,7 +906,7 @@ def sync_kassa_costs(doc):
 	weights = allocation_weights(order_measures(doc.order))
 	if not any(flt(w) > 0 for w in weights.values()):
 		frappe.throw(_("{0}: Order'da tonna/kub kiritilgan yuk yo'q — xarajatni bo'lib bo'lmaydi").format(doc.order))
-	wip = xg.wip("kutilmagan")
+	wip = xg.wip_for("kutilmagan", doc.expense_account)
 	lines = [
 		{
 			"order_detail": od,

@@ -22,3 +22,4 @@ logistika.patches.v1_1.xarajat_guruhlari
 logistika.patches.v1_1.tannarx_qayta_yozish
 logistika.patches.v1_1.transport_vositasi_truck_dispatch
 logistika.patches.v1_1.order_detail_ombor
+logistika.patches.v1_1.tannarx_aktiv_juftlar
