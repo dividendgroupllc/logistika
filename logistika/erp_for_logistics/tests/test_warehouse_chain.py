@@ -5,15 +5,11 @@ from frappe.utils import today
 from logistika.erp_for_logistics.doctype.order_detail.test_order_detail import make_order_detail, pekin_rows
 from logistika.erp_for_logistics.peregruz import pull_for_peregruz
 from logistika.erp_for_logistics.pipeline_status import resolve_order_details_for_kz_truck
-from logistika.erp_for_logistics.tests.utils import make_order, setup_logistika_settings
+from logistika.erp_for_logistics.tests.utils import ensure_ombor, make_order, setup_logistika_settings
 
 PLATE = "粤B12345"
 
-
-def ensure_ombor(name="_T Ombor"):
-	if not frappe.db.exists("Ombor", name):
-		frappe.get_doc({"doctype": "Ombor", "nomi": name, "faol": 1}).insert(ignore_permissions=True)
-	return name
+__all__ = ["ensure_ombor"]  # boshqa testlar shu yerdan import qiladi
 
 
 class TestWarehouseChain(FrappeTestCase):

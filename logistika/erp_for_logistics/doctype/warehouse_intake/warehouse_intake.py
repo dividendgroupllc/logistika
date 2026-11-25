@@ -23,6 +23,7 @@ class WarehouseIntake(Document):
 					self.fura
 				)
 			)
+		self.set_ombor()
 		self.compute_farq()
 		sana_tartibi.warehouse_intake(self)
 		for row in self.tushirish_xarajatlari:
@@ -35,6 +36,15 @@ class WarehouseIntake(Document):
 						row.idx, row.order, self.fura
 					)
 				)
+
+	def set_ombor(self):
+		"""Ombor — Order Detail'dan (2026-11-25): yuk belgilangan omborga tushadi."""
+		ods = self._order_details() or furalar.order_details_on_plate(self.fura, on_road=True)
+		omborlar = {o for o in (frappe.db.get_value("Order Detail", od, "ombor") for od in ods) if o}
+		if len(omborlar) > 1:
+			frappe.throw(_("Bu furadagi yuklar har xil omborlarga belgilangan: {0}").format(", ".join(sorted(omborlar))))
+		if omborlar:
+			self.ombor = omborlar.pop()
 
 	def compute_farq(self):
 		"""Farq = fakt − reja; birorta qatorda kam kelgan bo'lsa holati "Nedostatka"."""

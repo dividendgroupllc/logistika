@@ -1186,3 +1186,11 @@ Skanerlangan (rasm) PDF pekin list'lar shu model bilan o'qiladi — rasm qabul q
 Brutto vazn — jami,毛重——合计
 Vazn (brutto),重量（毛重）
 "= Brutto vazn (bo'lmasa net) / Karobka soni (avtomatik hisoblanadi)",= 毛重（无则净重）/ 箱数（自动计算）
+"""{0}"" furasidagi ""{1}"" yuki ""{2}"" omborga belgilangan — bitta fura faqat bitta omborga tushadi.",“{0}”货车上的“{1}”货物已指定到“{2}”仓库——一辆货车只能卸到一个仓库。
+"Bu Order yuki bir nechta omborda: {0}. Avval ""Xitoy fura"" ni tanlang.",该订单的货物在多个仓库：{0}。请先选择“中国货车”。
+Bu furadagi yuklar har xil omborlarga belgilangan: {0},该货车上的货物被指定到不同仓库：{0}
+Order Detail'dan olinadi (yuk qaysi omborga belgilangan bo'lsa).,取自 Order Detail（货物指定的仓库）。
+Order Detail'dan olinadi — yuk shu ombordan ortiladi.,取自 Order Detail——货物从该仓库装车。
+"Yuk ""{0}"" omborga kirib bo'lgan — omborni o'zgartirib bo'lmaydi.",货物已入“{0}”仓库——无法更改仓库。
+Yuk shu omborga tushadi va shu ombordan KZ furaga ortiladi. Bitta Xitoy fura — bitta ombor.,货物卸到此仓库，并从此仓库装上哈萨克斯坦货车。一辆中国货车——一个仓库。
+Yuklar har xil omborlarda: {0} — bitta KZ yuklash bitta ombordan. Xitoy furani tanlab torting.,货物在不同仓库：{0}——一次哈萨克斯坦装车只能来自一个仓库。请选择中国货车后提取。

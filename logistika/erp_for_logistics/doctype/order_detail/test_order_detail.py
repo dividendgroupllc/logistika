@@ -49,8 +49,12 @@ def make_order_detail(order, save=True, **overrides):
 	for field in FURA_FIELDS:
 		if field in overrides:
 			row[field] = overrides.pop(field)
+	from logistika.erp_for_logistics.tests.utils import ensure_ombor
+
 	data = {"doctype": "Order Detail", "order": order}
 	data.update(overrides)
+	if "ombor" not in data:
+		data["ombor"] = ensure_ombor()
 	data.setdefault("furalar", [row])
 	# Testlarda furalar omborchiga ko'rinadi (belgisiz holat o'z testida beriladi).
 	for r in data["furalar"]:

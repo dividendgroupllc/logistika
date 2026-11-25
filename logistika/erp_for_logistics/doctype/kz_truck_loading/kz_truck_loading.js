@@ -94,7 +94,16 @@ function pull_loads(frm) {
 				);
 				return;
 			}
-			if (!frm.doc.ombor) frm.set_value("ombor", items[0].ombor);
+			// Ombor — yuk turgan (Order Detail'da belgilangan) ombor. Order yuki bir nechta omborda
+			// bo'lsa — Xitoy furani tanlash kerak (bitta KZ yuklash — bitta ombor).
+			const omborlar = [...new Set(items.map((item) => item.ombor))];
+			if (omborlar.length > 1) {
+				frappe.msgprint(
+					__("Bu Order yuki bir nechta omborda: {0}. Avval \"Xitoy fura\" ni tanlang.", [omborlar.join(", ")])
+				);
+				return;
+			}
+			frm.set_value("ombor", omborlar[0]);
 			frm.clear_table("yuklar");
 			items
 				.filter((item) => item.ombor === frm.doc.ombor)

@@ -1244,3 +1244,11 @@ Skanerlangan (rasm) PDF pekin list'lar shu model bilan o'qiladi — rasm qabul q
 Brutto vazn — jami,Вес брутто — итого
 Vazn (brutto),Вес (брутто)
 "= Brutto vazn (bo'lmasa net) / Karobka soni (avtomatik hisoblanadi)","= Вес брутто (если нет — нетто) / Количество коробок (рассчитывается автоматически)"
+"""{0}"" furasidagi ""{1}"" yuki ""{2}"" omborga belgilangan — bitta fura faqat bitta omborga tushadi.",Груз «{1}» в фуре «{0}» назначен на склад «{2}» — одна фура выгружается только на один склад.
+"Bu Order yuki bir nechta omborda: {0}. Avval ""Xitoy fura"" ni tanlang.",Груз этого заказа на нескольких складах: {0}. Сначала выберите «Китайскую фуру».
+Bu furadagi yuklar har xil omborlarga belgilangan: {0},Грузы в этой фуре назначены на разные склады: {0}
+Order Detail'dan olinadi (yuk qaysi omborga belgilangan bo'lsa).,"Берётся из Order Detail (склад, на который назначен груз)."
+Order Detail'dan olinadi — yuk shu ombordan ortiladi.,Берётся из Order Detail — груз отгружается с этого склада.
+"Yuk ""{0}"" omborga kirib bo'lgan — omborni o'zgartirib bo'lmaydi.",Груз уже поступил на склад «{0}» — склад изменить нельзя.
+Yuk shu omborga tushadi va shu ombordan KZ furaga ortiladi. Bitta Xitoy fura — bitta ombor.,Груз выгружается на этот склад и с него грузится в фуру KZ. Одна китайская фура — один склад.
+Yuklar har xil omborlarda: {0} — bitta KZ yuklash bitta ombordan. Xitoy furani tanlab torting.,Грузы на разных складах: {0} — одна загрузка KZ только с одного склада. Выберите китайскую фуру и подтяните.

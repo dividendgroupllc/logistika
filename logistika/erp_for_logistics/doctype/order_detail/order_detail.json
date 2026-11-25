@@ -15,6 +15,7 @@
   "xitoy_postavshik",
   "xitoy_zavod_raqami",
   "xizmat_olchovi",
+  "ombor",
   "status",
   "sec_fura",
   "furalar",
@@ -101,6 +102,15 @@
    "fieldtype": "Data",
    "label": "Xizmat o'lchovi",
    "read_only": 1
+  },
+  {
+   "description": "Yuk shu omborga tushadi va shu ombordan KZ furaga ortiladi. Bitta Xitoy fura — bitta ombor.",
+   "fieldname": "ombor",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Ombor",
+   "options": "Ombor",
+   "reqd": 1
   },
   {
    "default": "Внутринний фура",
@@ -238,7 +248,7 @@
    "link_fieldname": "order_detail"
   }
  ],
- "modified": "2026-11-23 12:00:00.000000",
+ "modified": "2026-11-25 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Order Detail",

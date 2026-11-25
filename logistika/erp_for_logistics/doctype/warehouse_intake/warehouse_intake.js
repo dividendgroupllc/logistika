@@ -15,6 +15,13 @@ frappe.ui.form.on("Warehouse Intake", {
 			filters: { guruh: "tushirish" },
 		}));
 	},
+	// Ombor — Order Detail'dan (yuk belgilangan ombor); saqlashda server ham shuni qo'yadi.
+	fura(frm) {
+		if (!frm.doc.fura) return;
+		frappe
+			.call("logistika.erp_for_logistics.doctype.order_detail.order_detail.ombor_for_plate", { plate: frm.doc.fura })
+			.then((r) => r.message && frm.set_value("ombor", r.message));
+	},
 	refresh(frm) {
 		if (frm.doc.docstatus === 0) {
 			frm.add_custom_button(__("📥 Pekin list'dan tortish"), () => pull_from_order_details(frm), __("Yuklar"));

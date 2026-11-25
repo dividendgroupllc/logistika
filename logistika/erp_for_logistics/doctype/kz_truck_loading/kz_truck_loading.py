@@ -1,6 +1,8 @@
 # Copyright (c) 2026, sardorbek qamchibekov  and contributors
 # For license information, please see license.txt
 
+import frappe
+from frappe import _
 from frappe.model.document import Document
 
 from logistika.erp_for_logistics import bosqich_xabar, ombor_ledger, sana_tartibi, tannarx, xodimlar
@@ -15,8 +17,22 @@ class KZTruckLoading(Document):
 		assert_no_duplicate_document(
 			self, ["order", "kz_truck"], "Bu order + KZ fura uchun yuklash hujjati"
 		)
+		self.set_ombor()
 		ombor_ledger.validate_no_overissue(self)
 		sana_tartibi.kz_truck_loading(self)
+
+	def set_ombor(self):
+		"""Ombor — yuklarning Order Detail'idan (2026-11-25): yuk o'sha ombordan ortiladi."""
+		ods = {row.order for row in self.yuklar if row.order}
+		omborlar = {o for o in (frappe.db.get_value("Order Detail", od, "ombor") for od in ods) if o}
+		if len(omborlar) > 1:
+			frappe.throw(
+				_("Yuklar har xil omborlarda: {0} — bitta KZ yuklash bitta ombordan. Xitoy furani tanlab torting.").format(
+					", ".join(sorted(omborlar))
+				)
+			)
+		if omborlar:
+			self.ombor = omborlar.pop()
 
 	def on_submit(self):
 		ombor_ledger.sync_kz_truck_loading_ledger(self)

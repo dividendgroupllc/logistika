@@ -91,6 +91,12 @@ def ensure_employee(user="Administrator"):
 	)
 
 
+def ensure_ombor(name="_T Ombor"):
+	if not frappe.db.exists("Ombor", name):
+		frappe.get_doc({"doctype": "Ombor", "nomi": name, "faol": 1}).insert(ignore_permissions=True)
+	return name
+
+
 def setup_logistika_settings():
 	"""Order / Order Detail testlari uchun minimal sozlama."""
 	ensure_employee(frappe.session.user)

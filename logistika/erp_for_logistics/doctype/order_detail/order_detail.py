@@ -27,6 +27,7 @@ DIMENSION_MISMATCH_TOLERANCE = 0.15
 class OrderDetail(Document):
 	def validate(self):
 		self.validate_order_submitted()
+		self.validate_ombor()
 		self.validate_furalar()
 		self.validate_tracking_rows()
 		sana_tartibi.order_detail(self)
@@ -40,6 +41,32 @@ class OrderDetail(Document):
 	def on_trash(self):
 		tannarx.delete_order_detail_costs(self)
 		frappe.db.delete("Order Item Status Log", {"order": self.name})
+
+	def validate_ombor(self):
+		"""Yuk tushadigan ombor (2026-11-25): Warehouse Intake shu omborga qabul qiladi, KZ Truck
+		Loading shu ombordan ortadi. Bitta Xitoy fura (yo'ldagi reys) — faqat bitta omborga."""
+		if not self.ombor:
+			self.ombor = default_ombor()
+		if not self.ombor:
+			return  # majburiy maydon — Frappe o'zi so'raydi
+		if not self.is_new() and self.has_value_changed("ombor") and frappe.db.exists("Ombor Harakati", {"order": self.name}):
+			frappe.throw(
+				_("Yuk \"{0}\" omborga kirib bo'lgan — omborni o'zgartirib bo'lmaydi.").format(
+					frappe.db.get_value("Ombor Harakati", {"order": self.name}, "ombor")
+				)
+			)
+		for row in self.furalar:
+			if not row.xitoy_mashina_nomeri or row.fakt_kelish_sanasi:
+				continue
+			for other in furalar.rows_on_plate(
+				row.xitoy_mashina_nomeri, on_road=True, exclude_parent=self.name, fields="f.name, od.ombor as ombor"
+			):
+				if other.ombor and other.ombor != self.ombor:
+					frappe.throw(
+						_(
+							"\"{0}\" furasidagi \"{1}\" yuki \"{2}\" omborga belgilangan — bitta fura faqat bitta omborga tushadi."
+						).format(row.xitoy_mashina_nomeri, other.order_detail, other.ombor)
+					)
 
 	def validate_tracking_rows(self):
 		"""Kunlik kuzatuvdagi "Fura" — shu Order Detail furalaridan biri (bitta bo'lsa o'zi)."""
@@ -123,6 +150,20 @@ class OrderDetail(Document):
 
 def _row_has_history(row):
 	return bool(row.ichki_deklaratsiya or row.fura_pi or row.fakt_kelish_sanasi)
+
+
+def default_ombor():
+	"""Faol ombor bitta bo'lsa — o'sha (Order Detail'da avtomatik), aks holda None."""
+	names = frappe.get_all("Ombor", filters={"faol": 1}, pluck="name", limit=2)
+	return names[0] if len(names) == 1 else None
+
+
+@frappe.whitelist()
+def ombor_for_plate(plate):
+	"""Yo'ldagi fura qaysi omborga tushadi (Order Detail'laridagi ombor) — Warehouse Intake uchun."""
+	frappe.has_permission("Order Detail", "read", throw=True)
+	omborlar = {r.ombor for r in furalar.rows_on_plate(plate, on_road=True, fields="f.name, od.ombor as ombor") if r.ombor}
+	return omborlar.pop() if len(omborlar) == 1 else None
 
 
 def vazn_kg(row):
