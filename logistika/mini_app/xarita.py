@@ -95,6 +95,22 @@ def _positions(order, kz_truck, since, until=None):
 	return points
 
 
+ESRI_TILES = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
+
+
+def map_tiles():
+	"""Xarita fon manbai (Logistika Settings) — desk (Order'dagi nuqta) va mijoz kabineti uchun bir xil.
+	OpenStreetMap Xitoydan ochilmaydi (2026-11-25), standart — Esri."""
+	tiles = (frappe.db.get_single_value("Logistika Settings", "xarita_plitkalari") or "").strip() or ESRI_TILES
+	if "arcgisonline" in tiles:
+		attribution = "Tiles &copy; Esri"
+	elif "openstreetmap" in tiles:
+		attribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+	else:
+		attribution = ""
+	return {"tiles": tiles, "attribution": attribution}
+
+
 def track(order_detail, order):
 	info = frappe.db.get_value("Order", order, ["yetkazish_nuqtasi", "yetkazish_manzili", "yetkazish_sanasi"], as_dict=True) or frappe._dict()
 	dest = point_of(info.yetkazish_nuqtasi)
@@ -134,4 +150,5 @@ def track(order_detail, order):
 		"destination": {"lat": dest[0], "lng": dest[1], "text": info.yetkazish_manzili or ""} if dest else None,
 		"eta": ser._d(info.yetkazish_sanasi),
 		"trucks": trucks,
+		"map": map_tiles(),
 	}

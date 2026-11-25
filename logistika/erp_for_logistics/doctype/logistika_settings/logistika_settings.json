@@ -32,6 +32,8 @@
   "ombor_section",
   "cb_ombor",
   "eski_malumot_rejimi",
+  "xarita_section",
+  "xarita_plitkalari",
   "sarf_section",
   "sarf_materiallari_ombori",
   "cb_sarf",
@@ -391,11 +393,23 @@
    "fieldtype": "Link",
    "label": "Logistika xizmati (Item)",
    "options": "Item"
+  },
+  {
+   "fieldname": "xarita_section",
+   "fieldtype": "Section Break",
+   "label": "Xarita"
+  },
+  {
+   "default": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+   "description": "ERP va mijoz kabinetidagi xaritalar fon manbai ({z}/{x}/{y}). Standart — Esri (Xitoy va O'zbekistonda ochiladi); OpenStreetMap Xitoyda ochilmaydi.",
+   "fieldname": "xarita_plitkalari",
+   "fieldtype": "Data",
+   "label": "Xarita plitkalari manzili"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-11-24 12:00:00.000000",
+ "modified": "2026-11-25 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Logistika Settings",

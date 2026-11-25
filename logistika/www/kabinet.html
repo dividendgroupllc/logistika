@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Litella — kabinet</title>
+<script>window.KABINET_WEB = true;</script>
+<style>
+:root{
+  --bg:var(--tg-theme-bg-color,#ffffff); --sec:var(--tg-theme-secondary-bg-color,#f1f2f6);
+  --text:var(--tg-theme-text-color,#111418); --hint:var(--tg-theme-hint-color,#7d8590);
+  --link:var(--tg-theme-link-color,#2481cc); --btn:var(--tg-theme-button-color,#2481cc);
+  --btn-text:var(--tg-theme-button-text-color,#ffffff);
+  --tabs-h:calc(56px + env(safe-area-inset-bottom, 0px));
+  --ok:#2e9e5b; --warn:#e08a00; --bad:#d64545; --line:rgba(125,133,144,.22); --chip:rgba(36,129,204,.12);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:var(--tg-theme-bg-color,#17212b); --sec:var(--tg-theme-secondary-bg-color,#0e1621);
+    --text:var(--tg-theme-text-color,#f5f5f5); --hint:var(--tg-theme-hint-color,#8b9aa8);
+    --link:var(--tg-theme-link-color,#5eb5f7); --btn:var(--tg-theme-button-color,#5288c1);
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--sec);color:var(--text);font:15px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+a{color:var(--link);text-decoration:none}
+#app{min-height:100vh;display:flex;flex-direction:column}
+.scr{flex:1;padding:12px 12px calc(var(--tabs-h) + 16px)}
+.card{background:var(--bg);border-radius:14px;padding:12px;margin-bottom:10px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.muted{color:var(--hint);font-size:13px}
+.h{font-weight:600}
+.big{font-size:17px}
+.chip{display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;background:var(--chip);color:var(--link);white-space:nowrap}
+.chip.ok{background:rgba(46,158,91,.15);color:var(--ok)} .chip.warn{background:rgba(224,138,0,.15);color:var(--warn)} .chip.bad{background:rgba(214,69,69,.15);color:var(--bad)}
+.seg{display:flex;background:var(--bg);border-radius:10px;padding:3px;margin-bottom:10px}
+.seg button{flex:1;border:0;background:none;padding:7px;border-radius:8px;font-size:13px;color:var(--hint)}
+.seg button.on{background:var(--btn);color:var(--btn-text)}
+.search{width:100%;padding:10px 12px;border-radius:10px;border:0;background:var(--bg);color:var(--text);margin-bottom:10px;font-size:15px}
+.item{padding:10px 0;border-top:1px solid var(--line)} .item:first-child{border-top:0}
+.click{cursor:pointer}
+.alert{background:rgba(224,138,0,.12);border-radius:14px;padding:12px;margin-bottom:10px}
+.alert .h{color:var(--warn)}
+.btn{display:block;width:100%;text-align:center;background:var(--btn);color:var(--btn-text);border:0;border-radius:10px;padding:11px;font-size:15px;font-weight:600;margin-top:8px}
+.btn[disabled]{opacity:.5}
+.steps{list-style:none;margin:8px 0 0;padding:0}
+.steps li{display:flex;gap:10px;padding:5px 0;align-items:flex-start}
+.dot{width:16px;height:16px;border-radius:50%;flex:none;margin-top:2px;border:2px solid var(--line);background:var(--bg)}
+.done .dot{background:var(--ok);border-color:var(--ok)}
+.cur .dot{background:var(--btn);border-color:var(--btn);box-shadow:0 0 0 4px var(--chip)}
+.todo{color:var(--hint)}
+.sub{display:flex;gap:6px;overflow-x:auto;margin:0 0 10px}
+.sub a{padding:6px 12px;border-radius:16px;background:var(--bg);font-size:13px;white-space:nowrap;color:var(--text)}
+.sub a.on{background:var(--btn);color:var(--btn-text)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:6px 4px;border-top:1px solid var(--line);text-align:left} th{color:var(--hint);font-weight:500;border-top:0}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.kam{color:var(--bad);font-size:12px}
+.tabs{position:fixed;bottom:0;left:0;right:0;z-index:10;height:var(--tabs-h);display:flex;background:var(--bg);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom, 0px)}
+.tabs a{flex:1;text-align:center;padding:7px 0 9px;font-size:11px;color:var(--hint);position:relative}
+.tabs a .i{display:block;font-size:20px;line-height:24px}
+.tabs a.on{color:var(--link)}
+.badge{position:absolute;top:2px;left:55%;background:var(--bad);color:#fff;border-radius:9px;font-size:10px;padding:0 5px}
+/* Chat: qat'iy balandlik — faqat xabarlar ro'yxati aylanadi, yozish paneli menyu ustida. */
+.chat{position:fixed;top:0;left:0;right:0;bottom:var(--tabs-h);display:flex;flex-direction:column;background:var(--sec)}
+.msgs{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:12px 12px 8px}
+.msg{max-width:82%;padding:8px 10px;border-radius:14px;margin:6px 0;font-size:15px;white-space:pre-wrap;word-wrap:break-word}
+.msg.me{margin-left:auto;background:var(--btn);color:var(--btn-text);border-bottom-right-radius:4px}
+.msg.staff{background:var(--bg);border-bottom-left-radius:4px}
+.msg small{display:block;opacity:.7;font-size:11px;text-align:right;margin-top:2px}
+.compose{flex:none;display:flex;gap:6px;padding:8px;background:var(--bg);border-top:1px solid var(--line);align-items:center}
+.compose textarea{flex:1;border:0;background:var(--sec);border-radius:18px;padding:9px 12px;color:var(--text);font:inherit;resize:none;max-height:120px}
+.icon{border:0;background:none;font-size:22px;padding:4px;color:var(--link)}
+.center{text-align:center;padding:40px 16px}
+.err{color:var(--bad);font-size:13px;margin-top:6px}
+.empty{color:var(--hint);text-align:center;padding:24px 8px}
+/* Yuk xaritasi (TrackMap.vue) */
+.trk-map{position:relative;height:340px;border-radius:14px;overflow:hidden;margin-bottom:10px;background:var(--bg)}
+.trk-canvas{position:absolute;inset:0}
+.trk-live{position:absolute;left:10px;top:10px;z-index:500;display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:16px;background:var(--bg);color:var(--text);font-size:12px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.trk-dot{width:8px;height:8px;border-radius:50%;background:var(--ok)} .trk-dot.off{background:var(--warn)}
+.trk-center{position:absolute;right:10px;top:10px;z-index:500;width:44px;height:44px;border:0;border-radius:12px;background:var(--bg);color:var(--text);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.trk-bar{position:relative;height:10px;border-radius:5px;background:var(--line);margin:8px 0 6px}
+.trk-bar div{height:10px;border-radius:5px;background:var(--btn)}
+.trk-bar span{position:absolute;top:-6px;width:22px;height:22px;border-radius:50%;background:var(--bg);border:3px solid var(--btn)}
+.trk-eta{display:flex;gap:10px;align-items:center;margin-top:10px;padding:10px 12px;border-radius:12px;background:var(--sec);color:var(--link)}
+.trk-eta b{color:var(--text)}
+.trk-history{background:var(--bg);color:var(--link);margin:0 0 10px}
+.cr-svg{display:block;width:100%;height:auto;margin:10px 0 4px}
+/* Yo'l tarixi (Tarix.vue) */
+.tl{list-style:none;margin:0;padding:0}
+.tl li{display:grid;grid-template-columns:58px 22px minmax(0,1fr);column-gap:8px}
+.tl-when{display:flex;flex-direction:column;align-items:flex-end;padding-top:12px;font-size:13px}
+.tl-line{display:flex;flex-direction:column;align-items:center}
+.tl-dot{width:14px;height:14px;border-radius:50%;margin-top:14px;flex:none;box-sizing:border-box;background:var(--bg);border:3px solid var(--hint)}
+.tl li.kz .tl-dot{border-color:var(--btn)}
+.tl li.now .tl-dot{background:var(--btn);box-shadow:0 0 0 5px var(--chip)}
+.tl-bar{width:2px;flex:1;min-height:18px;background:var(--line)}
+.tl li.kz .tl-bar{background:var(--btn)}
+.tl li:last-child .tl-bar{background:transparent}
+.tl-card{background:var(--bg);border-radius:12px;padding:10px 12px;margin:6px 0;display:flex;flex-direction:column;gap:3px}
+.tl li.now .tl-card{box-shadow:inset 0 0 0 1px var(--btn)}
+.trk-truck{width:34px;height:34px;border-radius:50%;background:#fff;border:3px solid var(--c);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 8px rgba(36,129,204,.18)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+{{ include_script("mini_app.bundle.js") }}
+</body>
+</html>

@@ -1197,3 +1197,45 @@ LD qaytarish sabablari,Причины возврата LD
 XEH qaytarish sabablari,Причины возврата XEH
 LD qadam egalari tanlangan,Ответственные за шаги LD выбраны
 Valyuta kursi 3 kundan yangi,Курс валют свежее 3 дней
+Telefon raqamini to'g'ri kiriting,Введите номер телефона правильно
+"Raqam topilmadi. Avval WhatsApp botimizga ""start"" yozing yoki menejerga murojaat qiling.",Номер не найден. Сначала напишите «start» нашему боту в WhatsApp или обратитесь к менеджеру.
+"Avval WhatsApp botimizga ""start"" yozing",Сначала напишите «start» нашему боту в WhatsApp
+Kod yaqinda yuborildi — birozdan keyin qayta urinib ko'ring,Код недавно отправлен — попробуйте чуть позже
+Kodni WhatsApp orqali yuborib bo'lmadi — birozdan keyin qayta urinib ko'ring,Не удалось отправить код в WhatsApp — попробуйте чуть позже
+Kod eskirgan — yangisini so'rang,Код устарел — запросите новый
+Kod noto'g'ri,Неверный код
+Urinishlar ko'p — 15 daqiqadan keyin qayta urinib ko'ring yoki kod bilan kiring,Слишком много попыток — повторите через 15 минут или войдите по коду
+Telefon yoki parol noto'g'ri,Неверный телефон или пароль
+Avval kiring,Сначала войдите
+Parol kamida {0} belgidan iborat bo'lsin,Пароль должен содержать не менее {0} символов
+Kabinet Foydalanuvchi,Пользователь кабинета
+"Xalqaro ko'rinishda, faqat raqamlar (998901234567)","В международном формате, только цифры (998901234567)"
+Kontakt,Контакт
+Til,Язык
+uz,uz
+ru,ru
+en,en
+WhatsApp botga ulangan,Подключён к боту WhatsApp
+Ulangan vaqt,Время подключения
+O'chirilsa — kirish va kod yuborish to'xtaydi,Если выключить — вход и отправка кода прекратятся
+Parol (hash),Пароль (хеш)
+Kabinet Sessiya,Сессия кабинета
+Foydalanuvchi,Пользователь
+Token (sha256),Токен (sha256)
+Muddati,Срок действия
+WhatsApp Settings,Настройки WhatsApp
+Bot raqami,Номер бота
+"Mijozga ko'rsatiladi (wa.me havola uchun), masalan +998712000000","Показывается клиенту (для ссылки wa.me), например +998712000000"
+Kabinet manzili,Адрес кабинета
+Bo'sh bo'lsa — sayt manzili + /kabinet,Если пусто — адрес сайта + /kabinet
+Phone number ID (Meta),Phone number ID (Meta)
+Access token (Meta),Access token (Meta)
+Webhook verify token,Webhook verify token
+App secret (webhook imzosi),App secret (подпись webhook)
+Kod shabloni (Authentication),Шаблон кода (Authentication)
+Shablon nomi,Название шаблона
+Shablon tili,Язык шаблона
+Graph API versiyasi,Версия Graph API
+Xarita,Карта
+Xarita plitkalari manzili,Адрес тайлов карты
+ERP va mijoz kabinetidagi xaritalar fon manbai ({z}/{x}/{y}). Standart — Esri (Xitoy va O'zbekistonda ochiladi); OpenStreetMap Xitoyda ochilmaydi.,Источник подложки карт в ERP и кабинете клиента ({z}/{x}/{y}). По умолчанию — Esri (открывается в Китае и Узбекистане); OpenStreetMap в Китае не открывается.

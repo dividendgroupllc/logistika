@@ -1138,3 +1138,46 @@ LD qaytarish sabablari,LD 退回原因
 XEH qaytarish sabablari,XEH 退回原因
 LD qadam egalari tanlangan,已选择 LD 步骤负责人
 Valyuta kursi 3 kundan yangi,汇率在 3 天内更新
+Telefon raqamini to'g'ri kiriting,请正确输入电话号码
+"Raqam topilmadi. Avval WhatsApp botimizga ""start"" yozing yoki menejerga murojaat qiling.",未找到号码。请先在WhatsApp中向我们的机器人发送“start”，或联系经理。
+"Avval WhatsApp botimizga ""start"" yozing",请先在WhatsApp中向我们的机器人发送“start”
+Kod yaqinda yuborildi — birozdan keyin qayta urinib ko'ring,验证码刚刚发送——请稍后再试
+Kodni WhatsApp orqali yuborib bo'lmadi — birozdan keyin qayta urinib ko'ring,无法通过WhatsApp发送验证码——请稍后再试
+Kod eskirgan — yangisini so'rang,验证码已过期——请重新获取
+Kod noto'g'ri,验证码错误
+Urinishlar ko'p — 15 daqiqadan keyin qayta urinib ko'ring yoki kod bilan kiring,尝试次数过多——请15分钟后再试或使用验证码登录
+Telefon yoki parol noto'g'ri,电话或密码错误
+Avval kiring,请先登录
+Parol kamida {0} belgidan iborat bo'lsin,密码至少 {0} 个字符
+Kabinet Foydalanuvchi,账户用户
+"Xalqaro ko'rinishda, faqat raqamlar (998901234567)",国际格式，仅数字（998901234567）
+Kontakt,联系人
+Til,语言
+uz,uz
+ru,ru
+en,en
+WhatsApp botga ulangan,已连接WhatsApp机器人
+Ulangan vaqt,连接时间
+O'chirilsa — kirish va kod yuborish to'xtaydi,关闭后——将停止登录和发送验证码
+Parol (hash),密码（哈希）
+Kabinet Sessiya,账户会话
+Foydalanuvchi,用户
+Token (sha256),令牌（sha256）
+Muddati,有效期
+WhatsApp Settings,WhatsApp设置
+Bot raqami,机器人号码
+"Mijozga ko'rsatiladi (wa.me havola uchun), masalan +998712000000",显示给客户（用于wa.me链接），例如 +998712000000
+Kabinet manzili,账户地址
+Bo'sh bo'lsa — sayt manzili + /kabinet,为空时——网站地址 + /kabinet
+Phone number ID (Meta),Phone number ID（Meta）
+Access token (Meta),Access token（Meta）
+Webhook verify token,Webhook verify token
+App secret (webhook imzosi),App secret（webhook签名）
+Kod shabloni (Authentication),验证码模板（Authentication）
+Shablon nomi,模板名称
+Shablon tili,模板语言
+Graph API versiyasi,Graph API版本
+Telefon,电话
+Xarita,地图
+Xarita plitkalari manzili,地图瓦片地址
+ERP va mijoz kabinetidagi xaritalar fon manbai ({z}/{x}/{y}). Standart — Esri (Xitoy va O'zbekistonda ochiladi); OpenStreetMap Xitoyda ochilmaydi.,ERP 和客户门户地图的底图来源（{z}/{x}/{y}）。默认为 Esri（在中国和乌兹别克斯坦均可打开）；OpenStreetMap 在中国无法打开。

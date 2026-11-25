@@ -142,9 +142,10 @@ async function ensureMap() {
 	if (!L) L = await loadLeaflet();
 	if (!map) {
 		map = L.map(el.value, { zoomControl: false, attributionControl: true });
-		L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+		const conf = props.track.map || {};
+		L.tileLayer(conf.tiles || "https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
 			maxZoom: 18,
-			attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+			attribution: conf.attribution || '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
 		}).addTo(map);
 		draw(true);
 	} else {

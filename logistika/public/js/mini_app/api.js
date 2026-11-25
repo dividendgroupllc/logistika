@@ -2,6 +2,8 @@
 // cookie yuborilmaydi (credentials: "omit") — so'rov doim guest, kirish faqat imzo bilan.
 
 export const tg = window.Telegram && window.Telegram.WebApp;
+// Web kabinet (/kabinet, WhatsApp kod + parol): imzo o'rniga sessiya cookie'si.
+export const WEB = !!window.KABINET_WEB;
 
 export class ApiError extends Error {
 	constructor(status, message) {
@@ -28,8 +30,8 @@ function clean(args) {
 
 export async function call(method, args = {}, { post = false, form = null } = {}) {
 	const url = "/api/method/logistika.api.mini_app." + method;
-	const headers = { "X-Telegram-Init-Data": (tg && tg.initData) || "", Accept: "application/json" };
-	const options = { headers, credentials: "omit" };
+	const headers = WEB ? { Accept: "application/json" } : { "X-Telegram-Init-Data": (tg && tg.initData) || "", Accept: "application/json" };
+	const options = { headers, credentials: WEB ? "same-origin" : "omit" };
 	let target = url;
 	if (form || post) {
 		options.method = "POST";
@@ -37,6 +39,21 @@ export async function call(method, args = {}, { post = false, form = null } = {}
 	} else {
 		const query = new URLSearchParams(clean(args)).toString();
 		if (query) target += "?" + query;
+	}
+	const res = await fetch(target, options);
+	const data = await res.json().catch(() => ({}));
+	if (!res.ok) throw new ApiError(res.status, serverMessage(data));
+	return data.message;
+}
+
+// Web kabinet kirishi (logistika.api.kabinet.*).
+export async function authCall(method, args = {}, post = true) {
+	const url = "/api/method/logistika.api.kabinet." + method;
+	const options = { headers: { Accept: "application/json" }, credentials: "same-origin" };
+	let target = url;
+	if (post) {
+		options.method = "POST";
+		options.body = new URLSearchParams(clean(args));
 	}
 	const res = await fetch(target, options);
 	const data = await res.json().catch(() => ({}));

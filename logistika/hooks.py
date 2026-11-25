@@ -70,7 +70,11 @@ def _asset(path):
 
 
 app_include_css = [_asset("css/internal_logistics.css"), _asset("css/boshqaruv.css")]
+# Xarita fon manbai (Esri) — Order'dagi xarita Xitoydan ham ochilsin.
+extend_bootinfo = "logistika.boot.extend_bootinfo"
+
 app_include_js = [
+	_asset("js/xarita_sozlama.js"),
 	_asset("js/order_chat_widget.js"),
 	_asset("js/duplicate_warning.js"),
 	_asset("js/logistika_quick_create.js"),

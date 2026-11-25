@@ -168,7 +168,11 @@ def set_language(lang):
 
 	if lang not in LANGUAGES:
 		frappe.throw("Noma'lum til", frappe.ValidationError)
-	set_chat_language(_ctx().chat_id, lang)
+	ctx = _ctx()
+	if ctx.get("web_user"):
+		frappe.db.set_value("Kabinet Foydalanuvchi", ctx.web_user, "til", lang, update_modified=False)
+	else:
+		set_chat_language(ctx.chat_id, lang)
 	return {"lang": lang}
 
 
@@ -329,7 +333,7 @@ def send_chat(order, text=None):
 	if not text and not content:
 		frappe.throw("Xabar bo'sh", frappe.ValidationError)
 	ext = check_upload(filename, content, CHAT_IMAGE_EXTENSIONS) if content else None
-	if not within_limit(f"tg_chat:{ctx.chat_id}", CHAT_RATE_LIMIT, CHAT_RATE_WINDOW):
+	if not within_limit(f"tg_chat:{ctx.chat_id or ctx.user_id}", CHAT_RATE_LIMIT, CHAT_RATE_WINDOW):
 		raise frappe.TooManyRequestsError("Juda ko'p xabar")
 	rasm = None
 	if content:

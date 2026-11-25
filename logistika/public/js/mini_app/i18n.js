@@ -33,6 +33,11 @@ const M = {
 		gps_from_kz: "GPS KZ furada boshlanadi", route_label: "Yo'nalish: zavod, Xitoy yo'li, Xorgos ombori, yetkazish manzili",
 		factory: "Zavod", china_road: "Xitoy ichida yo'lda", horgos: "Xorgos", in_warehouse_now: "Xorgos omborida",
 		arrival_pending: "Omborga kelishi aniqlanmoqda", plan_was: "reja", warehouse_arrival: "omborga kelishi", at_factory: "Zavodda",
+		login_title: "Kabinetga kirish", phone_label: "Telefon raqamingiz", get_code: "WhatsApp'ga kod olish", by_password: "Parol bilan kirish",
+		by_code: "Kod bilan kirish", password_label: "Parol", enter: "Kirish", code_sent: "WhatsApp'ga 6 xonali kod yuborildi.", code_label: "Kod",
+		change_phone: "Raqamni o'zgartirish", set_password_title: "Parol o'rnating", set_password_hint: "Keyingi safar telefon va parol bilan kirasiz (kamida 6 belgi).",
+		save: "Saqlash", skip: "Keyinroq", open_whatsapp: "WhatsApp'da botga yozish", start_bot_hint: "Birinchi marta: WhatsApp botimizga \"start\" yozing — raqamingiz tasdiqlanadi.",
+		linked_via_web: "web kabinet", change_password: "Parolni o'zgartirish", password_saved: "Parol saqlandi", logout: "Chiqish",
 	},
 	ru: {
 		orders: "Заказы", documents: "Документы", chat: "Чат", profile: "Профиль",
@@ -63,6 +68,11 @@ const M = {
 		gps_from_kz: "GPS начинается на фуре KZ", route_label: "Маршрут: завод, путь по Китаю, склад Хоргос, адрес доставки",
 		factory: "Завод", china_road: "В пути по Китаю", horgos: "Хоргос", in_warehouse_now: "На складе Хоргос",
 		arrival_pending: "Дата прибытия на склад уточняется", plan_was: "план", warehouse_arrival: "прибытие на склад", at_factory: "На заводе",
+		login_title: "Вход в кабинет", phone_label: "Ваш номер телефона", get_code: "Получить код в WhatsApp", by_password: "Войти по паролю",
+		by_code: "Войти по коду", password_label: "Пароль", enter: "Войти", code_sent: "6-значный код отправлен в WhatsApp.", code_label: "Код",
+		change_phone: "Изменить номер", set_password_title: "Установите пароль", set_password_hint: "В следующий раз войдёте по номеру и паролю (не менее 6 символов).",
+		save: "Сохранить", skip: "Позже", open_whatsapp: "Написать боту в WhatsApp", start_bot_hint: "Впервые: напишите нашему боту в WhatsApp «start» — номер будет подтверждён.",
+		linked_via_web: "веб-кабинет", change_password: "Сменить пароль", password_saved: "Пароль сохранён", logout: "Выйти",
 	},
 	en: {
 		orders: "Orders", documents: "Documents", chat: "Chat", profile: "Profile",
@@ -93,6 +103,11 @@ const M = {
 		gps_from_kz: "GPS starts on the KZ truck", route_label: "Route: factory, China road, Khorgos warehouse, delivery address",
 		factory: "Factory", china_road: "On the road in China", horgos: "Khorgos", in_warehouse_now: "At Khorgos warehouse",
 		arrival_pending: "Warehouse arrival being confirmed", plan_was: "planned", warehouse_arrival: "warehouse arrival", at_factory: "At the factory",
+		login_title: "Sign in", phone_label: "Your phone number", get_code: "Get code via WhatsApp", by_password: "Sign in with password",
+		by_code: "Sign in with code", password_label: "Password", enter: "Sign in", code_sent: "A 6-digit code was sent to WhatsApp.", code_label: "Code",
+		change_phone: "Change number", set_password_title: "Set a password", set_password_hint: "Next time sign in with phone and password (at least 6 characters).",
+		save: "Save", skip: "Later", open_whatsapp: "Message the bot on WhatsApp", start_bot_hint: "First time: send \"start\" to our WhatsApp bot to confirm your number.",
+		linked_via_web: "web cabinet", change_password: "Change password", password_saved: "Password saved", logout: "Sign out",
 	},
 };
 

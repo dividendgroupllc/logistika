@@ -10,6 +10,7 @@
 		<p>{{ t("error") }}</p>
 		<button class="btn" @click="start">{{ t("retry") }}</button>
 	</div>
+	<Login v-else-if="state === 'login'" @done="start" />
 	<Link v-else-if="state === 'link'" @linked="start" />
 	<template v-else>
 		<router-view :key="$route.fullPath" />
@@ -27,11 +28,12 @@
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { ApiError, tg } from "./api";
+import { ApiError, WEB, tg } from "./api";
 import { t } from "./i18n";
 import { TABS } from "./router";
 import { loadMe, store } from "./store";
 import Link from "./pages/Link.vue";
+import Login from "./pages/Login.vue";
 
 const state = ref("loading");
 const reason = ref("");
@@ -55,9 +57,11 @@ async function start() {
 	state.value = "loading";
 	try {
 		const me = await loadMe();
-		state.value = me.linked ? "ready" : "link";
+		state.value = me.linked ? "ready" : WEB ? "login" : "link";
 	} catch (e) {
-		if (e instanceof ApiError && e.status === 401) {
+		if (WEB && e instanceof ApiError && (e.status === 401 || e.status === 403)) {
+			state.value = "login";
+		} else if (e instanceof ApiError && e.status === 401) {
 			reason.value = e.message === "bad_init_data" ? "bad_init_data" : "";
 			state.value = "outside";
 		} else {

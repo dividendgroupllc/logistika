@@ -137,7 +137,7 @@ def save_customer_message(order, chat_id, text, rasm=None):
 			"doctype": "Order Chat Message",
 			"order": order,
 			"sender": "Mijoz",
-			"telegram_chat_id": str(chat_id),
+			"telegram_chat_id": str(chat_id) if chat_id else None,  # web kabinet mijozi — chat_id yo'q
 			"matn": text,
 			"rasm": rasm,
 			"tarjima_xitoycha": None,

@@ -82,13 +82,39 @@ def _language(contact_lang, telegram_lang):
 	return telegram_lang if telegram_lang in ("ru", "en") else "uz"
 
 
+def _web_token():
+	"""Web kabinet sessiya cookie'si (logistika.api.kabinet)."""
+	try:
+		return frappe.request.cookies.get("kabinet_sid") if frappe.request else None
+	except RuntimeError:
+		return None
+
+
+def _web_context():
+	"""Web kabinet (WhatsApp kod + parol, 2026-11-25): sessiya → mijoz kontakti."""
+	from logistika.api.kabinet import current_user
+	from logistika.api.telegram_webhook import _get_linked_customers
+
+	user = current_user(_web_token())
+	if not user:
+		return None
+	return frappe._dict(
+		user_id=f"web:{user.name}",
+		chat_id=None,
+		web_user=user.name,
+		contact=user.contact,
+		customers=_get_linked_customers(user.contact),
+		lang=user.til if user.til in LANGUAGES else "uz",
+	)
+
+
 def get_context():
-	"""Joriy so'rov egasi; imzo yo'q/yaroqsiz bo'lsa None."""
+	"""Joriy so'rov egasi: Telegram imzosi, bo'lmasa web kabinet sessiyasi; yo'q bo'lsa None."""
 	from logistika.api.telegram_webhook import _get_linked_customers
 
 	user = _telegram_user()
 	if not user:
-		return None
+		return _web_context()
 	chat_id = str(user["id"])
 	contact = frappe.db.get_value("Contact", {"telegram_chat_id": chat_id}, ["name", "telegram_til"], as_dict=True)
 	return frappe._dict(

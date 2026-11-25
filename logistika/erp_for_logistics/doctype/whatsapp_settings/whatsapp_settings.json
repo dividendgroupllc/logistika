@@ -1,0 +1,109 @@
+{
+ "actions": [],
+ "creation": "2026-11-25 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "is_active",
+  "bot_raqami",
+  "kabinet_url",
+  "cb",
+  "phone_number_id",
+  "access_token",
+  "verify_token",
+  "app_secret",
+  "sec_tpl",
+  "otp_shablon",
+  "otp_til",
+  "api_versiya"
+ ],
+ "fields": [
+  {
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Faol"
+  },
+  {
+   "description": "Mijozga ko'rsatiladi (wa.me havola uchun), masalan +998712000000",
+   "fieldname": "bot_raqami",
+   "fieldtype": "Data",
+   "label": "Bot raqami"
+  },
+  {
+   "description": "Bo'sh bo'lsa — sayt manzili + /kabinet",
+   "fieldname": "kabinet_url",
+   "fieldtype": "Data",
+   "label": "Kabinet manzili"
+  },
+  {
+   "fieldname": "cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "phone_number_id",
+   "fieldtype": "Data",
+   "label": "Phone number ID (Meta)"
+  },
+  {
+   "fieldname": "access_token",
+   "fieldtype": "Password",
+   "label": "Access token (Meta)",
+   "length": 1000
+  },
+  {
+   "fieldname": "verify_token",
+   "fieldtype": "Password",
+   "label": "Webhook verify token"
+  },
+  {
+   "fieldname": "app_secret",
+   "fieldtype": "Password",
+   "label": "App secret (webhook imzosi)"
+  },
+  {
+   "fieldname": "sec_tpl",
+   "fieldtype": "Section Break",
+   "label": "Kod shabloni (Authentication)"
+  },
+  {
+   "default": "kabinet_kod",
+   "fieldname": "otp_shablon",
+   "fieldtype": "Data",
+   "label": "Shablon nomi"
+  },
+  {
+   "default": "uz",
+   "fieldname": "otp_til",
+   "fieldtype": "Data",
+   "label": "Shablon tili"
+  },
+  {
+   "default": "v21.0",
+   "fieldname": "api_versiya",
+   "fieldtype": "Data",
+   "label": "Graph API versiyasi"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-11-25 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "WhatsApp Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

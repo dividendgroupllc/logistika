@@ -1,0 +1,115 @@
+{
+ "actions": [],
+ "autoname": "field:telefon",
+ "creation": "2026-11-25 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "telefon",
+  "contact",
+  "til",
+  "cb",
+  "whatsapp_ulangan",
+  "ulangan_vaqt",
+  "oxirgi_kirish",
+  "faol",
+  "parol_hash"
+ ],
+ "fields": [
+  {
+   "description": "Xalqaro ko'rinishda, faqat raqamlar (998901234567)",
+   "fieldname": "telefon",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Telefon",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "contact",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kontakt",
+   "options": "Contact",
+   "reqd": 1
+  },
+  {
+   "default": "uz",
+   "fieldname": "til",
+   "fieldtype": "Select",
+   "label": "Til",
+   "options": "uz\nru\nen"
+  },
+  {
+   "fieldname": "cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "whatsapp_ulangan",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "WhatsApp botga ulangan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ulangan_vaqt",
+   "fieldtype": "Datetime",
+   "label": "Ulangan vaqt",
+   "read_only": 1
+  },
+  {
+   "fieldname": "oxirgi_kirish",
+   "fieldtype": "Datetime",
+   "label": "Oxirgi kirish",
+   "read_only": 1
+  },
+  {
+   "default": "1",
+   "description": "O'chirilsa — kirish va kod yuborish to'xtaydi",
+   "fieldname": "faol",
+   "fieldtype": "Check",
+   "label": "Faol"
+  },
+  {
+   "fieldname": "parol_hash",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Parol (hash)",
+   "length": 255,
+   "no_copy": 1,
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-25 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Erp for logistics",
+ "name": "Kabinet Foydalanuvchi",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Zakaz oluvchi"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "contact"
+}
