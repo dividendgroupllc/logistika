@@ -1194,3 +1194,37 @@ Order Detail'dan olinadi — yuk shu ombordan ortiladi.,取自 Order Detail—�
 "Yuk ""{0}"" omborga kirib bo'lgan — omborni o'zgartirib bo'lmaydi.",货物已入“{0}”仓库——无法更改仓库。
 Yuk shu omborga tushadi va shu ombordan KZ furaga ortiladi. Bitta Xitoy fura — bitta ombor.,货物卸到此仓库，并从此仓库装上哈萨克斯坦货车。一辆中国货车——一个仓库。
 Yuklar har xil omborlarda: {0} — bitta KZ yuklash bitta ombordan. Xitoy furani tanlab torting.,货物在不同仓库：{0}——一次哈萨克斯坦装车只能来自一个仓库。请选择中国货车后提取。
+Barcha mijozlar,所有客户
+Bu sahifa logistika xodimlari uchun,此页面仅供物流人员使用
+ED (Xitoy eksport),出口报关（中国）
+Excel'ga yuklab olish,导出到 Excel
+KZ fura · omborga kirishi,哈萨克斯坦货车 · 入库时间
+KZ oxirgi joyi,哈萨克斯坦段最后位置
+KZ yo'lda,哈萨克斯坦段运输中
+KZ yo'lga chiqdi,哈萨克斯坦货车出发
+Miqdori,数量
+Omborda,在仓库
+Omborga kirishi,入库时间
+Omborga: {0},入库：{0}
+"Order, mijoz, fura yoki mahsulot bo'yicha qidirish",按订单、客户、货车或商品搜索
+Qayerda,位置
+Qidirish,搜索
+Tashqi hujjat,外部单据
+Tushdi: {0},卸货：{0}
+Yetib borish,到达
+Yetkazildi,已送达
+Yetkazilganlarni ham ko'rsatish,同时显示已送达
+Yuk topilmadi,未找到货物
+Yuklar kuzatuvi,货物跟踪
+Zavodda,在工厂
+chiqish rejasi: {0},计划出发：{0}
+fakt,实际
+fakt (pekin list),实际（装箱单）
+joy kiritilmagan,未填写位置
+kechikmoqda,延误
+kelish rejasi: {0},计划到达：{0}
+kirish sanasi yo'q,无入库日期
+pekin list yo'q,无装箱单
+reja,计划
+taxminiy,预估
+yana {0} ta mahsulot,还有 {0} 种商品

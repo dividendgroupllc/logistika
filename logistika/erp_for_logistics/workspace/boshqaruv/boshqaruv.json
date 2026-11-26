@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\": \"hdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Boshqaruv</b></span>\", \"col\": 12}}, {\"id\": \"sc0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Boshqaruv markazi\", \"col\": 4}}, {\"id\": \"sc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Mening ishim\", \"col\": 3}}, {\"id\": \"sc2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Order tannarxi\", \"col\": 3}}, {\"id\": \"sc3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Logistika Settings\", \"col\": 3}}, {\"id\": \"sc4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Traccar Settings\", \"col\": 3}}, {\"id\": \"sc5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Kimi Settings\", \"col\": 3}}, {\"id\": \"sc6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Error Log\", \"col\": 3}}, {\"id\": \"sc7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"User\", \"col\": 3}}]",
+ "content": "[{\"id\": \"hdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Boshqaruv</b></span>\", \"col\": 12}}, {\"id\": \"sc0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Boshqaruv markazi\", \"col\": 4}}, {\"id\": \"ykzShortcutB\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Yuklar kuzatuvi\", \"col\": 4}}, {\"id\": \"sc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Mening ishim\", \"col\": 3}}, {\"id\": \"sc2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Order tannarxi\", \"col\": 3}}, {\"id\": \"sc3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Logistika Settings\", \"col\": 3}}, {\"id\": \"sc4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Traccar Settings\", \"col\": 3}}, {\"id\": \"sc5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Kimi Settings\", \"col\": 3}}, {\"id\": \"sc6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Error Log\", \"col\": 3}}, {\"id\": \"sc7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"User\", \"col\": 3}}]",
  "creation": "2026-11-24 23:00:00.000000",
  "custom_blocks": [],
  "docstatus": 0,
@@ -13,7 +13,7 @@
  "is_hidden": 0,
  "label": "Boshqaruv",
  "links": [],
- "modified": "2026-11-24 23:00:00.000000",
+ "modified": "2026-11-26 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Boshqaruv",
@@ -33,13 +33,23 @@
   {
    "color": "Blue",
    "doc_view": "",
+   "idx": 1,
    "label": "Boshqaruv markazi",
    "link_to": "boshqaruv",
    "type": "Page"
   },
   {
+   "color": "Blue",
+   "doc_view": "",
+   "idx": 2,
+   "label": "Yuklar kuzatuvi",
+   "link_to": "yuklar-kuzatuvi",
+   "type": "Page"
+  },
+  {
    "color": "Grey",
    "doc_view": "",
+   "idx": 3,
    "label": "Mening ishim",
    "link_to": "ish-stoli",
    "type": "Page"
@@ -47,6 +57,7 @@
   {
    "color": "Grey",
    "doc_view": "",
+   "idx": 4,
    "label": "Order tannarxi",
    "link_to": "Order tannarxi",
    "report_ref_doctype": "Tannarx Harakati",
@@ -55,6 +66,7 @@
   {
    "color": "Grey",
    "doc_view": "List",
+   "idx": 5,
    "label": "Logistika Settings",
    "link_to": "Logistika Settings",
    "stats_filter": "[]",
@@ -63,6 +75,7 @@
   {
    "color": "Grey",
    "doc_view": "List",
+   "idx": 6,
    "label": "Traccar Settings",
    "link_to": "Traccar Settings",
    "stats_filter": "[]",
@@ -71,6 +84,7 @@
   {
    "color": "Grey",
    "doc_view": "List",
+   "idx": 7,
    "label": "Kimi Settings",
    "link_to": "Kimi Settings",
    "stats_filter": "[]",
@@ -79,6 +93,7 @@
   {
    "color": "Grey",
    "doc_view": "List",
+   "idx": 8,
    "label": "Error Log",
    "link_to": "Error Log",
    "stats_filter": "[]",
@@ -87,6 +102,7 @@
   {
    "color": "Grey",
    "doc_view": "List",
+   "idx": 9,
    "label": "User",
    "link_to": "User",
    "stats_filter": "[]",

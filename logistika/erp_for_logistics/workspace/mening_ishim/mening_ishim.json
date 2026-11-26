@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\": \"hdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Mening ishim</b></span>\", \"col\": 12}}, {\"id\": \"sc0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Mening ishim\", \"col\": 4}}, {\"id\": \"sc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Order\", \"col\": 3}}, {\"id\": \"sc2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Order Detail\", \"col\": 3}}, {\"id\": \"sc3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Warehouse Intake\", \"col\": 3}}, {\"id\": \"sc4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"KZ Truck Loading\", \"col\": 3}}, {\"id\": \"sc5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Peregruz\", \"col\": 3}}, {\"id\": \"sc6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Xitoy Eksport Hujjati\", \"col\": 3}}, {\"id\": \"sc7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Logistic Documentation\", \"col\": 3}}, {\"id\": \"sc8\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Truck Dispatch\", \"col\": 3}}, {\"id\": \"sc9\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"KZ Transit\", \"col\": 3}}, {\"id\": \"sc10\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Kassa\", \"col\": 3}}, {\"id\": \"sc11\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Currency Exchange\", \"col\": 3}}]",
+ "content": "[{\"id\": \"hdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Mening ishim</b></span>\", \"col\": 12}}, {\"id\": \"sc0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Mening ishim\", \"col\": 4}}, {\"id\": \"ykzShortcutM\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Yuklar kuzatuvi\", \"col\": 4}}, {\"id\": \"sc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Order\", \"col\": 3}}, {\"id\": \"sc2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Order Detail\", \"col\": 3}}, {\"id\": \"sc3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Warehouse Intake\", \"col\": 3}}, {\"id\": \"sc4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"KZ Truck Loading\", \"col\": 3}}, {\"id\": \"sc5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Peregruz\", \"col\": 3}}, {\"id\": \"sc6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Xitoy Eksport Hujjati\", \"col\": 3}}, {\"id\": \"sc7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Logistic Documentation\", \"col\": 3}}, {\"id\": \"sc8\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Truck Dispatch\", \"col\": 3}}, {\"id\": \"sc9\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"KZ Transit\", \"col\": 3}}, {\"id\": \"sc10\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Kassa\", \"col\": 3}}, {\"id\": \"sc11\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Currency Exchange\", \"col\": 3}}]",
  "creation": "2026-11-24 23:00:00.000000",
  "custom_blocks": [],
  "docstatus": 0,
@@ -13,7 +13,7 @@
  "is_hidden": 0,
  "label": "Mening ishim",
  "links": [],
- "modified": "2026-11-24 23:00:00.000000",
+ "modified": "2026-11-26 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Mening ishim",
@@ -57,13 +57,23 @@
   {
    "color": "Blue",
    "doc_view": "",
+   "idx": 1,
    "label": "Mening ishim",
    "link_to": "ish-stoli",
    "type": "Page"
   },
   {
+   "color": "Blue",
+   "doc_view": "",
+   "idx": 2,
+   "label": "Yuklar kuzatuvi",
+   "link_to": "yuklar-kuzatuvi",
+   "type": "Page"
+  },
+  {
    "color": "Grey",
    "doc_view": "List",
+   "idx": 3,
    "label": "Order",
    "link_to": "Order",
    "stats_filter": "[]",
@@ -72,6 +82,7 @@
   {
    "color": "Grey",
    "doc_view": "List",
+   "idx": 4,
    "label": "Order Detail",
    "link_to": "Order Detail",
    "stats_filter": "[]",
@@ -80,6 +91,7 @@
   {
    "color": "Grey",
    "doc_view": "List",
+   "idx": 5,
    "label": "Warehouse Intake",
    "link_to": "Warehouse Intake",
    "stats_filter": "[]",
@@ -88,6 +100,7 @@
   {
    "color": "Grey",
    "doc_view": "List",
+   "idx": 6,
    "label": "KZ Truck Loading",
    "link_to": "KZ Truck Loading",
    "stats_filter": "[]",
@@ -96,6 +109,7 @@
   {
    "color": "Grey",
    "doc_view": "List",
+   "idx": 7,
    "label": "Peregruz",
    "link_to": "Peregruz",
    "stats_filter": "[]",
@@ -104,6 +118,7 @@
   {
    "color": "Grey",
    "doc_view": "List",
+   "idx": 8,
    "label": "Xitoy Eksport Hujjati",
    "link_to": "Xitoy Eksport Hujjati",
    "stats_filter": "[]",
@@ -112,6 +127,7 @@
   {
    "color": "Grey",
    "doc_view": "List",
+   "idx": 9,
    "label": "Logistic Documentation",
    "link_to": "Logistic Documentation",
    "stats_filter": "[]",
@@ -120,6 +136,7 @@
   {
    "color": "Grey",
    "doc_view": "List",
+   "idx": 10,
    "label": "Truck Dispatch",
    "link_to": "Truck Dispatch",
    "stats_filter": "[]",
@@ -128,6 +145,7 @@
   {
    "color": "Grey",
    "doc_view": "List",
+   "idx": 11,
    "label": "KZ Transit",
    "link_to": "KZ Transit",
    "stats_filter": "[]",
@@ -136,6 +154,7 @@
   {
    "color": "Grey",
    "doc_view": "List",
+   "idx": 12,
    "label": "Kassa",
    "link_to": "Kassa",
    "stats_filter": "[]",
@@ -144,6 +163,7 @@
   {
    "color": "Grey",
    "doc_view": "List",
+   "idx": 13,
    "label": "Currency Exchange",
    "link_to": "Currency Exchange",
    "stats_filter": "[]",

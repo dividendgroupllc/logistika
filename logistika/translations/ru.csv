@@ -1252,3 +1252,37 @@ Order Detail'dan olinadi — yuk shu ombordan ortiladi.,Берётся из Orde
 "Yuk ""{0}"" omborga kirib bo'lgan — omborni o'zgartirib bo'lmaydi.",Груз уже поступил на склад «{0}» — склад изменить нельзя.
 Yuk shu omborga tushadi va shu ombordan KZ furaga ortiladi. Bitta Xitoy fura — bitta ombor.,Груз выгружается на этот склад и с него грузится в фуру KZ. Одна китайская фура — один склад.
 Yuklar har xil omborlarda: {0} — bitta KZ yuklash bitta ombordan. Xitoy furani tanlab torting.,Грузы на разных складах: {0} — одна загрузка KZ только с одного склада. Выберите китайскую фуру и подтяните.
+Barcha mijozlar,Все клиенты
+Bu sahifa logistika xodimlari uchun,Эта страница для сотрудников логистики
+ED (Xitoy eksport),ЭД (экспорт Китай)
+Excel'ga yuklab olish,Скачать в Excel
+KZ fura · omborga kirishi,Фура KZ · заезд на склад
+KZ oxirgi joyi,Последнее место KZ
+KZ yo'lda,KZ в пути
+KZ yo'lga chiqdi,KZ выехала
+Miqdori,Количество
+Omborda,На складе
+Omborga kirishi,Заезд на склад
+Omborga: {0},На склад: {0}
+"Order, mijoz, fura yoki mahsulot bo'yicha qidirish","Поиск по заказу, клиенту, фуре или товару"
+Qayerda,Где
+Qidirish,Поиск
+Tashqi hujjat,Внешний документ
+Tushdi: {0},Выгружено: {0}
+Yetib borish,Прибытие
+Yetkazildi,Доставлено
+Yetkazilganlarni ham ko'rsatish,Показать и доставленные
+Yuk topilmadi,Груз не найден
+Yuklar kuzatuvi,Отслеживание грузов
+Zavodda,На заводе
+chiqish rejasi: {0},план выезда: {0}
+fakt,факт
+fakt (pekin list),факт (упаковочный лист)
+joy kiritilmagan,место не указано
+kechikmoqda,опаздывает
+kelish rejasi: {0},план прибытия: {0}
+kirish sanasi yo'q,нет даты заезда
+pekin list yo'q,нет упаковочного листа
+reja,план
+taxminiy,примерно
+yana {0} ta mahsulot,ещё {0} товара
