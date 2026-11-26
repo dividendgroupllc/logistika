@@ -44,7 +44,7 @@ def rows(include_delivered=0):
 	_require_role()
 	orders = {
 		o.name: o
-		for o in frappe.get_all("Order", filters={"docstatus": ["<", 2]}, fields=["name", "kliyent", "yetkazish_sanasi"])
+		for o in frappe.get_all("Order", filters={"docstatus": ["<", 2]}, fields=["name", "kliyent", "yetkazish_sanasi", "creation"])
 	}
 	details = frappe.get_all(
 		"Order Detail", filters={"order": ["in", list(orders) or [""]]}, fields=["name", "order", "kliyent", "ombor"], order_by="name desc"
@@ -59,7 +59,7 @@ def rows(include_delivered=0):
 			"parent", "idx", "xitoy_mashina_nomeri", "zavoddan_chiqish_sanasi", "kelish_sanasi", "fakt_chiqish_sanasi",
 			"fakt_kelish_sanasi", "taxminiy_tonna", "taxminiy_kub", "fakt_tonna", "fakt_kub", "ichki_deklaratsiya",
 		],
-		order_by="parent desc, idx asc",
+		order_by="parent asc, idx asc",
 	)
 	china_track = _last_by(
 		frappe.get_all(
@@ -187,6 +187,9 @@ def rows(include_delivered=0):
 		if row["bosqich"] == "yetkazildi" and not int(include_delivered or 0):
 			continue
 		out.append(row)
+	# Bitta Order qatorlari yonma-yon (sahifada har Order o'z rangida), yangi Order'lar tepada;
+	# Order ichidagi tartib (Order Detail, fura) saqlanadi — sort barqaror.
+	out.sort(key=lambda r: (orders[r["order"]].creation, r["order"]), reverse=True)
 	return {"rows": out, "today": today()}
 
 

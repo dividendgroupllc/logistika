@@ -102,6 +102,28 @@ class TestYuklarKuzatuvi(FrappeTestCase):
 		frappe.db.set_value("Order", self.order.name, "yetkazish_sanasi", add_days(today(), -1))
 		self.assertTrue(self.row()["eta"]["kech"])
 
+	def test_same_order_rows_adjacent(self):
+		# Sahifada har Order o'z rangida — uning qatorlari yonma-yon turishi kerak.
+		other = make_order(kliyent="_T YK Mijoz 2")
+		make_order_detail(other.name, xitoy_mashina_nomeri="粤B66002")
+		make_order_detail(self.order.name, xitoy_mashina_nomeri="粤B66003")
+		real = frappe.get_all
+
+		def shuffled(doctype, **kw):  # fura qatorlari aralash tartibda kelsa ham
+			rows = real(doctype, **kw)
+			if doctype != "Order Detail Fura":
+				return rows
+			created = {r.parent: frappe.db.get_value("Order Detail", r.parent, "creation") for r in rows}
+			return sorted(rows, key=lambda r: created[r.parent])  # 1-Order, 2-Order, yana 1-Order
+
+		with patch.object(yk.frappe, "get_all", side_effect=shuffled):
+			orders = [r["order"] for r in yk.rows()["rows"] if r["order"] in (self.order.name, other.name)]
+		seen = []
+		for o in orders:
+			if not seen or seen[-1] != o:
+				self.assertNotIn(o, seen, orders)
+				seen.append(o)
+
 	# ---------- ruxsat ----------
 	def test_only_logistics_roles(self):
 		with patch.object(yk.frappe, "get_roles", return_value=["Broker"]):

@@ -14,6 +14,11 @@ frappe.pages["yuklar-kuzatuvi"].on_page_show = function (wrapper) {
 	if (wrapper.yuklar_kuzatuvi) wrapper.yuklar_kuzatuvi.load();
 };
 
+// Har Order o'z rangida (yorug'/qorong'i rejimda ishlaydigan Frappe ranglari; qizil — "kechikmoqda"
+// uchun band). Rang yuklangan ro'yxatdagi navbat bo'yicha: qo'shni Order'lar har doim boshqa rangda,
+// filtrlaganda ham Order rangini o'zgartirmaydi.
+const YK_COLORS = 7;
+
 const YK_STAGES = {
 	zavodda: __("Zavodda"),
 	xitoy_yolda: __("Xitoyda yo'lda"),
@@ -62,6 +67,10 @@ class YuklarKuzatuvi {
 			.call("logistika.erp_for_logistics.yuklar_kuzatuvi.rows", { include_delivered: this.state.delivered ? 1 : 0 })
 			.then((r) => {
 				this.rows = (r.message && r.message.rows) || [];
+				this.colors = {};
+				this.rows.forEach((row) => {
+					if (!(row.order in this.colors)) this.colors[row.order] = Object.keys(this.colors).length % YK_COLORS;
+				});
 				this.fill_clients();
 				this.render();
 			});
@@ -126,14 +135,14 @@ class YuklarKuzatuvi {
 					<th>${__("KZ oxirgi joyi")}</th>
 					<th>${__("Yetib borish")}</th>
 				</tr></thead>
-				<tbody>${rows.map((r) => this.row_html(r)).join("")}</tbody>
+				<tbody>${rows.map((r, i) => this.row_html(r, i === 0 || rows[i - 1].order !== r.order)).join("")}</tbody>
 			</table>`);
 	}
 
-	row_html(r) {
+	row_html(r, starts_order) {
 		const lines = r.kz.length ? r.kz : [null];
 		const span = lines.length > 1 ? ` rowspan="${lines.length}"` : "";
-		const late = r.eta.kech ? "red" : "";
+		const color = `ykz-c${this.colors[r.order] || 0}`;
 		return lines
 			.map((k, i) => {
 				const head =
@@ -167,7 +176,8 @@ class YuklarKuzatuvi {
 									: `<span class="ykz-muted">—</span>`
 						  }</td>`
 						: "";
-				return `<tr class="${i === 0 ? late : ""} ${i > 0 ? "ykz-cont" : ""}">${head}${kz_cells}${ichki}${docs}${eta}</tr>`;
+				const cls = [color, i === 0 && starts_order ? "ykz-start" : "", i > 0 ? "ykz-cont" : ""].join(" ");
+				return `<tr class="${cls}">${head}${kz_cells}${ichki}${docs}${eta}</tr>`;
 			})
 			.join("");
 	}

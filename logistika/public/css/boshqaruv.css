@@ -121,5 +121,20 @@ a.bsh-kpi:hover, a.bsh-stage:hover, a.bsh-queue:hover, a.bsh-doc:hover { border-
 .ykz-table tr.ykz-cont td { border-top: 1px dashed var(--border-color); }
 .ykz-table .ykz-num { white-space: nowrap; }
 .ykz-muted { color: var(--text-muted); }
-.ykz-table tr.red td.ykz-first { box-shadow: inset 3px 0 0 var(--red-500); }
+/* Har Order o'z rangida: fon (butun guruh) + chap chetda chiziq; Order'lar orasida qalin chegara. */
+.ykz-table tr.ykz-c0 td { background: color-mix(in srgb, var(--blue-500) 10%, var(--card-bg)); }
+.ykz-table tr.ykz-c0 td.ykz-first { box-shadow: inset 5px 0 0 var(--blue-500); }
+.ykz-table tr.ykz-c1 td { background: color-mix(in srgb, var(--green-500) 10%, var(--card-bg)); }
+.ykz-table tr.ykz-c1 td.ykz-first { box-shadow: inset 5px 0 0 var(--green-500); }
+.ykz-table tr.ykz-c2 td { background: color-mix(in srgb, var(--orange-500) 10%, var(--card-bg)); }
+.ykz-table tr.ykz-c2 td.ykz-first { box-shadow: inset 5px 0 0 var(--orange-500); }
+.ykz-table tr.ykz-c3 td { background: color-mix(in srgb, var(--purple-500) 10%, var(--card-bg)); }
+.ykz-table tr.ykz-c3 td.ykz-first { box-shadow: inset 5px 0 0 var(--purple-500); }
+.ykz-table tr.ykz-c4 td { background: color-mix(in srgb, var(--pink-500) 10%, var(--card-bg)); }
+.ykz-table tr.ykz-c4 td.ykz-first { box-shadow: inset 5px 0 0 var(--pink-500); }
+.ykz-table tr.ykz-c5 td { background: color-mix(in srgb, var(--cyan-500) 10%, var(--card-bg)); }
+.ykz-table tr.ykz-c5 td.ykz-first { box-shadow: inset 5px 0 0 var(--cyan-500); }
+.ykz-table tr.ykz-c6 td { background: color-mix(in srgb, var(--yellow-500) 10%, var(--card-bg)); }
+.ykz-table tr.ykz-c6 td.ykz-first { box-shadow: inset 5px 0 0 var(--yellow-500); }
+.ykz-table tr.ykz-start td { border-top: 2px solid var(--gray-400); }
 @media (max-width: 640px) { .ykz-bar .ykz-q, .ykz-bar .ykz-client { max-width: none; flex-basis: 100%; } }
