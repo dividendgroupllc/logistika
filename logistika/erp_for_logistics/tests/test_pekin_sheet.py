@@ -122,3 +122,34 @@ class TestPekinSheet(FrappeTestCase):
 		patch.object(pli, "kimi_chat", return_value=json.dumps(answer)).start()
 		rows = pli.parse_text("header\nrow")
 		self.assertEqual([round(r["gross_weight"], 2) for r in rows], [5236.67, 2618.33])
+
+
+LONG = (
+	"DHD350-Type Pneumatic Down-the-Hole (DTH) Hammer for Rock Drilling, Model JS05H04 (Погружной пневмоударник "
+	"типа DHD350 для бурения горных пород, модель JS05H04) DHD350型气动潜孔锤，用于岩石钻探，型号JS05H04"
+)
+
+
+class TestPekinNomUzunligi(FrappeTestCase):
+	"""2026-11-27 MIX_PL: 3 tilli uzun nom — "Value too big … max characters allowed is 140"."""
+
+	def test_long_name_cut_to_field_limit(self):
+		row = pli._clean_row({"part_name": LONG, "quantity": 8})
+		self.assertLessEqual(len(row["part_name"]), pli.PART_NAME_MAX)
+		self.assertEqual(pli.PART_NAME_MAX, 140)
+		self.assertTrue(row["part_name"].startswith("DHD350-Type Pneumatic"))
+		self.assertTrue(row["part_name"].endswith("…"))
+
+	def test_short_name_unchanged(self):
+		self.assertEqual(pli._clean_row({"part_name": "knob 旋钮", "quantity": 9})["part_name"], "knob 旋钮")
+
+	def test_prompt_asks_short_single_language_name(self):
+		self.assertIn("100 belgi", pli.SYSTEM_PROMPT)
+
+	def test_csv_template_cuts_too(self):
+		import os
+
+		import frappe
+
+		js = open(os.path.join(frappe.get_app_path("logistika"), "public", "js", "pekin_list_import.js")).read()
+		self.assertIn("PART_NAME_MAX = 140", js)

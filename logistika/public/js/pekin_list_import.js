@@ -17,6 +17,9 @@ logistika.pekin_import.FIELDS = [
 	"balandlik",
 ];
 
+// "Mahsulot nomi" maydoni 140 belgi (Kimi o'qishida ham shunday qisqartiriladi).
+const PART_NAME_MAX = 140;
+
 logistika.pekin_import.render = function (frm, html_fieldname, table_fieldname) {
 	const field = frm.fields_dict[html_fieldname];
 	if (!field) return;
@@ -180,7 +183,8 @@ logistika.pekin_import.parse_csv = function (text) {
 	for (let i = header_idx + 1; i < lines.length; i++) {
 		const parts = lines[i].split(delim);
 		const get = (fn) => (parts[map[fn]] !== undefined ? String(parts[map[fn]]).trim() : "");
-		const part_name = get("part_name");
+		let part_name = get("part_name").replace(/\s+/g, " ");
+		if (part_name.length > PART_NAME_MAX) part_name = part_name.slice(0, PART_NAME_MAX - 1).trimEnd() + "…";
 		if (!part_name) {
 			if (parts.some((p) => p.trim().length > 0)) {
 				throw new Error(__("Faylda qo'shimcha, andozaga sig'magan ma'lumot bor"));

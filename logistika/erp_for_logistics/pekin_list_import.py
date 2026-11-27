@@ -34,6 +34,9 @@ FIELDS = [
 	"balandlik",
 ]
 NUMERIC_FIELDS = [f for f in FIELDS if f != "part_name"]
+# "Mahsulot nomi" — Data (140 belgi); ombor, KZ yuklash, peregruz va ombor jurnaliga ham shunday
+# ko'chadi (2026-11-27: 3 tilli ~300 belgilik nom — "Value too big").
+PART_NAME_MAX = 140
 # Shu maydonlardan hech bo'lmasa bittasi bo'lmasa, qator mazmunsiz deb tashlab
 # yuboriladi — mavjud qo'lda parser bilan bir xil qoidaga rioya qilinadi.
 SIGNIFICANT_FIELDS = ["quantity", "total_boxes", "volume_cbm"]
@@ -50,7 +53,9 @@ JSON'ga o'giruvchi yordamchisan. Foydalanuvchi CSV yoki jadval ko'rinishidagi ma
 til, ustunlar tartibi va sarlavhalar har xil bo'lishi mumkin (xitoycha, ruscha, o'zbekcha yoki \
 umuman sarlavhasiz). Har bir mahsulot qatoridan quyidagi maydonlarni chiqarib ol:
 
-- part_name: mahsulot nomi (matn)
+- part_name: mahsulot nomi (matn) — QISQA, 100 belgidan oshmasin: asosiy nomi va model/artikuli. \
+Nom bir nechta tilda (inglizcha, ruscha, xitoycha) takrorlangan bo'lsa — tarjimalarni qo'shma, bitta \
+tildagisini ol (inglizcha bo'lsa — o'sha, bo'lmasa asl nomi)
 - quantity: soni (dona)
 - total_boxes: quti/karobka soni
 - net_weight: sof/net vazn (kg, 净重 / Net Weight / Нетто), JAMI (bitta emas)
@@ -111,7 +116,9 @@ def _extract_json(content):
 
 def _clean_row(raw):
 	row = {}
-	part_name = str(raw.get("part_name") or "").strip()
+	part_name = " ".join(str(raw.get("part_name") or "").split())
+	if len(part_name) > PART_NAME_MAX:
+		part_name = part_name[: PART_NAME_MAX - 1].rstrip() + "…"
 	if part_name:
 		row["part_name"] = part_name
 	for field in NUMERIC_FIELDS:
