@@ -14,7 +14,7 @@ import secrets
 
 import frappe
 from frappe import _
-from frappe.utils import add_days, now_datetime
+from frappe.utils import add_days, add_to_date, get_datetime, now_datetime
 from frappe.utils.password import passlibctx
 
 from logistika.api.telegram_webhook import _normalize_phone
@@ -26,6 +26,9 @@ SESSION_DAYS = 30
 CODE_TTL = 300
 CODE_TRIES = 5
 MIN_PASSWORD = 6
+# Meta: mijoz yozgandan keyin 24 soat ichida oddiy xabar (shablonsiz) yuborish mumkin. Chegarada
+# xato bo'lmasligi uchun biroz kamroq olinadi.
+WINDOW_MINUTES = 23 * 60 + 45
 
 
 def _hash(value):
@@ -82,9 +85,19 @@ def request_code(phone):
 		frappe.throw(_("Kod yaqinda yuborildi — birozdan keyin qayta urinib ko'ring"))
 	code = f"{secrets.randbelow(10**6):06d}"
 	frappe.cache().set_value(f"kabinet:otp:{phone}", {"hash": _hash(code), "tries": 0}, expires_in_sec=CODE_TTL)
-	if not wa.send_otp(phone, code):
+	in_window = _in_service_window(user)
+	if (wa.send_code_text if in_window else wa.send_otp)(phone, code):
+		return {"sent": True}
+	frappe.cache().delete_value(f"kabinet:otp:{phone}")
+	frappe.cache().delete_value(f"kabinet:code1:{phone}")  # botga yozgach darhol qayta so'ray olsin
+	if in_window:
 		frappe.throw(_("Kodni WhatsApp orqali yuborib bo'lmadi — birozdan keyin qayta urinib ko'ring"))
-	return {"sent": True}
+	frappe.throw(_("Avval WhatsApp botimizga istalgan xabar yozing, so'ng kodni qayta so'rang"))
+
+
+def _in_service_window(user):
+	"""Mijoz so'nggi ~24 soatda botga yozganmi (shunda kod shablonsiz, bepul matn bilan boradi)."""
+	return bool(user.oxirgi_xabar) and get_datetime(user.oxirgi_xabar) > add_to_date(now_datetime(), minutes=-WINDOW_MINUTES)
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])

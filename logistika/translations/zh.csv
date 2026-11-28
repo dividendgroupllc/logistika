@@ -1228,3 +1228,21 @@ pekin list yo'q,无装箱单
 reja,计划
 taxminiy,预估
 yana {0} ta mahsulot,还有 {0} 种商品
+"Avval WhatsApp botimizga istalgan xabar yozing, so'ng kodni qayta so'rang",请先给我们的WhatsApp机器人发送任意消息，然后重新获取验证码
+Botga oxirgi yozgan vaqt,最后一次给机器人发消息的时间
+Shundan keyin 24 soat ichida kirish kodi oddiy xabar bilan (bepul) yuboriladi,此后24小时内，登录验证码将以普通（免费）消息发送
+Order'ni butunlay o'chirish faqat System Manager uchun,仅System Manager可彻底删除订单
+Tasdiqlash uchun Order nomini aynan yozing,请准确输入订单名称以确认
+O'chirib bo'lmaydi,无法删除
+{0} {1}: boshqa Order yuki ham bor ({2}),{0} {1}：还包含其他订单的货物（{2}）
+{0} {1}: boshqa Order'ga ham tegishli ({2}),{0} {1}：也属于其他订单（{2}）
+{0} {1}: boshqa hujjatlarni ham yopgan ({2}),{0} {1}：还核销了其他单据（{2}）
+Butunlay o'chirish,彻底删除
+Quyidagilar qaytarib bo'lmaydigan tarzda o'chiriladi:,以下内容将被永久删除：
+(GL yozuvlari bilan),（包括总账分录）
+Order'ni butunlay o'chirish,彻底删除订单
+Tasdiqlash uchun Order nomini yozing: {0},请输入订单名称以确认：{0}
+Yopish,关闭
+O'chirish,删除
+O'chirilmoqda...,正在删除...
+Order o'chirildi,订单已删除

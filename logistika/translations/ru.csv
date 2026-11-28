@@ -1286,3 +1286,21 @@ pekin list yo'q,нет упаковочного листа
 reja,план
 taxminiy,примерно
 yana {0} ta mahsulot,ещё {0} товара
+"Avval WhatsApp botimizga istalgan xabar yozing, so'ng kodni qayta so'rang","Сначала напишите любое сообщение нашему WhatsApp-боту, затем запросите код снова"
+Botga oxirgi yozgan vaqt,Последнее сообщение боту
+Shundan keyin 24 soat ichida kirish kodi oddiy xabar bilan (bepul) yuboriladi,В течение 24 часов после этого код входа отправляется обычным (бесплатным) сообщением
+Order'ni butunlay o'chirish faqat System Manager uchun,Полное удаление заказа доступно только System Manager
+Tasdiqlash uchun Order nomini aynan yozing,Для подтверждения введите точное название заказа
+O'chirib bo'lmaydi,Удалить невозможно
+{0} {1}: boshqa Order yuki ham bor ({2}),{0} {1}: содержит груз другого заказа ({2})
+{0} {1}: boshqa Order'ga ham tegishli ({2}),{0} {1}: относится и к другому заказу ({2})
+{0} {1}: boshqa hujjatlarni ham yopgan ({2}),{0} {1}: закрывает и другие документы ({2})
+Butunlay o'chirish,Удалить полностью
+Quyidagilar qaytarib bo'lmaydigan tarzda o'chiriladi:,Следующее будет удалено безвозвратно:
+(GL yozuvlari bilan),(вместе с проводками GL)
+Order'ni butunlay o'chirish,Полное удаление заказа
+Tasdiqlash uchun Order nomini yozing: {0},Для подтверждения введите название заказа: {0}
+Yopish,Закрыть
+O'chirish,Удалить
+O'chirilmoqda...,Удаление...
+Order o'chirildi,Заказ удалён

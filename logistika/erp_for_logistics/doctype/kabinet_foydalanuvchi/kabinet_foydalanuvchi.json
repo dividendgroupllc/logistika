@@ -11,6 +11,7 @@
   "cb",
   "whatsapp_ulangan",
   "ulangan_vaqt",
+  "oxirgi_xabar",
   "oxirgi_kirish",
   "faol",
   "parol_hash"
@@ -58,6 +59,13 @@
    "read_only": 1
   },
   {
+   "fieldname": "oxirgi_xabar",
+   "fieldtype": "Datetime",
+   "label": "Botga oxirgi yozgan vaqt",
+   "read_only": 1,
+   "description": "Shundan keyin 24 soat ichida kirish kodi oddiy xabar bilan (bepul) yuboriladi"
+  },
+  {
    "fieldname": "oxirgi_kirish",
    "fieldtype": "Datetime",
    "label": "Oxirgi kirish",
@@ -82,7 +90,7 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-25 10:00:00.000000",
+ "modified": "2026-11-28 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Erp for logistics",
  "name": "Kabinet Foydalanuvchi",

@@ -51,6 +51,12 @@ def send_text(to, text):
 	return _post({"to": to, "type": "text", "text": {"body": text}})
 
 
+def send_code_text(to, code):
+	"""Kirish kodi oddiy matn bilan — faqat mijoz so'nggi 24 soatda botga yozgan bo'lsa (Meta
+	"xizmat oynasi": shablon shart emas, bepul). 2026-11-28: akkauntda shablon yaratib bo'lmadi."""
+	return send_text(to, f"Your Litella login code: {code}\nIt expires in 5 minutes. Do not share it with anyone.")
+
+
 def send_otp(to, code):
 	"""Meta "Authentication" shabloni: matnda kod va "Nusxa olish" tugmasi (URL tugma parametri)."""
 	s = settings()

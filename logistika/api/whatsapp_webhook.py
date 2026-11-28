@@ -53,7 +53,8 @@ def handle_incoming(sender):
 		return None
 	name = frappe.db.get_value("Kabinet Foydalanuvchi", {"telefon": phone})
 	doc = frappe.get_doc("Kabinet Foydalanuvchi", name) if name else frappe.new_doc("Kabinet Foydalanuvchi")
-	doc.update({"telefon": phone, "contact": contact, "whatsapp_ulangan": 1})
+	# Har kiruvchi xabar — 24 soatlik "xizmat oynasi" ochiladi (kod shu oynada oddiy matn bilan boradi).
+	doc.update({"telefon": phone, "contact": contact, "whatsapp_ulangan": 1, "oxirgi_xabar": now_datetime()})
 	if not doc.ulangan_vaqt:
 		doc.ulangan_vaqt = now_datetime()
 	doc.save(ignore_permissions=True)

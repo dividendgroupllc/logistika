@@ -7,6 +7,7 @@ from unittest.mock import patch
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
+from frappe.utils import add_to_date, now_datetime
 
 from logistika.api import kabinet
 from logistika.api import mini_app as mini_api
@@ -42,6 +43,7 @@ class TestWebKabinet(FrappeTestCase):
 		self.order = make_order(kliyent=A)
 		self.text = patch.object(wa, "send_text", return_value=True).start()
 		self.otp = patch.object(wa, "send_otp", return_value=True).start()
+		self.code_text = patch.object(wa, "send_code_text", return_value=True).start()
 		self.cookie = {}
 		patch.object(kabinet, "_set_cookie", side_effect=lambda token: self.cookie.update(token=token)).start()
 		patch.object(kabinet, "_clear_cookie", side_effect=lambda: self.cookie.clear()).start()
@@ -58,7 +60,10 @@ class TestWebKabinet(FrappeTestCase):
 
 	def code(self):
 		kabinet.request_code("+998 93 777-55-11")
-		return self.otp.call_args.args[1]
+		return self.code_text.call_args.args[1]
+
+	def last_message(self, hours_ago):
+		frappe.db.set_value("Kabinet Foydalanuvchi", PHONE, "oxirgi_xabar", add_to_date(now_datetime(), hours=-hours_ago))
 
 	# ---------- bot ----------
 	def test_webhook_verification(self):
@@ -111,6 +116,45 @@ class TestWebKabinet(FrappeTestCase):
 				kabinet.verify_code(PHONE, wrong)
 		with self.assertRaises(frappe.ValidationError):
 			kabinet.verify_code(PHONE, code)  # 5 urinishdan keyin kod yaroqsiz
+
+	# ---------- 24 soatlik oyna (2026-11-28: shablon yaratib bo'lmadi) ----------
+	def test_incoming_message_opens_window(self):
+		self.link()
+		self.assertTrue(frappe.db.get_value("Kabinet Foydalanuvchi", PHONE, "oxirgi_xabar"))
+
+	def test_code_as_free_text_within_24h(self):
+		self.link()
+		self.last_message(23)
+		code = self.code()
+		self.assertRegex(code, r"^\d{6}$")
+		self.assertEqual(self.code_text.call_args.args[0], PHONE)
+		self.otp.assert_not_called()
+
+	def test_code_by_template_after_24h(self):
+		self.link()
+		self.last_message(25)
+		kabinet.request_code(PHONE)
+		self.code_text.assert_not_called()
+		self.assertEqual(self.otp.call_args.args[0], PHONE)
+
+	def test_no_template_asks_to_write_bot_then_retry_works(self):
+		self.link()
+		self.last_message(25)
+		self.otp.return_value = False
+		with self.assertRaises(frappe.ValidationError) as ctx:
+			kabinet.request_code(PHONE)
+		self.assertIn("xabar yozing", str(ctx.exception))
+		self.link()  # mijoz botga yozdi — darhol qayta so'rashi mumkin ("yaqinda yuborildi" emas)
+		self.assertRegex(self.code(), r"^\d{6}$")
+
+	def test_code_text_in_english(self):
+		patch.stopall()  # setUp'dagi send_code_text soxtasini olib tashlash
+		with patch.object(wa, "_post", return_value=True) as post:
+			self.assertTrue(wa.send_code_text(PHONE, "123456"))
+		body = post.call_args.args[0]["text"]["body"]
+		self.assertEqual(post.call_args.args[0]["to"], PHONE)
+		self.assertIn("123456", body)
+		self.assertIn("login code", body)
 
 	# ---------- parol va sessiya ----------
 	def test_password_flow(self):
