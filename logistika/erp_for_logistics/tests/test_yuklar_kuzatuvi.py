@@ -124,11 +124,59 @@ class TestYuklarKuzatuvi(FrappeTestCase):
 				self.assertNotIn(o, seen, orders)
 				seen.append(o)
 
+	# ---------- xarita (2026-11-28) ----------
+	def on_road(self, **kw):
+		data = {"doctype": "KZ Transit", "order": self.order.name, "kz_truck": KZ, "holati": "Yo'lda", "yolga_chiqqan_vaqt": add_days(today(), -2)}
+		data.update(kw)
+		return raw_insert(data, docstatus=0)
+
+	def gps(self):
+		points = [
+			{"lat": 44.2, "lng": 80.4, "time": f"{add_days(today(), -2)} 08:00:00", "speed": 0, "course": 0},
+			{"lat": 43.6, "lng": 77.0, "time": f"{add_days(today(), -1)} 12:00:00", "speed": 40, "course": 90},
+			{"lat": 42.3, "lng": 69.6, "time": f"{today()} 09:30:00", "speed": 52, "course": 180},
+		]
+		return patch.object(yk.xarita, "_positions", return_value=points).start()
+
+	def test_map_shows_trucks_on_road(self):
+		self.on_road()
+		self.gps()
+		trucks = [t for t in yk.map_data()["trucks"] if t["order"] == self.order.name]
+		self.assertEqual(len(trucks), 1)
+		t = trucks[0]
+		self.assertEqual((t["kz_truck"], t["client"]), (KZ, "_T YK Mijoz"))
+		self.assertEqual(len(t["path"]), 3)
+		self.assertEqual((t["live"]["lat"], t["live"]["speed"]), (42.3, 52))
+		self.assertGreater(t["km_done"], 500)
+		self.assertTrue(t["transit"])
+		self.assertIn("tiles", yk.map_data()["map"])
+
+	def test_delivered_truck_not_on_map(self):
+		self.on_road(holati="Yakunlangan", fakt_yetib_borgan=today())
+		self.gps()
+		self.assertFalse([t for t in yk.map_data()["trucks"] if t["order"] == self.order.name])
+
+	def test_route_has_timed_points_for_replay(self):
+		name = self.on_road(fakt_yetib_borgan=today(), holati="Yakunlangan")
+		gps = self.gps()
+		route = yk.truck_route(name.name)
+		self.assertEqual([p[3] for p in route["points"]], [0, 40, 52])
+		self.assertTrue(route["points"][0][2].startswith(add_days(today(), -2)))
+		self.assertEqual(route["delivered"], today())
+		self.assertIn(f"{today()} 23:59:59", gps.call_args.args)  # yetib borgan kungacha
+
+	def test_route_without_gps(self):
+		name = self.on_road()
+		patch.object(yk.xarita, "_positions", return_value=[]).start()
+		route = yk.truck_route(name.name)
+		self.assertEqual((route["points"], route["live"]), ([], None))
+
 	# ---------- ruxsat ----------
 	def test_only_logistics_roles(self):
 		with patch.object(yk.frappe, "get_roles", return_value=["Broker"]):
-			with self.assertRaises(frappe.PermissionError):
-				yk.rows()
+			for fn, args in ((yk.rows, ()), (yk.map_data, ()), (yk.truck_route, ("KZT-X",))):
+				with self.assertRaises(frappe.PermissionError):
+					fn(*args)
 
 	def test_page_roles_match(self):
 		roles = {r.role for r in frappe.get_doc("Page", "yuklar-kuzatuvi").roles}

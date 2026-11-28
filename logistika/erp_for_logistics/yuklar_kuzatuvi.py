@@ -15,6 +15,9 @@ import frappe
 from frappe import _
 from frappe.utils import flt, getdate, today
 
+from logistika.erp_for_logistics import traccar_client
+from logistika.mini_app import xarita
+
 ROLES = (
 	"System Manager",
 	"Ichki logistika bo'limi",
@@ -243,3 +246,58 @@ def _row(o, d, t, plate, kz, china_track, cargo, intake):
 		"kz": kz,
 		"eta": eta,
 	}
+
+
+# ---------------------------------------------------------------- xarita (2026-11-28) ----------
+# "Xarita" ko'rinishi — hozir yo'lda turgan KZ furalar (KZ Transit "Yo'lda", yetib bormagan) va
+# bitta furaning to'liq yo'li (vaqt sirpang'ichi uchun vaqtli nuqtalar). Yo'l — Traccar'dan
+# ("Yo'lga chiqdi"dan beri; mijoz xaritasidagi bilan bir xil, 2 daqiqa kesh). Brauzerga faqat
+# koordinatalar ketadi — qurilma ID va Traccar manzili emas.
+ROUTE_POINTS = 600
+TRANSIT_FIELDS = ["name", "order", "kz_truck", "yolga_chiqqan_vaqt", "sana", "fakt_yetib_borgan", "holati"]
+
+
+@frappe.whitelist()
+def map_data():
+	_require_role()
+	transits = frappe.get_all(
+		"KZ Transit",
+		filters={"docstatus": ["<", 2], "holati": "Yo'lda", "fakt_yetib_borgan": ["is", "not set"]},
+		fields=TRANSIT_FIELDS,
+		order_by="yolga_chiqqan_vaqt asc",
+	)
+	return {"trucks": [_truck(t) for t in transits], "map": xarita.map_tiles()}
+
+
+@frappe.whitelist()
+def truck_route(transit):
+	_require_role()
+	t = frappe.db.get_value("KZ Transit", transit, TRANSIT_FIELDS, as_dict=True)
+	if not t:
+		frappe.throw(_("KZ Transit topilmadi"))
+	return {**_truck(t, full=True), "map": xarita.map_tiles()}
+
+
+def _truck(t, full=False):
+	info = frappe.db.get_value("Order", t.order, ["kliyent", "yetkazish_nuqtasi", "yetkazish_manzili"], as_dict=True) or frappe._dict()
+	dest = xarita.point_of(info.yetkazish_nuqtasi)
+	since = t.yolga_chiqqan_vaqt or t.sana
+	until = f"{t.fakt_yetib_borgan} 23:59:59" if t.fakt_yetib_borgan else None
+	points = xarita._positions(t.order, t.kz_truck, since, until) if since else []
+	path = xarita.downsample([(p["lat"], p["lng"]) for p in points])
+	last = points[-1] if points else None
+	result = {
+		"transit": t.name,
+		"order": t.order,
+		"client": info.kliyent,
+		"kz_truck": t.kz_truck,
+		"departed": str(t.yolga_chiqqan_vaqt) if t.yolga_chiqqan_vaqt else None,
+		"delivered": str(t.fakt_yetib_borgan) if t.fakt_yetib_borgan else None,
+		"path": [[lat, lng] for lat, lng in path],
+		"live": {**last, "fresh": traccar_client.is_fresh({"fixTime": last["time"]})} if last else None,
+		"destination": {"lat": dest[0], "lng": dest[1], "text": info.yetkazish_manzili or ""} if dest else None,
+		**(xarita.progress(path, dest) if path else {"km_done": None, "km_left": None, "percent": None}),
+	}
+	if full:
+		result["points"] = [[p["lat"], p["lng"], p["time"], p.get("speed") or 0] for p in xarita.downsample(points, ROUTE_POINTS)]
+	return result

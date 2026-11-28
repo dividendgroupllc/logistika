@@ -1304,3 +1304,22 @@ Yopish,Закрыть
 O'chirish,Удалить
 O'chirilmoqda...,Удаление...
 Order o'chirildi,Заказ удалён
+Ko'rinish,Вид
+Jadval,Таблица
+Yo'lni xaritada ko'rish,Показать маршрут на карте
+Yo'lda: {0} ta KZ fura,В пути: {0} КЗ фур
+Hozir yo'lda KZ fura yo'q,Сейчас нет КЗ фур в пути
+GPS ma'lumoti yo'q,Нет данных GPS
+Oxirgi signal,Последний сигнал
+{0} km yurdi,Пройдено {0} км
+~{0} km qoldi,Осталось ~{0} км
+Yo'lga chiqdi: {0},Выехал: {0}
+Tezlik: {0} km/soat,Скорость: {0} км/ч
+Yo'lni batafsil ko'rish,Подробный маршрут
+Yetib bordi,Прибыл
+Masofa,Расстояние
+Bu fura uchun GPS yo'li topilmadi (Truck Dispatch'da GPS qurilma ID yo'q yoki Traccar'da ma'lumot yo'q),Маршрут GPS для этой фуры не найден (в Truck Dispatch нет ID GPS-устройства или в Traccar нет данных)
+Vaqt bo'yicha ko'rish,Просмотр по времени
+Boshlanish: {0},Начало: {0}
+{0} km/soat,{0} км/ч
+KZ Transit topilmadi,KZ Transit не найден

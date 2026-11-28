@@ -138,3 +138,28 @@ a.bsh-kpi:hover, a.bsh-stage:hover, a.bsh-queue:hover, a.bsh-doc:hover { border-
 .ykz-table tr.ykz-c6 td.ykz-first { box-shadow: inset 5px 0 0 var(--yellow-500); }
 .ykz-table tr.ykz-start td { border-top: 2px solid var(--gray-400); }
 @media (max-width: 640px) { .ykz-bar .ykz-q, .ykz-bar .ykz-client { max-width: none; flex-basis: 100%; } }
+
+/* Yuklar kuzatuvi — xarita (2026-11-28) */
+.ykz-views { margin-left: auto; }
+.ykz-mapview { display: grid; grid-template-columns: minmax(0, 1fr) 300px; height: calc(100vh - 220px); min-height: 460px; padding: 0; overflow: hidden; }
+.ykz-mapview[hidden] { display: none; }
+.ykz-map { height: 100%; min-height: 420px; }
+.ykz-maplist { overflow: auto; border-left: 1px solid var(--border-color); padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+.ykz-maphead { font-weight: 600; padding: 4px 6px 8px; }
+.ykz-truck { text-align: left; border: 1px solid var(--border-color); border-left: 5px solid var(--ykz-color); border-radius: 8px; background: var(--card-bg); padding: 8px 10px; display: flex; flex-direction: column; gap: 2px; cursor: pointer; }
+.ykz-truck:hover, .ykz-truck:focus-visible { background: var(--subtle-fg); }
+.ykz-truck span, .ykz-truck small { color: var(--text-muted); font-size: 12px; }
+.ykz-tip { font-weight: 600; }
+.ykz-pop { font-size: 13px; line-height: 1.5; }
+.ykz-routehead { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 12px; }
+.ykz-routehead small { display: block; color: var(--text-muted); font-size: 12px; }
+.ykz-routemap { height: 60vh; min-height: 360px; border-radius: 8px; }
+.ykz-replay { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+.ykz-replay input { flex: 1; }
+.ykz-replay-info { min-width: 220px; font-variant-numeric: tabular-nums; }
+@media (max-width: 768px) {
+	.ykz-mapview { grid-template-columns: 1fr; height: auto; }
+	.ykz-map { height: 55vh; }
+	.ykz-maplist { border-left: 0; border-top: 1px solid var(--border-color); max-height: 40vh; }
+	.ykz-replay { flex-direction: column; align-items: stretch; }
+}

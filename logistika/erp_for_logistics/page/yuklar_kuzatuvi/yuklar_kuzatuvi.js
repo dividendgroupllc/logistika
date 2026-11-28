@@ -4,6 +4,8 @@
 // Yuklar kuzatuvi (2026-11-26): barcha zakazlar bitta jadvalda — har qator bitta Xitoy fura yuki.
 // Bir nechta KZ furaga bo'lingan yuk KZ ustunlarida qator-qator (qolgan ustunlar birlashtirilgan).
 // Ma'lumot: logistika.erp_for_logistics.yuklar_kuzatuvi.rows
+// "Xarita" ko'rinishi (2026-11-28): yo'ldagi KZ furalar (map_data) va bitta furaning yo'li vaqt
+// sirpang'ichi bilan (truck_route) — Traccar'dan. Leaflet (L) — Frappe desk'ning o'zida bor.
 
 frappe.pages["yuklar-kuzatuvi"].on_page_load = function (wrapper) {
 	const page = frappe.ui.make_app_page({ parent: wrapper, title: __("Yuklar kuzatuvi"), single_column: true });
@@ -19,6 +21,9 @@ frappe.pages["yuklar-kuzatuvi"].on_page_show = function (wrapper) {
 // filtrlaganda ham Order rangini o'zgartirmaydi.
 const YK_COLORS = 7;
 
+const YK_COLOR_VARS = ["--blue-500", "--green-500", "--orange-500", "--purple-500", "--pink-500", "--cyan-500", "--yellow-500"];
+const YK_KNOT = 1.852; // Traccar tezligi — tugunda
+
 const YK_STAGES = {
 	zavodda: __("Zavodda"),
 	xitoy_yolda: __("Xitoyda yo'lda"),
@@ -30,7 +35,7 @@ const YK_STAGES = {
 class YuklarKuzatuvi {
 	constructor(page) {
 		this.page = page;
-		this.state = { q: "", client: "", stage: "", delivered: false };
+		this.state = { q: "", client: "", stage: "", delivered: false, view: "table" };
 		this.rows = [];
 		page.set_primary_action(__("Yangilash"), () => this.load(), "refresh");
 		page.add_button(__("Excel'ga yuklab olish"), () => this.export());
@@ -40,10 +45,36 @@ class YuklarKuzatuvi {
 				<input type="search" class="form-control ykz-q" placeholder="${__("Order, mijoz, fura yoki mahsulot bo'yicha qidirish")}" aria-label="${__("Qidirish")}">
 				<select class="form-control ykz-client" aria-label="${__("Mijoz")}"></select>
 				<label class="ykz-check"><input type="checkbox" class="ykz-delivered"> ${__("Yetkazilganlarni ham ko'rsatish")}</label>
+				<div class="bsh-chips ykz-views" role="group" aria-label="${__("Ko'rinish")}">
+					<button type="button" data-view="table" class="on">${__("Jadval")}</button>
+					<button type="button" data-view="map">${__("Xarita")}</button>
+				</div>
 			</div>
-			<div class="bsh-chips ykz-stages"></div>
-			<div class="bsh-card bsh-table ykz-table"></div>
+			<div class="ykz-tableview">
+				<div class="bsh-chips ykz-stages"></div>
+				<div class="bsh-card bsh-table ykz-table"></div>
+			</div>
+			<div class="bsh-card ykz-mapview" hidden>
+				<div class="ykz-map"></div>
+				<div class="ykz-maplist"></div>
+			</div>
 		`);
+		this.$root.on("click", ".ykz-views button", (e) => {
+			this.state.view = $(e.currentTarget).data("view");
+			this.$root.find(".ykz-views button").each((_i, b) => $(b).toggleClass("on", $(b).data("view") === this.state.view));
+			this.$root.find(".ykz-tableview").prop("hidden", this.state.view !== "table");
+			this.$root.find(".ykz-mapview").prop("hidden", this.state.view !== "map");
+			if (this.state.view === "map") this.load_map();
+		});
+		this.$root.on("click", ".ykz-route", (e) => {
+			e.preventDefault();
+			yk_route_dialog($(e.currentTarget).data("transit"), this.color_of($(e.currentTarget).data("order")));
+		});
+		this.$root.on("click", ".ykz-maplist [data-transit]", (e) => this.focus_truck($(e.currentTarget).data("transit")));
+		this.$root.on("click", ".ykz-pop [data-route]", (e) => {
+			e.preventDefault();
+			yk_route_dialog($(e.currentTarget).data("route"), this.color_of($(e.currentTarget).data("order")));
+		});
 		this.$root.on("input", ".ykz-q", (e) => {
 			this.state.q = e.target.value.trim().toLowerCase();
 			this.render();
@@ -73,7 +104,67 @@ class YuklarKuzatuvi {
 				});
 				this.fill_clients();
 				this.render();
+				// Xarita ranglari jadvaldagi Order ranglari bilan bir xil bo'lishi uchun — jadvaldan keyin.
+				if (this.state.view === "map") this.load_map();
 			});
+	}
+
+	color_of(order) {
+		if (!this.colors) this.colors = {};
+		if (!(order in this.colors)) this.colors[order] = Object.keys(this.colors).length % YK_COLORS;
+		return yk_css(YK_COLOR_VARS[this.colors[order]]);
+	}
+
+	// ---------- xarita ko'rinishi ----------
+	load_map() {
+		frappe.call("logistika.erp_for_logistics.yuklar_kuzatuvi.map_data").then((r) => {
+			const data = r.message || { trucks: [] };
+			const el = this.$root.find(".ykz-map")[0];
+			if (!this.map) {
+				this.map = L.map(el, { zoomControl: true });
+				L.tileLayer(data.map.tiles, { maxZoom: 18, attribution: data.map.attribution || "" }).addTo(this.map);
+				this.layer = L.layerGroup().addTo(this.map);
+			}
+			this.layer.clearLayers();
+			this.markers = {};
+			const bounds = [];
+			data.trucks.forEach((t) => {
+				const color = this.color_of(t.order);
+				if (t.path.length > 1) L.polyline(t.path, { color, weight: 4, opacity: 0.85 }).addTo(this.layer);
+				t.path.forEach((p) => bounds.push(p));
+				if (t.destination) {
+					L.circleMarker([t.destination.lat, t.destination.lng], { radius: 6, color: yk_css("--gray-600"), weight: 2, fillOpacity: 0.2 })
+						.bindTooltip(esc(t.destination.text || __("Manzil")))
+						.addTo(this.layer);
+					bounds.push([t.destination.lat, t.destination.lng]);
+				}
+				if (t.live) {
+					const m = L.circleMarker([t.live.lat, t.live.lng], { radius: 9, color: "#fff", weight: 3, fillColor: color, fillOpacity: 1 })
+						.bindTooltip(esc(t.kz_truck), { permanent: true, direction: "top", offset: [0, -8], className: "ykz-tip" })
+						.bindPopup(yk_popup(t))
+						.addTo(this.layer);
+					this.markers[t.transit] = m;
+				}
+			});
+			this.$root.find(".ykz-maplist").html(
+				`<div class="ykz-maphead">${__("Yo'lda: {0} ta KZ fura", [data.trucks.length])}</div>` +
+					(data.trucks.length
+						? data.trucks.map((t) => yk_card(t, this.color_of(t.order))).join("")
+						: `<div class="bsh-empty">${__("Hozir yo'lda KZ fura yo'q")}</div>`)
+			);
+			setTimeout(() => {
+				this.map.invalidateSize();
+				if (bounds.length) this.map.fitBounds(bounds, { padding: [40, 40], maxZoom: 9 });
+				else this.map.setView((frappe.boot.logistika_map || {}).center || [43, 70], 5);
+			}, 50);
+		});
+	}
+
+	focus_truck(transit) {
+		const m = this.markers && this.markers[transit];
+		if (!m) return yk_route_dialog(transit);
+		this.map.flyTo(m.getLatLng(), Math.max(this.map.getZoom(), 8));
+		m.openPopup();
 	}
 
 	fill_clients() {
@@ -156,7 +247,7 @@ class YuklarKuzatuvi {
 						: "";
 				const kz_cells = k
 					? `
-					<td>${esc(k.truck)}${k.reja ? ` <span class="bsh-pill">${__("reja")}</span>` : ""}<small>${k.kirish ? __("Omborga: {0}", [date(k.kirish)]) : __("kirish sanasi yo'q")}</small></td>`
+					<td>${k.transit ? `<a href="#" class="ykz-route" data-transit="${esc(k.transit)}" data-order="${esc(r.order)}" title="${__("Yo'lni xaritada ko'rish")}">${esc(k.truck)} 🗺</a>` : esc(k.truck)}${k.reja ? ` <span class="bsh-pill">${__("reja")}</span>` : ""}<small>${k.kirish ? __("Omborga: {0}", [date(k.kirish)]) : __("kirish sanasi yo'q")}</small></td>`
 					: `<td class="ykz-muted">—</td>`;
 				const ichki = i === 0 ? `<td${span}>${r.ichki ? `<a href="/app/ichki-deklaratsiya/${encodeURIComponent(r.ichki)}" class="bsh-green">✓</a>` : `<span class="ykz-muted">—</span>`}</td>` : "";
 				const docs = k
@@ -240,4 +331,104 @@ function cargo(items) {
 	const all = items.map((y) => `${y.nomi} — ${y.soni}`).join("\n");
 	const more = items.length > 2 ? `<small title="${esc(all)}">${__("yana {0} ta mahsulot", [items.length - 2])}</small>` : "";
 	return shown.join("") + more;
+}
+
+// ---------- xarita yordamchilari ----------
+function yk_css(variable) {
+	return getComputedStyle(document.documentElement).getPropertyValue(variable).trim() || "#2490ef";
+}
+
+function yk_time(t) {
+	// Traccar vaqti — mintaqa belgisi bilan (UTC), brauzer vaqtida ko'rsatiladi.
+	return t ? moment(t).format("DD.MM.YYYY HH:mm") : "";
+}
+
+function yk_server_time(v) {
+	// ERP vaqti (server mintaqasida, belgisiz) — ERP'ning o'z formatida.
+	return v ? frappe.datetime.str_to_user(String(v).slice(0, 19)) : "";
+}
+
+function yk_signal(live) {
+	if (!live) return `<span class="ykz-muted">${__("GPS ma'lumoti yo'q")}</span>`;
+	return `<span class="${live.fresh ? "" : "bsh-red"}" title="${esc(yk_time(live.time))}">${__("Oxirgi signal")}: ${esc(moment(live.time).fromNow())}</span>`;
+}
+
+function yk_km(t) {
+	const parts = [];
+	if (t.km_done != null) parts.push(__("{0} km yurdi", [t.km_done]));
+	if (t.km_left != null) parts.push(__("~{0} km qoldi", [t.km_left]));
+	if (t.percent != null) parts.push(`${t.percent}%`);
+	return parts.join(" · ");
+}
+
+function yk_popup(t) {
+	return `<div class="ykz-pop">
+		<b>${esc(t.kz_truck)}</b> · <a href="/app/order/${encodeURIComponent(t.order)}">${esc(t.order)}</a><br>
+		${esc(t.client || "")}<br>
+		${t.departed ? __("Yo'lga chiqdi: {0}", [yk_server_time(t.departed)]) + "<br>" : ""}
+		${yk_km(t)}${yk_km(t) ? "<br>" : ""}
+		${t.live ? __("Tezlik: {0} km/soat", [Math.round((t.live.speed || 0) * YK_KNOT)]) + "<br>" : ""}
+		${yk_signal(t.live)}<br>
+		<a href="#" data-route="${esc(t.transit)}" data-order="${esc(t.order)}">${__("Yo'lni batafsil ko'rish")} →</a>
+	</div>`;
+}
+
+function yk_card(t, color) {
+	return `<button type="button" class="ykz-truck" data-transit="${esc(t.transit)}" style="--ykz-color: ${color}">
+		<b>${esc(t.kz_truck)}</b><span>${esc(t.order)} · ${esc(t.client || "")}</span>
+		<small>${yk_km(t) || "&nbsp;"}</small>
+		<small>${yk_signal(t.live)}</small>
+	</button>`;
+}
+
+function yk_route_dialog(transit, color) {
+	frappe.call("logistika.erp_for_logistics.yuklar_kuzatuvi.truck_route", { transit }).then((r) => {
+		const t = r.message;
+		color = color || yk_css("--blue-500");
+		const d = new frappe.ui.Dialog({ title: `${t.kz_truck} — ${t.order}`, size: "extra-large", fields: [{ fieldtype: "HTML", fieldname: "body" }] });
+		const has = t.points.length > 0;
+		d.fields_dict.body.$wrapper.html(`
+			<div class="ykz-routehead">
+				<div><small>${__("Mijoz")}</small><b>${esc(t.client || "—")}</b></div>
+				<div><small>${__("Yo'lga chiqdi")}</small><b>${t.departed ? esc(yk_server_time(t.departed)) : "—"}</b></div>
+				<div><small>${t.delivered ? __("Yetib bordi") : __("Masofa")}</small><b>${t.delivered ? esc(frappe.datetime.str_to_user(t.delivered)) : esc(yk_km(t) || "—")}</b></div>
+				<div><small>${__("GPS")}</small><b>${yk_signal(t.live)}</b></div>
+			</div>
+			${has ? "" : `<div class="bsh-empty">${__("Bu fura uchun GPS yo'li topilmadi (Truck Dispatch'da GPS qurilma ID yo'q yoki Traccar'da ma'lumot yo'q)")}</div>`}
+			<div class="ykz-routemap" ${has ? "" : "hidden"}></div>
+			<div class="ykz-replay" ${has ? "" : "hidden"}>
+				<input type="range" min="0" max="${Math.max(t.points.length - 1, 0)}" value="${Math.max(t.points.length - 1, 0)}" aria-label="${__("Vaqt bo'yicha ko'rish")}">
+				<span class="ykz-replay-info"></span>
+			</div>`);
+		d.show();
+		if (!has) return;
+		setTimeout(() => {
+			const map = L.map(d.$wrapper.find(".ykz-routemap")[0]);
+			L.tileLayer(t.map.tiles, { maxZoom: 18, attribution: t.map.attribution || "" }).addTo(map);
+			const line = t.points.map((p) => [p[0], p[1]]);
+			L.polyline(line, { color, weight: 5, opacity: 0.85 }).addTo(map);
+			L.circleMarker(line[0], { radius: 7, color: "#fff", weight: 2, fillColor: yk_css("--green-500"), fillOpacity: 1 })
+				.bindTooltip(__("Boshlanish: {0}", [yk_time(t.points[0][2])]))
+				.addTo(map);
+			const bounds = line.slice();
+			if (t.destination) {
+				L.circleMarker([t.destination.lat, t.destination.lng], { radius: 7, color: yk_css("--gray-600"), weight: 2, fillOpacity: 0.2 })
+					.bindTooltip(esc(t.destination.text || __("Manzil")))
+					.addTo(map);
+				bounds.push([t.destination.lat, t.destination.lng]);
+			}
+			const truck = L.circleMarker(line[line.length - 1], { radius: 10, color: "#fff", weight: 3, fillColor: color, fillOpacity: 1 })
+				.bindTooltip(esc(t.kz_truck), { permanent: true, direction: "top", offset: [0, -10], className: "ykz-tip" })
+				.addTo(map);
+			map.fitBounds(bounds, { padding: [30, 30] });
+			const $info = d.$wrapper.find(".ykz-replay-info");
+			const show = (i) => {
+				const p = t.points[i];
+				truck.setLatLng([p[0], p[1]]);
+				$info.text(`${yk_time(p[2])} · ${__("{0} km/soat", [Math.round((p[3] || 0) * YK_KNOT)])}`);
+			};
+			d.$wrapper.find(".ykz-replay input").on("input", (e) => show(+e.target.value));
+			show(t.points.length - 1);
+		}, 250);
+	});
 }

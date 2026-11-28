@@ -1246,3 +1246,22 @@ Yopish,关闭
 O'chirish,删除
 O'chirilmoqda...,正在删除...
 Order o'chirildi,订单已删除
+Ko'rinish,视图
+Jadval,表格
+Yo'lni xaritada ko'rish,在地图上查看路线
+Yo'lda: {0} ta KZ fura,在途：{0}辆KZ货车
+Hozir yo'lda KZ fura yo'q,目前没有在途的KZ货车
+GPS ma'lumoti yo'q,无GPS数据
+Oxirgi signal,最后信号
+{0} km yurdi,已行驶{0}公里
+~{0} km qoldi,剩余约{0}公里
+Yo'lga chiqdi: {0},出发：{0}
+Tezlik: {0} km/soat,速度：{0}公里/小时
+Yo'lni batafsil ko'rish,查看详细路线
+Yetib bordi,已到达
+Masofa,距离
+Bu fura uchun GPS yo'li topilmadi (Truck Dispatch'da GPS qurilma ID yo'q yoki Traccar'da ma'lumot yo'q),未找到该货车的GPS路线（Truck Dispatch中没有GPS设备ID或Traccar中无数据）
+Vaqt bo'yicha ko'rish,按时间查看
+Boshlanish: {0},起点：{0}
+{0} km/soat,{0}公里/小时
+KZ Transit topilmadi,未找到KZ Transit
