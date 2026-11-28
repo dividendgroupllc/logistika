@@ -482,6 +482,81 @@ def _page_images(reader):
 	return images
 
 
+# Tahrirlangan PDF (2026-11-28, SH26-08251-7): eski raqamlar oq to'rtburchak bilan yopilib, ustiga
+# yangilari yozilgan — matn qatlamida ikkalasi bor, Kimi eskisini olardi. Keyin chizilgan matn
+# ostida qolgan (bir xil satr, bir xil o'lcham, ustma-ust) boshqa matn — ko'rinmaydi, tashlanadi.
+# pypdf'ning layout-mode ichki funksiyalari (frappe pypdf==6.13.3 ni qotiradi); xato bo'lsa — oddiy matn.
+def _text_pieces(page):
+	"""Sahifadagi har Tj/TJ bo'lagi chizilish tartibida (TextStateParams: text, tx, ty,
+	displaced_tx, font_height, font_size)."""
+	from pypdf._text_extraction._layout_mode._fixed_width_page import recurse_to_target_op
+	from pypdf._text_extraction._layout_mode._text_state_manager import TextStateManager
+	from pypdf.generic import ContentStream
+
+	fonts = page._layout_mode_fonts()
+	ops = iter(ContentStream(page["/Contents"].get_object(), page.pdf, "bytes").operations)
+	state, pieces = TextStateManager(), []
+	for operands, op in ops:
+		if op in (b"BT", b"q"):
+			pieces.extend(recurse_to_target_op(ops, state, b"ET" if op == b"BT" else b"Q", fonts)[1])
+		elif op == b"Tf":
+			state.set_font(fonts[operands[0]], operands[1])
+		elif op == b"cm":
+			state.add_cm(*operands)
+		else:
+			state.set_state_param(op, operands)
+	return [p for p in pieces if p.text.strip() and not p.rotated and p.font.interpretable]
+
+
+def _covers(top, below):
+	"""`top` (keyinroq chizilgan) `below`ni yopadimi: bir satrda, o'lchami yaqin, x bo'yicha ustma-ust."""
+	h = min(top.font_height, below.font_height)
+	if h <= 0 or max(top.font_height, below.font_height) > 1.5 * h or abs(top.ty - below.ty) > 0.5 * h:
+		return False
+	overlap = min(top.displaced_tx, below.displaced_tx) - max(top.tx, below.tx)
+	width = min(top.displaced_tx - top.tx, below.displaced_tx - below.tx)
+	return width > 0 and overlap > 0.3 * width and top.text.strip() != below.text.strip()
+
+
+def _visible_text(page):
+	"""Yopilgan matn bo'lsa — ko'rinadigan matn (satrlar yuqoridan pastga); bo'lmasa None."""
+	pieces = _text_pieces(page)
+	buckets = {}
+	for i, p in enumerate(pieces):
+		buckets.setdefault(round(p.ty / 4), []).append(i)
+	hidden = set()
+	for j, top in enumerate(pieces):
+		key = round(top.ty / 4)
+		for i in (i for k in (key - 1, key, key + 1) for i in buckets.get(k, ()) if i < j):
+			if i not in hidden and _covers(top, pieces[i]):
+				hidden.add(i)
+	if not hidden:
+		return None
+	lines = []
+	for p in sorted((p for i, p in enumerate(pieces) if i not in hidden), key=lambda p: (-p.ty, p.tx)):
+		if lines and abs(lines[-1][0].ty - p.ty) <= 0.5 * min(p.font_height, lines[-1][0].font_height):
+			lines[-1].append(p)
+		else:
+			lines.append([p])
+	out = []
+	for line in lines:
+		line.sort(key=lambda p: p.tx)
+		text = line[0].text
+		for prev, p in zip(line, line[1:], strict=False):
+			gap = p.tx - prev.displaced_tx
+			text += ("" if gap < 0.15 * p.font_size else " " if gap < 1.5 * p.font_size else "   ") + p.text
+		out.append(text)
+	return "\n".join(out)
+
+
+def _page_text(page):
+	try:
+		visible = _visible_text(page)
+	except Exception:
+		visible = None
+	return visible if visible is not None else page.extract_text() or ""
+
+
 def _pdf_content(file_bytes):
 	"""PDF matni; matn qatlami bo'lmasa (skanerlangan) — sahifa rasmlari ro'yxati.
 	PDF'dan chiqarilgan matn ko'pincha buzilgan/tartibsiz bo'ladi (ustunlar uzilib, boshqa
@@ -489,7 +564,7 @@ def _pdf_content(file_bytes):
 	tartib bo'yicha mosla" ko'rsatmasi buni hisobga oladi."""
 	try:
 		reader = PdfReader(BytesIO(file_bytes))
-		text = PAGE_BREAK.join(page.extract_text() or "" for page in reader.pages)
+		text = PAGE_BREAK.join(_page_text(page) for page in reader.pages)
 	except Exception:
 		frappe.throw("PDF faylini o'qib bo'lmadi — fayl buzilgan yoki himoyalangan bo'lishi mumkin")
 	if text.strip():
