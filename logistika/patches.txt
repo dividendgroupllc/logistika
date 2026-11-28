@@ -24,3 +24,4 @@ logistika.patches.v1_1.transport_vositasi_truck_dispatch
 logistika.patches.v1_1.order_detail_ombor
 logistika.patches.v1_1.tannarx_aktiv_juftlar
 logistika.patches.v1_1.kurs_xatosi_tuzatish
+logistika.patches.v1_1.kurs_xatosi_tuzatish #2026-11-28 kurs tuzatilgandan keyin qayta

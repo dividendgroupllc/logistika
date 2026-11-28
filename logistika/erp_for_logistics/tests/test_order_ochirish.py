@@ -16,6 +16,13 @@ from logistika.erp_for_logistics.tests.utils import make_order
 KZ = base.KZ_A
 
 
+def fresh_request():
+	"""Prod'dagi kabi yangi so'rov: havola tekshiruvi keshdan emas, bazadan (2026-11-28: keshda
+	"bor" deb qolgan Order Detail testda xatoni yashirgan)."""
+	frappe.db.value_cache.clear()
+	frappe.local.document_cache = {}
+
+
 class TestOrderOchirish(base.TestTannarx):
 	def full_order(self):
 		"""Order → OD (sug'urta + fura summasi) → omborga kirim (fura PI) → KZ ortish → KZ Transit
@@ -47,6 +54,7 @@ class TestOrderOchirish(base.TestTannarx):
 		vouchers = self.vouchers(od.name)
 		self.assertTrue(vouchers)
 		other = make_order(kliyent="_T Boshqa mijoz")
+		fresh_request()
 
 		result = oo.delete_order(self.order.name, self.order.name)
 
@@ -101,6 +109,7 @@ class TestOrderOchirishXEH(xeh_base.TestXitoyEksport):
 		self.as_(self.bux, xeh_base.xeh.approve, doc.name, self.cny_cash)
 		doc = frappe.get_doc("Xitoy Eksport Hujjati", doc.name)
 		si, pe = doc.sales_invoice, doc.payment_entry
+		fresh_request()
 
 		oo.delete_order(doc.order, doc.order)
 

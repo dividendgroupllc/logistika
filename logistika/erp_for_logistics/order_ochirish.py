@@ -4,8 +4,8 @@
 # Bitta Order'ni butunlay o'chirish (2026-11-28 — test ma'lumotlari uchun; faqat System Manager):
 #   preview(order)               — nima o'chishi va nima to'sib turgani
 #   delete_order(order, confirm) — confirm = Order nomi
-# Tartib: logistika hujjatlari hook'larsiz o'chiriladi (aks holda ularning bekor qilinishi teskari JE
-# yozib yuborardi); keyin vaucherlar to'g'ri bekor qilinadi (PE → JE → SI → PI); so'ng bekor qilingan
+# Tartib: vaucherlar to'g'ri bekor qilinadi (PE → JE → SI → PI); keyin logistika hujjatlari hook'larsiz
+# o'chiriladi (aks holda ularning bekor qilinishi teskari JE yozib yuborardi); so'ng bekor qilingan
 # vaucherlar, ularning GL/Payment Ledger yozuvlari, fayllar va izohlar o'chadi.
 # Boshqa Order yuki bor umumiy hujjat (ombor kirimi, ortish, peregruz) yoki boshqa Order'ga ham
 # tegishli vaucher bo'lsa — hech narsa o'chirilmaydi, ro'yxat ko'rsatiladi.
@@ -79,21 +79,23 @@ def delete_order(order, confirm):
 	if info["blockers"]:
 		frappe.throw("<br>".join(info["blockers"]), title=_("O'chirib bo'lmaydi"))
 
-	# Avval logistika hujjatlari (ular vaucherlarga havola qiladi — submit qilingan hujjat havolasi
-	# vaucherni bekor qilishga yo'l qo'ymaydi).
-	counts = {}
-	for dt, names in info["documents"].items():
-		if names:
-			_delete_raw(dt, list(names))
-			counts[dt] = len(names)
-
+	# Avval vaucherlar bekor qilinadi — Order Detail hali bor bo'lishi shart (teskari GL yozuvlarida
+	# order_detail havolasi tekshiriladi). Logistika hujjatlarining vaucherga havolasi (masalan
+	# Warehouse Intake.tannarx_je) bekor qilishni to'smasin — ular baribir o'chadi.
 	vouchers = info["vouchers"]
 	for dt in VOUCHER_ORDER:
 		for name in sorted(vouchers.get(dt, ())):
 			if frappe.db.get_value(dt, name, "docstatus") == 1:
 				doc = frappe.get_doc(dt, name)
 				doc.flags.ignore_permissions = True
+				doc.flags.ignore_links = True
 				doc.cancel()
+
+	counts = {}
+	for dt, names in info["documents"].items():
+		if names:
+			_delete_raw(dt, list(names))
+			counts[dt] = len(names)
 
 	for dt in VOUCHER_ORDER:
 		names = [n for n in vouchers.get(dt, ()) if frappe.db.exists(dt, n)]
